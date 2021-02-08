@@ -1,3 +1,10 @@
+"""
+Script that outputs bounding box for a given sulci based on a manually
+labeled dataset.
+Bounding box corresponds to the biggest box encountered in the manually
+labeled subjects.
+"""
+
 from soma import aims
 import os
 import numpy as np
@@ -20,12 +27,9 @@ list_bbmax = []
 for sub in subjects:
     if sub != 'eros':
         sulci_pattern = root_dir+'%(subject)s/t1mri/t1/default_analysis/folds/3.3/base2018_manual/%(side)s%(subject)s_base2018_manual.arg'
-        #sulcus = 'S.C._right'
-        #sulcus = 'S.T.s._right'
         sulcus = 'S.T.s.ter.asc.ant._left'
 
         atts['subject'] = sub
-        print(atts)
         graph = aims.read(sulci_pattern % atts)
 
         tal_transfo = aims.GraphManip.talairach(graph)
@@ -68,15 +72,13 @@ ave_bbmax = np.array([max([val[0] for k, val in enumerate(list_bbmax)]),
                       max([val[2] for k, val in enumerate(list_bbmax)])])
 
 
-print('ici', ave_bbmin, ave_bbmax)
-
 tal_to_mni = aims.read(aims.carto.Paths.findResourceFile('transformation/talairach_TO_spm_template_novoxels.trm'))
 
 # To go back to HCP space
 # vol = aims.read('/neurospin/hcp/ANALYSIS/3T_morphologist/100307/t1mri/default_acquisition/100307.nii.gz')
+
 # Space of Jeff's original crops
 #vol = aims.read('/neurospin/hcp/ANALYSIS/3T_morphologist/100206/t1mri/default_acquisition/normalized_SPM_100206.nii')
-#vol = aims.read('/neurospin/dico/lguillon/Rskeleton_trans.nii')
 vol = aims.read('Rskeleton_159946_normalized_crop.nii.gz')
 
 template_mni = aims.read('/neurospin/dico/lguillon/MNI152_T1_1mm.nii.gz')
@@ -85,21 +87,14 @@ mni_to_template = aims.AffineTransformation3d(template_mni.header()['transformat
 tal_to_template = mni_to_template *tal_to_mni
 #vol_to_mni = vol.header()['transformations'][-1] # ici c'est la derniere transfo
 vol_to_mni = aims.AffineTransformation3d(vol.header()['transformations'][-1])
-print(vol_to_mni, vol.header()['referentials'][-1])
 tal_to_vol = vol_to_mni.inverse() * tal_to_mni
-#tal_to_vol = vol_to_mni.inverse() * tal_to_template
-#print(type(vol_to_mni))
+
 # Application of the transformation to bbox
-print(ave_bbmin)
-print(ave_bbmax)
 ave_bbmin = tal_to_vol.transform(ave_bbmin)
 ave_bbmax = tal_to_vol.transform(ave_bbmax)
-print(ave_bbmin)
 
 # To go back from mms to voxels
 vs = vol.header()['voxel_size'][:3]
-print(vs)
-#vs = [1, 1, 1]
 
 vox_bbmin = np.round(np.array(ave_bbmin) / vs).astype(int)
 vox_bbmax = np.round(np.array(ave_bbmax) / vs).astype(int)
