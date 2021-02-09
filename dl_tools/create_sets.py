@@ -1,3 +1,9 @@
+# /usr/bin/env python3
+# coding: utf-8
+"""
+The aim of this script is to create pytorch dataloaders from MRIs saved as
+numpy arrays in a .pickle.
+"""
 import os
 import time
 from datetime import date
@@ -10,20 +16,21 @@ import torchvision.transforms as transforms
 from torch.autograd import Variable
 import torchio as tio
 
-#from model.unet_sulcus import *
 from dl_tools.pynet_transforms import *
 from dl_tools import save_results
 
 
 class TensorDataset():
     """Custom dataset that includes image file paths.
-    root_dir : path to folder containing training and testing arrays
-    all_data : False if training without abnormal images, True otherwise
+    Apply different transformations to data depending on the type of input.
+    IN: data_tensor: tensor containing MRIs as numpy arrays
+        filenames: list of subjects' IDs
+        skeleton: boolean, whether input is skeleton images or not
+    OUT: tensor of [batch, sample, subject ID]
     """
-    def __init__(self, data_tensor, filenames, skeleton, vae):
+    def __init__(self, data_tensor, filenames, skeleton):
         self.skeleton = skeleton
         self.data_tensor = data_tensor
-        #print(data_tensor.shape)
         self.transform = True
         self.nb_train = len(filenames)
         print(self.nb_train)
@@ -40,24 +47,14 @@ class TensorDataset():
         file = self.filenames[idx]
 
         if self.skeleton:
-            #print(np.unique(sample.cpu().numpy()))
             fill_value = 1
-
             sample = NormalizeSkeleton(sample)()
-            #print(np.unique(sample.cpu().numpy()))
             self.transform = transforms.Compose([DownsampleTensor(scale=2),
                         PaddingTensor([1, 40, 40, 40], fill_value=fill_value)
             ])
 
-            #print(np.unique(sample.cpu().numpy()))
-
             sample = self.transform(sample)
-            #print(np.unique(sample.cpu().numpy()))
-            if self.vae:
-                self.transform = DownsampleTensor(scale=2)
-                sample = self.transform(sample)
-            #sample = NormalizeSkeleton(sample)()
-            #print(np.unique(sample.cpu().numpy()))
+
         else:
             self.transform = PaddingTensor([1, 80, 80, 80])
             sample = self.transform(sample)
@@ -73,7 +70,11 @@ class TensorDataset():
 
 
 class AugDatasetTransformer(torch.utils.data.Dataset):
-
+    """
+    Custom dataset that apply data augmentation on a dataset processed
+    through TensorDataset class.
+    Transformations are performed on CPU.
+    """
     def __init__(self, base_dataset):
         self.base_dataset = base_dataset
         #self.transform = transforms.RandomRotation(degrees=(-90, 90))
@@ -122,7 +123,6 @@ def create_hcp_benchmark(side, benchmark, directory, batch_size, handedness=1):
     tmp = pd.read_pickle(data_dir + input_data +'.pkl')
     train = pd.merge(tmp, train_list.Subject.astype(str), on='Subject')
     train = train.reset_index(drop=True)
-    print(train.head())
 
     filenames_train = train.Subject.values
     print(len(filenames_train))
@@ -138,8 +138,8 @@ def create_hcp_benchmark(side, benchmark, directory, batch_size, handedness=1):
     print([round(i*(len(hcp_dataset_train))) for i in partition])
     train_set, val_set, test_set = torch.utils.data.random_split(hcp_dataset_train,
                          [round(i*(len(hcp_dataset_train))) for i in partition])
-    """train_set, val_set, test_set = torch.utils.data.random_split(hcp_dataset_train,
-                         [3,2,5])"""
+
+    # Data Augmentation application
     #train_set = AugDatasetTransformer(train_set)
     #val_set = AugDatasetTransformer(val_set)
     #test_set  = AugDatasetTransformer(test_set)
@@ -160,13 +160,10 @@ def create_benchmark_test(benchmark, side, handedness=1):
     (cf anatomist_tools.benchmark_generation module)
     IN: benchmark: int, number of benchmark
         handedness: int, 1 if right handed, 2 if left handed
-    OUT: dataset_test_nor_loader,
-         dataset_test_abnor_loader
+    OUT: dataset_test_abnor_loader
     """
     data_dir = '/neurospin/dico/lguillon/mic21/anomalies_set/dataset/benchmark' + str(benchmark) + '/'
-    #hand = 'left'
 
-    #hcp_leftH = pd.read_pickle('/home_local/lg261972/data/data_handedness/{}_hemi/controls_qc_{}_{}H.pkl'.format(side, side, hand))
     input_data = 'abnormal_skeleton_' + side
     print(input_data)
     tmp = pd.read_pickle(data_dir + input_data +'.pkl')
@@ -179,7 +176,6 @@ def create_benchmark_test(benchmark, side, handedness=1):
 
     benchmark_dataset = TensorDataset(filenames=filenames, data_tensor=tmp,
                                     skeleton=True, vae=False)
-
 
     benchmark_loader = torch.utils.data.DataLoader(benchmark_dataset, batch_size=1,
                                                     shuffle=True, num_workers=0)
@@ -196,7 +192,9 @@ def create_hcp_sets(skeleton, side, directory, batch_size, handedness=0):
         directory: str, folder in which save the results
         batch_size: int, size of training batches
         weights: list, list of weights to apply to skeleton values
-    OUT:
+    OUT: root_dir: created directory where results will be stored
+         dataset_train_loader, dataset_val_loader, dataset_test_loader: loaders
+         that will be used for training and testing
     """
     print(torch.cuda.current_device())
     date_exp = date.today().strftime("%d%m%y")
@@ -250,13 +248,7 @@ def create_hcp_sets(skeleton, side, directory, batch_size, handedness=0):
             filenames = tmp.Subject.values
             print(len(filenames))
             tmp = torch.from_numpy(np.array([tmp.loc[k].values[0] for k in range(len(tmp))]))
-            print('là')
-    #tmp = pd.read_pickle(data_dir + input_data +'.pkl')
-    #list_frames.append(tmp)
-    #tmp = pd.concat(list_frames, axis=1, sort=False)
-    #len_tmp = len(tmp.columns)
-    #filenames = list(tmp.columns)
-    #tmp = torch.from_numpy(np.array([tmp.loc[0].values[k] for k in range(len_tmp)]))
+
     tmp = tmp.to('cuda')
 
     hcp_dataset = TensorDataset(filenames=filenames, data_tensor=tmp,
