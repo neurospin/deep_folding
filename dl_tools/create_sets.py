@@ -69,6 +69,44 @@ class TensorDataset():
         return tuple_with_path
 
 
+class SkeletonDataset():
+    """Custom dataset for skeleton images that includes image file paths.
+    dataframe: dataframe containing training and testing arrays
+    filenames: optional, list of corresponding filenames
+    Works on CPUs
+    """
+    def __init__(self, dataframe, filenames=None):
+        self.df = dataframe
+        if filenames:
+            self.filenames = filenames
+            self.df = self.df.T
+        else:
+            self.filenames = None
+
+    def __len__(self):
+        return len(self.df)
+
+    def __getitem__(self, idx):
+        if torch.is_tensor(idx):
+            idx = idx.tolist()
+
+        if self.filenames:
+            filename = self.filenames[idx]
+            sample = self.df.iloc[idx][0]
+        else:
+            filename = self.df.iloc[idx]['ID']
+            sample = self.df.iloc[idx][0]
+
+        fill_value = 1
+        sample = NormalizeSkeleton(sample)()
+        self.transform = transforms.Compose([Downsample(scale=2),
+                         Padding([1, 40, 40, 40], fill_value=fill_value)
+                         ])
+        sample = self.transform(sample)
+        tuple_with_path = (sample, filename)
+        return tuple_with_path
+
+
 class AugDatasetTransformer(torch.utils.data.Dataset):
     """
     Custom dataset that apply data augmentation on a dataset processed
@@ -77,12 +115,13 @@ class AugDatasetTransformer(torch.utils.data.Dataset):
     """
     def __init__(self, base_dataset):
         self.base_dataset = base_dataset
-        #self.transform = transforms.RandomRotation(degrees=(-90, 90))
-        self.transform = tio.RandomAffine(degrees=90, default_pad_value=1, p=0.4)
 
     def __getitem__(self, index):
-        img, target = self.base_dataset[index]
-        return self.transform(img.cpu()), target
+        img, filename = self.base_dataset[index]
+        if np.random.rand() > 0.6:
+            self.angle = np.random.randint(-90, 90)
+            img = np.expand_dims(rotate(img[0], angle=self.angle, reshape=False, cval=1, order=1), axis=0)
+        return img, filename
 
     def __len__(self):
         return len(self.base_dataset)
@@ -124,14 +163,7 @@ def create_hcp_benchmark(side, benchmark, directory, batch_size, handedness=1):
     train = pd.merge(tmp, train_list.Subject.astype(str), on='Subject')
     train = train.reset_index(drop=True)
 
-    filenames_train = train.Subject.values
-    print(len(filenames_train))
-    train = torch.from_numpy(np.array([train.loc[k].values[0] for k in range(len(train))]))
-
-    train = train.to('cuda')
-
-    hcp_dataset_train = TensorDataset(filenames=filenames_train, data_tensor=train,
-                                skeleton=True, vae=False)
+    hcp_dataset_train = SkeletonDataset(dataframe=train)
 
     # Split training set into train, val and test
     partition = [0.7, 0.2, 0.1]
@@ -140,12 +172,12 @@ def create_hcp_benchmark(side, benchmark, directory, batch_size, handedness=1):
                          [round(i*(len(hcp_dataset_train))) for i in partition])
 
     # Data Augmentation application
-    #train_set = AugDatasetTransformer(train_set)
+    train_set = AugDatasetTransformer(train_set)
     #val_set = AugDatasetTransformer(val_set)
     #test_set  = AugDatasetTransformer(test_set)
 
     dataset_train_loader = torch.utils.data.DataLoader(train_set, batch_size=batch_size,
-                                                shuffle=True, num_workers=0)
+                                                shuffle=True, num_workers=8)
     dataset_val_loader = torch.utils.data.DataLoader(val_set, shuffle=True,
                                                           num_workers=0)
     dataset_test_loader = torch.utils.data.DataLoader(test_set, shuffle=True,
@@ -169,13 +201,7 @@ def create_benchmark_test(benchmark, side, handedness=1):
     tmp = pd.read_pickle(data_dir + input_data +'.pkl')
     filenames = list(tmp.columns)
 
-    print(len(filenames))
-    tmp = torch.from_numpy(np.array([tmp.loc[0].values[k] for k in range(len(filenames))]))
-
-    tmp = tmp.to('cuda')
-
-    benchmark_dataset = TensorDataset(filenames=filenames, data_tensor=tmp,
-                                    skeleton=True, vae=False)
+    benchmark_dataset = SkeletonDataset(dataframe=tmp, filenames=filenames)
 
     benchmark_loader = torch.utils.data.DataLoader(benchmark_dataset, batch_size=1,
                                                     shuffle=True, num_workers=0)
