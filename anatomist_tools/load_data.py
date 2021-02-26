@@ -14,7 +14,7 @@ import numpy as np
 import re
 
 
-def fetch_data(root_dir):
+def fetch_data(root_dir, save_dir=None, side=None):
     """
     Creates a dataframe of data with a column for each subject and associated
     np.array. Generation a dataframe of "normal" images and a dataframe of
@@ -31,7 +31,7 @@ def fetch_data(root_dir):
         data_dict = dict()
         for filename in os.listdir(root_dir+phase):
             file = os.path.join(root_dir+phase, filename)
-            print(filename)
+            #print(filename)
             if os.path.isfile(file) and '.nii' in file and '.minf' not in file and 'normalized' in file:
                 vol = a.loadObject(file)
                 aimsvol = a.toAimsObject(vol)
@@ -41,13 +41,18 @@ def fetch_data(root_dir):
                 else:
                     # filename = re.search('-(\d{6})', file).group(1)
                     #filename = re.search('_(\d{6})', file).group(1)
-                    filename = re.search('(\d{12})', file).group(1)
+                    #filename = re.search('(\d{12})', file).group(1)
+                    filename = re.search('(\d{6})', file).group(1)
 
                 data_dict[filename] = [sample]
-                print(filename)
+                #print(filename)
 
         dataframe = pd.DataFrame.from_dict(data_dict)
-        dataframe.to_pickle('/neurospin/dico/lguillon/mic21/anomalies_set/dataset/benchmark2/abnormal_skeleton_left.pkl')
+
+        if save_dir:
+            dataframe.to_pickle(save_dir + side + 'skeleton.pkl')
+        else:
+            dataframe.to_pickle('/neurospin/dico/lguillon/mic21/anomalies_set/dataset/benchmark2/abnormal_skeleton_left.pkl')
 
 
 if __name__ == '__main__':
