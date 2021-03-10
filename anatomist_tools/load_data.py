@@ -48,7 +48,9 @@ def fetch_data(root_dir, save_dir=None, side=None):
         dataframe = pd.DataFrame.from_dict(data_dict)
 
         if save_dir:
-            dataframe.to_pickle(save_dir + side + 'skeleton.pkl')
+            file_pickle_basename = side + 'skeleton.pkl'
+            file_pickle = os.path.join(save_dir, file_pickle_basename)
+            dataframe.to_pickle(file_pickle)
         else:
             dataframe.to_pickle('/neurospin/dico/lguillon/mic21/anomalies_set/dataset/benchmark2/abnormal_skeleton_left.pkl')
 
