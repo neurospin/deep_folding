@@ -7,7 +7,6 @@ import os
 
 import anatomist.api as anatomist
 from soma import aims
-a = anatomist.Anatomist()
 
 import pandas as pd
 import numpy as np
@@ -33,9 +32,8 @@ def fetch_data(root_dir, save_dir=None, side=None):
             file = os.path.join(root_dir+phase, filename)
             #print(filename)
             if os.path.isfile(file) and '.nii' in file and '.minf' not in file and 'normalized' in file:
-                vol = a.loadObject(file)
-                aimsvol = a.toAimsObject(vol)
-                sample = np.asarray(aimsvol.volume()).T
+		aimsvol = aims.read(file)
+                sample = np.asarray(aimsvol).T
                 if input == 'skeleton':
                     filename = re.search('_(\d{6})', file).group(1)
                 else:
@@ -50,7 +48,9 @@ def fetch_data(root_dir, save_dir=None, side=None):
         dataframe = pd.DataFrame.from_dict(data_dict)
 
         if save_dir:
-            dataframe.to_pickle(save_dir + side + 'skeleton.pkl')
+            file_pickle_basename = side + 'skeleton.pkl'
+            file_pickle = os.path.join(save_dir, file_pickle_basename)
+            dataframe.to_pickle(file_pickle)
         else:
             dataframe.to_pickle('/neurospin/dico/lguillon/mic21/anomalies_set/dataset/benchmark2/abnormal_skeleton_left.pkl')
 
