@@ -71,7 +71,8 @@ side = 'L' # hemisphere 'L' or 'R'
 # Bounding box defined thanks to
 # bbox_definition.py for S.T.s ter. asc.
 # ant. and post. 
-bbox = ([105, 109, 23], [147, 171, 93])                        
+bbox = ([112, 110, 24], [147, 152, 78]) # bbox for left side: 'L'
+# bbox = ([8, 95, 23], [43, 146, 85]) # bbox for right side: 'R'             
 
 
 # Input directories
@@ -115,7 +116,7 @@ def main():
   The programm loops over all the subjects from the input directory.
   """
 
-  for sub in os.listdir(dir_input_MRI)[:2]: # go through all HCP subjects folder
+  for sub in os.listdir(dir_input_MRI): # go through all HCP subjects folder
 
       # Creating transformation file name
       file_transform_basename = 'natif_to_template_spm_' + sub + '.trm' 
@@ -142,7 +143,7 @@ def main():
       cmd_crop = 'AimsSubVolume' + ' -i ' + file_output + ' -o ' + file_output + cmd_bounding_box
       os.system(cmd_crop)
 
-  # Creation of global .pickle file
+  # Creation of .pickle file for all subjects
   fetch_data(dir_output, save_dir=dir_output_base, side=side)
 
   # Log information
