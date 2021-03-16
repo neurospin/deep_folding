@@ -115,17 +115,20 @@ def main():
   The programm loops over all the subjects from the input directory.
   """
 
+  if not os.path.exists(dir_output):
+    os.makedirs(dir_output)
+
   for sub in os.listdir(dir_input_MRI): # go through all HCP subjects folder
 
-      # Creating transformation file name
+      # Transformation file name
       file_transform_basename = 'natif_to_template_spm_' + sub + '.trm' 
       file_transform = join(dir_input_transform, file_transform_basename) 
       
-      # Creating normalized SPM file name
+      # Normalized SPM file name
       file_SPM_basename = 'normalized_SPM_' + sub +'.nii'
       file_SPM = join(dir_input_MRI, sub, 't1mri/default_acquisition', file_SPM_basename)
       
-      # Creating skeleton file name
+      # Skeleton file name
       file_skeleton_basename = side + 'skeleton_' + sub + '.nii.gz'
       file_skeleton = join(dir_input_MRI, sub, 't1mri/default_acquisition/default_analysis/segmentation', file_skeleton_basename)
       
