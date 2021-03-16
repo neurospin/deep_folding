@@ -77,7 +77,7 @@ _image_normalized_SPM = '/neurospin/hcp/ANALYSIS/3T_morphologist/100206/t1mri/de
 def list_all_subjects():
   """List all subjects from the clean database (directory _root_dir).
 
-  Subjects are the names the subdirectories of the root directory.
+  Subjects are the names of the subdirectories of the root directory.
 
   Parameters:
     None
@@ -112,8 +112,8 @@ def get_bounding_boxes(subjects):
     subjects: list containing all subjects to be analyzed
 
   Returns:
-    list_bbmin: list containing the lower left vertex of the box in the Talairach space
-    list_bbmax: list containing the upper right vertex of the box in the Talairach space
+    list_bbmin: list containing the upper right vertex of the box in the Talairach space
+    list_bbmax: list containing the lower left vertex of the box in the Talairach space
   """
 
   # Initialization
@@ -169,12 +169,12 @@ def compute_box_talairach_space(list_bbmin, list_bbmax):
   """Returns the coordinates of the box in Talairach space encompassing the sulcus for all subjects
 
   Parameters:
-    list_bbmin: list containing the lower left vertex of the box in the Talairach space
-    list_bbmax: list containing the upper right vertex of the box in the Talairach space    
+    list_bbmin: list containing the upper right vertex of the box in the Talairach space
+    list_bbmax: list containing the lower left vertex of the box in the Talairach space    
 
   Returns:
-    bbmin_tal: numpy array with the x,y,z coordinates of the lower left corner of the box
-    bblax_tal: numpy array with the x,y,z coordinates of the upper right corner of the box
+    bbmin_tal: numpy array with the x,y,z coordinates of the upper right corner of the box
+    bblax_tal: numpy array with the x,y,z coordinates of the lower left corner of the box
   """
 
   bbmin_tal = np.array([min([val[0] for k, val in enumerate(list_bbmin)]),
@@ -188,7 +188,7 @@ def compute_box_talairach_space(list_bbmin, list_bbmax):
   return bbmin_tal, bbmax_tal
 
 
-def compute_transform_tal_spm_mni():
+def compute_transform_tal_to_native():
   """Returns the transformation from Talairach space to MNI template
 
   Compute the transformation from Talairach space to MNI space, passing through SPM template.
@@ -199,7 +199,7 @@ def compute_transform_tal_spm_mni():
     None 
 
   Returns:
-    tal_to_mni: transformation used from Talairach space to MNI template
+    tal_to_native: transformation used from Talairach space to native MRI space
     voxel_size: voxel size (in MNI referential or HCP normalized SPM space)
   """
 
@@ -209,34 +209,36 @@ def compute_transform_tal_spm_mni():
   # Gets a normalized SPM file from the morphologist analysis of the hcp database
   image_normalized_spm = aims.read(_image_normalized_SPM)
 
-  # Gets the last transform of the SPM image
-  mni_to_spm_template = aims.AffineTransformation3d(image_normalized_spm.header()['transformations'][-1])
-  tal_to_mni = mni_to_spm_template.inverse() * tal_to_spm_template
+  # Tranformation from the native space to the MNI/SPM template referential
+  native_to_spm_template = aims.AffineTransformation3d(image_normalized_spm.header()['transformations'][-1])
+
+  # Tranformation from the Talairach space to the native space
+  tal_to_native = native_to_spm_template.inverse() * tal_to_spm_template
   
   voxel_size = image_normalized_spm.header()['voxel_size'][:3]
 
-  return tal_to_mni, voxel_size
+  return tal_to_native, voxel_size
 
 
-def compute_box_voxel(bbmin_tal, bbmax_tal, tal_to_mni, voxel_size):
+def compute_box_voxel(bbmin_tal, bbmax_tal, tal_to_native, voxel_size):
   """Returns the coordinates of the box as voxels encompassing the sulcus for all subjects
 
   Coordinates of the box in voxels are determined in the MNI referential
 
   Parameters:
-    bbmin_tal: numpy array with the coordinates of the lower left corner of the box (Talairach space)
-    bblax_tal: numpy array with the coordinates of the upper right corner of the box (Talairach space)
-    tal_to_mni: transformation used from Talairach space to MNI template
+    bbmin_tal: numpy array with the coordinates of the upper right corner of the box (Talairach space)
+    bblax_tal: numpy array with the coordinates of the lower left corner of the box (Talairach space)
+    tal_to_native: transformation used from Talairach space to native MRI space
     voxel_size: voxel size (in MNI referential or HCP normalized SPM space)
 
   Returns:
-    bbmin_vox: numpy array with the coordinates of the lower left corner of the box (voxels in MNI space)
-    bblax_vox: numpy array with the coordinates of the upper right corner of the box (voxels in MNI space)  
+    bbmin_vox: numpy array with the coordinates of the upper right corner of the box (voxels in MNI space)
+    bblax_vox: numpy array with the coordinates of the lower left corner of the box (voxels in MNI space)  
   """
 
   # Application of the transformation to bbox
-  bbmin_mni = tal_to_mni.transform(bbmin_tal)
-  bbmax_mni = tal_to_mni.transform(bbmax_tal)
+  bbmin_mni = tal_to_native.transform(bbmin_tal)
+  bbmax_mni = tal_to_native.transform(bbmax_tal)
 
   # To go back from mms to voxels
   bbmin_vox = np.round(np.array(bbmin_mni) / voxel_size).astype(int)
@@ -262,12 +264,12 @@ def main():
   list_bbmin, list_bbmax = get_bounding_boxes(subjects)
   bbmin_tal, bbmax_tal = compute_box_talairach_space(list_bbmin, list_bbmax)
 
-  # Compute the transform from the Talairach space to MNI space
-  tal_to_mni, voxel_size = compute_transform_tal_spm_mni()
+  # Compute the transform from the Talairach space to native MRI space
+  tal_to_native, voxel_size = compute_transform_tal_to_native()
 
   # Determine the box encompassing the _sulcus for all subjects
   # The coordinates are determined in voxels in MNI space
-  bbmin_vox, bbmax_vox = compute_box_voxel(bbmin_tal, bbmax_tal, tal_to_mni, voxel_size)
+  bbmin_vox, bbmax_vox = compute_box_voxel(bbmin_tal, bbmax_tal, tal_to_native, voxel_size)
 
   print(bbmin_vox, bbmax_vox)
 
