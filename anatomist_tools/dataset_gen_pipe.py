@@ -66,14 +66,13 @@ from load_data import fetch_data
 # Global variables (that the user can change)
 ######################################################################
 
-side = 'L' # hemisphere 'L' or 'R'
+side = 'R' # hemisphere 'L' or 'R'
 
 # Bounding box defined thanks to
 # bbox_definition.py for S.T.s ter. asc.
 # ant. and post. 
-bbox = ([112, 110, 24], [147, 152, 78]) # bbox for left side: 'L'
-# bbox = ([8, 95, 23], [43, 146, 85]) # bbox for right side: 'R'             
-
+bbox = ( ([112, 110, 24], [147, 152, 78]) if side=='L' # bbox for left side: 'L'
+         else ([8, 95, 23], [43, 146, 85]) ) # bbox for right side: 'R'  
 
 # Input directories
 # --------------
