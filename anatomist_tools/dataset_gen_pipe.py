@@ -66,13 +66,13 @@ from load_data import fetch_data
 # Global variables (that the user can change)
 ######################################################################
 
-side = 'L' # hemisphere 'L' or 'R'
+side = 'R' # hemisphere 'L' or 'R'
 
 # Bounding box defined thanks to
 # bbox_definition.py for S.T.s ter. asc.
 # ant. and post. 
-bbox = ([105, 109, 23], [147, 171, 93])                        
-
+bbox = ( ([112, 110, 24], [147, 152, 78]) if side=='L' # bbox for left side: 'L'
+         else ([8, 95, 23], [43, 146, 85]) ) # bbox for right side: 'R'  
 
 # Input directories
 # --------------
@@ -115,17 +115,20 @@ def main():
   The programm loops over all the subjects from the input directory.
   """
 
-  for sub in os.listdir(dir_input_MRI)[:2]: # go through all HCP subjects folder
+  if not os.path.exists(dir_output):
+    os.makedirs(dir_output)
 
-      # Creating transformation file name
+  for sub in os.listdir(dir_input_MRI): # go through all HCP subjects folder
+
+      # Transformation file name
       file_transform_basename = 'natif_to_template_spm_' + sub + '.trm' 
       file_transform = join(dir_input_transform, file_transform_basename) 
       
-      # Creating normalized SPM file name
+      # Normalized SPM file name
       file_SPM_basename = 'normalized_SPM_' + sub +'.nii'
       file_SPM = join(dir_input_MRI, sub, 't1mri/default_acquisition', file_SPM_basename)
       
-      # Creating skeleton file name
+      # Skeleton file name
       file_skeleton_basename = side + 'skeleton_' + sub + '.nii.gz'
       file_skeleton = join(dir_input_MRI, sub, 't1mri/default_acquisition/default_analysis/segmentation', file_skeleton_basename)
       
@@ -142,7 +145,7 @@ def main():
       cmd_crop = 'AimsSubVolume' + ' -i ' + file_output + ' -o ' + file_output + cmd_bounding_box
       os.system(cmd_crop)
 
-  # Creation of global .pickle file
+  # Creation of .pickle file for all subjects
   fetch_data(dir_output, save_dir=dir_output_base, side=side)
 
   # Log information
