@@ -53,7 +53,7 @@ import numpy as np
 ######################################################################
 
 # _root_dir is the directory in which lies the manually segmented database
-_root_dir = "/neurospin/lnao/PClean/database_learnclean/panabase/"
+_root_dir = "/neurospin/lnao/PClean/database_learnclean/all/"
 
 # hemisphere 'L' or 'R'
 _side = 'R' 
@@ -98,6 +98,55 @@ def list_all_subjects():
   return subjects
 
 
+def get_one_bounding_box(graph_filename):
+  """get bounding box of the chosen sulcus for one data graph
+
+  Function that outputs the bounding box for the sulcus '_sulcus' for this datagraph.
+  The bounding box is the smallest
+  rectangular box that encompasses the chosen sulcus
+
+  Parameters:
+    graph_filename: string being the name of graph file .arg to be analyzed: 'Lammon_base2018_manual.arg'
+
+  Returns:
+    bbox_min: numpy array giving the upper right vertex coordinates of the box in the Talairach space
+    bbox_max: numpy array fiving the lower left vertex coordinates of the box in the Talairach space
+  """
+
+  # Read the data graph and extract the Talairach transform
+  graph = aims.read(graph_filename)
+  voxel_size = graph['voxel_size'][:3]
+  tal_transfo = aims.GraphManip.talairach(graph)
+  bbox_min = None
+  bbox_max = None
+  
+  # Get the min and max coordinates of the sulcus '_sulcus'
+  # by looping over all the vertices of the graph
+  for vertex in graph.vertices():
+      vname = vertex.get('name')
+      if vname != _sulcus:
+          continue
+      for bucket_name in ('aims_ss', 'aims_bottom', 'aims_other'):
+          bucket = vertex.get(bucket_name)
+          if bucket is not None:
+            voxels = np.asarray(
+                [tal_transfo.transform(np.array(voxel) * voxel_size)
+                 for voxel in bucket[0].keys()])
+
+            if voxels.shape == (0, ):
+                continue
+            bbox_min = np.min(np.vstack(
+                ([bbox_min] if bbox_min is not None else [])
+                + [voxels]), axis=0)
+            bbox_max = np.max(np.vstack(
+                ([bbox_max] if bbox_max is not None else [])
+                + [voxels]), axis=0)
+
+  print('bounding box min:', bbox_min)
+  print('bounding box max:', bbox_max)
+
+  return bbox_min, bbox_max
+
 
 def get_bounding_boxes(subjects):
   """get bounding boxes of the chosen sulcus for all subjects
@@ -126,38 +175,8 @@ def get_bounding_boxes(subjects):
       print(sub)
 
       atts['subject'] = sub
-      
-      # Read the data graph and extract the Talairach transform
-      graph = aims.read(sulci_pattern % atts)
-      voxel_size = graph['voxel_size'][:3]
-      tal_transfo = aims.GraphManip.talairach(graph)
-      bbox_min = None
-      bbox_max = None
-      
-      # Get the min and max coordinates of the sulcus '_sulcus'
-      # by looping over all the vertices of the graph
-      for vertex in graph.vertices():
-          vname = vertex.get('name')
-          if vname != _sulcus:
-              continue
-          for bucket_name in ('aims_ss', 'aims_bottom', 'aims_other'):
-              bucket = vertex.get(bucket_name)
-              if bucket is not None:
-                voxels = np.asarray(
-                    [tal_transfo.transform(np.array(voxel) * voxel_size)
-                     for voxel in bucket[0].keys()])
 
-                if voxels.shape == (0, ):
-                    continue
-                bbox_min = np.min(np.vstack(
-                    ([bbox_min] if bbox_min is not None else [])
-                    + [voxels]), axis=0)
-                bbox_max = np.max(np.vstack(
-                    ([bbox_max] if bbox_max is not None else [])
-                    + [voxels]), axis=0)
-
-      print('bounding box min:', bbox_min)
-      print('bounding box max:', bbox_max)
+      bbox_min, bbox_max = get_one_bounding_box(sulci_pattern % atts)
 
       list_bbmin.append([bbox_min[0], bbox_min[1], bbox_min[2]])
       list_bbmax.append([bbox_max[0], bbox_max[1], bbox_max[2]])
@@ -227,7 +246,7 @@ def compute_box_voxel(bbmin_tal, bbmax_tal, tal_to_native, voxel_size):
 
   Parameters:
     bbmin_tal: numpy array with the coordinates of the upper right corner of the box (Talairach space)
-    bblax_tal: numpy array with the coordinates of the lower left corner of the box (Talairach space)
+    bbmax_tal: numpy array with the coordinates of the lower left corner of the box (Talairach space)
     tal_to_native: transformation used from Talairach space to native MRI space
     voxel_size: voxel size (in MNI referential or HCP normalized SPM space)
 
@@ -271,7 +290,8 @@ def main():
   # The coordinates are determined in voxels in MNI space
   bbmin_vox, bbmax_vox = compute_box_voxel(bbmin_tal, bbmax_tal, tal_to_native, voxel_size)
 
-  print(bbmin_vox, bbmax_vox)
+  print("box: min = ", bbmin_vox)
+  print("box: max = ", bbmax_vox)
 
   return bbmin_vox, bbmax_vox
 
