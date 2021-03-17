@@ -56,7 +56,7 @@ import numpy as np
 _root_dir = "/neurospin/lnao/PClean/database_learnclean/all/"
 
 # hemisphere 'L' or 'R'
-_side = 'R' 
+_side = 'L' 
 
 # sulcus to encompass:
 # its name depends on the hemisphere side
