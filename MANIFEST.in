@@ -1,0 +1,6 @@
+include tests/*.py
+include examples/*.py
+include LICENSE
+include AUTHORS.rst
+include README.rst
+
