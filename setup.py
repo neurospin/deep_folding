@@ -1,0 +1,14 @@
+from setuptools import setup, find_packages
+
+setup(
+    name='deep_folding',
+    version='0.1',
+    packages=find_packages(exclude=['tests*', 'examples*']),
+    license='CeCILL license version 2',
+    description='Deep learning utilities to characterize sulcus patterns',
+    long_description=open('README.rst').read(),
+    install_requires=[],
+    url='',
+    author='',
+    author_email=''
+)

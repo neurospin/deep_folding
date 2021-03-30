@@ -1,3 +1,9 @@
 # Compiled sources #
 ####################
 *.pyc
+
+# Folders #
+################
+build
+dist
+*.egg-info
