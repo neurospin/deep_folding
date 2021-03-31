@@ -43,6 +43,8 @@ import torchvision.transforms as transforms
 from torch.autograd import Variable
 import torchio as tio
 
+from preprocessing.pynet_transforms import *
+
 class TensorDataset():
     """Custom dataset that includes image file paths.
     Applies different transformations to data depending on the type of input.
@@ -102,7 +104,7 @@ class SkeletonDataset():
         self.df = dataframe
         if filenames:
             self.filenames = filenames
-            self.df = self.df.T
+            #self.df = self.df.T
         else:
             self.filenames = None
 

@@ -256,9 +256,35 @@ def create_left_handed_set(skeleton, side):
 
     leftH_hcp_dataset = TensorDataset(filenames=filenames, data_tensor=tmp,
                                     skeleton=skeleton, vae=False)
-    # Split training set into train, val and test
 
     leftH_loader = torch.utils.data.DataLoader(leftH_hcp_dataset, batch_size=1,
                                                     shuffle=True, num_workers=0)
 
     return leftH_loader
+
+
+def create_loader_from_csv(subject_list, side):
+    """
+    Creates a dataloader from a list of subjects
+    IN: subject_list: list of subjects to put in loader, csv file
+        side: 'left' or 'right' hemisphere, str
+    OUT: dataloader
+    """
+
+    subject_list = pd.read_csv(subject_list)
+
+    data_dir = '/neurospin/dico/lguillon/skeleton/sts_crop/'
+    input_data = side + '_hemi_rightH_sts_crop_skeleton'
+    tmp = pd.read_pickle(data_dir + input_data +'.pkl')
+
+    subject_dataset = pd.merge(tmp, subject_list.subjects.astype(str), left_on='Subject',
+                     right_on='subjects')
+    subject_dataset = subject_dataset.reset_index(drop=True)
+    filenames = list(subject_dataset.Subject)
+
+    subject_dataset = SkeletonDataset(dataframe=subject_dataset, filenames=filenames)
+
+    subject_loader = torch.utils.data.DataLoader(subject_dataset, batch_size=1,
+                                                    shuffle=True, num_workers=0)
+
+    return subject_loader
