@@ -6,9 +6,6 @@ The aim of this script is to compute transformation files
 from __future__ import division
 from soma import aims
 import os
-import numpy as np
-import anatomist.api as ana
-
 
 def calculate_transforms(subject_id):
     """
