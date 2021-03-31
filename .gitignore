@@ -7,3 +7,8 @@
 build
 dist
 *.egg-info
+
+# pycharm and virtualenv folders #
+##################################
+.idea
+venv
