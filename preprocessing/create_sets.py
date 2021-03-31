@@ -1,5 +1,38 @@
+# -*- coding: utf-8 -*-
 # /usr/bin/env python3
-# coding: utf-8
+#
+#  This software and supporting documentation are distributed by
+#      Institut Federatif de Recherche 49
+#      CEA/NeuroSpin, Batiment 145,
+#      91191 Gif-sur-Yvette cedex
+#      France
+#
+# This software is governed by the CeCILL license version 2 under
+# French law and abiding by the rules of distribution of free software.
+# You can  use, modify and/or redistribute the software under the
+# terms of the CeCILL license version 2 as circulated by CEA, CNRS
+# and INRIA at the following URL "http://www.cecill.info".
+#
+# As a counterpart to the access to the source code and  rights to copy,
+# modify and redistribute granted by the license, users are provided only
+# with a limited warranty  and the software's author,  the holder of the
+# economic rights,  and the successive licensors  have only  limited
+# liability.
+#
+# In this respect, the user's attention is drawn to the risks associated
+# with loading,  using,  modifying and/or developing or reproducing the
+# software by the user in light of its specific status of free software,
+# that may mean  that it is complicated to manipulate,  and  that  also
+# therefore means  that it is reserved for developers  and  experienced
+# professionals having in-depth computer knowledge. Users are therefore
+# encouraged to load and test the software's suitability as regards their
+# requirements in conditions enabling the security of their systems and/or
+# data to be ensured and,  more generally, to use and operate it in the
+# same conditions as regards security.
+#
+# The fact that you are presently reading this means that you have had
+# knowledge of the CeCILL license version 2 and that you accept its terms.
+
 """
 The aim of this script is to create pytorch dataloaders from MRIs saved as
 numpy arrays in a .pickle.
@@ -16,115 +49,11 @@ import torchvision.transforms as transforms
 from torch.autograd import Variable
 import torchio as tio
 
-from dl_tools.pynet_transforms import *
-from dl_tools import save_results
+from preprocessing.datasets import *
+from utils import save_results
 
-
-class TensorDataset():
-    """Custom dataset that includes image file paths.
-    Apply different transformations to data depending on the type of input.
-    IN: data_tensor: tensor containing MRIs as numpy arrays
-        filenames: list of subjects' IDs
-        skeleton: boolean, whether input is skeleton images or not
-    OUT: tensor of [batch, sample, subject ID]
-    """
-    def __init__(self, data_tensor, filenames, skeleton):
-        self.skeleton = skeleton
-        self.data_tensor = data_tensor
-        self.transform = True
-        self.nb_train = len(filenames)
-        print(self.nb_train)
-        self.filenames = filenames
-        self.vae = vae
-
-    def __len__(self):
-        return(self.nb_train)
-
-    def __getitem__(self, idx):
-        if torch.is_tensor(idx):
-            idx = idx.tolist()
-        sample = self.data_tensor[idx]
-        file = self.filenames[idx]
-
-        if self.skeleton:
-            fill_value = 1
-            sample = NormalizeSkeleton(sample)()
-            self.transform = transforms.Compose([DownsampleTensor(scale=2),
-                        PaddingTensor([1, 40, 40, 40], fill_value=fill_value)
-            ])
-
-            sample = self.transform(sample)
-
-        else:
-            self.transform = PaddingTensor([1, 80, 80, 80])
-            sample = self.transform(sample)
-            self.transform = DownsampleTensor(scale=2)
-            sample = self.transform(sample)
-            if self.vae:
-                self.transform = DownsampleTensor(scale=2)
-                sample = self.transform(sample)
-            sample = NormalizeHisto(sample)()
-
-        tuple_with_path = (sample, file)
-        return tuple_with_path
-
-
-class SkeletonDataset():
-    """Custom dataset for skeleton images that includes image file paths.
-    dataframe: dataframe containing training and testing arrays
-    filenames: optional, list of corresponding filenames
-    Works on CPUs
-    """
-    def __init__(self, dataframe, filenames=None):
-        self.df = dataframe
-        if filenames:
-            self.filenames = filenames
-            self.df = self.df.T
-        else:
-            self.filenames = None
-
-    def __len__(self):
-        return len(self.df)
-
-    def __getitem__(self, idx):
-        if torch.is_tensor(idx):
-            idx = idx.tolist()
-
-        if self.filenames:
-            filename = self.filenames[idx]
-            sample = self.df.iloc[idx][0]
-        else:
-            filename = self.df.iloc[idx]['ID']
-            sample = self.df.iloc[idx][0]
-
-        fill_value = 1
-        sample = NormalizeSkeleton(sample)()
-        self.transform = transforms.Compose([Downsample(scale=2),
-                         Padding([1, 40, 40, 40], fill_value=fill_value)
-                         ])
-        sample = self.transform(sample)
-        tuple_with_path = (sample, filename)
-        return tuple_with_path
-
-
-class AugDatasetTransformer(torch.utils.data.Dataset):
-    """
-    Custom dataset that apply data augmentation on a dataset processed
-    through TensorDataset class.
-    Transformations are performed on CPU.
-    """
-    def __init__(self, base_dataset):
-        self.base_dataset = base_dataset
-
-    def __getitem__(self, index):
-        img, filename = self.base_dataset[index]
-        if np.random.rand() > 0.6:
-            self.angle = np.random.randint(-90, 90)
-            img = np.expand_dims(rotate(img[0], angle=self.angle, reshape=False, cval=1, order=1), axis=0)
-        return img, filename
-
-    def __len__(self):
-        return len(self.base_dataset)
+# from dl_tools.pynet_transforms import *
+# from dl_tools import save_results
 
 
 def create_hcp_benchmark(side, benchmark, directory, batch_size, handedness=1):
@@ -327,7 +256,6 @@ def create_left_handed_set(skeleton, side):
 
     leftH_hcp_dataset = TensorDataset(filenames=filenames, data_tensor=tmp,
                                     skeleton=skeleton, vae=False)
-    # Split training set into train, val and test
 
     leftH_loader = torch.utils.data.DataLoader(leftH_hcp_dataset, batch_size=1,
                                                     shuffle=True, num_workers=0)
@@ -335,82 +263,28 @@ def create_left_handed_set(skeleton, side):
     return leftH_loader
 
 
-
-def create_aims_sets(skeleton, side, handedness=0):
+def create_loader_from_csv(subject_list, side):
     """
-    Creates datasets from AIMS data
-    IN: skeleton: boolean, True if input is skeleton, False otherwise,
-        side: str, 'right' or 'left'
-        handedness: int, 0 if mixed ind, 1 if right handed, 2 if left handed
-    OUT:
+    Creates a dataloader from a list of subjects
+    IN: subject_list: list of subjects to put in loader, csv file
+        side: 'left' or 'right' hemisphere, str
+    OUT: dataloader
     """
 
-    if handedness == 0:
-        if skeleton:
-            controls = pd.read_pickle('/neurospin/dico/lguillon/aims_detection/aims_crop/skeleton/{}_hemi/controls_qc_{}.pkl'.format(side, side))
-            asd = pd.read_pickle('/neurospin/dico/lguillon/aims_detection/aims_crop/skeleton/{}_hemi/asd_qc_{}.pkl'.format(side, side))
-            id_controls = pd.read_pickle('/neurospin/dico/lguillon/aims_detection/aims_crop/skeleton/{}_hemi/id_controls_qc_{}.pkl'.format(side, side))
-            asd_id = pd.read_pickle('/neurospin/dico/lguillon/aims_detection/aims_crop/skeleton/{}_hemi/asd_id_qc_{}.pkl'.format(side, side))
-        else:
-            controls = pd.read_pickle('/neurospin/dico/lguillon/aims_detection/aims_crop/controls_qc_{}.pkl'.format(side))
-            asd = pd.read_pickle('/neurospin/dico/lguillon/aims_detection/aims_crop/asd_qc_{}.pkl'.format(side))
-            id_controls = pd.read_pickle('/neurospin/dico/lguillon/aims_detection/aims_crop/id_controls_qc_{}.pkl'.format(side))
-            asd_id = pd.read_pickle('/neurospin/dico/lguillon/aims_detection/aims_crop/asd_id_qc_{}.pkl'.format(side))
-        asd = asd.rename(columns={0:'mri'})
-        asd_id = asd_id.rename(columns={0:'mri'})
-        controls = controls.rename(columns={0:'mri'})
-        id_controls = id_controls.rename(columns={0:'mri'})
-    else:
-        if handedness==1:
-            hand = 'right'
-        else:
-            hand = 'left'
-        if skeleton:
-            #controls = pd.read_pickle('/neurospin/dico/lguillon/aims_detection/aims_crop/skeleton/{}_hemi/controls_qc_{}_{}H.pkl'.format(side, side, hand))
-            #asd = pd.read_pickle('/neurospin/dico/lguillon/aims_detection/aims_crop/skeleton/{}_hemi/asd_qc_{}_{}H.pkl'.format(side, side, hand))
-            #id_controls = pd.read_pickle('/neurospin/dico/lguillon/aims_detection/aims_crop/skeleton/{}_hemi/id_controls_qc_{}_{}H.pkl'.format(side, side, hand))
-            #asd_id = pd.read_pickle('/neurospin/dico/lguillon/aims_detection/aims_crop/skeleton/{}_hemi/asd_id_qc_{}_{}H.pkl'.format(side, side, hand))
+    subject_list = pd.read_csv(subject_list)
 
-            controls = pd.read_pickle('/home_local/lg261972/data/data_handedness/{}_hemi/controls_qc_{}_{}H.pkl'.format(side, side, hand))
-            asd = pd.read_pickle('/home_local/lg261972/data/data_handedness/{}_hemi/asd_qc_{}_{}H.pkl'.format(side, side, hand))
-            id_controls = pd.read_pickle('/home_local/lg261972/data/data_handedness/{}_hemi/id_controls_qc_{}_{}H.pkl'.format(side, side, hand))
-            asd_id = pd.read_pickle('/home_local/lg261972/data/data_handedness/{}_hemi/asd_id_qc_{}_{}H.pkl'.format(side, side, hand))
-        else:
-            controls = pd.read_pickle('/neurospin/dico/lguillon/aims_detection/aims_crop/{}_hemi/controls_qc_{}_{}H.pkl'.format(side, side, hand))
-            asd = pd.read_pickle('/neurospin/dico/lguillon/aims_detection/aims_crop/{}_hemi/asd_qc_{}_{}H.pkl'.format(side, side, hand))
-            id_controls = pd.read_pickle('/neurospin/dico/lguillon/aims_detection/aims_crop/{}_hemi/id_controls_qc_{}_{}H.pkl'.format(side, side, hand))
-            asd_id = pd.read_pickle('/neurospin/dico/lguillon/aims_detection/aims_crop/{}_hemi/asd_id_qc_{}_{}H.pkl'.format(side, side, hand))
+    data_dir = '/neurospin/dico/lguillon/skeleton/sts_crop/'
+    input_data = side + '_hemi_rightH_sts_crop_skeleton'
+    tmp = pd.read_pickle(data_dir + input_data +'.pkl')
 
-    filenames_asd = asd['ID']
-    asd = torch.from_numpy(np.array([asd.mri.values[k] for k in range(len(asd))]))
-    asd = asd.to('cuda')
-    asd_dataset = TensorDataset(filenames=filenames_asd, data_tensor=asd,
-                                skeleton=skeleton, vae=False)
-    asd_dataset = torch.utils.data.DataLoader(asd_dataset, shuffle=True,
-                                              num_workers=0, batch_size=1)
+    subject_dataset = pd.merge(tmp, subject_list.subjects.astype(str), left_on='Subject',
+                     right_on='subjects')
+    subject_dataset = subject_dataset.reset_index(drop=True)
+    filenames = list(subject_dataset.Subject)
 
-    filenames_controls = controls['ID']
-    controls = torch.from_numpy(np.array([controls.mri.values[k] for k in range(len(controls))]))
-    controls = controls.to('cuda')
-    controls_dataset = TensorDataset(filenames=filenames_controls, data_tensor=controls,
-                                    skeleton=skeleton, vae=False)
-    controls_dataset = torch.utils.data.DataLoader(controls_dataset, shuffle=True,
-                                              num_workers=0, batch_size=1)
+    subject_dataset = SkeletonDataset(dataframe=subject_dataset, filenames=filenames)
 
-    filenames_id_controls = id_controls['ID']
-    id_controls = torch.from_numpy(np.array([id_controls.mri.values[k] for k in range(len(id_controls))]))
-    id_controls = id_controls.to('cuda')
-    id_controls_dataset = TensorDataset(filenames=filenames_id_controls, data_tensor=id_controls,
-                                        skeleton=skeleton, vae=False)
-    id_controls_dataset = torch.utils.data.DataLoader(id_controls_dataset, shuffle=True,
-                                              num_workers=0, batch_size=1)
+    subject_loader = torch.utils.data.DataLoader(subject_dataset, batch_size=1,
+                                                    shuffle=True, num_workers=0)
 
-    filenames_asd_id = asd_id['ID']
-    asd_id = torch.from_numpy(np.array([asd_id.mri.values[k] for k in range(len(asd_id))]))
-    asd_id = asd_id.to('cuda')
-    asd_id_dataset = TensorDataset(filenames=filenames_asd_id, data_tensor=asd_id,
-                                   skeleton=skeleton, vae=False)
-    asd_id_dataset = torch.utils.data.DataLoader(asd_id_dataset, shuffle=True,
-                                              num_workers=0, batch_size=1)
-
-    return asd_dataset, controls_dataset, id_controls_dataset, asd_id_dataset
+    return subject_loader
