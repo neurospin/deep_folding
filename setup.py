@@ -1,4 +1,3 @@
-from casa_distro import six
 from setuptools import setup, find_packages
 
 setup(
