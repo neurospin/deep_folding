@@ -49,115 +49,11 @@ import torchvision.transforms as transforms
 from torch.autograd import Variable
 import torchio as tio
 
+from preprocessing.datasets import *
+from utils import save_results
+
 # from dl_tools.pynet_transforms import *
 # from dl_tools import save_results
-
-
-class TensorDataset():
-    """Custom dataset that includes image file paths.
-    Applies different transformations to data depending on the type of input.
-    IN: data_tensor: tensor containing MRIs as numpy arrays
-        filenames: list of subjects' IDs
-        skeleton: boolean, whether input is skeleton images or not
-    OUT: tensor of [batch, sample, subject ID]
-    """
-    def __init__(self, data_tensor, filenames, skeleton):
-        self.skeleton = skeleton
-        self.data_tensor = data_tensor
-        self.transform = True
-        self.nb_train = len(filenames)
-        print(self.nb_train)
-        self.filenames = filenames
-        self.vae = vae
-
-    def __len__(self):
-        return(self.nb_train)
-
-    def __getitem__(self, idx):
-        if torch.is_tensor(idx):
-            idx = idx.tolist()
-        sample = self.data_tensor[idx]
-        file = self.filenames[idx]
-
-        if self.skeleton:
-            fill_value = 1
-            sample = NormalizeSkeleton(sample)()
-            self.transform = transforms.Compose([DownsampleTensor(scale=2),
-                        PaddingTensor([1, 40, 40, 40], fill_value=fill_value)
-            ])
-
-            sample = self.transform(sample)
-
-        else:
-            self.transform = PaddingTensor([1, 80, 80, 80])
-            sample = self.transform(sample)
-            self.transform = DownsampleTensor(scale=2)
-            sample = self.transform(sample)
-            if self.vae:
-                self.transform = DownsampleTensor(scale=2)
-                sample = self.transform(sample)
-            sample = NormalizeHisto(sample)()
-
-        tuple_with_path = (sample, file)
-        return tuple_with_path
-
-
-class SkeletonDataset():
-    """Custom dataset for skeleton images that includes image file paths.
-    dataframe: dataframe containing training and testing arrays
-    filenames: optional, list of corresponding filenames
-    Works on CPUs
-    """
-    def __init__(self, dataframe, filenames=None):
-        self.df = dataframe
-        if filenames:
-            self.filenames = filenames
-            self.df = self.df.T
-        else:
-            self.filenames = None
-
-    def __len__(self):
-        return len(self.df)
-
-    def __getitem__(self, idx):
-        if torch.is_tensor(idx):
-            idx = idx.tolist()
-
-        if self.filenames:
-            filename = self.filenames[idx]
-            sample = self.df.iloc[idx][0]
-        else:
-            filename = self.df.iloc[idx]['ID']
-            sample = self.df.iloc[idx][0]
-
-        fill_value = 1
-        sample = NormalizeSkeleton(sample)()
-        self.transform = transforms.Compose([Downsample(scale=2),
-                         Padding([1, 40, 40, 40], fill_value=fill_value)
-                         ])
-        sample = self.transform(sample)
-        tuple_with_path = (sample, filename)
-        return tuple_with_path
-
-
-class AugDatasetTransformer(torch.utils.data.Dataset):
-    """
-    Custom dataset that applies data augmentation on a dataset processed
-    through TensorDataset or Skeleton Dataset classes.
-    Transformations are performed on CPU.
-    """
-    def __init__(self, base_dataset):
-        self.base_dataset = base_dataset
-
-    def __getitem__(self, index):
-        img, filename = self.base_dataset[index]
-        if np.random.rand() > 0.6:
-            self.angle = np.random.randint(-90, 90)
-            img = np.expand_dims(rotate(img[0], angle=self.angle, reshape=False, cval=1, order=1), axis=0)
-        return img, filename
-
-    def __len__(self):
-        return len(self.base_dataset)
 
 
 def create_hcp_benchmark(side, benchmark, directory, batch_size, handedness=1):
