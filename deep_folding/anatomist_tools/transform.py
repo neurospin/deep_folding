@@ -42,8 +42,8 @@ The script scans all subjects from src_dir and looks for morphologist analysis f
 Examples:
     Specifies the source directory where the MRI data lies, the target directory where to put
     the transform, and the number of subjects to analyse (all by default)
-        $ python spm_skeleton.py -s /neurospin/hcp -t /path/to/transfo_dir -n all
-        $ python spm_skeleton.py --help
+        $ python transform.py -s /neurospin/hcp -t /path/to/transfo_dir -n all
+        $ python transform.py --help
 """
 
 import argparse
@@ -79,8 +79,9 @@ class TransformToSPM:
 
         # Subdirectories and files from the morphologist pipeline
         # Once the database directory (like /neurospin/hcp) is defined, the subdirectories
-        # remain identical and are specific of the morphologist pipeline
+        # remain identical and are specific to the morphologist pipeline
         # 'subject' is the ID of the subject
+
         # Morphologist directory
         self.morphologist_dir = join(self.src_dir, "ANALYSIS/3T_morphologist")
         # default acquisition subdirectory
@@ -99,10 +100,11 @@ class TransformToSPM:
         """Calculates the transformation file of a given subject.
 
         This transformation enables to go from native space (= MRI subject space) to
-        normalized SPM space.
+        normalized SPM space. The normalized SPM space (or template SPM space) is
+        a translation + an axis inversion of the Talairach MNI space
 
         Args:
-            subject_id: int or str, id of subject of whom transformation file is computed
+            subject_id: id of subject of whom transformation file is computed
         """
 
         # Identifies 'subject' in a mapping (for file and directory namings)
@@ -142,11 +144,11 @@ class TransformToSPM:
         normalized SPM space.
 
         Args:
-            number_subjects: integer giving the number of subjects,
+            number_subjects: integer giving the number of subjects to analyze,
                 by default it is set to _ALL_SUBJECTS (-1).
         """
 
-        # subjects are detected as the repertory name under src_dir
+        # subjects are detected as the directory names under src_dir
         list_all_subjects = listdir(self.morphologist_dir)
 
         # Gives the possibility to list only the first number_subjects if requested
@@ -164,7 +166,7 @@ def main():
     """
 
     # Parse command line arguments
-    parser = argparse.ArgumentParser(prog='spm_skeleton',
+    parser = argparse.ArgumentParser(prog='transform.py',
                                      description='Generate transformation files')
     parser.add_argument(
         "-s", "--src_dir", type=str, default=_SRC_DIR_DEFAULT,
