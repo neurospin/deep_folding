@@ -78,13 +78,13 @@ _image_normalized_SPM = '/neurospin/hcp/ANALYSIS/3T_morphologist/100206/t1mri/de
 def list_all_subjects():
     """List all subjects from the clean database (directory _root_dir).
 
-  Subjects are the names of the subdirectories of the root directory.
+    Subjects are the names of the subdirectories of the root directory.
 
-  Parameters:
+    Parameters:
 
-  Returns:
-    subjects: a list containing all subjects to be analyzed
-  """
+    Returns:
+        subjects: a list containing all subjects to be analyzed
+    """
 
     subjects = []
 
@@ -169,7 +169,8 @@ def get_bounding_boxes(subjects):
     atts = {'subject': '', 'side': _side}
     list_bbmin = []
     list_bbmax = []
-    sulci_pattern = _root_dir + '%(subject)s/t1mri/t1/default_analysis/folds/3.3/base2018_manual/%(side)s%(subject)s_base2018_manual.arg'
+    sulci_pattern = _root_dir \
+                    + '%(subject)s/t1mri/t1/default_analysis/folds/3.3/base2018_manual/%(side)s%(subject)s_base2018_manual.arg'
 
     for sub in subjects:
         print(sub)
@@ -277,7 +278,7 @@ def main():
     # List all subjects from _root_dir
     subjects = list_all_subjects()
 
-    # Determine the box encomassing the _sulcus for all subjects
+    # Determine the box encompassing the _sulcus for all subjects
     # The coordinates are determined in Talairach space
     list_bbmin, list_bbmax = get_bounding_boxes(subjects)
     bbmin_tal, bbmax_tal = compute_box_talairach_space(list_bbmin, list_bbmax)

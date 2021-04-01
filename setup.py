@@ -7,7 +7,7 @@ setup(
     license='CeCILL license version 2',
     description='Deep learning utilities to characterize sulcus patterns',
     long_description=open('README.rst').read(),
-    install_requires=['six', 'numpy','soma'],
+    install_requires=['six', 'sip', 'numpy', 'soma'],
     url='https://github.com/neurospin/deep_folding',
     author='',
     author_email=''
