@@ -36,36 +36,38 @@
 """
 The aim of this script is to compute transformation files from native to normalized SPM space
 
+The script scans all subjects from src_dir and looks for morphologist analysis folder
 
 
 Examples:
-    Specify the source directory where the MRI data lies, the target directory where to put the transform,
-    and the number of subjects to analyse (all by default)
-        $ python spm_skeleton.py -s /neurospin/hcp -t /neurospin/dico/deep_folding_data/data/transfo_pre_process -n all
-
-Attributes:
-
+    Specifies the source directory where the MRI data lies, the target directory where to put
+    the transform, and the number of subjects to analyse (all by default)
+        $ python spm_skeleton.py -s /neurospin/hcp -t /path/to/transfo_dir -n all
+        $ python spm_skeleton.py --help
 """
-from soma import aims
+
+import argparse
 from os import listdir
 from os.path import join
-import argparse
+from soma import aims
+
 
 _ALL_SUBJECTS = -1
 
-_src_dir_default = "/neurospin/hcp"
-_tgt_dir_default = "/neurospin/dico/deep_folding_data/data/transfo_pre_process"
+_SRC_DIR_DEFAULT = "/neurospin/hcp"
+_TGT_DIR_DEFAULT = "/neurospin/dico/deep_folding_data/data/transfo_pre_process"
 
 
-class Transform:
+class TransformToSPM:
     """Compute transformation from native to normalized SPM space
 
     Attributes:
         src_dir: A string giving the name of the source data directory.
-        tgt_dir: A string giving the name of the target directory in which the transformations are saved.
+        tgt_dir: A string giving the name of the target directory
+                in which the transformations are saved.
     """
 
-    def __init__(self, src_dir=_src_dir_default, tgt_dir=_tgt_dir_default):
+    def __init__(self, src_dir=_SRC_DIR_DEFAULT, tgt_dir=_TGT_DIR_DEFAULT):
         """Inits Transform class with source and target directory names
 
         Args:
@@ -76,18 +78,22 @@ class Transform:
         self.tgt_dir = tgt_dir
 
         # Subdirectories and files from the morphologist pipeline
-        # Once the database directory (like /neurospin/hcp) is defined, the subdirectories remain identical
-        # and are specific of the morphologist pipeline
+        # Once the database directory (like /neurospin/hcp) is defined, the subdirectories
+        # remain identical and are specific of the morphologist pipeline
         # 'subject' is the ID of the subject
-        self.morphologist_dir = join(self.src_dir, "ANALYSIS/3T_morphologist")  # Morphologist directory
-        self.morpho_acquis_dir = "%(subject)s/t1mri/default_acquisition"  # default acquisition subdirectory
-        self.normalized_spm_file = "normalized_SPM_%(subject)s.nii"  # (input) name of normalized SPM file
+        # Morphologist directory
+        self.morphologist_dir = join(self.src_dir, "ANALYSIS/3T_morphologist")
+        # default acquisition subdirectory
+        self.acquisition_dir = "%(subject)s/t1mri/default_acquisition"
+        # (input) name of normalized SPM file
+        self.normalized_spm_file = "normalized_SPM_%(subject)s.nii"
         # (input) name of the raw to MNT Talairach transformation file
-        self.transform_to_talairach_file = "registration/RawT1-%(subject)s_default_acquisition_TO_Talairach-MNI.trm"
+        self.to_talairach_file = \
+            "registration/RawT1-%(subject)s_default_acquisition_TO_Talairach-MNI.trm"
 
         # (Output files) Name of transformation files that are written by the program
         # 'subject' is the ID of the subject
-        self.transform_to_spm_file = "natif_to_template_spm_%(subject)s.trm"
+        self.natif_to_spm_file = "natif_to_template_spm_%(subject)s.trm"
 
     def calculate_one_transform(self, subject_id):
         """Calculates the transformation file of a given subject.
@@ -103,13 +109,22 @@ class Transform:
         subject = {'subject': subject_id}
 
         # Names directory where subject analysis files are stored
-        subject_dir = join(self.morphologist_dir, self.morpho_acquis_dir % subject)
-        # Reads transformation file that goes from native space to MNI space
-        natif_to_mni = aims.read(join(subject_dir, self.transform_to_talairach_file % subject))
+        subject_dir = join(self.morphologist_dir, self.acquisition_dir % subject)
 
-        # Fetching of template's transformation
+        # Reads transformation file that goes from native space to Talairach MNI space
+        # The Talairach MNI space has the brain centered (coordinates can be negative)
+        # The normalized SPM (or template SPM) has only positive coordinates
+        # and its axes are inverted with respect to Talairach MNI
+        to_talairach_file = join(subject_dir, self.to_talairach_file % subject)
+        natif_to_mni = aims.read(to_talairach_file)
+
+        # Fetches template's transformation from Talairach MNI to normalized SPM
+        # The first transformation[0] of the file normalized_spm
+        # is the transformation from normalized SPM to Talairach MNI
+        # The transformation between normalized SPM and Talairach MNI
         template = aims.read(join(subject_dir, self.normalized_spm_file % subject))
-        mni_to_template = aims.AffineTransformation3d(template.header()['transformations'][0]).inverse()
+        template_transform = template.header()['transformations'][0]
+        mni_to_template = aims.AffineTransformation3d(template_transform).inverse()
         # print(template.header()['transformations'][0])
 
         # Combination of transformations
@@ -117,8 +132,8 @@ class Transform:
         # print(natif_to_template_mni)
 
         # Saving of transformation files
-        transform_to_spm_file = join(self.tgt_dir, self.transform_to_spm_file % subject)
-        aims.write(natif_to_template_mni, transform_to_spm_file)
+        natif_to_spm_file = join(self.tgt_dir, self.natif_to_spm_file % subject)
+        aims.write(natif_to_template_mni, natif_to_spm_file)
 
     def calculate_transforms(self, number_subjects=_ALL_SUBJECTS):
         """Calculates transformation file for all subjects.
@@ -145,22 +160,25 @@ class Transform:
 
 
 def main():
+    """Reads argument line and creates transformation files
     """
 
-    """
-
-    # Parse arguments
+    # Parse command line arguments
     parser = argparse.ArgumentParser(prog='spm_skeleton',
                                      description='Generate transformation files')
-    parser.add_argument("-s", "--src_dir", type=str, default=_src_dir_default,
-                        help='Source directory where the MRI data lies. '
-                             'Default is : ' + _src_dir_default)
-    parser.add_argument("-t", "--tgt_dir", type=str, default=_tgt_dir_default,
-                        help='Target directory where to store the output transformation files. '
-                             'Default is : ' + _tgt_dir_default)
-    parser.add_argument("-n", "--nb_subjects", type=int, default=_ALL_SUBJECTS,
-                        help='(int) Number of subjects to take into account.'
-                             'Default is : ' + str(_ALL_SUBJECTS) + ' (all subjects)')
+    parser.add_argument(
+        "-s", "--src_dir", type=str, default=_SRC_DIR_DEFAULT,
+        help='Source directory where the MRI data lies. '
+             'Default is : ' + _SRC_DIR_DEFAULT)
+    parser.add_argument(
+        "-t", "--tgt_dir", type=str, default=_TGT_DIR_DEFAULT,
+        help='Target directory where to store the output transformation files. '
+             'Default is : ' + _TGT_DIR_DEFAULT)
+    parser.add_argument(
+        "-n", "--nb_subjects", type=int, default=_ALL_SUBJECTS,
+        help='Number of subjects to take into account, or \'all\'.'
+             'Default is : all')
+
     args = parser.parse_args()
     src_dir = args.src_dir
     tgt_dir = args.tgt_dir
@@ -175,10 +193,11 @@ def main():
             if number_subjects <= 0:
                 raise ValueError
     except ValueError:
-        raise ValueError("nb_subjects must be either the string \"all\" or an integer")
+        raise ValueError(
+            "nb_subjects must be either the string \"all\" or an integer")
 
-    t = Transform(src_dir=src_dir, tgt_dir=tgt_dir)
-    t.calculate_transforms(number_subjects=number_subjects)
+    transformer = TransformToSPM(src_dir=src_dir, tgt_dir=tgt_dir)
+    transformer.calculate_transforms(number_subjects=number_subjects)
 
 
 ######################################################################
