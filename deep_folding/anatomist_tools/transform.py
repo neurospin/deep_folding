@@ -36,8 +36,9 @@
 """
 The aim of this script is to compute transformation files from native to normalized SPM space
 
-The script scans all subjects from src_dir and looks for morphologist analysis folder
-
+It scans all subjects from src_dir and looks for morphologist analysis folder.
+It then produces the transformation file from native space to normalized SPM space.
+It saved the results (one transformation file per subject) into directory tgt_dir
 
 Examples:
     Specifies the source directory where the MRI data lies, the target directory where to put
@@ -166,8 +167,9 @@ def main():
     """
 
     # Parse command line arguments
-    parser = argparse.ArgumentParser(prog='transform.py',
-                                     description='Generate transformation files')
+    parser = argparse.ArgumentParser(
+        prog='transform.py',
+        description='Generate transformation files')
     parser.add_argument(
         "-s", "--src_dir", type=str, default=_SRC_DIR_DEFAULT,
         help='Source directory where the MRI data lies. '
