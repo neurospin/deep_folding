@@ -11,7 +11,7 @@ CEA Neurospin BAOBAB laboratory.
 Core developers
 ...............
 
-The pynet core developers are:
+The deep_folding core developers are:
 
 * Louise Guillon
 * Joël Chavas
