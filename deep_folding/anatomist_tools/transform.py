@@ -47,13 +47,12 @@ Examples:
         $ python transform.py --help
 """
 
+from __future__ import division
+
 import argparse
 from os import listdir
 from os.path import join
 from soma import aims
-
-from __future__ import division
-
 
 _ALL_SUBJECTS = -1
 
