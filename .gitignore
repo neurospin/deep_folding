@@ -1,0 +1,14 @@
+# Compiled sources #
+####################
+*.pyc
+
+# Folders #
+################
+build
+dist
+*.egg-info
+
+# pycharm and virtualenv folders #
+##################################
+.idea
+venv
