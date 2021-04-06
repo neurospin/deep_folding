@@ -1,4 +1,4 @@
-# /usr/bin/env python2.7 + brainvisa compliant env
+# /usr/bin/env python
 # coding: utf-8
 #
 #  This software and supporting documentation are distributed by
@@ -34,12 +34,12 @@
 # knowledge of the CeCILL license version 2 and that you accept its terms.
 
 """
-The aim of this script is to compute transformation files from native
+The aim of this script is to compute transformation files from native MRI space
 to normalized SPM space
 
 It scans all subjects from src_dir and looks for morphologist analysis folder,
 then produces the transformation file from native space to normalized SPM space,
-saved the results (one transformation file per subject) into directory tgt_dir
+saves the results (one transformation file per subject) into directory tgt_dir
 
 Examples:
     Specifies the source directory where the MRI data lies, the target directory
@@ -50,10 +50,14 @@ Examples:
 """
 
 from __future__ import division
+from __future__ import print_function
 
 import argparse
+import sys
+import os
 from os import listdir
 from os.path import join
+import six
 from soma import aims
 
 _ALL_SUBJECTS = -1
@@ -74,6 +78,8 @@ class TransformToSPM:
     def __init__(self, src_dir=_SRC_DIR_DEFAULT, tgt_dir=_TGT_DIR_DEFAULT):
         """Inits Transform class with source and target directory names
 
+        It also creates the target directory if it doesn't exist
+
         Args:
             src_dir: string naming src directory
             tgt_dir: string naming target directory in which transformtion files
@@ -82,7 +88,7 @@ class TransformToSPM:
         self.src_dir = src_dir
         self.tgt_dir = tgt_dir
 
-        # Subdirectories and files from the morphologist pipeline
+        # Below are subdirectories and files from the morphologist pipeline
         # Once the database directory (like /neurospin/hcp) is defined,
         # subdirectories remain identical and are specific to the morphologist
         # pipeline
@@ -145,7 +151,8 @@ class TransformToSPM:
         # print(natif_to_template_mni)
 
         # Saving of transformation files
-        natif_to_spm_file = join(self.tgt_dir, self.natif_to_spm_file % subject)
+        natif_to_spm_file = join(
+            self.tgt_dir, self.natif_to_spm_file % subject)
         aims.write(natif_to_template_mni, natif_to_spm_file)
 
     def calculate_transforms(self, number_subjects=_ALL_SUBJECTS):
@@ -159,21 +166,51 @@ class TransformToSPM:
                 by default it is set to _ALL_SUBJECTS (-1).
         """
 
-        # subjects are detected as the directory names under src_dir
-        list_all_subjects = listdir(self.morphologist_dir)
+        if number_subjects:
+            # subjects are detected as the directory names under src_dir
+            list_all_subjects = listdir(self.morphologist_dir)
 
-        # Gives the possibility to list only the first number_subjects
-        list_subjects = (list_all_subjects if number_subjects == _ALL_SUBJECTS
-                         else list_all_subjects[:number_subjects])
+            # Gives the possibility to list only the first number_subjects
+            list_subjects = (
+                list_all_subjects
+                if number_subjects == _ALL_SUBJECTS
+                else list_all_subjects[:number_subjects])
 
-        # Computes and saves transformation files for all listed subjects
-        for subject in list_subjects:
-            print("subject : " + subject)
-            self.calculate_one_transform(subject)
+            # Creates target dir if it doesn't exist
+            if not os.path.exists(self.tgt_dir):
+                os.mkdir(self.tgt_dir)
+            # Computes and saves transformation files for all listed subjects
+            for subject in list_subjects:
+                print("subject : " + subject)
+                self.calculate_one_transform(subject)
 
 
-def main():
-    """Reads argument line and creates transformation files
+def transform_to_spm(src_dir=_SRC_DIR_DEFAULT,
+                     tgt_dir=_TGT_DIR_DEFAULT,
+                     number_subjects=_ALL_SUBJECTS):
+    """High-level API function performing the transform
+
+    Args:
+        src_dir: source directory name, full path
+        tgt_dir: target directory where to save the transformations, full path
+        number_subjects: number of subjects to analyze (all=-1 by default)
+    """
+
+    # Do the actual transformations
+    transformer = TransformToSPM(src_dir=src_dir, tgt_dir=tgt_dir)
+    transformer.calculate_transforms(number_subjects=number_subjects)
+
+
+def parse_args(argv):
+    """Function parsing command-line arguments
+
+    Args:
+        argv: a list containing command line arguments
+
+    Returns:
+        src_dir: source directory name, full path
+        tgt_dir: target directory where to save the transformations, full path
+        number_subjects: number of subjects to analyze
     """
 
     # Parse command line arguments
@@ -191,9 +228,10 @@ def main():
     parser.add_argument(
         "-n", "--nb_subjects", type=int, default=_ALL_SUBJECTS,
         help='Number of subjects to take into account, or \'all\'.'
+             '0 subject is allowed, for debug purpose.'
              'Default is : all')
 
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
     src_dir = args.src_dir
     tgt_dir = args.tgt_dir
     number_subjects = args.nb_subjects
@@ -204,14 +242,34 @@ def main():
             number_subjects = _ALL_SUBJECTS
         else:
             number_subjects = int(number_subjects)
-            if number_subjects <= 0:
+            if number_subjects < 0:
                 raise ValueError
     except ValueError:
         raise ValueError(
             "nb_subjects must be either the string \"all\" or an integer")
 
-    transformer = TransformToSPM(src_dir=src_dir, tgt_dir=tgt_dir)
-    transformer.calculate_transforms(number_subjects=number_subjects)
+    return src_dir, tgt_dir, number_subjects
+
+
+def main(argv):
+    """Reads argument line and creates transformation files
+
+    These are transformations from native to normalize SPM space
+
+    Args:
+        argv: a list containing command line arguments
+    """
+
+    # This code ermits to catch SystemExit with exit code 0
+    # such as the one raised when "--help" is given as argument
+    try:
+        # Parsing arguments
+        src_dir, tgt_dir, number_subjects = parse_args(argv)
+        # Actual API
+        transform_to_spm(src_dir, tgt_dir, number_subjects)
+    except SystemExit as exc:
+        if exc.code != 0:
+            six.reraise(*sys.exc_info())
 
 
 ######################################################################
@@ -219,4 +277,6 @@ def main():
 ######################################################################
 
 if __name__ == '__main__':
-    main()
+    # We do this to be able to call main also from another python program
+    # without having to make system calls
+    main(argv=sys.argv[1:])
