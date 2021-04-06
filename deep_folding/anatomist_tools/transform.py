@@ -34,15 +34,17 @@
 # knowledge of the CeCILL license version 2 and that you accept its terms.
 
 """
-The aim of this script is to compute transformation files from native to normalized SPM space
+The aim of this script is to compute transformation files from native
+to normalized SPM space
 
-It scans all subjects from src_dir and looks for morphologist analysis folder.
-It then produces the transformation file from native space to normalized SPM space.
-It saved the results (one transformation file per subject) into directory tgt_dir
+It scans all subjects from src_dir and looks for morphologist analysis folder,
+then produces the transformation file from native space to normalized SPM space,
+saved the results (one transformation file per subject) into directory tgt_dir
 
 Examples:
-    Specifies the source directory where the MRI data lies, the target directory where to put
-    the transform, and the number of subjects to analyse (all by default)
+    Specifies the source directory where the MRI data lies, the target directory
+    where to put the transform, and the number of subjects to analyse
+    (all by default)
         $ python transform.py -s /neurospin/hcp -t /path/to/transfo_dir -n all
         $ python transform.py --help
 """
@@ -57,7 +59,7 @@ from soma import aims
 _ALL_SUBJECTS = -1
 
 _SRC_DIR_DEFAULT = "/neurospin/hcp"
-_TGT_DIR_DEFAULT = "/neurospin/dico/deep_folding_data/data/transfo_pre_process"
+_TGT_DIR_DEFAULT = "/neurospin/dico/deep_folding_data/data/transfo_to_spm"
 
 
 class TransformToSPM:
@@ -74,14 +76,16 @@ class TransformToSPM:
 
         Args:
             src_dir: string naming src directory
-            tgt_dir: string naming target directory in which transformtion files are saved
+            tgt_dir: string naming target directory in which transformtion files
+                     are saved
         """
         self.src_dir = src_dir
         self.tgt_dir = tgt_dir
 
         # Subdirectories and files from the morphologist pipeline
-        # Once the database directory (like /neurospin/hcp) is defined, the subdirectories
-        # remain identical and are specific to the morphologist pipeline
+        # Once the database directory (like /neurospin/hcp) is defined,
+        # subdirectories remain identical and are specific to the morphologist
+        # pipeline
         # 'subject' is the ID of the subject
 
         # Morphologist directory
@@ -91,18 +95,18 @@ class TransformToSPM:
         # (input) name of normalized SPM file
         self.normalized_spm_file = "normalized_SPM_%(subject)s.nii"
         # (input) name of the raw to MNT Talairach transformation file
-        self.to_talairach_file = \
-            "registration/RawT1-%(subject)s_default_acquisition_TO_Talairach-MNI.trm"
+        self.to_talairach_file = "registration/" + \
+            "RawT1-%(subject)s_default_acquisition_TO_Talairach-MNI.trm"
 
-        # (Output files) Name of transformation files that are written by the program
+        # (Outputs) Name of transformation files that are written by the program
         # 'subject' is the ID of the subject
         self.natif_to_spm_file = "natif_to_template_spm_%(subject)s.trm"
 
     def calculate_one_transform(self, subject_id):
         """Calculates the transformation file of a given subject.
 
-        This transformation enables to go from native space (= MRI subject space) to
-        normalized SPM space. The normalized SPM space (or template SPM space) is
+        This transformation enables to go from native space (= MRI space) to
+        normalized SPM space. The normalized SPM space (template SPM space) is
         a translation + an axis inversion of the Talairach MNI space
 
         Args:
@@ -113,10 +117,13 @@ class TransformToSPM:
         subject = {'subject': subject_id}
 
         # Names directory where subject analysis files are stored
-        subject_dir = join(self.morphologist_dir, self.acquisition_dir % subject)
+        subject_dir = \
+            join(self.morphologist_dir, self.acquisition_dir % subject)
 
-        # Reads transformation file that goes from native space to Talairach MNI space
-        # The Talairach MNI space has the brain centered (coordinates can be negative)
+        # Reads transformation file that goes from native space to
+        # Talairach MNI space.
+        # The Talairach MNI space has the brain centered, which means
+        # that the coordinates can be negative.
         # The normalized SPM (or template SPM) has only positive coordinates
         # and its axes are inverted with respect to Talairach MNI
         to_talairach_file = join(subject_dir, self.to_talairach_file % subject)
@@ -126,9 +133,11 @@ class TransformToSPM:
         # The first transformation[0] of the file normalized_spm
         # is the transformation from normalized SPM to Talairach MNI
         # The transformation between normalized SPM and Talairach MNI
-        template = aims.read(join(subject_dir, self.normalized_spm_file % subject))
+        template = aims.read(
+            join(subject_dir, self.normalized_spm_file % subject))
         template_transform = template.header()['transformations'][0]
-        mni_to_template = aims.AffineTransformation3d(template_transform).inverse()
+        mni_to_template = \
+            aims.AffineTransformation3d(template_transform).inverse()
         # print(template.header()['transformations'][0])
 
         # Combination of transformations
@@ -142,8 +151,8 @@ class TransformToSPM:
     def calculate_transforms(self, number_subjects=_ALL_SUBJECTS):
         """Calculates transformation file for all subjects.
 
-        This transformation enables to go from native space (= MRI subject space) to
-        normalized SPM space.
+        This transformation enables to go from native space
+        (= MRI subject space) to normalized SPM space.
 
         Args:
             number_subjects: integer giving the number of subjects to analyze,
@@ -153,7 +162,7 @@ class TransformToSPM:
         # subjects are detected as the directory names under src_dir
         list_all_subjects = listdir(self.morphologist_dir)
 
-        # Gives the possibility to list only the first number_subjects if requested
+        # Gives the possibility to list only the first number_subjects
         list_subjects = (list_all_subjects if number_subjects == _ALL_SUBJECTS
                          else list_all_subjects[:number_subjects])
 
