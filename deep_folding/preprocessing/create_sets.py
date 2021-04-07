@@ -49,11 +49,8 @@ import torchvision.transforms as transforms
 from torch.autograd import Variable
 import torchio as tio
 
-from preprocessing.datasets import *
-from utils import save_results
-
-# from dl_tools.pynet_transforms import *
-# from dl_tools import save_results
+from .datasets import SkeletonDataset
+from ..utils import save_results
 
 
 def create_hcp_benchmark(side, benchmark, directory, batch_size, handedness=1):
@@ -129,6 +126,7 @@ def create_benchmark_test(benchmark, side, handedness=1):
     print(input_data)
     tmp = pd.read_pickle(data_dir + input_data +'.pkl')
     filenames = list(tmp.columns)
+    tmp = tmp.T
 
     benchmark_dataset = SkeletonDataset(dataframe=tmp, filenames=filenames)
 
