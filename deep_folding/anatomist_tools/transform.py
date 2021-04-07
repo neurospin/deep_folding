@@ -58,8 +58,8 @@ import os
 from os import listdir
 from os.path import join
 from datetime import datetime
-import logging
 
+import json
 import six
 import git
 from soma import aims
@@ -202,17 +202,24 @@ class TransformToSPM:
 
         now = datetime.now()
         current_time = now.strftime("%Y-%m-%d -- %H:%M:%S")
-        logger.critical("Current time YYYY-MM-DD = " + current_time)
+
+        readme_name = join(self.tgt_dir, 'README')
+        readme = open(readme_name, 'w')
+        readme.write("Current time YYYY-MM-DD = " + current_time + '\n')
 
         try:
             repo = git.Repo(search_parent_directories=True)
             sha = repo.head.object.hexsha
-            logger.critical("To recover the same program, do:")
-            logger.critical("git checkout " + sha)
-            logger.critical("repo working dir: " + repo.working_tree_dir)
+            readme.write("To recover the source code used, do:" + '\n')
+            readme.write("git checkout " + sha + '\n\n')
+            readme.write("repo working dir: " + repo.working_tree_dir + '\n')
         except git.InvalidGitRepositoryError:
-            print("No git repository")
+            readme.write("No git repository")
 
+        b = self.__dict__
+        readme.write('\n' + "Variables internal to TransformToSPM class:\n")
+        readme.write(json.dumps(b, sort_keys=False, indent=4))
+        readme.close()
 
 def transform_to_spm(src_dir=_SRC_DIR_DEFAULT,
                      tgt_dir=_TGT_DIR_DEFAULT,
@@ -255,7 +262,7 @@ def parse_args(argv):
         help='Target directory where to store the output transformation files. '
              'Default is : ' + _TGT_DIR_DEFAULT)
     parser.add_argument(
-        "-n", "--nb_subjects", type=int, default=_ALL_SUBJECTS,
+        "-n", "--nb_subjects", type=str, default="all",
         help='Number of subjects to take into account, or \'all\'.'
              '0 subject is allowed, for debug purpose.'
              'Default is : all')
