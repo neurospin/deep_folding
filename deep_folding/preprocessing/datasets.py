@@ -43,7 +43,7 @@ import torchvision.transforms as transforms
 from torch.autograd import Variable
 import torchio as tio
 
-from preprocessing.pynet_transforms import *
+from .pynet_transforms import *
 
 class TensorDataset():
     """Custom dataset that includes image file paths.
