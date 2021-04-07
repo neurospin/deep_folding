@@ -1,5 +1,5 @@
-# /usr/bin/env python
-# coding: utf-8
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 #
 #  This software and supporting documentation are distributed by
 #      Institut Federatif de Recherche 49
@@ -57,7 +57,11 @@ import sys
 import os
 from os import listdir
 from os.path import join
+from datetime import datetime
+import logging
+
 import six
+import git
 from soma import aims
 
 _ALL_SUBJECTS = -1
@@ -65,9 +69,8 @@ _ALL_SUBJECTS = -1
 _SRC_DIR_DEFAULT = "/neurospin/hcp"
 _TGT_DIR_DEFAULT = "/neurospin/dico/deep_folding_data/data/transfo_to_spm"
 
-
 class TransformToSPM:
-    """Compute transformation from native to normalized SPM space
+    """Computes transformation from native to normalized SPM space
 
     Attributes:
         src_dir: A string giving the name of the source data directory.
@@ -113,7 +116,8 @@ class TransformToSPM:
 
         This transformation enables to go from native space (= MRI space) to
         normalized SPM space. The normalized SPM space (template SPM space) is
-        a translation + an axis inversion of the Talairach MNI space
+        a translation + an axis inversion of the Talairach MNI space.
+        The transformation is directly written to the file
 
         Args:
             subject_id: id of subject of whom transformation file is computed
@@ -179,10 +183,35 @@ class TransformToSPM:
             # Creates target dir if it doesn't exist
             if not os.path.exists(self.tgt_dir):
                 os.mkdir(self.tgt_dir)
+
+            # Creates README
+            self.write_readme()
+
             # Computes and saves transformation files for all listed subjects
             for subject in list_subjects:
                 print("subject : " + subject)
                 self.calculate_one_transform(subject)
+
+
+    def write_readme(self):
+        """Writes README on the target directory
+
+        It contains information about generation date, git hash/version number,
+        source directory and number of subjects
+        """
+
+        now = datetime.now()
+        current_time = now.strftime("%Y-%m-%d -- %H:%M:%S")
+        logger.critical("Current time YYYY-MM-DD = " + current_time)
+
+        try:
+            repo = git.Repo(search_parent_directories=True)
+            sha = repo.head.object.hexsha
+            logger.critical("To recover the same program, do:")
+            logger.critical("git checkout " + sha)
+            logger.critical("repo working dir: " + repo.working_tree_dir)
+        except git.InvalidGitRepositoryError:
+            print("No git repository")
 
 
 def transform_to_spm(src_dir=_SRC_DIR_DEFAULT,
@@ -260,7 +289,7 @@ def main(argv):
         argv: a list containing command line arguments
     """
 
-    # This code ermits to catch SystemExit with exit code 0
+    # This code permits to catch SystemExit with exit code 0
     # such as the one raised when "--help" is given as argument
     try:
         # Parsing arguments
