@@ -40,8 +40,6 @@ Tools in order to create pytorch dataloaders
 import pandas as pd
 import torch
 import torchvision.transforms as transforms
-from torch.autograd import Variable
-import torchio as tio
 
 from .pynet_transforms import *
 
