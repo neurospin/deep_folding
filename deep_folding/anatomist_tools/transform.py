@@ -63,6 +63,7 @@ import json
 import six
 import git
 from soma import aims
+from typing import Dict
 
 _ALL_SUBJECTS = -1
 
@@ -159,6 +160,40 @@ class TransformToSPM:
             self.tgt_dir, self.natif_to_spm_file % subject)
         aims.write(natif_to_template_mni, natif_to_spm_file)
 
+
+    def write_readme(self, dict_to_write):
+        """Writes README on the target directory
+
+        It contains information about generation date, git hash/version number,
+        source directory and number of subjects
+        """
+
+        now = datetime.now()
+        current_time = now.strftime("%Y-%m-%d -- %H:%M:%S")
+
+        readme_name = join(self.tgt_dir, 'README')
+        readme = open(readme_name, 'w')
+        readme.write("Current time YYYY-MM-DD = " + current_time + '\n')
+
+        try:
+            repo = git.Repo(search_parent_directories=True)
+            sha = repo.head.object.hexsha
+            readme.write("To recover the source code used, do:" + '\n')
+            readme.write("git checkout " + sha + '\n\n')
+            readme.write("repo working dir: " + repo.working_tree_dir + '\n')
+        except git.InvalidGitRepositoryError:
+            readme.write("No git repository")
+
+        readme.write('\n' + "Internal paramaters:\n")
+
+        readme.write(json.dumps(dict_to_write, sort_keys=False, indent=4))
+
+        b = self.__dict__
+        readme.write('\n\n' + "Variables internal to TransformToSPM class:\n")
+        readme.write(json.dumps(b, sort_keys=False, indent=4))
+        readme.close()
+
+
     def calculate_transforms(self, number_subjects=_ALL_SUBJECTS):
         """Calculates transformation file for all subjects.
 
@@ -184,42 +219,15 @@ class TransformToSPM:
             if not os.path.exists(self.tgt_dir):
                 os.mkdir(self.tgt_dir)
 
-            # Creates README
-            self.write_readme()
+            # Creates and writes README file
+            dict_to_write= {'nb_subjects': len(list_all_subjects)}
+            self.write_readme(dict_to_write=dict_to_write)
 
             # Computes and saves transformation files for all listed subjects
             for subject in list_subjects:
                 print("subject : " + subject)
                 self.calculate_one_transform(subject)
 
-
-    def write_readme(self):
-        """Writes README on the target directory
-
-        It contains information about generation date, git hash/version number,
-        source directory and number of subjects
-        """
-
-        now = datetime.now()
-        current_time = now.strftime("%Y-%m-%d -- %H:%M:%S")
-
-        readme_name = join(self.tgt_dir, 'README')
-        readme = open(readme_name, 'w')
-        readme.write("Current time YYYY-MM-DD = " + current_time + '\n')
-
-        try:
-            repo = git.Repo(search_parent_directories=True)
-            sha = repo.head.object.hexsha
-            readme.write("To recover the source code used, do:" + '\n')
-            readme.write("git checkout " + sha + '\n\n')
-            readme.write("repo working dir: " + repo.working_tree_dir + '\n')
-        except git.InvalidGitRepositoryError:
-            readme.write("No git repository")
-
-        b = self.__dict__
-        readme.write('\n' + "Variables internal to TransformToSPM class:\n")
-        readme.write(json.dumps(b, sort_keys=False, indent=4))
-        readme.close()
 
 def transform_to_spm(src_dir=_SRC_DIR_DEFAULT,
                      tgt_dir=_TGT_DIR_DEFAULT,
