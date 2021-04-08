@@ -21,11 +21,12 @@ Development
     git clone https://github.com/neurospin/deep_folding.git
 
     # Install for development
+    bv bash
     cd deep_folding
     python setup.py develop
 
     # Tests
-    pytest  # run tests
+    python -m pytest  # run tests
 
 
 
@@ -39,6 +40,13 @@ Notebooks are in the repertory notebooks, access using:
 
 .. code-block:: shell
 
-    jupyter notebook
+    bv bash # to enter brainvisa environnment
+    jupyter notebook # then click on file to open a notebook
 
 Examples are in the examples directory
+
+.. code-block:: shell
+
+    bv bash
+    cd examples
+    python use_transform.py
