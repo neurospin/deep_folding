@@ -23,7 +23,11 @@ Development
     # Install for development
     bv bash
     cd deep_folding
-    python setup.py develop
+    virtualenv -p /casa/install/bin/python venv
+    ln -s /usr/local/lib/python2.7/dist-packages/sip.so venv/lib/python2.7/site-packages/sip.so
+    ln -s /usr/local/lib/python2.7/dist-packages/PyQt5 venv/lib/python2.7/site-packages/PyQt5 
+    . bin/activate/venv
+    pip install -e .
 
     # Tests
     python -m pytest  # run tests
