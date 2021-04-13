@@ -97,11 +97,11 @@ with open(os.path.join(ref_dir,ref_file), 'r') as f:
 
 tgt_file = os.listdir(tgt_dir)[0]
 print"tgt_file = ", tgt_file, '\n'
-with open(os.path.join(tgt_dir,tgt_file), 'r') as f:
-    print(f.read())
+with open(os.path.join(tgt_dir,tgt_file), 'r') as f_tgt:
+    print(f_tgt.read())
 
 # Generated README (we read the generated README from the target directory)
 
-with open(os.path.join(tgt_dir,"README"), 'r') as f:
-    print(f.read())
+with open(os.path.join(tgt_dir,"README"), 'r') as readme:
+    print(readme.read())
 
