@@ -34,23 +34,22 @@
 # knowledge of the CeCILL license version 2 and that you accept its terms.
 
 """
-Script that outputs bounding box for a given sulcus based on a manually
-labeled dataset.
-Bounding box corresponds to the biggest box that encompasses the given sulcus 
-got all subjects of the manually labelled dataset.
+The aim of this script is to output bounding box got given sulcis
+based on a manually labelled dataset
+
+Bounding box corresponds to the biggest box that encompasses the given sulci
+on all subjects of the manually labelled dataset. It measures the bounding box
+in the normalized SPM space
 """
 
-######################################################################
-# Imports 
-######################################################################
+from __future__ import division
+from __future__ import print_function
+
+import sys
 
 from soma import aims
 import os
 import numpy as np
-
-######################################################################
-# Global variables (that the user can change)
-######################################################################
 
 # _root_dir is the directory in which lies the manually segmented database
 _root_dir = "/neurospin/lnao/PClean/database_learnclean/all/"
@@ -295,10 +294,80 @@ def main():
 
     return bbmin_vox, bbmax_vox
 
+def parse_args(argv):
+    """Function parsing command-line arguments
+
+    Args:
+        argv: a list containing command line arguments
+
+    Returns:
+        src_dir: a list with source directory names, full path
+        sulcus: a list containing the sulci to analyze
+    """
+
+    # Parse command line arguments
+    parser = argparse.ArgumentParser(
+        prog='bbox_definition.py',
+        description='Computes bounding box')
+    parser.add_argument(
+        "-s", "--src_dir", type=str, default=_SRC_DIR_DEFAULT,
+        help='Source directory where the MRI data lies. '
+             'If there are several directories, add another -s argument. '
+             'Default is : ' + _SRC_DIR_DEFAULT)
+    parser.add_argument(
+        "-t", "--tgt_dir", type=str, default=_TGT_DIR_DEFAULT,
+        help='Target directory where to store the output transformation files. '
+             'Default is : ' + _TGT_DIR_DEFAULT)
+    parser.add_argument(
+        "-n", "--nb_subjects", type=str, default="all",
+        help='Number of subjects to take into account, or \'all\'.'
+             '0 subject is allowed, for debug purpose.'
+             'Default is : all')
+
+    args = parser.parse_args(argv)
+    src_dir = args.src_dir
+    tgt_dir = args.tgt_dir
+    number_subjects = args.nb_subjects
+
+    # Check if nb_subjects is either the string "all" or a positive integer
+    try:
+        if number_subjects == "all":
+            number_subjects = _ALL_SUBJECTS
+        else:
+            number_subjects = int(number_subjects)
+            if number_subjects < 0:
+                raise ValueError
+    except ValueError:
+        raise ValueError(
+            "nb_subjects must be either the string \"all\" or an integer")
+
+    return src_dir, tgt_dir, number_subjects
+
+def main(argv):
+    """Reads argument line and creates transformation files
+
+    These are transformations from native to normalize SPM space
+
+    Args:
+        argv: a list containing command line arguments
+    """
+
+    # This code permits to catch SystemExit with exit code 0
+    # such as the one raised when "--help" is given as argument
+    try:
+        # Parsing arguments
+        src_dir, tgt_dir, number_subjects = parse_args(argv)
+        # Actual API
+        transform_to_spm(src_dir, tgt_dir, number_subjects)
+    except SystemExit as exc:
+        if exc.code != 0:
+            six.reraise(*sys.exc_info())
 
 ######################################################################
 # Main program
 ######################################################################
 
 if __name__ == '__main__':
-    main()
+    # This permits to call main also from another python program
+    # without having to make system calls
+    main(argv=sys.argv[1:])

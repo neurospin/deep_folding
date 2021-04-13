@@ -63,12 +63,12 @@ import json
 import six
 import git
 from soma import aims
-from typing import Dict
 
 _ALL_SUBJECTS = -1
 
 _SRC_DIR_DEFAULT = "/neurospin/hcp"
 _TGT_DIR_DEFAULT = "/neurospin/dico/deep_folding_data/data/transfo_to_spm"
+
 
 class TransformToSPM:
     """Computes transformation from native to normalized SPM space
@@ -160,7 +160,6 @@ class TransformToSPM:
             self.tgt_dir, self.natif_to_spm_file % subject)
         aims.write(natif_to_template_mni, natif_to_spm_file)
 
-
     def write_readme(self, dict_to_write):
         """Writes README on the target directory
 
@@ -193,7 +192,6 @@ class TransformToSPM:
         readme.write(json.dumps(b, sort_keys=False, indent=4))
         readme.close()
 
-
     def calculate_transforms(self, number_subjects=_ALL_SUBJECTS):
         """Calculates transformation file for all subjects.
 
@@ -220,7 +218,7 @@ class TransformToSPM:
                 os.mkdir(self.tgt_dir)
 
             # Creates and writes README file
-            dict_to_write= {'nb_subjects': len(list_all_subjects)}
+            dict_to_write = {'nb_subjects': len(list_all_subjects)}
             self.write_readme(dict_to_write=dict_to_write)
 
             # Computes and saves transformation files for all listed subjects
@@ -260,7 +258,7 @@ def parse_args(argv):
     # Parse command line arguments
     parser = argparse.ArgumentParser(
         prog='transform.py',
-        description='Generate transformation files')
+        description='Generates transformation files')
     parser.add_argument(
         "-s", "--src_dir", type=str, default=_SRC_DIR_DEFAULT,
         help='Source directory where the MRI data lies. '
@@ -321,6 +319,6 @@ def main(argv):
 ######################################################################
 
 if __name__ == '__main__':
-    # We do this to be able to call main also from another python program
+    # This permits to call main also from another python program
     # without having to make system calls
     main(argv=sys.argv[1:])
