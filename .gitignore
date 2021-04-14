@@ -9,8 +9,12 @@ dist
 *.egg-info
 notebooks/.ipynb_checkpoints
 data/tgt
+
+# Files #
+################
 contest.py
 *.swp
+README.rst.*
 
 # pycharm and virtualenv folders #
 ##################################

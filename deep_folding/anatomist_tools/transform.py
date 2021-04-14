@@ -55,6 +55,7 @@ from __future__ import print_function
 import argparse
 import sys
 import os
+import time
 from os import listdir
 from os.path import join
 from datetime import datetime
@@ -70,7 +71,50 @@ _SRC_DIR_DEFAULT = "/neurospin/hcp"
 _TGT_DIR_DEFAULT = "/neurospin/dico/deep_folding_data/data/transfo_to_spm"
 
 
-class TransformToSPM:
+class LogJson:
+    """
+
+    """
+
+    def __init__(self, json_file):
+        """
+
+        """
+        self.json_file = json_file
+        self.create_file()
+
+    def create_file(self):
+        """Creates json file and overwrites old content
+        """
+        try:
+            with open(self.json_file, "w") as json_file:
+                json_file.write(json.dumps({}))
+        except IOError:
+                print("File %s cannot be overwritten", self.json_file)
+
+    def update(self, dict_to_add):
+        """Updates json file with new dictionary entry
+
+        Args:
+            dict_to_add: dictionary appended to json file
+        """
+
+        try:
+            with open(self.json_file, "r") as json_file:
+                data = json.load(json_file)
+        except IOError:
+            print("File %s is not readable through json.load", self.json_file)
+
+        data.update(dict_to_add)
+
+        try:
+            with open(self.json_file, "w") as json_file:
+                json_file.write(json.dumps(data, sort_keys=False, indent=4))
+        except IOError:
+            print("File %s is not writable", self.json_file)
+
+
+class TransformToSPM(PreProcessing):
     """Computes transformation from native to normalized SPM space
 
     Attributes:
@@ -111,6 +155,12 @@ class TransformToSPM:
         # (Outputs) Name of transformation files that are written by the program
         # 'subject' is the ID of the subject
         self.natif_to_spm_file = "natif_to_template_spm_%(subject)s.trm"
+
+        # Creates json log class
+        json_file = join(self.tgt_dir, 'transform.json')
+        self.json = LogJson(json_file)
+
+
 
     def calculate_one_transform(self, subject_id):
         """Calculates the transformation file of a given subject.
@@ -160,37 +210,36 @@ class TransformToSPM:
             self.tgt_dir, self.natif_to_spm_file % subject)
         aims.write(natif_to_template_mni, natif_to_spm_file)
 
-    def write_readme(self, dict_to_write):
-        """Writes README on the target directory
+    def write_general_info(self):
+        """Writes general information on README
 
         It contains information about generation date, git hash/version number,
-        source directory and number of subjects
+        source directory and number of subjects.
         """
 
-        now = datetime.now()
-        current_time = now.strftime("%Y-%m-%d -- %H:%M:%S")
+        # Initialize dictionary to write to json
+        dict_to_add = {}
 
-        readme_name = join(self.tgt_dir, 'README')
-        readme = open(readme_name, 'w')
-        readme.write("Current time YYYY-MM-DD = " + current_time + '\n')
+        timestamp_now = time.time()
+        dict_to_add['timestamp'] = timestamp_now
+        date_now = datetime.fromtimestamp(timestamp_now)
+        dict_to_add['date'] = date_now.strftime('%Y-%m-%d %H:%M:%S')
 
         try:
             repo = git.Repo(search_parent_directories=True)
             sha = repo.head.object.hexsha
-            readme.write("To recover the source code used, do:" + '\n')
-            readme.write("git checkout " + sha + '\n\n')
-            readme.write("repo working dir: " + repo.working_tree_dir + '\n')
+            dict_to_add['is_git'] = True
+            dict_to_add['git_sha'] = sha
+            dict_to_add['repo_working_dir'] = repo.working_tree_dir
         except git.InvalidGitRepositoryError:
-            readme.write("No git repository")
+            dict_to_add['is_git'] = False
 
-        readme.write('\n' + "Internal paramaters:\n")
+        # Writes class variables to json
 
-        readme.write(json.dumps(dict_to_write, sort_keys=False, indent=4))
+        dict_to_add['src_dir'] = self.src_dir
+        dict_to_add['tgt_dir'] = self.tgt_dir
+        self.json.update(dict_to_add=dict_to_add)
 
-        b = self.__dict__
-        readme.write('\n\n' + "Variables internal to TransformToSPM class:\n")
-        readme.write(json.dumps(b, sort_keys=False, indent=4))
-        readme.close()
 
     def calculate_transforms(self, number_subjects=_ALL_SUBJECTS):
         """Calculates transformation file for all subjects.
@@ -207,6 +256,8 @@ class TransformToSPM:
             # subjects are detected as the directory names under src_dir
             list_all_subjects = listdir(self.morphologist_dir)
 
+            self.write_general_info()
+
             # Gives the possibility to list only the first number_subjects
             list_subjects = (
                 list_all_subjects
@@ -217,9 +268,9 @@ class TransformToSPM:
             if not os.path.exists(self.tgt_dir):
                 os.mkdir(self.tgt_dir)
 
-            # Creates and writes README file
-            dict_to_write = {'nb_subjects': len(list_all_subjects)}
-            self.write_readme(dict_to_write=dict_to_write)
+            # Writes number of subjects to json file
+            dict_to_add = {'nb_subjects': len(list_subjects)}
+            self.json.update(dict_to_add=dict_to_add)
 
             # Computes and saves transformation files for all listed subjects
             for subject in list_subjects:
