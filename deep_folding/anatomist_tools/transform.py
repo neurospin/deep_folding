@@ -60,61 +60,19 @@ from os import listdir
 from os.path import join
 from datetime import datetime
 
-import json
 import six
 import git
 from soma import aims
 
+from .utils import LogJson
+
 _ALL_SUBJECTS = -1
 
 _SRC_DIR_DEFAULT = "/neurospin/hcp"
-_TGT_DIR_DEFAULT = "/neurospin/dico/deep_folding_data/data/transfo_to_spm"
+_TGT_DIR_DEFAULT = "/neurospin/dico/deep_folding_data/data/transform_default"
 
 
-class LogJson:
-    """
-
-    """
-
-    def __init__(self, json_file):
-        """
-
-        """
-        self.json_file = json_file
-        self.create_file()
-
-    def create_file(self):
-        """Creates json file and overwrites old content
-        """
-        try:
-            with open(self.json_file, "w") as json_file:
-                json_file.write(json.dumps({}))
-        except IOError:
-                print("File %s cannot be overwritten", self.json_file)
-
-    def update(self, dict_to_add):
-        """Updates json file with new dictionary entry
-
-        Args:
-            dict_to_add: dictionary appended to json file
-        """
-
-        try:
-            with open(self.json_file, "r") as json_file:
-                data = json.load(json_file)
-        except IOError:
-            print("File %s is not readable through json.load", self.json_file)
-
-        data.update(dict_to_add)
-
-        try:
-            with open(self.json_file, "w") as json_file:
-                json_file.write(json.dumps(data, sort_keys=False, indent=4))
-        except IOError:
-            print("File %s is not writable", self.json_file)
-
-
-class TransformToSPM(PreProcessing):
+class TransformToSPM:
     """Computes transformation from native to normalized SPM space
 
     Attributes:
@@ -159,8 +117,6 @@ class TransformToSPM(PreProcessing):
         # Creates json log class
         json_file = join(self.tgt_dir, 'transform.json')
         self.json = LogJson(json_file)
-
-
 
     def calculate_one_transform(self, subject_id):
         """Calculates the transformation file of a given subject.
@@ -239,7 +195,6 @@ class TransformToSPM(PreProcessing):
         dict_to_add['src_dir'] = self.src_dir
         dict_to_add['tgt_dir'] = self.tgt_dir
         self.json.update(dict_to_add=dict_to_add)
-
 
     def calculate_transforms(self, number_subjects=_ALL_SUBJECTS):
         """Calculates transformation file for all subjects.
