@@ -34,7 +34,7 @@
 # knowledge of the CeCILL license version 2 and that you accept its terms.
 
 """
-The aim of this script is to output bounding box got given sulcis
+The aim of this script is to output bounding box got given sulci
 based on a manually labelled dataset
 
 Bounding box corresponds to the biggest box that encompasses the given sulci
@@ -46,12 +46,17 @@ from __future__ import division
 from __future__ import print_function
 
 import sys
-
-from soma import aims
 import os
-import numpy as np
+from os.path import join
 import argparse
 import six
+
+import numpy as np
+
+from soma import aims
+
+
+from deep_folding.anatomist_tools.utils import LogJson
 
 _ALL_SUBJECTS = -1
 
@@ -59,7 +64,7 @@ _ALL_SUBJECTS = -1
 _SRC_DIR_DEFAULT = "/neurospin/lnao/PClean/database_learnclean/all/"
 
 # Default directory to which we write the bounding box results
-_TGT_DIR_DEFAULT = "/neurospin/dico/deep_folding_data/data/bbox"
+_TGT_DIR_DEFAULT = "/neurospin/dico/deep_folding_data/default/bbox"
 
 # hemisphere 'L' or 'R'
 _SIDE_DEFAULT = 'L'
@@ -68,19 +73,15 @@ _SIDE_DEFAULT = 'L'
 # its name depends on the hemisphere side
 _SULCUS_DEFAULT = 'S.T.s.ter.asc.ant._left'
 
-######################################################################
-# Global variables (that the user will probably not change)
-######################################################################
-
 # A normalized SPM image to get the HCP morphologist transformation
-_image_normalized_SPM = '/neurospin/hcp/ANALYSIS/3T_morphologist/100206/t1mri/default_acquisition/normalized_SPM_100206.nii'
+_image_normalized_SPM = '/neurospin/hcp/ANALYSIS/3T_morphologist/100206/' \
+                        't1mri/default_acquisition/normalized_SPM_100206.nii'
 
 
 class BoundingBoxMax:
     """Determines the maximum Bounding Box around given sulci
 
-    Attributes:
-
+    It is determined in the normalized SPM referential
     """
 
     def __init__(self, src_dir=_SRC_DIR_DEFAULT,
@@ -95,15 +96,20 @@ class BoundingBoxMax:
         """
 
         # Transforms input sourcedir and sulcus names to a list of strings
-        self.src_dir = [src_dir] if type(src_dir) is str else src_dir
-        self.sulcus = [sulcus] if type(sulcus) is str else sulcus
+        self.src_dir = [src_dir] if isinstance(src_dir, str) else src_dir
+        self.sulcus = [sulcus] if isinstance(sulcus, str) else sulcus
 
         self.tgt_dir = tgt_dir
         self.side = side
 
+        # graph file in the morphologist subdirectory directory
+        self.graph_file = '%(subject)s/t1mri/t1/default_analysis/' \
+                          'folds/3.3/base2018_manual/' \
+                          '%(side)s%(subject)s_base2018_manual.arg'
+
         # Creates json file name
-        self.json_file = join(self.tgt_dir, 'bbox.json')
-        self.create_json()
+        json_file = join(self.tgt_dir, 'bbox.json')
+        self.json = LogJson(json_file)
 
     def list_all_subjects(self):
         """List all subjects from the clean database (directory _root_dir).
@@ -138,6 +144,8 @@ class BoundingBoxMax:
       Function that outputs the bounding box for the listed sulci
       for this datagraph. The bounding box is the smallest rectangular box
       that encompasses the chosen sulcus.
+      It is given in the AIMS Talairch referential, different from the MNI
+      Talairach referential.
 
       Parameters:
         graph_filename: string being the name of graph file .arg to analyze:
@@ -150,14 +158,17 @@ class BoundingBoxMax:
                 of the box in the Talairach space
       """
 
-        # Read the data graph and extract the Talairach transform
+        # Reads the data graph and transforms it to AIMS Talairach referential
+        # Note that this is NOT the MNI Talairach referential
+        # This is the Talairach referential used in AIMS
+        # There are several Talairach referentials
         graph = aims.read(graph_filename)
         voxel_size = graph['voxel_size'][:3]
         tal_transfo = aims.GraphManip.talairach(graph)
         bbox_min = None
         bbox_max = None
 
-        # Get the min and max coordinates of the sulcus '_sulcus'
+        # Gets the min and max coordinates of the sulci
         # by looping over all the vertices of the graph
         for vertex in graph.vertices():
             vname = vertex.get('name')
@@ -179,8 +190,8 @@ class BoundingBoxMax:
                         ([bbox_max] if bbox_max is not None else [])
                         + [voxels]), axis=0)
 
-        print('bounding box min:', bbox_min)
-        print('bounding box max:', bbox_max)
+        print('box (AIMS Talairach) min:', bbox_min)
+        print('box (AIMS Talairach) max:', bbox_max)
 
         return bbox_min, bbox_max
 
@@ -190,8 +201,10 @@ class BoundingBoxMax:
       Function that outputs the bounding box for the listed sulci on a manually
       labeled dataset.
       Bounding box corresponds to the biggest box encountered in the manually
-      labeled subjects in the Talairach space. The bounding box is the smallest
-      rectangular box that encompasses the sulcus.
+      labeled subjects in the AIMS Talairach space, different from the MNI
+      Talairach template.
+      The bounding box is the smallest rectangular box that
+      encompasses the sulcus.
 
       Parameters:
         subjects: list containing all subjects to be analyzed
@@ -210,10 +223,7 @@ class BoundingBoxMax:
         for sub in subjects:
             print(sub)
 
-            sulci_pattern = sub['dir'] \
-                            + '%(subject)s/t1mri/t1/default_analysis/folds/3.3/' \
-                              'base2018_manual/' \
-                              '%(side)s%(subject)s_base2018_manual.arg'
+            sulci_pattern = join(sub['dir'], self.graph_file % sub)
 
             bbox_min, bbox_max = self.get_one_bounding_box(sulci_pattern % sub)
 
@@ -224,13 +234,13 @@ class BoundingBoxMax:
 
     @staticmethod
     def compute_box_talairach_space(list_bbmin, list_bbmax):
-        """Returns the coordinates of the box in Talairach space
+        """Returns the coordinates of the box in AIMS Talairach space
 
       Parameters:
         list_bbmin: list containing the upper right vertex of the box
-                    in the Talairach space
+                    in the AIMS Talairach space
         list_bbmax: list containing the lower left vertex of the box
-                    in the Talairach space
+                    in the AIMS Talairach space
 
       Returns:
         bbmin_tal: numpy array with the x,y,z coordinates
@@ -252,59 +262,75 @@ class BoundingBoxMax:
         return bbmin_tal, bbmax_tal
 
     @staticmethod
-    def transform_tal_to_native():
-        """Returns the transformation from Talairach space to MNI template
+    def tal_to_normalized_spm():
+        """Returns the transformation from AIMS Talairach to normalized SPM
 
-      Compute the transformation from Talairach space to MNI space, passing through SPM template.
-      Empirically, this was done because some Deep learning results were better with SPM template.
+      Computes the transformation from AIMS Talairach space to normalized SPM
+      space, MNI space, passing through SPM template.
+      Empirically, this was done because some Deep learning results were better
+      with SPM template.
       The transform from MNI to SPM template is taken from HCP database
 
-      Parameters:
-
       Returns:
-        tal_to_native: transformation used from Talairach space to native MRI space
+        tal_to_normalized_spm: transformation from AIMS Talairach space to
+                    normalized SPM
         voxel_size: voxel size (in MNI referential or HCP normalized SPM space)
       """
 
         # Gets the transformation file from brainvisa directory structure
+        # Transforms from AIMS Talairach to the true MNI space with the origin
+        # at the center
+        # It is in /casa/install/share/brainvisa-share-5.0/transformation
         tal_to_spm_template = aims.read(
             aims.carto.Paths.findResourceFile(
                 'transformation/talairach_TO_spm_template_novoxels.trm'))
 
-        # Gets a normalized SPM file from the morphologist analysis of the hcp database
+        # Gets a normalized SPM file from the morphologist analysis
         image_normalized_spm = aims.read(_image_normalized_SPM)
 
-        # Tranformation from the native space to the MNI/SPM template referential
-        native_to_spm_template = aims.AffineTransformation3d(
-            image_normalized_spm.header()['transformations'][-1])
+        # Tranformation from the normalized SPM
+        # to the template SPM
+        # normalized_spm_to_spm_template = aims.AffineTransformation3d(
+        #    image_normalized_spm.header()['transformations'][-1])
+        normalized_spm_to_spm_template = aims.read(
+            aims.carto.Paths.findResourceFile(
+                'transformation/spm_template_TO_spm_template_novoxels.trm'))
 
         # Tranformation from the Talairach space to the native space
-        tal_to_native = native_to_spm_template.inverse() * tal_to_spm_template
+        tal_to_normalized_spm = normalized_spm_to_spm_template.inverse() \
+                                * tal_to_spm_template
 
         voxel_size = image_normalized_spm.header()['voxel_size'][:3]
 
-        return tal_to_native, voxel_size
+
+        return tal_to_normalized_spm, voxel_size
 
     @staticmethod
-    def compute_box_voxel(bbmin_tal, bbmax_tal, tal_to_native, voxel_size):
-        """Returns the coordinates of the box as voxels encompassing the sulcus for all subjects
+    def compute_box_voxel(bbmin_tal, bbmax_tal,
+                          tal_to_normalized_spm, voxel_size):
+        """Returns the coordinates of the box as voxels
 
       Coordinates of the box in voxels are determined in the MNI referential
 
       Parameters:
-        bbmin_tal: numpy array with the coordinates of the upper right corner of the box (Talairach space)
-        bbmax_tal: numpy array with the coordinates of the lower left corner of the box (Talairach space)
-        tal_to_native: transformation used from Talairach space to native MRI space
+        bbmin_tal: numpy array with the coordinates of the upper right corner
+                of the box (AIMS Talairach space)
+        bbmax_tal: numpy array with the coordinates of the lower left corner
+                of the box (AIMS Talairach space)
+        tal_to_normalized_spm: transformation used from Talairach space
+                to normalized SPM
         voxel_size: voxel size (in MNI referential or HCP normalized SPM space)
 
       Returns:
-        bbmin_vox: numpy array with the coordinates of the upper right corner of the box (voxels in MNI space)
-        bblax_vox: numpy array with the coordinates of the lower left corner of the box (voxels in MNI space)
+        bbmin_vox: numpy array with the coordinates of the upper right corner
+                of the box (voxels in MNI space)
+        bblax_vox: numpy array with the coordinates of the lower left corner
+                of the box (voxels in MNI space)
       """
 
         # Application of the transformation to bbox
-        bbmin_mni = tal_to_native.transform(bbmin_tal)
-        bbmax_mni = tal_to_native.transform(bbmax_tal)
+        bbmin_mni = tal_to_normalized_spm.transform(bbmin_tal)
+        bbmax_mni = tal_to_normalized_spm.transform(bbmax_tal)
 
         # To go back from mms to voxels
         bbmin_vox = np.round(np.array(bbmin_mni) / voxel_size).astype(int)
@@ -314,10 +340,15 @@ class BoundingBoxMax:
 
     def compute_bounding_box(self, number_subjects=_ALL_SUBJECTS):
         """Main class program to compute the bounding box
+
+        Args:
+            number_subjects: number_subjects to analyze
         """
 
         if number_subjects:
             subjects = self.list_all_subjects()
+
+            self.json.write_general_info()
 
             # Gives the possibility to list only the first number_subjects
             subjects = (
@@ -325,24 +356,46 @@ class BoundingBoxMax:
                 if number_subjects == _ALL_SUBJECTS
                 else subjects[:number_subjects])
 
-            # Determine the box encompassing the sulcus for all subjects
-            # The coordinates are determined in Talairach space
+            # Creates target dir if it doesn't exist
+            if not os.path.exists(self.tgt_dir):
+                os.mkdir(self.tgt_dir)
+
+            # Writes number of subjects and directory names to json file
+            dict_to_add = {'nb_subjects': len(subjects),
+                           'src_dir': self.src_dir,
+                           'tgt_dir': self.tgt_dir}
+            self.json.update(dict_to_add=dict_to_add)
+
+            # Determines the box encompassing the sulcus for all subjects
+            # The coordinates are determined in AIMS Talairach space
             list_bbmin, list_bbmax = self.get_bounding_boxes(subjects)
             bbmin_tal, bbmax_tal = self.compute_box_talairach_space(list_bbmin,
                                                                     list_bbmax)
 
-            # Compute the transform from the Talairach space to native MRI space
-            tal_to_native, voxel_size = self.transform_tal_to_native()
+            dict_to_add = {'bbmin_AIMS_Talairach': bbmin_tal.tolist(),
+                           'bbmax_AIMS_Talairach': bbmax_tal.tolist()}
 
-            # Determine the box encompassing the _sulcus for all subjects
+            # Computes the transform from the AIMS Talairach space
+            # to normalized SPM space
+            tal_to_normalized_spm, voxel_size = self.tal_to_normalized_spm()
+
+            # Determines the box encompassing the _sulcus for all subjects
             # The coordinates are determined in voxels in MNI space
             bbmin_vox, bbmax_vox = self.compute_box_voxel(bbmin_tal,
                                                           bbmax_tal,
-                                                          tal_to_native,
+                                                          tal_to_normalized_spm,
                                                           voxel_size)
 
+            dict_to_add.update({'side': self.side,
+                                'sulcus': self.sulcus,
+                                'bbmin': bbmin_vox.tolist(),
+                                'bbmax': bbmax_vox.tolist()})
+            self.json.update(dict_to_add=dict_to_add)
             print("box: min = ", bbmin_vox)
             print("box: max = ", bbmax_vox)
+        else:
+            bbmin_vox = 0
+            bbmax_vox = 0
 
         return bbmin_vox, bbmax_vox
 
@@ -358,10 +411,11 @@ def max_bounding_box(src_dir=_SRC_DIR_DEFAULT, sulcus=_SULCUS_DEFAULT,
   Args:
       src_dir: list of strings -> directories of the supervised databases
       sulcus: list of strings giving the sulci to analyze
+      number_subjects: integer giving the number of subjects to analyze,
+            by default it is set to _ALL_SUBJECTS (-1).
   """
 
     box = BoundingBoxMax(src_dir=src_dir, sulcus=sulcus)
-    # List all subjects from _root_dir
     bbmin_vox, bbmax_vox = box.compute_bounding_box(
         number_subjects=number_subjects)
 
@@ -377,6 +431,7 @@ def parse_args(argv):
     Returns:
         src_dir: a list with source directory names, full path
         sulcus: a list containing the sulci to analyze
+        number_subjects: number of subjects to analyze
     """
 
     # Parse command line arguments
@@ -415,8 +470,8 @@ def parse_args(argv):
             if number_subjects < 0:
                 raise ValueError
     except ValueError:
-        raise ValueError(
-            "nb_subjects must be either the string \"all\" or an integer")
+        raise ValueError("nb_subjects must be either the string \"all\" "
+                         "or an integer")
 
     return src_dir, sulcus, number_subjects
 

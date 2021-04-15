@@ -39,16 +39,26 @@ used by brainvisa-dependent preprocessing
 """
 
 import json
+import os
+import errno
+import time
+import git
+from datetime import datetime
 
 
 class LogJson:
-    """
+    """Handles json file lifecycle
 
+    Json file is created by overwriting old file.
+    Upon loading a ne dictionary, it updates the json file
+    by reading back and writing the updated content
     """
 
     def __init__(self, json_file):
-        """
+        """Creates json file and updates its content
 
+        Args:
+            json_file: string giving the path/filename to the json file
         """
         self.json_file = json_file
         self.create_file()
@@ -56,11 +66,19 @@ class LogJson:
     def create_file(self):
         """Creates json file and overwrites old content
         """
+
+        if not os.path.exists(os.path.dirname(self.json_file)):
+            try:
+                os.makedirs(os.path.dirname(self.json_file))
+            except OSError as exc:  # Guard against race condition
+                if exc.errno != errno.EEXIST:
+                    raise
+
         try:
             with open(self.json_file, "w") as json_file:
                 json_file.write(json.dumps({}))
         except IOError:
-            print("File %s cannot be overwritten", self.json_file)
+            print("File " + self.json_file + " cannot be overwritten")
 
     def update(self, dict_to_add):
         """Updates json file with new dictionary entry
@@ -82,3 +100,28 @@ class LogJson:
                 json_file.write(json.dumps(data, sort_keys=False, indent=4))
         except IOError:
             print("File %s is not writable", self.json_file)
+
+    def write_general_info(self):
+        """Writes general information on json
+
+        It contains information about generation date, git hash/version number.
+        """
+
+        # Writes time on json
+        timestamp_now = time.time()
+        date_now = datetime.fromtimestamp(timestamp_now)
+        dict_to_add = {'timestamp': timestamp_now,
+                       'date': date_now.strftime('%Y-%m-%d %H:%M:%S')}
+
+        # Writes git information on dictionary if avauilable
+        try:
+            repo = git.Repo(search_parent_directories=True)
+            sha = repo.head.object.hexsha
+            dict_to_add.update({'is_git': True,
+                                'git_sha': sha,
+                                'repo_working_dir': repo.working_tree_dir})
+        except git.InvalidGitRepositoryError:
+            dict_to_add['is_git'] = False
+
+        # Updates json file with new dictionary by reading and writing the file
+        self.update(dict_to_add=dict_to_add)
