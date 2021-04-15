@@ -6,6 +6,7 @@
 #      CEA/NeuroSpin, Batiment 145,
 #      91191 Gif-sur-Yvette cedex
 #      France
+#      France
 #
 # This software is governed by the CeCILL license version 2 under
 # French law and abiding by the rules of distribution of free software.
@@ -91,24 +92,28 @@ class BoundingBoxMax:
         """Inits with list of directories and list of sulci
 
         Args:
-            src_dir: list of strings naming src directories
-            sulcus: list of sulcus names
+            src_dir: list of strings naming ful path source directories
+            tgt_dir: name of target directory with full path
+            sulcus: sulcus name
+            side: hemisphere side (either L for left, or R for right hemisphere)
         """
 
-        # Transforms input sourcedir and sulcus names to a list of strings
+        # Transforms input source dir  to a list of strings
         self.src_dir = [src_dir] if isinstance(src_dir, str) else src_dir
-        self.sulcus = [sulcus] if isinstance(sulcus, str) else sulcus
 
+        self.sulcus = sulcus
         self.tgt_dir = tgt_dir
         self.side = side
+        hemisphere = "Right" if side == 'R' else "Left"
 
-        # graph file in the morphologist subdirectory directory
+        # graph file in the morphologist subdirectory
         self.graph_file = '%(subject)s/t1mri/t1/default_analysis/' \
                           'folds/3.3/base2018_manual/' \
                           '%(side)s%(subject)s_base2018_manual.arg'
 
-        # Creates json file name
-        json_file = join(self.tgt_dir, 'bbox.json')
+        # Json fule name is the name of the sulcus + .json
+        # and is kept under the subdirectory Left or Right
+        json_file = join(self.tgt_dir, hemisphere, self.sulcus + '.json')
         self.json = LogJson(json_file)
 
     def list_all_subjects(self):
@@ -172,7 +177,7 @@ class BoundingBoxMax:
         # by looping over all the vertices of the graph
         for vertex in graph.vertices():
             vname = vertex.get('name')
-            if vname not in self.sulcus:
+            if vname != self.sulcus:
                 continue
             for bucket_name in ('aims_ss', 'aims_bottom', 'aims_other'):
                 bucket = vertex.get(bucket_name)
@@ -379,7 +384,7 @@ class BoundingBoxMax:
             # to normalized SPM space
             tal_to_normalized_spm, voxel_size = self.tal_to_normalized_spm()
 
-            # Determines the box encompassing the _sulcus for all subjects
+            # Determines the box encompassing the sulcus for all subjects
             # The coordinates are determined in voxels in MNI space
             bbmin_vox, bbmax_vox = self.compute_box_voxel(bbmin_tal,
                                                           bbmax_tal,
@@ -388,11 +393,11 @@ class BoundingBoxMax:
 
             dict_to_add.update({'side': self.side,
                                 'sulcus': self.sulcus,
-                                'bbmin': bbmin_vox.tolist(),
-                                'bbmax': bbmax_vox.tolist()})
+                                'bbmin_voxel': bbmin_vox.tolist(),
+                                'bbmax_voxel': bbmax_vox.tolist()})
             self.json.update(dict_to_add=dict_to_add)
-            print("box: min = ", bbmin_vox)
-            print("box: max = ", bbmax_vox)
+            print("box (voxel): min = ", bbmin_vox)
+            print("box (voxel): max = ", bbmax_vox)
         else:
             bbmin_vox = 0
             bbmax_vox = 0
@@ -410,7 +415,7 @@ def max_bounding_box(src_dir=_SRC_DIR_DEFAULT, sulcus=_SULCUS_DEFAULT,
 
   Args:
       src_dir: list of strings -> directories of the supervised databases
-      sulcus: list of strings giving the sulci to analyze
+      sulcus: string giving the sulcus to analyze
       number_subjects: integer giving the number of subjects to analyze,
             by default it is set to _ALL_SUBJECTS (-1).
   """
@@ -430,16 +435,16 @@ def parse_args(argv):
 
     Returns:
         src_dir: a list with source directory names, full path
-        sulcus: a list containing the sulci to analyze
+        sulcus: a string containing the sulcus to analyze
         number_subjects: number of subjects to analyze
     """
 
     # Parse command line arguments
     parser = argparse.ArgumentParser(
-        prog='bbox_definition.py',
-        description='Computes bounding box around the named sulci')
+        prog='bounding_box.py',
+        description='Computes bounding box around the named sulcus')
     parser.add_argument(
-        "-s", "--src_dir", type=str, default=_SRC_DIR_DEFAULT,
+        "-s", "--src_dir", type=str, default=_SRC_DIR_DEFAULT, nargs='+',
         help='Source directory where the MRI data lies. '
              'If there are several directories, add all directories '
              'one after the other. Example: -s DIR_1 DIR_2. '
@@ -447,17 +452,16 @@ def parse_args(argv):
     parser.add_argument(
         "-u", "--sulcus", type=str, default=_SULCUS_DEFAULT,
         help='Sulcus name around which we determine the bounding box. '
-             '0 subject is allowed, for debug purpose.'
              'Default is : ' + _SULCUS_DEFAULT)
     parser.add_argument(
         "-n", "--nb_subjects", type=str, default="all",
-        help='Number of subjects to take into account, or \'all\'.'
+        help='Number of subjects to take into account, or \'all\'. '
              '0 subject is allowed, for debug purpose.'
              'Default is : all')
 
     args = parser.parse_args(argv)
     src_dir = args.src_dir  # src_dir is a list
-    sulcus = args.sulcus  # sulcus is a list
+    sulcus = args.sulcus  # sulcus is a string
 
     number_subjects = args.nb_subjects
 
