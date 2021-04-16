@@ -57,18 +57,17 @@ import sys
 import os
 from os import listdir
 from os.path import join
-from datetime import datetime
 
-import json
 import six
-import git
 from soma import aims
-from typing import Dict
+
+from deep_folding.anatomist_tools.utils import LogJson
 
 _ALL_SUBJECTS = -1
 
 _SRC_DIR_DEFAULT = "/neurospin/hcp"
-_TGT_DIR_DEFAULT = "/neurospin/dico/deep_folding_data/data/transfo_to_spm"
+_TGT_DIR_DEFAULT = "/neurospin/dico/deep_folding_data/default/transform"
+
 
 class TransformToSPM:
     """Computes transformation from native to normalized SPM space
@@ -105,23 +104,28 @@ class TransformToSPM:
         # (input) name of normalized SPM file
         self.normalized_spm_file = "normalized_SPM_%(subject)s.nii"
         # (input) name of the raw to MNT Talairach transformation file
-        self.to_talairach_file = "registration/" + \
+        self.to_talairach_MNI_file = "registration/" \
             "RawT1-%(subject)s_default_acquisition_TO_Talairach-MNI.trm"
 
         # (Outputs) Name of transformation files that are written by the program
         # 'subject' is the ID of the subject
-        self.natif_to_spm_file = "natif_to_template_spm_%(subject)s.trm"
+        self.natif_to_normalized_spm_file = \
+            "natif_to_template_spm_%(subject)s.trm"
+
+        # Creates json log class
+        json_file = join(self.tgt_dir, 'transform.json')
+        self.json = LogJson(json_file)
 
     def calculate_one_transform(self, subject_id):
         """Calculates the transformation file of a given subject.
 
         This transformation enables to go from native space (= MRI space) to
-        normalized SPM space. The normalized SPM space (template SPM space) is
+        normalized SPM space. The normalized SPM space  is
         a translation + an axis inversion of the Talairach MNI space.
         The transformation is directly written to the file
 
         Args:
-            subject_id: id of subject of whom transformation file is computed
+            subject_id: id of subject whose transformation file is computed
         """
 
         # Identifies 'subject' in a mapping (for file and directory namings)
@@ -137,62 +141,28 @@ class TransformToSPM:
         # that the coordinates can be negative.
         # The normalized SPM (or template SPM) has only positive coordinates
         # and its axes are inverted with respect to Talairach MNI
-        to_talairach_file = join(subject_dir, self.to_talairach_file % subject)
-        natif_to_mni = aims.read(to_talairach_file)
+        to_talairach_MNI_file = join(subject_dir,
+                                     self.to_talairach_MNI_file % subject)
+        natif_to_mni = aims.read(to_talairach_MNI_file)
 
         # Fetches template's transformation from Talairach MNI to normalized SPM
         # The first transformation[0] of the file normalized_spm
         # is the transformation from normalized SPM to Talairach MNI
         # The transformation between normalized SPM and Talairach MNI
-        template = aims.read(
+        normalized_spm = aims.read(
             join(subject_dir, self.normalized_spm_file % subject))
-        template_transform = template.header()['transformations'][0]
-        mni_to_template = \
-            aims.AffineTransformation3d(template_transform).inverse()
+        normalized_spm_to_mni = normalized_spm.header()['transformations'][0]
+        mni_to_normalized_spm = \
+            aims.AffineTransformation3d(normalized_spm_to_mni).inverse()
         # print(template.header()['transformations'][0])
 
         # Combination of transformations
-        natif_to_template_mni = mni_to_template * natif_to_mni
-        # print(natif_to_template_mni)
+        natif_to_normalized_spm = mni_to_normalized_spm * natif_to_mni
 
         # Saving of transformation files
-        natif_to_spm_file = join(
-            self.tgt_dir, self.natif_to_spm_file % subject)
-        aims.write(natif_to_template_mni, natif_to_spm_file)
-
-
-    def write_readme(self, dict_to_write):
-        """Writes README on the target directory
-
-        It contains information about generation date, git hash/version number,
-        source directory and number of subjects
-        """
-
-        now = datetime.now()
-        current_time = now.strftime("%Y-%m-%d -- %H:%M:%S")
-
-        readme_name = join(self.tgt_dir, 'README')
-        readme = open(readme_name, 'w')
-        readme.write("Current time YYYY-MM-DD = " + current_time + '\n')
-
-        try:
-            repo = git.Repo(search_parent_directories=True)
-            sha = repo.head.object.hexsha
-            readme.write("To recover the source code used, do:" + '\n')
-            readme.write("git checkout " + sha + '\n\n')
-            readme.write("repo working dir: " + repo.working_tree_dir + '\n')
-        except git.InvalidGitRepositoryError:
-            readme.write("No git repository")
-
-        readme.write('\n' + "Internal paramaters:\n")
-
-        readme.write(json.dumps(dict_to_write, sort_keys=False, indent=4))
-
-        b = self.__dict__
-        readme.write('\n\n' + "Variables internal to TransformToSPM class:\n")
-        readme.write(json.dumps(b, sort_keys=False, indent=4))
-        readme.close()
-
+        natif_to_normalized_spm_file = join(
+            self.tgt_dir, self.natif_to_normalized_spm_file % subject)
+        aims.write(natif_to_normalized_spm, natif_to_normalized_spm_file)
 
     def calculate_transforms(self, number_subjects=_ALL_SUBJECTS):
         """Calculates transformation file for all subjects.
@@ -209,6 +179,8 @@ class TransformToSPM:
             # subjects are detected as the directory names under src_dir
             list_all_subjects = listdir(self.morphologist_dir)
 
+            self.json.write_general_info()
+
             # Gives the possibility to list only the first number_subjects
             list_subjects = (
                 list_all_subjects
@@ -219,9 +191,11 @@ class TransformToSPM:
             if not os.path.exists(self.tgt_dir):
                 os.mkdir(self.tgt_dir)
 
-            # Creates and writes README file
-            dict_to_write= {'nb_subjects': len(list_all_subjects)}
-            self.write_readme(dict_to_write=dict_to_write)
+            # Writes number of subjects and directory names to json file
+            dict_to_add = {'nb_subjects': len(list_subjects),
+                           'src_dir': self.src_dir,
+                           'tgt_dir': self.tgt_dir}
+            self.json.update(dict_to_add=dict_to_add)
 
             # Computes and saves transformation files for all listed subjects
             for subject in list_subjects:
@@ -260,7 +234,7 @@ def parse_args(argv):
     # Parse command line arguments
     parser = argparse.ArgumentParser(
         prog='transform.py',
-        description='Generate transformation files')
+        description='Generates transformation files')
     parser.add_argument(
         "-s", "--src_dir", type=str, default=_SRC_DIR_DEFAULT,
         help='Source directory where the MRI data lies. '
@@ -290,7 +264,7 @@ def parse_args(argv):
                 raise ValueError
     except ValueError:
         raise ValueError(
-            "nb_subjects must be either the string \"all\" or an integer")
+            "number_subjects must be either the string \"all\" or an integer")
 
     return src_dir, tgt_dir, number_subjects
 
@@ -321,6 +295,6 @@ def main(argv):
 ######################################################################
 
 if __name__ == '__main__':
-    # We do this to be able to call main also from another python program
+    # This permits to call main also from another python program
     # without having to make system calls
     main(argv=sys.argv[1:])

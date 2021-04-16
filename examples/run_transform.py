@@ -14,7 +14,7 @@ import os
 # The following line permits to import deep_folding, even if this example is
 # executed from the examples subfolder (and no install has been launched):
 # 
-#  /notebooks/use_transform.ipynb  
+#  /examples/use_transform.py
 #  /deep_folding/__init__.py
 
 sys.path.append((os.path.abspath('../')))
@@ -61,9 +61,9 @@ transform.main(argv)
 
 # ### By using the API function call
 
-transform.transform_to_spm(src_dir=src_dir, 
-                       tgt_dir=tgt_dir, 
-                       number_subjects=0)
+transform.transform_to_spm(src_dir=src_dir,
+                           tgt_dir=tgt_dir,
+                           number_subjects=0)
 
 
 # # Test example with all subjects from source directory
@@ -73,8 +73,9 @@ ref_dir = os.path.abspath(ref_dir)
 print("ref_dir = " + ref_dir)
 
 
+all_subjects_tag = -1
 transform.transform_to_spm(src_dir=src_dir, tgt_dir=tgt_dir,
-                           number_subjects=transform._ALL_SUBJECTS)
+                           number_subjects=all_subjects_tag)
 
 #####################################
 # # Result analysis
@@ -89,7 +90,7 @@ print('\n'.join(os.listdir(tgt_dir)))
 
 ref_file = os.listdir(ref_dir)[0]
 print "ref_file = ", ref_file, '\n'
-with open(os.path.join(ref_dir,ref_file), 'r') as f:
+with open(os.path.join(ref_dir, ref_file), 'r') as f:
     print(f.read())
 
 
@@ -97,11 +98,10 @@ with open(os.path.join(ref_dir,ref_file), 'r') as f:
 
 tgt_file = os.listdir(tgt_dir)[0]
 print"tgt_file = ", tgt_file, '\n'
-with open(os.path.join(tgt_dir,tgt_file), 'r') as f:
-    print(f.read())
+with open(os.path.join(tgt_dir, tgt_file), 'r') as f_tgt:
+    print(f_tgt.read())
 
 # Generated README (we read the generated README from the target directory)
 
-with open(os.path.join(tgt_dir,"README"), 'r') as f:
-    print(f.read())
-
+with open(os.path.join(tgt_dir, "README"), 'r') as readme:
+    print(readme.read())

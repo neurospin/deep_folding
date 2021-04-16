@@ -23,7 +23,7 @@ Development
     # Install for development
     bv bash
     cd deep_folding
-    virtualenv -p /casa/install/bin/python --system-site-packages venv 
+    virtualenv -p /casa/install/bin/python --system-site-packages venv
     . bin/activate/venv
     pip install -e .
 
