@@ -1,43 +1,87 @@
-# The aim of this script is to generate a benchmark of sulcal abnormalities.
-# In this script, abnormalities are defined as skeleton with one simple surface
-# missing. This simple surface must be completely in the bounding box of interest
-#(currently S.T.s.ter.asc.ant/post Left) and include a minimum number of voxels
-# (in order that the anomaly is big enough to be considered as abnormal).
+# -*- coding: utf-8 -*-
+# /usr/bin/env python2.7 + brainvisa compliant env
+#
+#  This software and supporting documentation are distributed by
+#      Institut Federatif de Recherche 49
+#      CEA/NeuroSpin, Batiment 145,
+#      91191 Gif-sur-Yvette cedex
+#      France
+#
+# This software is governed by the CeCILL license version 2 under
+# French law and abiding by the rules of distribution of free software.
+# You can  use, modify and/or redistribute the software under the
+# terms of the CeCILL license version 2 as circulated by CEA, CNRS
+# and INRIA at the following URL "http://www.cecill.info".
+#
+# As a counterpart to the access to the source code and  rights to copy,
+# modify and redistribute granted by the license, users are provided only
+# with a limited warranty  and the software's author,  the holder of the
+# economic rights,  and the successive licensors  have only  limited
+# liability.
+#
+# In this respect, the user's attention is drawn to the risks associated
+# with loading,  using,  modifying and/or developing or reproducing the
+# software by the user in light of its specific status of free software,
+# that may mean  that it is complicated to manipulate,  and  that  also
+# therefore means  that it is reserved for developers  and  experienced
+# professionals having in-depth computer knowledge. Users are therefore
+# encouraged to load and test the software's suitability as regards their
+# requirements in conditions enabling the security of their systems and/or
+# data to be ensured and,  more generally, to use and operate it in the
+# same conditions as regards security.
+#
+# The fact that you are presently reading this means that you have had
+# knowledge of the CeCILL license version 2 and that you accept its terms.
 
-# Modules import
+
+""" Creating abnormal skeleton images
+
+The aim of this script is to generate a benchmark of sulcal abnormalities.
+Abnormalities are defined as skeletons with one simple surface missing.
+This simple surface must be completely inside the bounding box of interest and
+include a minimum number of voxels (in order that the anomaly is big enough to
+be considered as abnormal).
+"""
+
+######################################################################
+# Imports and global variables definitions
+######################################################################
+
 from soma import aims
 import numpy as np
 from glob import glob
 import random
 import pandas as pd
 import os
+import utils.load_bbox
 
-def generate(b_num, side, region, ss_size):
+
+def generate(b_num, side, ss_size, sulci_list):
+    """ Generates the abnormal skeleton images
+
+    Args: b_num: the benchmark number to create (int)
+          side: hemisphere, str, whether 'L' or 'R'
+          ss_size: Minimal size of simple surface to suppress
+          sulci_list: the list of sulci delimiting the bounding box
+
+    Returns: list of subjects altered or original
+             saves abnormal skeletons to saving_dir
     """
-    IN: b_num: benchmark number
-        side: hemisphere, str, whether 'L' or 'R',
-        region: region of the brain
-        ss_size: Minimal size of simple surface to suppress
-    OUT: altered skeletons generated
-         list of subjects altered or original
-    """
+    # folder containing all HCP subjects folder
+    data_dir = '/neurospin/hcp/ANALYSIS/3T_morphologist/'
+    saving_dir = '/neurospin/dico/lguillon/mic21/anomalies_set/dataset/benchmark' + str(b_num) + '/0_' + side + 'side/'
+
     # List of right handed subjects
     right_handed = pd.read_csv('/neurospin/dico/lguillon/hcp_info/right_handed.csv')
     subjects_list = list(right_handed['Subject'])
-
-    data_dir = '/neurospin/hcp/ANALYSIS/3T_morphologist/' # folder containing all
-                                                          # HCP subjects folder
-    saving_dir = '/neurospin/dico/lguillon/mic21/anomalies_set/dataset/benchmark' + str(b_num) + '/0_' + side + 'side/'
-    #folder_list = glob(data_dir + '*') # get list of all subjects folder
     random.shuffle(subjects_list)
 
     # Saving of simple surfaces satisfying both criteria: completely inside the
-    # bounding box defined for the crop and including at least 500 voxels
+    # bounding box defined for the crop and including at least ss_size voxels
 
     abnormality_test = []
-    if region == 'S.T.s':
-        bbmin = [34.05417004,  39.15836927, -65.53190718] # Obtained with bbox_definition.py script
-        bbmax = [71.73703268, 85.71765662, -2.74244928] # Obtained with bbox_definition.py script
+    bbmin, bbmax = utils.load_bbox.load(sulci_list, side,talairach_box=True)
+    print(bbmin, bbmax)
 
     for sub in subjects_list:
         print(sub)
@@ -98,8 +142,8 @@ def generate(b_num, side, region, ss_size):
 
 
 if __name__ == '__main__':
-    benchmark_num = 2
+    benchmark_num = 7
     side = 'L'
     region = 'S.T.s'
     ss_size = 600
-    generate(benchmark_num, side, region, ss_size)
+    generate(benchmark_num, side, ss_size, ['S.T.s.ter.asc.ant._left', 'S.T.s.ter.asc.test._left'])
