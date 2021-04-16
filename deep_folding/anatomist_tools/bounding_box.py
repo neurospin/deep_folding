@@ -57,7 +57,7 @@ import numpy as np
 from soma import aims
 
 
-from deep_folding.anatomist_tools.utils import LogJson
+import utils.logs
 
 _ALL_SUBJECTS = -1
 
@@ -65,7 +65,7 @@ _ALL_SUBJECTS = -1
 _SRC_DIR_DEFAULT = "/neurospin/lnao/PClean/database_learnclean/all/"
 
 # Default directory to which we write the bounding box results
-_TGT_DIR_DEFAULT = "/neurospin/dico/deep_folding_data/default/bounding_box"
+_TGT_DIR_DEFAULT = "/neurospin/dico/deep_folding_data/default/bbox"
 
 # hemisphere 'L' or 'R'
 _SIDE_DEFAULT = 'L'
@@ -115,7 +115,7 @@ class BoundingBoxMax:
         # Json fule name is the name of the sulcus + .json
         # and is kept under the subdirectory Left or Right
         json_file = join(self.tgt_dir, hemisphere, self.sulcus + '.json')
-        self.json = LogJson(json_file)
+        self.json = utils.logs.LogJson(json_file)
 
     def list_all_subjects(self):
         """List all subjects from the clean database (directory _root_dir).
