@@ -75,7 +75,7 @@ _SIDE_DEFAULT = 'L'
 _SULCUS_DEFAULT = 'S.T.s.ter.asc.ant._left'
 
 # A normalized SPM image to get the HCP morphologist transformation
-_IMAGE_NORMALIZED_SPM = '../../data/source/unsupervised/' \
+_IMAGE_NORMALIZED_SPM = '/neurospin/hcp/' \
                         'ANALYSIS/3T_morphologist/100206/' \
                         't1mri/default_acquisition/normalized_SPM_100206.nii'
 
