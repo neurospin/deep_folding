@@ -69,7 +69,7 @@ def generate(b_num, side, ss_size, sulci_list):
     """
     # folder containing all HCP subjects folder
     data_dir = '/neurospin/hcp/ANALYSIS/3T_morphologist/'
-    saving_dir = '/neurospin/dico/lguillon/mic21/anomalies_set/dataset/benchmark' + str(b_num) + '/0_' + side + 'side/'
+    saving_dir = '/neurospin/dico/lguillon/mic21/anomalies_set/dataset/benchmark' + str(b_num) +'/'
 
     # List of right handed subjects
     right_handed = pd.read_csv('/neurospin/dico/lguillon/hcp_info/right_handed.csv')
@@ -80,7 +80,7 @@ def generate(b_num, side, ss_size, sulci_list):
     # bounding box defined for the crop and including at least ss_size voxels
 
     abnormality_test = []
-    bbmin, bbmax = utils.load_bbox.load(sulci_list, side,talairach_box=True)
+    bbmin, bbmax = utils.load_bbox.load(sulci_list, side, talairach_box=True)
     print(bbmin, bbmax)
 
     for sub in subjects_list:
@@ -123,7 +123,7 @@ def generate(b_num, side, ss_size, sulci_list):
 
                 # Addition of modified graph to abnormality_test set
                 abnormality_test.append(sub)
-                if len(abnormality_test) == 70:
+                if len(abnormality_test) == 150:
                     break
 
     # Train, validation and test separation
