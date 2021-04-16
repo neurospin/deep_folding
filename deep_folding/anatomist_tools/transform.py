@@ -264,7 +264,7 @@ def parse_args(argv):
                 raise ValueError
     except ValueError:
         raise ValueError(
-            "nb_subjects must be either the string \"all\" or an integer")
+            "number_subjects must be either the string \"all\" or an integer")
 
     return src_dir, tgt_dir, number_subjects
 

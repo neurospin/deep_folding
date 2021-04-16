@@ -8,7 +8,7 @@ build
 dist
 *.egg-info
 notebooks/.ipynb_checkpoints
-data/tgt
+data/target
 
 # Files #
 ################

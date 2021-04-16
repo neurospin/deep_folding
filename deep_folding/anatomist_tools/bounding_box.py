@@ -65,7 +65,7 @@ _ALL_SUBJECTS = -1
 _SRC_DIR_DEFAULT = "/neurospin/lnao/PClean/database_learnclean/all/"
 
 # Default directory to which we write the bounding box results
-_TGT_DIR_DEFAULT = "/neurospin/dico/deep_folding_data/default/bbox"
+_TGT_DIR_DEFAULT = "/neurospin/dico/deep_folding_data/default/bounding_box"
 
 # hemisphere 'L' or 'R'
 _SIDE_DEFAULT = 'L'
@@ -75,7 +75,8 @@ _SIDE_DEFAULT = 'L'
 _SULCUS_DEFAULT = 'S.T.s.ter.asc.ant._left'
 
 # A normalized SPM image to get the HCP morphologist transformation
-_image_normalized_SPM = '/neurospin/hcp/ANALYSIS/3T_morphologist/100206/' \
+_IMAGE_NORMALIZED_SPM = '../../data/source/unsupervised/' \
+                        'ANALYSIS/3T_morphologist/100206/' \
                         't1mri/default_acquisition/normalized_SPM_100206.nii'
 
 
@@ -291,7 +292,7 @@ class BoundingBoxMax:
                 'transformation/talairach_TO_spm_template_novoxels.trm'))
 
         # Gets a normalized SPM file from the morphologist analysis
-        image_normalized_spm = aims.read(_image_normalized_SPM)
+        image_normalized_spm = aims.read(_IMAGE_NORMALIZED_SPM)
 
         # Tranformation from the normalized SPM
         # to the template SPM
@@ -405,8 +406,9 @@ class BoundingBoxMax:
         return bbmin_vox, bbmax_vox
 
 
-def max_bounding_box(src_dir=_SRC_DIR_DEFAULT, sulcus=_SULCUS_DEFAULT,
-                     number_subjects=_ALL_SUBJECTS):
+def bounding_box(src_dir=_SRC_DIR_DEFAULT, tgt_dir=_TGT_DIR_DEFAULT,
+                 sulcus=_SULCUS_DEFAULT, side=_SIDE_DEFAULT,
+                 number_subjects=_ALL_SUBJECTS):
     """ Main program computing the box encompassing the sulcus in all subjects
 
   The programm loops over all subjects
@@ -420,7 +422,8 @@ def max_bounding_box(src_dir=_SRC_DIR_DEFAULT, sulcus=_SULCUS_DEFAULT,
             by default it is set to _ALL_SUBJECTS (-1).
   """
 
-    box = BoundingBoxMax(src_dir=src_dir, sulcus=sulcus)
+    box = BoundingBoxMax(src_dir=src_dir, tgt_dir=tgt_dir,
+                         sulcus=sulcus, side=side)
     bbmin_vox, bbmax_vox = box.compute_bounding_box(
         number_subjects=number_subjects)
 
@@ -450,9 +453,16 @@ def parse_args(argv):
              'one after the other. Example: -s DIR_1 DIR_2. '
              'Default is : ' + _SRC_DIR_DEFAULT)
     parser.add_argument(
+        "-t", "--tgt_dir", type=str, default=_TGT_DIR_DEFAULT,
+        help='Target directory where to store the output transformation files. '
+             'Default is : ' + _TGT_DIR_DEFAULT)
+    parser.add_argument(
         "-u", "--sulcus", type=str, default=_SULCUS_DEFAULT,
         help='Sulcus name around which we determine the bounding box. '
              'Default is : ' + _SULCUS_DEFAULT)
+    parser.add_argument(
+        "-i", "--side", type=str, default=_SIDE_DEFAULT,
+        help='Hemisphere side. Default is : ' + _SIDE_DEFAULT)
     parser.add_argument(
         "-n", "--nb_subjects", type=str, default="all",
         help='Number of subjects to take into account, or \'all\'. '
@@ -461,7 +471,10 @@ def parse_args(argv):
 
     args = parser.parse_args(argv)
     src_dir = args.src_dir  # src_dir is a list
+    tgt_dir= args.tgt_dir # tgt_dir is a string, only one target directory
     sulcus = args.sulcus  # sulcus is a string
+    side = args.side
+
 
     number_subjects = args.nb_subjects
 
@@ -477,7 +490,7 @@ def parse_args(argv):
         raise ValueError("nb_subjects must be either the string \"all\" "
                          "or an integer")
 
-    return src_dir, sulcus, number_subjects
+    return src_dir, tgt_dir, sulcus, side, number_subjects
 
 
 def main(argv):
@@ -491,9 +504,11 @@ def main(argv):
     # such as the one raised when "--help" is given as argument
     try:
         # Parsing arguments
-        src_dir, sulcus, number_subjects = parse_args(argv)
+        src_dir, tgt_dir, sulcus, side, number_subjects = parse_args(argv)
         # Actual API
-        max_bounding_box(src_dir, sulcus, number_subjects)
+        bounding_box(src_dir=src_dir, tgt_dir=tgt_dir,
+                     sulcus=sulcus, side=side,
+                     number_subjects=number_subjects)
     except SystemExit as exc:
         if exc.code != 0:
             six.reraise(*sys.exc_info())

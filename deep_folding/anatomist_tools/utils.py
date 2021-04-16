@@ -97,7 +97,7 @@ class LogJson:
 
         try:
             with open(self.json_file, "w") as json_file:
-                json_file.write(json.dumps(data, sort_keys=False, indent=4))
+                json_file.write(json.dumps(data, sort_keys=True, indent=4))
         except IOError:
             print("File %s is not writable", self.json_file)
 
