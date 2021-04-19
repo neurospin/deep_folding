@@ -105,7 +105,6 @@ class BoundingBoxMax:
         self.sulcus = sulcus
         self.tgt_dir = tgt_dir
         self.side = side
-        hemisphere = "Right" if side == 'R' else "Left"
 
         # graph file in the morphologist subdirectory
         self.graph_file = '%(subject)s/t1mri/t1/default_analysis/' \
@@ -114,7 +113,7 @@ class BoundingBoxMax:
 
         # Json fule name is the name of the sulcus + .json
         # and is kept under the subdirectory Left or Right
-        json_file = join(self.tgt_dir, hemisphere, self.sulcus + '.json')
+        json_file = join(self.tgt_dir, self.side, self.sulcus + '.json')
         self.json = utils.logs.LogJson(json_file)
 
     def list_all_subjects(self):
