@@ -250,23 +250,23 @@ class BoundingBoxMax:
         list_bbmax: list containing the lower left vertex of the box
 
       Returns:
-        bbmin_tal: numpy array with the x,y,z coordinates
+        bbmin: numpy array with the x,y,z coordinates
                     of the upper right corner of the box
-        bblax_tal: numpy array with the x,y,z coordinates
+        bblax: numpy array with the x,y,z coordinates
                     of the lower left corner of the box
       """
 
-        bbmin_tal = np.array(
+        bbmin = np.array(
             [min([val[0] for k, val in enumerate(list_bbmin)]),
              min([val[1] for k, val in enumerate(list_bbmin)]),
              min([val[2] for k, val in enumerate(list_bbmin)])])
 
-        bbmax_tal = np.array(
+        bbmax = np.array(
             [max([val[0] for k, val in enumerate(list_bbmax)]),
              max([val[1] for k, val in enumerate(list_bbmax)]),
              max([val[2] for k, val in enumerate(list_bbmax)])])
 
-        return bbmin_tal, bbmax_tal
+        return bbmin, bbmax
 
     def tal_to_normalized_spm(self):
         """Returns the transformation from AIMS Talairach to normalized SPM

@@ -65,26 +65,27 @@ def load(sulci_list, side, talairach_box=False, src_dir=_SRC_DIR_DEFAULT):
         bbmin: an array of minimum coordinates of bounding box of given sulci
         bbmax: an array of maximum coordinates of bounding box of given sulci
     """
-    
+
     list_bbmin, list_bbmax = [], []
     if talairach_box:
         rad = 'AIMS_Talairach'
-    else :
+    else:
         rad = 'voxel'
 
-    for file in sulci_list:
-        with open(join(src_dir, side, file+'.json')) as json_file:
+    for sulcus in sulci_list:
+        with open(join(src_dir, side, sulcus + '.json')) as json_file:
             sulcus = json.load(json_file)
 
             list_bbmin.append(sulcus['bbmin_'+rad])
             list_bbmax.append(sulcus['bbmax_'+rad])
 
-    bbmin, bbmax = BoundingBoxMax.compute_max_box(list_bbmin, list_bbmax)
+    bbmin_loc, bbmax_loc = BoundingBoxMax.compute_max_box(list_bbmin=list_bbmin,
+                                                          list_bbmax=list_bbmax)
 
-    return bbmin, bbmax
+    return bbmin_loc, bbmax_loc
 
 
-if __name__ =='__main__':
+if __name__ == '__main__':
     bbmin, bbmax = load(['S.T.s.ter.asc.ant._left', 'S.T.s.ter.asc.test._left'],
                         'L')
     print("bbmin = ", bbmin)
