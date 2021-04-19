@@ -23,6 +23,13 @@ def test_bounding_box():
 	tgt_dir = os.path.join(os.getcwd(), 'data/target/bbox')
 	tgt_dir = os.path.abspath(tgt_dir)
 
+	# Gets normalized SPM file
+	norm_dir = os.path.join(os.getcwd(), 'data/source/unsupervised')
+	norm_dir = os.path.abspath(norm_dir)
+	sub_dir = "ANALYSIS/3T_morphologist/100206/t1mri/default_acquisition"
+	file_name = "normalized_SPM_100206.nii"
+	image_normalized_spm = os.path.join(norm_dir, sub_dir, file_name)
+
 	# Gets sulcus name
 	sulcus = 'S.T.s.ter.asc.ant._left'
 	side = 'L'
@@ -30,7 +37,8 @@ def test_bounding_box():
 	# Determines the bounding box around the sulcus
 	bounding_box.bounding_box(src_dir=src_dir, tgt_dir=tgt_dir,
 							  sulcus=sulcus, side=side,
-							  number_subjects=bounding_box._ALL_SUBJECTS)
+							  number_subjects=bounding_box._ALL_SUBJECTS,
+							  image_normalized_spm=image_normalized_spm)
 
 	# Selected keys to test
 	selected_keys = ['bbmin_voxel', 'bbmax_voxel',
