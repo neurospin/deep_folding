@@ -48,13 +48,18 @@ from deep_folding.anatomist_tools.bounding_box import BoundingBoxMax
 _SRC_DIR_DEFAULT = "/neurospin/dico/deep_folding_data/default/bbox/"
 
 
-def load(sulci_list, side, talairach_box=False):
+def load(sulci_list, side, talairach_box=False, src_dir=_SRC_DIR_DEFAULT):
     """Function returning maximal bounding box of a given list of sulci
+
+    It reads json files contained in the source directory.
+    They are listed in subdirectory 'L' or 'R' according t hemisphere
+    Each json file is the name of the sulcus + 'json'
 
     Args:
         sulci_list: a list of sulci
         side: a string corresponding to the hemisphere, whether 'L' or 'R'
         talairach_box: a boolean whether using Talairach coordinates or voxels
+        src_dir: path to source directory containing bbox dimensions
 
     Returns:
         bbmin: an array of minimum coordinates of bounding box of given sulci
@@ -68,7 +73,7 @@ def load(sulci_list, side, talairach_box=False):
         rad = 'voxel'
 
     for file in sulci_list:
-        with open(join(_SRC_DIR_DEFAULT, side, file+'.json')) as json_file:
+        with open(join(src_dir, side, file+'.json')) as json_file:
             sulcus = json.load(json_file)
 
             list_bbmin.append(sulcus['bbmin_'+rad])
