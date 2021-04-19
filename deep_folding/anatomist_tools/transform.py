@@ -61,7 +61,7 @@ from os.path import join
 import six
 from soma import aims
 
-from deep_folding.anatomist_tools.utils import LogJson
+from deep_folding.anatomist_tools.utils.logs import LogJson
 
 _ALL_SUBJECTS = -1
 
