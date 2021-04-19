@@ -79,10 +79,10 @@ def load(sulci_list, side, talairach_box=False, src_dir=_SRC_DIR_DEFAULT):
             list_bbmin.append(sulcus['bbmin_'+rad])
             list_bbmax.append(sulcus['bbmax_'+rad])
 
-    bbmin_loc, bbmax_loc = BoundingBoxMax.compute_max_box(list_bbmin=list_bbmin,
+    bbmin_npy, bbmax_npy = BoundingBoxMax.compute_max_box(list_bbmin=list_bbmin,
                                                           list_bbmax=list_bbmax)
 
-    return bbmin_loc, bbmax_loc
+    return bbmin_npy, bbmax_npy
 
 
 if __name__ == '__main__':
