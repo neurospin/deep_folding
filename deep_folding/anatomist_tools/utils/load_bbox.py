@@ -40,23 +40,20 @@ a specified hemisphere.
 
 """
 
-import os
-from os import listdir
 from os.path import join
 import json
-import numpy as np
-from bounding_box import BoundingBoxMax
+from deep_folding.anatomist_tools.bounding_box import BoundingBoxMax
 
 
 _SRC_DIR_DEFAULT = "/neurospin/dico/deep_folding_data/default/bbox/"
 
 
-def load(sulci_list, hemisphere, talairach_box=False):
+def load(sulci_list, side, talairach_box=False):
     """Function returning maximal bounding box of a given list of sulci
 
     Args:
         sulci_list: a list of sulci
-        hemisphere: a string corresponding to the hemisphere, whether 'L' or 'R'
+        side: a string corresponding to the hemisphere, whether 'L' or 'R'
         talairach_box: a boolean whether using Talairach coordinates or voxels
 
     Returns:
@@ -71,16 +68,19 @@ def load(sulci_list, hemisphere, talairach_box=False):
         rad = 'voxel'
 
     for file in sulci_list:
-        with open(join(_SRC_DIR_DEFAULT, hemisphere, file+'.json')) as json_file:
+        with open(join(_SRC_DIR_DEFAULT, side, file+'.json')) as json_file:
             sulcus = json.load(json_file)
 
             list_bbmin.append(sulcus['bbmin_'+rad])
             list_bbmax.append(sulcus['bbmax_'+rad])
 
-    bbmin, bbmax = BoundingBoxMax.compute_box_talairach_space(list_bbmin, list_bbmax)
+    bbmin, bbmax = BoundingBoxMax.compute_max_box(list_bbmin, list_bbmax)
 
     return bbmin, bbmax
 
 
 if __name__ =='__main__':
-    load(['S.T.s.ter.asc.ant._left', 'S.T.s.ter.asc.test._left'], 'L')
+    bbmin, bbmax = load(['S.T.s.ter.asc.ant._left', 'S.T.s.ter.asc.test._left'],
+                        'L')
+    print("bbmin = ", bbmin)
+    print("bbmax = ", bbmax)

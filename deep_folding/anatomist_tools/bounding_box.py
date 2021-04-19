@@ -239,14 +239,12 @@ class BoundingBoxMax:
         return list_bbmin, list_bbmax
 
     @staticmethod
-    def compute_box_talairach_space(list_bbmin, list_bbmax):
-        """Returns the coordinates of the box in AIMS Talairach space
+    def compute_max_box(list_bbmin, list_bbmax):
+        """Returns the coordinates of the box encompassing all input boxes
 
       Parameters:
         list_bbmin: list containing the upper right vertex of the box
-                    in the AIMS Talairach space
         list_bbmax: list containing the lower left vertex of the box
-                    in the AIMS Talairach space
 
       Returns:
         bbmin_tal: numpy array with the x,y,z coordinates
@@ -375,8 +373,7 @@ class BoundingBoxMax:
             # Determines the box encompassing the sulcus for all subjects
             # The coordinates are determined in AIMS Talairach space
             list_bbmin, list_bbmax = self.get_bounding_boxes(subjects)
-            bbmin_tal, bbmax_tal = self.compute_box_talairach_space(list_bbmin,
-                                                                    list_bbmax)
+            bbmin_tal, bbmax_tal = self.compute_max_box(list_bbmin, list_bbmax)
 
             dict_to_add = {'bbmin_AIMS_Talairach': bbmin_tal.tolist(),
                            'bbmax_AIMS_Talairach': bbmax_tal.tolist()}
