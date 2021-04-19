@@ -40,7 +40,7 @@ def test_bounding_box():
 	# Gets and read the first reference file
 	ref_dir_side = os.path.join(ref_dir, hemisphere)
 	ref_file = os.listdir(ref_dir_side)[0]
-	print "ref_file = ", ref_file, '\n'
+	print("ref_file = ", ref_file, '\n')
 	with open(os.path.join(ref_dir_side, ref_file), 'r') as f:
 		data_ref = json.load(f)
 		print(json.dumps(data_ref, sort_keys=True, indent=4))
@@ -49,7 +49,7 @@ def test_bounding_box():
 	# Gets and read the second reference file
 	tgt_dir_side = os.path.join(tgt_dir, hemisphere)
 	tgt_file = os.listdir(tgt_dir_side)[0]
-	print"tgt_file = ", tgt_file, '\n'
+	print("tgt_file = ", tgt_file, '\n')
 	with open(os.path.join(tgt_dir_side, tgt_file), 'r') as f:
 		data_target = json.load(f)
 		print(json.dumps(data_target, sort_keys=True, indent=4))
