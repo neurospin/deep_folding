@@ -259,10 +259,11 @@ class DatasetCroppedSkeleton:
         self.json.write_general_info()
 
         # Generate cropped files
-        self.bbmin, self.bbmax = compute_max_box(sulci_list=self.list_sulci,
-                                                 side=self.side,
-                                                 talairach_box=False,
-                                                 src_dir=self.bbox_dir)
+        if number_subjects:
+            self.bbmin, self.bbmax = compute_max_box(sulci_list=self.list_sulci,
+                                                     side=self.side,
+                                                     talairach_box=False,
+                                                     src_dir=self.bbox_dir)
         # Generate cropped files
         self.crop_files(number_subjects=number_subjects)
         # Creation of .pickle file for all subjects
