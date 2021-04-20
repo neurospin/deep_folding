@@ -48,8 +48,8 @@ def fetch_data(cropped_dir, tgt_dir=None, side=None):
         if is_file_nii(file_nii):
             aimsvol = aims.read(file_nii)
             sample = np.asarray(aimsvol).T
-            file_nii = re.search('_(\d{6})', file_nii).group(1)
-            data_dict[file_nii] = [sample]
+            subject = re.search('(\d{6})', file_nii).group(1)
+            data_dict[subject] = [sample]
 
     dataframe = pd.DataFrame.from_dict(data_dict)
 

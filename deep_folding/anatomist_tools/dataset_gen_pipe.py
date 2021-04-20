@@ -81,7 +81,7 @@ _SULCUS_DEFAULT = 'S.T.s.ter.asc.ant._left'
 # -----------------
 
 # Input directory contaning the morphologist analysis of the HCP database
-_SRC_DIR_DEFAULT = '/neurospin/hcp/ANALYSIS/3T_morphologist'
+_SRC_DIR_DEFAULT = '/neurospin/hcp'
 
 # Directory that contains the transformation file
 # from native to MNI through SPM
@@ -144,7 +144,8 @@ class DatasetCroppedSkeleton:
         # Names of files in function of dictionary: keys -> 'subject' and 'side'
         # Files from morphologist pipeline
         self.normalized_spm_file = 'normalized_SPM_%(subject)s.nii'
-        self.skeleton_file = 'segmentation/%(side)sskeleton_%(subject)s.nii.gz'
+        self.skeleton_file = 'default_analysis/segmentation/' \
+                             '%(side)sskeleton_%(subject)s.nii.gz'
 
         # Names of files in function of dictionary: keys -> 'subject' and 'side'
         self.transform_file = 'natif_to_template_spm_%(subject)s.trm'
@@ -223,9 +224,11 @@ class DatasetCroppedSkeleton:
                 if number_subjects == _ALL_SUBJECTS
                 else list_all_subjects[:number_subjects])
 
-            # Creates target directory
+            # Creates target and cropped directory
             if not os.path.exists(self.tgt_dir):
                 os.makedirs(self.tgt_dir)
+            if not os.path.exists(self.cropped_dir):
+                os.makedirs(self.cropped_dir)
 
             # Writes number of subjects and directory names to json file
             dict_to_add = {'nb_subjects': len(list_subjects),
@@ -234,9 +237,10 @@ class DatasetCroppedSkeleton:
                            'bbox_dir': self.bbox_dir,
                            'side': self.side,
                            'list_sulci': self.list_sulci,
-                           'bbmin': self.bbmin,
-                           'bbmax': self.bbmax,
-                           'tgt_dir': self.tgt_dir}
+                           'bbmin': self.bbmin.tolist(),
+                           'bbmax': self.bbmax.tolist(),
+                           'tgt_dir': self.tgt_dir,
+                           'cropped_dir': self.cropped_dir}
             self.json.update(dict_to_add=dict_to_add)
 
             for subject in list_subjects:
@@ -308,7 +312,7 @@ def parse_args(argv):
              'Default is : ' + _SULCUS_DEFAULT)
     parser.add_argument(
         "-i", "--side", type=str, default=_SIDE_DEFAULT,
-        help='Hemisphere side. Default is : ' + _SIDE_DEFAULT)
+        help='Hemisphere side (either L or R). Default is : ' + _SIDE_DEFAULT)
     parser.add_argument(
         "-n", "--nb_subjects", type=str, default="all",
         help='Number of subjects to take into account, or \'all\'. '
