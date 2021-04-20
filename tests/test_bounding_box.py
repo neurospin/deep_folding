@@ -45,7 +45,7 @@ def test_bounding_box():
 	selected_keys = ['bbmin_voxel', 'bbmax_voxel',
 					 'bbmin_AIMS_Talairach', 'bbmin_AIMS_Talairach']
 
-	# Gets and read the first reference json file
+	# Gets and reads the first reference json file
 	ref_dir_side = os.path.join(ref_dir, side)
 	ref_file = glob.glob(ref_dir_side + '/*.json')[0]
 	print("ref_file = ", ref_file, '\n')
@@ -54,7 +54,7 @@ def test_bounding_box():
 		print(json.dumps(data_ref, sort_keys=True, indent=4))
 		box_ref = {k: data_ref[k] for k in selected_keys}
 
-	# Gets and read the first target json file
+	# Gets and reads the first target json file
 	tgt_dir_side = os.path.join(tgt_dir, side)
 	tgt_file = glob.glob(tgt_dir_side + '/*.json')[0]
 	print("tgt_file = ", tgt_file, '\n')
