@@ -55,9 +55,7 @@ import six
 import numpy as np
 
 from soma import aims
-
-
-import utils.logs
+from deep_folding.anatomist_tools.utils.logs import LogJson
 
 _ALL_SUBJECTS = -1
 
@@ -75,7 +73,7 @@ _SIDE_DEFAULT = 'L'
 _SULCUS_DEFAULT = 'S.T.s.ter.asc.ant._left'
 
 # A normalized SPM image to get the voxel size
-_IMAGE_NORMALIZED_SPM = '/neurospin/hcp/' \
+_IMAGE_NORMALIZED_SPM_DEFAULT = '/neurospin/hcp/' \
                         'ANALYSIS/3T_morphologist/100206/' \
                         't1mri/default_acquisition/normalized_SPM_100206.nii'
 
@@ -90,7 +88,7 @@ class BoundingBoxMax:
                  tgt_dir=_TGT_DIR_DEFAULT,
                  sulcus=_SULCUS_DEFAULT,
                  side=_SIDE_DEFAULT,
-                 image_normalized_spm=_IMAGE_NORMALIZED_SPM):
+                 image_normalized_spm=_IMAGE_NORMALIZED_SPM_DEFAULT):
         """Inits with list of directories and list of sulci
 
         Args:
@@ -102,7 +100,7 @@ class BoundingBoxMax:
                 normalized SPM file out of which is extracted the voxel size
         """
 
-        # Transforms input source dir  to a list of strings
+        # Transforms input source dir to a list of strings
         self.src_dir = [src_dir] if isinstance(src_dir, str) else src_dir
 
         self.sulcus = sulcus
@@ -115,13 +113,13 @@ class BoundingBoxMax:
                           'folds/3.3/base2018_manual/' \
                           '%(side)s%(subject)s_base2018_manual.arg'
 
-        # Json fule name is the name of the sulcus + .json
+        # Json full name is the name of the sulcus + .json
         # and is kept under the subdirectory Left or Right
         json_file = join(self.tgt_dir, self.side, self.sulcus + '.json')
-        self.json = utils.logs.LogJson(json_file)
+        self.json = LogJson(json_file)
 
     def list_all_subjects(self):
-        """List all subjects from the clean database (directory _root_dir).
+        """List all subjects from the clean database (directory src_dir).
 
         Subjects are the names of the subdirectories of the root directory.
 
@@ -408,7 +406,7 @@ class BoundingBoxMax:
 def bounding_box(src_dir=_SRC_DIR_DEFAULT, tgt_dir=_TGT_DIR_DEFAULT,
                  sulcus=_SULCUS_DEFAULT, side=_SIDE_DEFAULT,
                  number_subjects=_ALL_SUBJECTS,
-                 image_normalized_spm=_IMAGE_NORMALIZED_SPM):
+                 image_normalized_spm=_IMAGE_NORMALIZED_SPM_DEFAULT):
     """ Main program computing the box encompassing the sulcus in all subjects
 
   The programm loops over all subjects
@@ -469,10 +467,11 @@ def parse_args(argv):
         "-i", "--side", type=str, default=_SIDE_DEFAULT,
         help='Hemisphere side. Default is : ' + _SIDE_DEFAULT)
     parser.add_argument(
-        "-m", "--image_normalized_SPM", type=str, default=_IMAGE_NORMALIZED_SPM,
+        "-m", "--image_normalized_SPM", type=str,
+        default=_IMAGE_NORMALIZED_SPM_DEFAULT,
         help='Name (with path) of normalized SPM image. '
              'It is used to determine voxel size.'
-             'Default is : ' + _IMAGE_NORMALIZED_SPM)
+             'Default is : ' + _IMAGE_NORMALIZED_SPM_DEFAULT)
     parser.add_argument(
         "-n", "--nb_subjects", type=str, default="all",
         help='Number of subjects to take into account, or \'all\'. '

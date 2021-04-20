@@ -48,7 +48,7 @@ from deep_folding.anatomist_tools.bounding_box import BoundingBoxMax
 _SRC_DIR_DEFAULT = "/neurospin/dico/deep_folding_data/default/bbox/"
 
 
-def load(sulci_list, side, talairach_box=False, src_dir=_SRC_DIR_DEFAULT):
+def compute_max_box(sulci_list, side, talairach_box=False, src_dir=_SRC_DIR_DEFAULT):
     """Function returning maximal bounding box of a given list of sulci
 
     It reads json files contained in the source directory.

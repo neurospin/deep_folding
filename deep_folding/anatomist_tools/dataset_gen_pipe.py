@@ -52,121 +52,336 @@ Several steps are required: normalization, crop and .pickle generation
 
 """
 
-######################################################################
-# Imports and global variables definitions
-######################################################################
+from __future__ import division
+from __future__ import print_function
 
+import argparse
+import sys
 import os
+from os import listdir
 from os.path import join
-import json
 
-from load_data import fetch_data
+import numpy as np
+
+import six
+
+from deep_folding.anatomist_tools.utils.logs import LogJson
+from deep_folding.anatomist_tools.utils.load_bbox import compute_max_box
+from deep_folding.anatomist_tools.load_data import fetch_data
 
 _ALL_SUBJECTS = -1
 
-_SIDE_DEFAULT = 'L' # hemisphere 'L' or 'R'
+_SIDE_DEFAULT = 'L'  # hemisphere 'L' or 'R'
 
-# Bounding box defined thanks to
-# bbox_definition.py for S.T.s ter. asc.
-# ant. and post. 
-bbox = ( ([112, 110, 24], [147, 152, 78]) if side=='L' # bbox for left side: 'L'
-         else ([8, 95, 23], [43, 146, 85]) ) # bbox for right side: 'R'  
+# sulcus to encompass:
+# its name depends on the hemisphere side
+_SULCUS_DEFAULT = 'S.T.s.ter.asc.ant._left'
 
 # Input directories
 # -----------------
+
+# Input directory contaning the morphologist analysis of the HCP database
+_SRC_DIR_DEFAULT = '/neurospin/hcp/ANALYSIS/3T_morphologist'
 
 # Directory that contains the transformation file
 # from native to MNI through SPM
 # These files have been created with spm_skeleton
 _TRANSFORM_DIR_DEFAULT = '/neurospin/dico/deep_folding_data/default/transform'
 
-# Input directory contaning the morphologist analysis of the HCP database
-_SRC_DIR_DEFAULT = '/neurospin/hcp/ANALYSIS/3T_morphologist'
+# Directory containing bounding box json files
+_BBOX_DIR_DEFAULT = '/neurospin/dico/deep_folding_data/default/bbox'
 
 # Output (target) directory
 # -------------------------
 _TGT_DIR_DEFAULT = '/neurospin/dico/deep_folding_data/default'
 
 
-######################################################################
-# Global variables (that the user will probably not change)
-######################################################################
+class DatasetCroppedSkeleton:
+    """Generates cropped skeleton files and corresponding pickle file
+    """
 
-# Take the coordinates of the bounding box
-xmin, ymin, zmin = str(bbox[0][0]), str(bbox[0][1]), str(bbox[0][2])
-xmax, ymax, zmax = str(bbox[1][0]), str(bbox[1][1]), str(bbox[1][2])
+    def __init__(self, src_dir=_SRC_DIR_DEFAULT,
+                 tgt_dir=_TGT_DIR_DEFAULT,
+                 transform_dir=_TRANSFORM_DIR_DEFAULT,
+                 bbox_dir=_BBOX_DIR_DEFAULT,
+                 list_sulci=_SULCUS_DEFAULT,
+                 side=_SIDE_DEFAULT):
+        """Inits with list of directories and list of sulci
 
-# Define the subdirectory in which the cropped skeletons will be saved
-subdir = side + 'crops'
-dir_output = join(tgt_dir, side + 'crops')
+        Args:
+            src_dir: list of strings naming ful path source directories,
+                    containing MRI images
+            tgt_dir: name of target (output) directory with full path
+            transform_dir: directory containing transformation files
+                    (generated using transform.py)
+            bbox_dir: directory containing bbox json files
+                    (generated using bounding_box.py)
+            list_sulci: list of sulcus names
+            side: hemisphere side (either L for left, or R for right hemisphere)
+        """
+
+        self.src_dir = src_dir
+
+        # Transforms sulcus in a list of sulci
+        self.list_sulci = ([list_sulci] if isinstance(list_sulci, str)
+                           else list_sulci)
+
+        self.tgt_dir = tgt_dir
+        self.transform_dir = transform_dir
+        self.bbox_dir = bbox_dir
+        self.side = side
+
+        # Morphologist directory
+        self.morphologist_dir = join(self.src_dir, "ANALYSIS/3T_morphologist")
+        # default acquisition subdirectory
+        self.acquisition_dir = "%(subject)s/t1mri/default_acquisition"
+        # (input) name of normalized SPM file
+        self.normalized_spm_file = "normalized_SPM_%(subject)s.nii"
+
+        # Directory where to store cropped files
+        self.cropped_dir = join(self.tgt_dir, self.side + 'crops')
+
+        # Names of files in function of dictionary: keys -> 'subject' and 'side'
+        # Files from morphologist pipeline
+        self.normalized_spm_file = 'normalized_SPM_%(subject)s.nii'
+        self.skeleton_file = 'segmentation/%(side)sskeleton_%(subject)s.nii.gz'
+
+        # Names of files in function of dictionary: keys -> 'subject' and 'side'
+        self.transform_file = 'natif_to_template_spm_%(subject)s.trm'
+        self.cropped_file = '%(subject)s_normalized.nii.gz'
+
+        # Initialization of bounding box coordinates
+        self.bbmin = np.zeros(3)
+        self.bbmax = np.zeros(3)
+
+        # Creates json log class
+        json_file = join(self.tgt_dir, 'dataset.json')
+        self.json = LogJson(json_file)
+
+    def crop_one_file(self, subject_id):
+        """Crops one noo file
+        """
+
+        # Identifies 'subject' in a mapping (for file and directory namings)
+        subject = {'subject': subject_id, 'side': self.side}
+
+        # Names directory where subject analysis files are stored
+        subject_dir = \
+            join(self.morphologist_dir, self.acquisition_dir % subject)
+
+        # Transformation file name
+        file_transform = join(self.transform_dir, self.transform_file % subject)
+
+        # Normalized SPM file name
+        file_SPM = join(subject_dir, self.normalized_spm_file % subject)
+
+        # Skeleton file name
+        file_skeleton = join(subject_dir, self.skeleton_file % subject)
+        # Creates output (cropped) file name
+        file_cropped = join(self.cropped_dir, self.cropped_file % subject)
+
+        # Normalization and resampling of skeleton images
+        cmd_normalize = 'AimsResample' + \
+                        ' -i ' + file_skeleton + \
+                        ' -o ' + file_cropped + \
+                        ' -m ' + file_transform + \
+                        ' -r ' + file_SPM
+        os.system(cmd_normalize)
+
+        # Take the coordinates of the bounding box
+        bbmin = self.bbmin
+        bbmax = self.bbmax
+        xmin, ymin, zmin = str(bbmin[0]), str(bbmin[1]), str(bbmin[2])
+        xmax, ymax, zmax = str(bbmax[0]), str(bbmax[1]), str(bbmax[2])
+
+        # Crop of the images based on bounding box
+        cmd_bounding_box = ' -x ' + xmin + ' -y ' + ymin + ' -z ' + zmin + \
+                           ' -X ' + xmax + ' -Y ' + ymax + ' -Z ' + zmax
+        cmd_crop = 'AimsSubVolume' + \
+                   ' -i ' + file_cropped + \
+                   ' -o ' + file_cropped + cmd_bounding_box
+        os.system(cmd_crop)
+
+    def crop_files(self, number_subjects=_ALL_SUBJECTS):
+        """Crop nii files
+
+        The programm loops over all subjects from the input (source) directory.
+
+        Args:
+            number_subjects: integer giving the number of subjects to analyze,
+                by default it is set to _ALL_SUBJECTS (-1).
+        """
+
+        if number_subjects:
+
+            # subjects are detected as the directory names under src_dir
+            list_all_subjects = listdir(self.morphologist_dir)
+
+            # Gives the possibility to list only the first number_subjects
+            list_subjects = (
+                list_all_subjects
+                if number_subjects == _ALL_SUBJECTS
+                else list_all_subjects[:number_subjects])
+
+            # Creates target directory
+            if not os.path.exists(self.tgt_dir):
+                os.makedirs(self.tgt_dir)
+
+            # Writes number of subjects and directory names to json file
+            dict_to_add = {'nb_subjects': len(list_subjects),
+                           'src_dir': self.src_dir,
+                           'transform_dir': self.transform_dir,
+                           'bbox_dir': self.bbox_dir,
+                           'side': self.side,
+                           'list_sulci': self.list_sulci,
+                           'bbmin': self.bbmin,
+                           'bbmax': self.bbmax,
+                           'tgt_dir': self.tgt_dir}
+            self.json.update(dict_to_add=dict_to_add)
+
+            for subject in list_subjects:
+                self.crop_one_file(subject)
+
+    def dataset_gen_pipe(self, number_subjects=_ALL_SUBJECTS):
+        """Main API to create pickle files
+
+        The programm loops over all subjects from the input (source) directory.
+
+        Args:
+            number_subjects: integer giving the number of subjects to analyze,
+                by default it is set to _ALL_SUBJECTS (-1).
+        """
+
+        self.json.write_general_info()
+
+        # Generate cropped files
+        self.bbmin, self.bbmax = compute_max_box(sulci_list=self.list_sulci,
+                                                 side=self.side,
+                                                 talairach_box=False,
+                                                 src_dir=self.bbox_dir)
+        # Generate cropped files
+        self.crop_files(number_subjects=number_subjects)
+        # Creation of .pickle file for all subjects
+        if number_subjects:
+            fetch_data(cropped_dir=self.cropped_dir,
+                       tgt_dir=self.tgt_dir,
+                       side=self.side)
 
 
-######################################################################
-# Main function
-######################################################################
+def parse_args(argv):
+    """Function parsing command-line arguments
+
+    Args:
+        argv: a list containing command line arguments
+
+    Returns:
+        params: dictionary with keys: src_dir, tgt_dir, nb_subjects, list_sulci
+    """
+
+    # Parse command line arguments
+    parser = argparse.ArgumentParser(
+        prog='dataset_gen_pipe.py',
+        description='Generates cropped and pickle files')
+    parser.add_argument(
+        "-s", "--src_dir", type=str, default=_SRC_DIR_DEFAULT,
+        help='Source directory where the MRI data lies. '
+             'Default is : ' + _SRC_DIR_DEFAULT)
+    parser.add_argument(
+        "-t", "--tgt_dir", type=str, default=_TGT_DIR_DEFAULT,
+        help='Target directory where to store the cropped and pickle files. '
+             'Default is : ' + _TGT_DIR_DEFAULT)
+    parser.add_argument(
+        "-r", "--transform_dir", type=str, default=_TRANSFORM_DIR_DEFAULT,
+        help='Transform directory where transformation files from native '
+             'to Talairach files have been stored. '
+             'Default is : ' + _TRANSFORM_DIR_DEFAULT)
+    parser.add_argument(
+        "-b", "--bbox_dir", type=str, default=_BBOX_DIR_DEFAULT,
+        help='Bounding box directory where json files containing '
+             'bounding box coordinates have been stored. '
+             'Default is : ' + _BBOX_DIR_DEFAULT)
+    parser.add_argument(
+        "-u", "--sulcus", type=str, default=_SULCUS_DEFAULT, nargs='+',
+        help='Sulcus name around which we determine the bounding box. '
+             'If there are several sulci, add all sulci '
+             'one after the other. Example: -u sulcus_1 sulcus_2 '
+             'Default is : ' + _SULCUS_DEFAULT)
+    parser.add_argument(
+        "-i", "--side", type=str, default=_SIDE_DEFAULT,
+        help='Hemisphere side. Default is : ' + _SIDE_DEFAULT)
+    parser.add_argument(
+        "-n", "--nb_subjects", type=str, default="all",
+        help='Number of subjects to take into account, or \'all\'. '
+             '0 subject is allowed, for debug purpose.'
+             'Default is : all')
+
+    params = {}
+
+    args = parser.parse_args(argv)
+    params['src_dir'] = args.src_dir
+    params['tgt_dir'] = args.tgt_dir
+    params['bbox_dir'] = args.bbox_dir
+    params['transform_dir'] = args.transform_dir
+    params['list_sulci'] = args.sulcus  # a list of sulci
+    params['side'] = args.side
+
+    number_subjects = args.nb_subjects
+
+    # Check if nb_subjects is either the string "all" or a positive integer
+    try:
+        if number_subjects == "all":
+            number_subjects = _ALL_SUBJECTS
+        else:
+            number_subjects = int(number_subjects)
+            if number_subjects < 0:
+                raise ValueError
+    except ValueError:
+        raise ValueError(
+            "number_subjects must be either the string \"all\" or an integer")
+    params['nb_subjects'] = number_subjects
+
+    return params
 
 
-def dataset_gen_pipe(transform_dir=_TRANSFORM_DIR_DEFAULT,
-                     src_dir=_SRC_DIR_DEFAULT,
-                     tgt_dir=_TGT_DIR_DEFAULT,
-                     number_subjects=_ALL_SUBJECTS
-                     ):
-  """Main loop to create pickle files
-  
-  The programm loops over all the subjects from the input (source) directory.
-  """
+def dataset_gen_pipe(src_dir=_SRC_DIR_DEFAULT, tgt_dir=_TGT_DIR_DEFAULT,
+                     transform_dir=_TRANSFORM_DIR_DEFAULT,
+                     bbox_dir=_BBOX_DIR_DEFAULT, side=_SIDE_DEFAULT,
+                     list_sulci=_SULCUS_DEFAULT, number_subjects=_ALL_SUBJECTS):
+    """Main program generating cropped files and corresponding pickle file
+    """
 
-  if not os.path.exists(tgt_dir):
-    os.makedirs(tgt_dir)
+    dataset = DatasetCroppedSkeleton(src_dir=src_dir, tgt_dir=tgt_dir,
+                                     transform_dir=transform_dir,
+                                     bbox_dir=bbox_dir, side=side,
+                                     list_sulci=list_sulci)
+    dataset.dataset_gen_pipe(number_subjects=number_subjects)
 
-  for sub in os.listdir(src_dir): # go through all HCP subjects folder
 
-      # Transformation file name
-      file_transform_basename = 'natif_to_template_spm_' + sub + '.trm' 
-      file_transform = join(transform_dir, file_transform_basename)
-      
-      # Normalized SPM file name
-      file_SPM_basename = 'normalized_SPM_' + sub +'.nii'
-      file_SPM = join(src_dir, sub, 't1mri/default_acquisition', file_SPM_basename)
-      
-      # Skeleton file name
-      file_skeleton_basename = side + 'skeleton_' + sub + '.nii.gz'
-      file_skeleton = join(src_dir, sub,
-                           't1mri/default_acquisition/'
-                           'default_analysis/segmentation',
-                           file_skeleton_basename)
-      
-      # Creating output file name
-      file_output_basename = sub + '_normalized.nii.gz'
-      file_output = join(tgt_dir, file_output_basename)
+def main(argv):
+    """Reads argument line and creates cropped files and pickle file
 
-      # Normalization and resampling of skeleton images
-      cmd_normalize = 'AimsResample' + \
-                      ' -i ' + file_skeleton + \
-                      ' -o ' + file_output + \
-                      ' -m ' + file_transform + \
-                      ' -r ' + file_SPM
-      os.system(cmd_normalize)
+    Args:
+        argv: a list containing command line arguments
+    """
 
-      # Crop of the images based on bounding box
-      cmd_bounding_box = ' -x ' + xmin + ' -y ' + ymin + ' -z ' + zmin + \
-                         ' -X '+ xmax + ' -Y ' + ymax + ' -Z ' + zmax
-      cmd_crop = 'AimsSubVolume' + \
-                 ' -i ' + file_output + \
-                 ' -o ' + file_output + cmd_bounding_box
-      os.system(cmd_crop)
+    # This code permits to catch SystemExit with exit code 0
+    # such as the one raised when "--help" is given as argument
+    try:
+        # Parsing arguments
+        params = parse_args(argv)
+        # Actual API
+        dataset_gen_pipe(src_dir=params['src_dir'],
+                         tgt_dir=params['tgt_dir'],
+                         transform_dir=params['transform_dir'],
+                         bbox_dir=params['bbox_dir'],
+                         side=params['side'],
+                         list_sulci=params['list_sulci'],
+                         number_subjects=params['nb_subjects'])
+    except SystemExit as exc:
+        if exc.code != 0:
+            six.reraise(*sys.exc_info())
 
-  # Creation of .pickle file for all subjects
-  fetch_data(tgt_dir, save_dir=dir_output_base, side=side)
 
-  # Log information
-  input_dict = {'Bbox': bbox, 'side': side}
-  log_file_name = join(tgt_dir, 'logs.json')
-  log_file = open(log_file_name, 'a+')
-  log_file.write(json.dumps(input_dict))
-  log_file.close()
-  
-  
 ######################################################################
 # Main program
 ######################################################################
