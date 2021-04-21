@@ -24,7 +24,7 @@ Development
     bv bash
     cd deep_folding
     virtualenv -p /casa/install/bin/python --system-site-packages venv
-    . bin/activate/venv
+    . venv/bin/activate
     pip install -e .
 
     # Tests
