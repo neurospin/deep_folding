@@ -45,7 +45,7 @@ import json
 from deep_folding.anatomist_tools.bounding_box import BoundingBoxMax
 
 
-_SRC_DIR_DEFAULT = "/neurospin/dico/deep_folding_data/default/bbox/"
+_SRC_DIR_DEFAULT = "/neurospin/dico/deep_folding_data/test/bbox/"
 
 
 def compute_max_box(sulci_list, side, talairach_box=False, src_dir=_SRC_DIR_DEFAULT):
