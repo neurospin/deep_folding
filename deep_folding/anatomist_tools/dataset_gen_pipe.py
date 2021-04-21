@@ -86,14 +86,14 @@ _SRC_DIR_DEFAULT = '/neurospin/hcp'
 # Directory that contains the transformation file
 # from native to MNI through SPM
 # These files have been created with spm_skeleton
-_TRANSFORM_DIR_DEFAULT = '/neurospin/dico/deep_folding_data/default/transform'
+_TRANSFORM_DIR_DEFAULT = '/neurospin/dico/deep_folding_data/test/transform'
 
 # Directory containing bounding box json files
-_BBOX_DIR_DEFAULT = '/neurospin/dico/deep_folding_data/default/bbox'
+_BBOX_DIR_DEFAULT = '/neurospin/dico/deep_folding_data/test/bbox'
 
 # Output (target) directory
 # -------------------------
-_TGT_DIR_DEFAULT = '/neurospin/dico/deep_folding_data/default'
+_TGT_DIR_DEFAULT = '/neurospin/dico/deep_folding_data/test'
 
 
 class DatasetCroppedSkeleton:
