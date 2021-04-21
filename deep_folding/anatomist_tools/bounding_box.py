@@ -63,7 +63,7 @@ _ALL_SUBJECTS = -1
 _SRC_DIR_DEFAULT = "/neurospin/lnao/PClean/database_learnclean/all/"
 
 # Default directory to which we write the bounding box results
-_TGT_DIR_DEFAULT = "/neurospin/dico/deep_folding_data/default/bbox"
+_TGT_DIR_DEFAULT = "/neurospin/dico/deep_folding_data/test/bbox"
 
 # hemisphere 'L' or 'R'
 _SIDE_DEFAULT = 'L'
