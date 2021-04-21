@@ -55,9 +55,7 @@ import six
 import numpy as np
 
 from soma import aims
-
-
-import utils.logs
+from deep_folding.anatomist_tools.utils.logs import LogJson
 
 _ALL_SUBJECTS = -1
 
@@ -74,8 +72,8 @@ _SIDE_DEFAULT = 'L'
 # its name depends on the hemisphere side
 _SULCUS_DEFAULT = 'S.T.s.ter.asc.ant._left'
 
-# A normalized SPM image to get the HCP morphologist transformation
-_IMAGE_NORMALIZED_SPM = '/neurospin/hcp/' \
+# A normalized SPM image to get the voxel size
+_IMAGE_NORMALIZED_SPM_DEFAULT = '/neurospin/hcp/' \
                         'ANALYSIS/3T_morphologist/100206/' \
                         't1mri/default_acquisition/normalized_SPM_100206.nii'
 
@@ -89,7 +87,8 @@ class BoundingBoxMax:
     def __init__(self, src_dir=_SRC_DIR_DEFAULT,
                  tgt_dir=_TGT_DIR_DEFAULT,
                  sulcus=_SULCUS_DEFAULT,
-                 side=_SIDE_DEFAULT):
+                 side=_SIDE_DEFAULT,
+                 image_normalized_spm=_IMAGE_NORMALIZED_SPM_DEFAULT):
         """Inits with list of directories and list of sulci
 
         Args:
@@ -97,28 +96,30 @@ class BoundingBoxMax:
             tgt_dir: name of target directory with full path
             sulcus: sulcus name
             side: hemisphere side (either L for left, or R for right hemisphere)
+            image_normalized_spm: string giving file name (with path) of
+                normalized SPM file out of which is extracted the voxel size
         """
 
-        # Transforms input source dir  to a list of strings
+        # Transforms input source dir to a list of strings
         self.src_dir = [src_dir] if isinstance(src_dir, str) else src_dir
 
         self.sulcus = sulcus
         self.tgt_dir = tgt_dir
         self.side = side
-        hemisphere = "Right" if side == 'R' else "Left"
+        self.image_normalized_spm = image_normalized_spm
 
         # graph file in the morphologist subdirectory
         self.graph_file = '%(subject)s/t1mri/t1/default_analysis/' \
                           'folds/3.3/base2018_manual/' \
                           '%(side)s%(subject)s_base2018_manual.arg'
 
-        # Json fule name is the name of the sulcus + .json
+        # Json full name is the name of the sulcus + .json
         # and is kept under the subdirectory Left or Right
-        json_file = join(self.tgt_dir, hemisphere, self.sulcus + '.json')
-        self.json = utils.logs.LogJson(json_file)
+        json_file = join(self.tgt_dir, self.side, self.sulcus + '.json')
+        self.json = LogJson(json_file)
 
     def list_all_subjects(self):
-        """List all subjects from the clean database (directory _root_dir).
+        """List all subjects from the clean database (directory src_dir).
 
         Subjects are the names of the subdirectories of the root directory.
 
@@ -247,26 +248,25 @@ class BoundingBoxMax:
         list_bbmax: list containing the lower left vertex of the box
 
       Returns:
-        bbmin_tal: numpy array with the x,y,z coordinates
+        bbmin: numpy array with the x,y,z coordinates
                     of the upper right corner of the box
-        bblax_tal: numpy array with the x,y,z coordinates
+        bblax: numpy array with the x,y,z coordinates
                     of the lower left corner of the box
       """
 
-        bbmin_tal = np.array(
+        bbmin = np.array(
             [min([val[0] for k, val in enumerate(list_bbmin)]),
              min([val[1] for k, val in enumerate(list_bbmin)]),
              min([val[2] for k, val in enumerate(list_bbmin)])])
 
-        bbmax_tal = np.array(
+        bbmax = np.array(
             [max([val[0] for k, val in enumerate(list_bbmax)]),
              max([val[1] for k, val in enumerate(list_bbmax)]),
              max([val[2] for k, val in enumerate(list_bbmax)])])
 
-        return bbmin_tal, bbmax_tal
+        return bbmin, bbmax
 
-    @staticmethod
-    def tal_to_normalized_spm():
+    def tal_to_normalized_spm(self):
         """Returns the transformation from AIMS Talairach to normalized SPM
 
       Computes the transformation from AIMS Talairach space to normalized SPM
@@ -290,7 +290,7 @@ class BoundingBoxMax:
                 'transformation/talairach_TO_spm_template_novoxels.trm'))
 
         # Gets a normalized SPM file from the morphologist analysis
-        image_normalized_spm = aims.read(_IMAGE_NORMALIZED_SPM)
+        image_normalized_spm = aims.read(self.image_normalized_spm)
 
         # Tranformation from the normalized SPM
         # to the template SPM
@@ -405,7 +405,8 @@ class BoundingBoxMax:
 
 def bounding_box(src_dir=_SRC_DIR_DEFAULT, tgt_dir=_TGT_DIR_DEFAULT,
                  sulcus=_SULCUS_DEFAULT, side=_SIDE_DEFAULT,
-                 number_subjects=_ALL_SUBJECTS):
+                 number_subjects=_ALL_SUBJECTS,
+                 image_normalized_spm=_IMAGE_NORMALIZED_SPM_DEFAULT):
     """ Main program computing the box encompassing the sulcus in all subjects
 
   The programm loops over all subjects
@@ -414,13 +415,18 @@ def bounding_box(src_dir=_SRC_DIR_DEFAULT, tgt_dir=_TGT_DIR_DEFAULT,
 
   Args:
       src_dir: list of strings -> directories of the supervised databases
+      tgt_dir: string giving target directory path
+      side: hemisphere side (either 'L' for left, or 'R' for right)
       sulcus: string giving the sulcus to analyze
       number_subjects: integer giving the number of subjects to analyze,
             by default it is set to _ALL_SUBJECTS (-1).
+      image_normalized_spm: string giving file name (with path) of normalized
+            SPM file out of which is extracted the voxel size
   """
 
     box = BoundingBoxMax(src_dir=src_dir, tgt_dir=tgt_dir,
-                         sulcus=sulcus, side=side)
+                         sulcus=sulcus, side=side,
+                         image_normalized_spm=image_normalized_spm)
     bbmin_vox, bbmax_vox = box.compute_bounding_box(
         number_subjects=number_subjects)
 
@@ -461,16 +467,25 @@ def parse_args(argv):
         "-i", "--side", type=str, default=_SIDE_DEFAULT,
         help='Hemisphere side. Default is : ' + _SIDE_DEFAULT)
     parser.add_argument(
+        "-m", "--image_normalized_SPM", type=str,
+        default=_IMAGE_NORMALIZED_SPM_DEFAULT,
+        help='Name (with path) of normalized SPM image. '
+             'It is used to determine voxel size.'
+             'Default is : ' + _IMAGE_NORMALIZED_SPM_DEFAULT)
+    parser.add_argument(
         "-n", "--nb_subjects", type=str, default="all",
         help='Number of subjects to take into account, or \'all\'. '
              '0 subject is allowed, for debug purpose.'
              'Default is : all')
 
+    params = {}
+
     args = parser.parse_args(argv)
-    src_dir = args.src_dir  # src_dir is a list
-    tgt_dir= args.tgt_dir # tgt_dir is a string, only one target directory
-    sulcus = args.sulcus  # sulcus is a string
-    side = args.side
+    params['src_dir'] = args.src_dir  # src_dir is a list
+    params['tgt_dir']= args.tgt_dir # tgt_dir is a string, only one target directory
+    params['image_normalized_spm'] = args.image_normalized_SPM
+    params['sulcus'] = args.sulcus  # sulcus is a string
+    params['side'] = args.side
 
 
     number_subjects = args.nb_subjects
@@ -486,8 +501,9 @@ def parse_args(argv):
     except ValueError:
         raise ValueError("nb_subjects must be either the string \"all\" "
                          "or an integer")
+    params['nb_subjects'] = number_subjects
 
-    return src_dir, tgt_dir, sulcus, side, number_subjects
+    return params
 
 
 def main(argv):
@@ -501,11 +517,11 @@ def main(argv):
     # such as the one raised when "--help" is given as argument
     try:
         # Parsing arguments
-        src_dir, tgt_dir, sulcus, side, number_subjects = parse_args(argv)
+        params = parse_args(argv)
         # Actual API
-        bounding_box(src_dir=src_dir, tgt_dir=tgt_dir,
-                     sulcus=sulcus, side=side,
-                     number_subjects=number_subjects)
+        bounding_box(src_dir=params['src_dir'], tgt_dir=params['tgt_dir'],
+                     sulcus=params['sulcus'], side=params['side'],
+                     number_subjects=params['nb_subjects'])
     except SystemExit as exc:
         if exc.code != 0:
             six.reraise(*sys.exc_info())

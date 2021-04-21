@@ -45,10 +45,3 @@ Notebooks are in the repertory notebooks, access using:
     bv bash # to enter brainvisa environnment
     jupyter notebook # then click on file to open a notebook
 
-Examples are in the examples directory
-
-.. code-block:: shell
-
-    bv bash
-    cd examples
-    python use_transform.py

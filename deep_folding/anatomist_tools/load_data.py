@@ -5,7 +5,6 @@ images.
 from __future__ import division
 import os
 
-import anatomist.api as anatomist
 from soma import aims
 
 import pandas as pd
@@ -13,56 +12,53 @@ import numpy as np
 import re
 
 
-def fetch_data(root_dir, save_dir=None, side=None):
+def is_file_nii(filename):
+    """Tests if file is nii file
+
+    Args:
+        filename: string giving file name with full path
+
+    Returns:
+        is_file_nii: boolean stating if file is nii file
+    """
+    is_file_nii = os.path.isfile(filename)\
+                  and '.nii' in filename \
+                  and '.minf' not in filename \
+                  and 'normalized' in filename
+    return is_file_nii
+
+
+def fetch_data(cropped_dir, tgt_dir=None, side=None):
     """
     Creates a dataframe of data with a column for each subject and associated
     np.array. Generation a dataframe of "normal" images and a dataframe of
-    "abnormal" images. Saved these two dataframes to pkl format on
-    Neurospin/dico/lguillon/data directory.
-    -----------
-    Parameter:
-    root_dir: directory of training images
+    "abnormal" images. Saved these this dataframe to pkl format on the target
+    directory
+
+    Args:
+        cropped_dir: directory containing cropped images
+        tgt_dir: directory where to save the pickle file
+        side: hemisphere side, either 'L' for left or 'R' for right hemisphere
     """
 
-    data = ['train', 'test']
-    for phase in data:
-        phase=''
-        data_dict = dict()
-        for filename in os.listdir(root_dir+phase):
-            file = os.path.join(root_dir+phase, filename)
-            #print(filename)
-            if os.path.isfile(file) and '.nii' in file and '.minf' not in file and 'normalized' in file:
-		aimsvol = aims.read(file)
-                sample = np.asarray(aimsvol).T
-                if input == 'skeleton':
-                    filename = re.search('_(\d{6})', file).group(1)
-                else:
-                    # filename = re.search('-(\d{6})', file).group(1)
-                    #filename = re.search('_(\d{6})', file).group(1)
-                    #filename = re.search('(\d{12})', file).group(1)
-                    filename = re.search('(\d{6})', file).group(1)
+    data_dict = dict()
 
-                data_dict[filename] = [sample]
-                #print(filename)
+    for filename in os.listdir(cropped_dir):
+        file_nii = os.path.join(cropped_dir, filename)
+        if is_file_nii(file_nii):
+            aimsvol = aims.read(file_nii)
+            sample = np.asarray(aimsvol).T
+            subject = re.search('(\d{6})', file_nii).group(1)
+            data_dict[subject] = [sample]
 
-        dataframe = pd.DataFrame.from_dict(data_dict)
+    dataframe = pd.DataFrame.from_dict(data_dict)
 
-        if save_dir:
-            file_pickle_basename = side + 'skeleton.pkl'
-            file_pickle = os.path.join(save_dir, file_pickle_basename)
-            dataframe.to_pickle(file_pickle)
-        else:
-            dataframe.to_pickle('/neurospin/dico/lguillon/mic21/anomalies_set/dataset/benchmark2/abnormal_skeleton_left.pkl')
+    file_pickle_basename = side + 'skeleton.pkl'
+    file_pickle = os.path.join(tgt_dir, file_pickle_basename)
+    dataframe.to_pickle(file_pickle)
 
 
 if __name__ == '__main__':
-    input = 'skeleton'
-    # input = 'raw'
-
-    if input == 'raw':
-        # Raw MRIs - crop
-        fetch_data('/neurospin/dico/lguillon/aims_detection/aims_crop/skeleton/right_hemi/normalized_crops/')
-
-    else:
-        # Skeletons
-        fetch_data('/neurospin/dico/lguillon/mic21/anomalies_set/dataset/benchmark2/0_Lside/')
+    fetch_data(cropped_dir='/neurospin/dico/deep_folding_data/default/data/Lcrops',
+               tgt_dir='/neurospin/dico/deep_folding_data/default/data',
+               side='L')

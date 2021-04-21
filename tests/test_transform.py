@@ -1,5 +1,6 @@
 from soma import aims
 import os
+import glob
 from deep_folding.anatomist_tools import transform
 
 
@@ -27,12 +28,14 @@ def test_transform():
                                number_subjects=transform._ALL_SUBJECTS)
 
     # takes and reads first target file
-    tgt_file = os.path.join(tgt_dir, os.listdir(tgt_dir)[0])
+    tgt_file = os.path.join(tgt_dir,
+                            glob.glob(tgt_dir + '/natif_to_template*.trm')[0])
     tgt_transfo = aims.read(tgt_file)
     print(tgt_transfo)
 
     # takes and read first reference file
-    ref_file = os.path.join(ref_dir, os.listdir(ref_dir)[0])
+    ref_file = os.path.join(ref_dir,
+                            glob.glob(ref_dir + '/natif_to_template*.trm')[0])
     ref_transfo = aims.read(ref_file)
     print(type(ref_transfo))
     print(ref_transfo)
