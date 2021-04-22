@@ -40,6 +40,7 @@ Tools in order to create pytorch dataloaders
 import pandas as pd
 import torch
 import torchvision.transforms as transforms
+from scipy.ndimage import rotate
 
 from .pynet_transforms import *
 
