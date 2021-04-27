@@ -120,7 +120,7 @@ def test_dataset_gen_pipe_nearest():
 		bbox_dir=bbox_dir,
 		list_sulci=sulcus,
 		side=side,
-		interp='linear',
+		interp='nearest',
 		number_subjects=_ALL_SUBJECTS)
 
 	# Gets target crop as numpy array
