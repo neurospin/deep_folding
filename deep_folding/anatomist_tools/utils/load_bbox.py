@@ -42,10 +42,10 @@ a specified hemisphere.
 
 from os.path import join
 import json
-from deep_folding.anatomist_tools.bounding_box import BoundingBoxMax
+from bounding_box import BoundingBoxMax
 
 
-_SRC_DIR_DEFAULT = "/neurospin/dico/deep_folding_data/test/bbox/"
+_SRC_DIR_DEFAULT = "/neurospin/dico/deep_folding_data/data/bbox/"
 
 
 def compute_max_box(sulci_list, side, talairach_box=False, src_dir=_SRC_DIR_DEFAULT):
