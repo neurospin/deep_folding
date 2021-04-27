@@ -8,6 +8,27 @@ from soma import aims
 from deep_folding.anatomist_tools import dataset_gen_pipe
 
 
+def are_arrays_almost_equal(arr1, arr2, epsilon, max_number_different_pixels):
+	"""Returns True if arrays arr1 and arr2 are almost equal
+
+	arr1 and arr2 are almost equal if at most max_number_different_pixels pixels
+	differ by more than epsilon
+
+	Args:
+		arr1: first numpy array
+		arr2: second numpy array
+		epsilon: max allowed difference between pixels values
+		max_number_different_pixels: max allowed different number of pixels
+
+	Returns:
+		equal_arrays: True if arrays are almost equal
+		number_different_pixels: number of pixels differing by more thanepsilon
+    """
+	difference = (abs(arr1 - arr2) >= epsilon)
+	number_different_pixels = np.count_nonzero(difference)
+	equal_arrays = number_different_pixels <= max_number_different_pixels
+	return equal_arrays, number_different_pixels
+
 def test_dataset_gen_pipe():
 	"""Tests if the dataset generation on one subject gives the expected result.
 
@@ -57,4 +78,7 @@ def test_dataset_gen_pipe():
 	vol_ref = aims.read(vol_ref_file[0])
 	arr_ref = vol_ref.arraydata()
 
-	assert np.array_equal(arr_target, arr_ref)
+	# Test fails if arrays differ strictly of more than 1 on more than 2 pixels
+	equal_arrays, number_different_pixels = \
+		are_arrays_almost_equal(arr_ref, arr_target, 1, 2)
+	assert equal_arrays

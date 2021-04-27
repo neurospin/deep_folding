@@ -182,7 +182,7 @@ class DatasetCroppedSkeleton:
         file_cropped = join(self.cropped_dir, self.cropped_file % subject)
 
         # Normalization and resampling of skeleton images
-        cmd_normalize = 'AimsResample' + \
+        cmd_normalize = 'AimsApplyTransform' + \
                         ' -i ' + file_skeleton + \
                         ' -o ' + file_cropped + \
                         ' -m ' + file_transform + \
