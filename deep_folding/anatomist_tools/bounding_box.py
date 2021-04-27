@@ -47,6 +47,7 @@ from __future__ import division
 from __future__ import print_function
 
 import sys
+import glob
 import os
 from os.path import join
 import argparse
@@ -72,6 +73,10 @@ _SIDE_DEFAULT = 'L'
 # its name depends on the hemisphere side
 _SULCUS_DEFAULT = 'S.T.s.ter.asc.ant._left'
 
+# Gives the relative path to the manually labelled graph .arg
+# in the supervise
+_PATH_TO_GRAPH_DEFAULT = "t1mri/t1/default_analysis/folds/3.3/base2018_manual"
+
 # A normalized SPM image to get the voxel size
 _IMAGE_NORMALIZED_SPM_DEFAULT = '/neurospin/hcp/' \
                         'ANALYSIS/3T_morphologist/100206/' \
@@ -85,6 +90,7 @@ class BoundingBoxMax:
     """
 
     def __init__(self, src_dir=_SRC_DIR_DEFAULT,
+                 path_to_graph=_PATH_TO_GRAPH_DEFAULT,
                  tgt_dir=_TGT_DIR_DEFAULT,
                  sulcus=_SULCUS_DEFAULT,
                  side=_SIDE_DEFAULT,
@@ -93,6 +99,7 @@ class BoundingBoxMax:
 
         Args:
             src_dir: list of strings naming ful path source directories
+            path_to_graph: list of strings naming relative path to labelle graph
             tgt_dir: name of target directory with full path
             sulcus: sulcus name
             side: hemisphere side (either L for left, or R for right hemisphere)
@@ -103,15 +110,23 @@ class BoundingBoxMax:
         # Transforms input source dir to a list of strings
         self.src_dir = [src_dir] if isinstance(src_dir, str) else src_dir
 
+        # manually labelled graph file relative to the subject directory
+        # we use the '*' glob to take into account different naming conventions
+        # It must be put in the same order as src_dir
+        path_to_graph = ([path_to_graph] if isinstance(path_to_graph, str)
+                         else path_to_graph)
+        self.graph_file = []
+        for path in path_to_graph:
+            self.graph_file.append('%(subject)s/' \
+                              + path \
+                              + '/%(side)s%(subject)s*.arg')
+
         self.sulcus = sulcus
         self.tgt_dir = tgt_dir
         self.side = side
         self.image_normalized_spm = image_normalized_spm
 
-        # graph file in the morphologist subdirectory
-        self.graph_file = '%(subject)s/t1mri/t1/default_analysis/' \
-                          'folds/3.3/base2018_manual/' \
-                          '%(side)s%(subject)s_base2018_manual.arg'
+
 
         # Json full name is the name of the sulcus + .json
         # and is kept under the subdirectory Left or Right
@@ -133,14 +148,16 @@ class BoundingBoxMax:
 
         # Main loop: list all subjects of the directories
         # listed in self.src_dir
-        for src_dir in self.src_dir:
+        for src_dir, graph_file in zip(self.src_dir, self.graph_file):
             for filename in os.listdir(src_dir):
                 directory = os.path.join(src_dir, filename)
                 if os.path.isdir(directory):
                     if filename != 'ra':
-                        subject_d = {'subject': filename,
+                        subject = filename
+                        subject_d = {'subject': subject,
                                      'side': self.side,
-                                     'dir': src_dir}
+                                     'dir': src_dir,
+                                     'graph_file': graph_file}
                         subjects.append(subject_d)
 
         return subjects
@@ -229,8 +246,10 @@ class BoundingBoxMax:
 
         for sub in subjects:
             print(sub)
-
-            sulci_pattern = join(sub['dir'], self.graph_file % sub)
+            # Its substitutes 'subject' in graph_file name
+            graph_file = sub['graph_file'] % sub
+            # It looks for a graph file .arg
+            sulci_pattern = glob.glob(join(sub['dir'], graph_file))[0]
 
             bbox_min, bbox_max = self.get_one_bounding_box(sulci_pattern % sub)
 
@@ -404,6 +423,7 @@ class BoundingBoxMax:
 
 
 def bounding_box(src_dir=_SRC_DIR_DEFAULT, tgt_dir=_TGT_DIR_DEFAULT,
+                 path_to_graph=_PATH_TO_GRAPH_DEFAULT,
                  sulcus=_SULCUS_DEFAULT, side=_SIDE_DEFAULT,
                  number_subjects=_ALL_SUBJECTS,
                  image_normalized_spm=_IMAGE_NORMALIZED_SPM_DEFAULT):
@@ -416,6 +436,7 @@ def bounding_box(src_dir=_SRC_DIR_DEFAULT, tgt_dir=_TGT_DIR_DEFAULT,
   Args:
       src_dir: list of strings -> directories of the supervised databases
       tgt_dir: string giving target directory path
+      path_to_graph: string giving relative path to manually labelled graph
       side: hemisphere side (either 'L' for left, or 'R' for right)
       sulcus: string giving the sulcus to analyze
       number_subjects: integer giving the number of subjects to analyze,
@@ -425,6 +446,7 @@ def bounding_box(src_dir=_SRC_DIR_DEFAULT, tgt_dir=_TGT_DIR_DEFAULT,
   """
 
     box = BoundingBoxMax(src_dir=src_dir, tgt_dir=tgt_dir,
+                         path_to_graph=path_to_graph,
                          sulcus=sulcus, side=side,
                          image_normalized_spm=image_normalized_spm)
     bbmin_vox, bbmax_vox = box.compute_bounding_box(
@@ -440,9 +462,7 @@ def parse_args(argv):
         argv: a list containing command line arguments
 
     Returns:
-        src_dir: a list with source directory names, full path
-        sulcus: a string containing the sulcus to analyze
-        number_subjects: number of subjects to analyze
+        params: a dictionary with all arugments as keys
     """
 
     # Parse command line arguments
@@ -470,19 +490,25 @@ def parse_args(argv):
         "-m", "--image_normalized_SPM", type=str,
         default=_IMAGE_NORMALIZED_SPM_DEFAULT,
         help='Name (with path) of normalized SPM image. '
-             'It is used to determine voxel size.'
+             'It is used to determine voxel size. '
              'Default is : ' + _IMAGE_NORMALIZED_SPM_DEFAULT)
+    parser.add_argument(
+        "-p", "--path_to_graph", type=str,
+        default=_PATH_TO_GRAPH_DEFAULT,
+        help='Relative path to manually labelled graph. '
+             'Default is ' + _PATH_TO_GRAPH_DEFAULT)
     parser.add_argument(
         "-n", "--nb_subjects", type=str, default="all",
         help='Number of subjects to take into account, or \'all\'. '
-             '0 subject is allowed, for debug purpose.'
+             '0 subject is allowed, for debug purpose. '
              'Default is : all')
 
     params = {}
 
     args = parser.parse_args(argv)
     params['src_dir'] = args.src_dir  # src_dir is a list
-    params['tgt_dir']= args.tgt_dir # tgt_dir is a string, only one target directory
+    params['path_to_graph'] = args.path_to_graph
+    params['tgt_dir']= args.tgt_dir # tgt_dir is a string, only one directory
     params['image_normalized_spm'] = args.image_normalized_SPM
     params['sulcus'] = args.sulcus  # sulcus is a string
     params['side'] = args.side
@@ -519,7 +545,9 @@ def main(argv):
         # Parsing arguments
         params = parse_args(argv)
         # Actual API
-        bounding_box(src_dir=params['src_dir'], tgt_dir=params['tgt_dir'],
+        bounding_box(src_dir=params['src_dir'],
+                     path_to_graph=params['path_to_graph'],
+                     tgt_dir=params['tgt_dir'],
                      sulcus=params['sulcus'], side=params['side'],
                      number_subjects=params['nb_subjects'])
     except SystemExit as exc:

@@ -13,7 +13,7 @@ def test_bounding_box():
 
 	# Gets the source directory
 	src_dir = os.path.join(os.getcwd(), 'data/source/supervised')
-	src_dir = os.path.abspath(src_dir)
+	src_dir = [os.path.abspath(src_dir)]
 
 	# Gets the reference directory
 	ref_dir = os.path.join(os.getcwd(), 'data/reference/bbox')
@@ -23,6 +23,9 @@ def test_bounding_box():
 	# Defines the target directory
 	tgt_dir = os.path.join(os.getcwd(), 'data/target/bbox')
 	tgt_dir = os.path.abspath(tgt_dir)
+
+	# Gets relative path to graph file name
+	path_to_graph = ["t1mri/t1/default_analysis/folds/3.3/base2018_manual"]
 
 	# Gets normalized SPM file
 	norm_dir = os.path.join(os.getcwd(), 'data/source/unsupervised')
@@ -37,6 +40,7 @@ def test_bounding_box():
 
 	# Determines the bounding box around the sulcus
 	bounding_box.bounding_box(src_dir=src_dir, tgt_dir=tgt_dir,
+							  path_to_graph=path_to_graph,
 							  sulcus=sulcus, side=side,
 							  number_subjects=bounding_box._ALL_SUBJECTS,
 							  image_normalized_spm=image_normalized_spm)
