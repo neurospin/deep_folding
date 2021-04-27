@@ -85,39 +85,49 @@ def parse_args(argv):
     parser.add_argument(
         "-l", "--ss_size", type=int, default=_SS_SIZE_DEFAULT,
         help='simple surface min size Default is : ' + str(_SS_SIZE_DEFAULT))
+    parser.add_argument(
+        "-m", "--benchmark_mode", type=str, default=_MODE_DEFAULT,
+        help='benchmark creation mode Default is : ' + str(_MODE_DEFAULT))
 
     args = parser.parse_args(argv)
     src_dir = args.src_dir  # src_dir is a list
     sulcus = args.sulcus  # sulcus is a string
     side = args.side
     ss_size = args.ss_size
+    mode = args.benchmark_mode
 
-    return src_dir, sulcus, side, ss_size
+    return src_dir, sulcus, side, ss_size, mode
 
 
 
-_SS_SIZE_DEFAULT = 1000
+_SS_SIZE_DEFAULT = 500
 _SRC_DIR_DEFAULT = '/neurospin/dico/lguillon/mic21/anomalies_set/dataset/'
 _SULCUS_DEFAULT = ['S.T.s.ter.asc.ant._left', 'S.T.s.ter.asc.post._left']
 _SIDE_DEFAULT = 'L'
-b_num = len(os.walk(_SRC_DIR_DEFAULT).next()[1]) + 1
+_MODE_DEFAULT = 'suppression'
 
 
 def main(argv):
-    """Main loop to generate abnormal skeletons and create pickle files 
+    """Main loop to generate abnormal skeletons and create pickle files
     """
-    src_dir, sulcus, side, ss_size = parse_args(argv)
-    tgt_dir = src_dir + 'benchmark' + str(b_num) + '/'
-
-    print(tgt_dir)
-    if not os.path.isdir(tgt_dir):
-        os.mkdir(tgt_dir)
-
+    src_dir, sulcus, side, ss_size, mode = parse_args(argv)
     print(sulcus)
-    benchmark_generation.generate(b_num, side, ss_size, sulcus)
+    if mode == 'suppression':
+        b_num = len(os.walk(_SRC_DIR_DEFAULT).next()[1]) + 1
+        tgt_dir = src_dir + 'benchmark' + str(b_num) + '/'
+        if not os.path.isdir(tgt_dir):
+            os.mkdir(tgt_dir)
+        benchmark_generation.generate(b_num, side, ss_size, sulcus)
+    elif mode=='merge':
+        src_dir = '/neurospin/dico/lguillon/mic21/anomalies_set/dataset/benchmark_merge/'
+        b_num = len(os.walk(src_dir).next()[1]) + 1
+        tgt_dir = src_dir + 'benchmark' + str(b_num) + '/'
+        if not os.path.isdir(tgt_dir):
+            os.mkdir(tgt_dir)
+        benchmark_generation.generate_add_ss(b_num, side, ss_size, sulcus)
 
     # Get bounding box in voxels
-    bbox = utils.load_bbox.load(sulcus, side)
+    bbox = utils.load_bbox.compute_max_box(sulcus, side)
     print(bbox)
     # Take the coordinates of the bounding box
     xmin, ymin, zmin = str(bbox[0][0]), str(bbox[0][1]), str(bbox[0][2])
