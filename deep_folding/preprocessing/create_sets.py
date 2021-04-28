@@ -47,9 +47,8 @@ import itertools
 import torch
 import torchvision.transforms as transforms
 from torch.autograd import Variable
-import torchio as tio
 
-from .datasets import SkeletonDataset
+from .datasets import SkeletonDataset, AugDatasetTransformer
 from ..utils import save_results
 
 
@@ -70,7 +69,7 @@ def create_hcp_benchmark(side, benchmark, directory, batch_size, handedness=1):
     """
     date_exp = date.today().strftime("%d%m%y")
 
-    train_list = pd.read_csv('/neurospin/dico/lguillon/mic21/anomalies_set/dataset/benchmark' + str(benchmark) + '/0_Lside/train.csv')
+    train_list = pd.read_csv('/neurospin/dico/lguillon/mic21/anomalies_set/dataset/benchmark' + str(benchmark) + '/0_Rside/train.csv')
     train_list = train_list.rename(columns={"0":"Subject"})
 
     loss_type = 'CrossEnt'
@@ -93,23 +92,18 @@ def create_hcp_benchmark(side, benchmark, directory, batch_size, handedness=1):
 
     # Split training set into train, val and test
     partition = [0.7, 0.2, 0.1]
+
+    random_seed = 42
+    torch.manual_seed(random_seed)
+
     print([round(i*(len(hcp_dataset_train))) for i in partition])
     train_set, val_set, test_set = torch.utils.data.random_split(hcp_dataset_train,
                          [round(i*(len(hcp_dataset_train))) for i in partition])
 
     # Data Augmentation application
     train_set = AugDatasetTransformer(train_set)
-    #val_set = AugDatasetTransformer(val_set)
-    #test_set  = AugDatasetTransformer(test_set)
 
-    dataset_train_loader = torch.utils.data.DataLoader(train_set, batch_size=batch_size,
-                                                shuffle=True, num_workers=8)
-    dataset_val_loader = torch.utils.data.DataLoader(val_set, shuffle=True,
-                                                          num_workers=0)
-    dataset_test_loader = torch.utils.data.DataLoader(test_set, shuffle=True,
-                                                              num_workers=0)
-
-    return root_dir, dataset_train_loader, dataset_val_loader, dataset_test_loader
+    return root_dir, train_set, val_set, test_set
 
 
 def create_benchmark_test(benchmark, side, handedness=1):
@@ -130,10 +124,7 @@ def create_benchmark_test(benchmark, side, handedness=1):
 
     benchmark_dataset = SkeletonDataset(dataframe=tmp, filenames=filenames)
 
-    benchmark_loader = torch.utils.data.DataLoader(benchmark_dataset, batch_size=1,
-                                                    shuffle=True, num_workers=0)
-
-    return benchmark_loader
+    return benchmark_dataset
 
 
 def create_hcp_sets(skeleton, side, directory, batch_size, handedness=0):
