@@ -161,7 +161,7 @@ class DatasetCroppedSkeleton:
         self.bbmax = np.zeros(3)
 
         # Creates json log class
-        json_file = join(self.tgt_dir, 'dataset.json')
+        json_file = join(self.tgt_dir, self.side + 'dataset.json')
         self.json = LogJson(json_file)
 
     def crop_one_file(self, subject_id):
