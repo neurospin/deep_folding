@@ -73,6 +73,8 @@ _ALL_SUBJECTS = -1
 
 _SIDE_DEFAULT = 'L'  # hemisphere 'L' or 'R'
 
+_INTERP_DEFAULT = 'linear'  # default interpolation for ApplyAimsTransform
+
 # sulcus to encompass:
 # its name depends on the hemisphere side
 _SULCUS_DEFAULT = 'S.T.s.ter.asc.ant._left'
@@ -105,7 +107,8 @@ class DatasetCroppedSkeleton:
                  transform_dir=_TRANSFORM_DIR_DEFAULT,
                  bbox_dir=_BBOX_DIR_DEFAULT,
                  list_sulci=_SULCUS_DEFAULT,
-                 side=_SIDE_DEFAULT):
+                 side=_SIDE_DEFAULT,
+                 interp=_INTERP_DEFAULT):
         """Inits with list of directories and list of sulci
 
         Args:
@@ -118,6 +121,7 @@ class DatasetCroppedSkeleton:
                     (generated using bounding_box.py)
             list_sulci: list of sulcus names
             side: hemisphere side (either L for left, or R for right hemisphere)
+            interp: string giving interpolation for AimsApplyTransform
         """
 
         self.src_dir = src_dir
@@ -130,6 +134,7 @@ class DatasetCroppedSkeleton:
         self.transform_dir = transform_dir
         self.bbox_dir = bbox_dir
         self.side = side
+        self.interp = interp
 
         # Morphologist directory
         self.morphologist_dir = join(self.src_dir, "ANALYSIS/3T_morphologist")
@@ -160,7 +165,10 @@ class DatasetCroppedSkeleton:
         self.json = LogJson(json_file)
 
     def crop_one_file(self, subject_id):
-        """Crops one noo file
+        """Crops one file
+
+        Args:
+            subject_id: string giving the subject ID
         """
 
         # Identifies 'subject' in a mapping (for file and directory namings)
@@ -182,11 +190,12 @@ class DatasetCroppedSkeleton:
         file_cropped = join(self.cropped_dir, self.cropped_file % subject)
 
         # Normalization and resampling of skeleton images
-        cmd_normalize = 'AimsResample' + \
+        cmd_normalize = 'AimsApplyTransform' + \
                         ' -i ' + file_skeleton + \
                         ' -o ' + file_cropped + \
                         ' -m ' + file_transform + \
-                        ' -r ' + file_SPM
+                        ' -r ' + file_SPM + \
+                        ' -t ' + self.interp
         os.system(cmd_normalize)
 
         # Take the coordinates of the bounding box
@@ -236,6 +245,7 @@ class DatasetCroppedSkeleton:
                            'transform_dir': self.transform_dir,
                            'bbox_dir': self.bbox_dir,
                            'side': self.side,
+                           'interp': self.interp,
                            'list_sulci': self.list_sulci,
                            'bbmin': self.bbmin.tolist(),
                            'bbmax': self.bbmax.tolist(),
@@ -319,6 +329,15 @@ def parse_args(argv):
         help='Number of subjects to take into account, or \'all\'. '
              '0 subject is allowed, for debug purpose.'
              'Default is : all')
+    parser.add_argument(
+        "-e", "--interp", type=str, default=_INTERP_DEFAULT,
+        help="Same interpolation type as for AimsApplyTransform. "
+             "Type of interpolation used for Volumes: "
+             "n[earest], l[inear], q[uadratic], c[cubic], quartic, "
+             "quintic, six[thorder], seven[thorder]. "
+             "Modes may also be specified as order number: "
+             "0=nearest, 1=linear..."
+    )
 
     params = {}
 
@@ -329,6 +348,7 @@ def parse_args(argv):
     params['transform_dir'] = args.transform_dir
     params['list_sulci'] = args.sulcus  # a list of sulci
     params['side'] = args.side
+    params['interp'] = args.interp
 
     number_subjects = args.nb_subjects
 
@@ -351,14 +371,15 @@ def parse_args(argv):
 def dataset_gen_pipe(src_dir=_SRC_DIR_DEFAULT, tgt_dir=_TGT_DIR_DEFAULT,
                      transform_dir=_TRANSFORM_DIR_DEFAULT,
                      bbox_dir=_BBOX_DIR_DEFAULT, side=_SIDE_DEFAULT,
-                     list_sulci=_SULCUS_DEFAULT, number_subjects=_ALL_SUBJECTS):
+                     list_sulci=_SULCUS_DEFAULT, number_subjects=_ALL_SUBJECTS,
+                     interp=_INTERP_DEFAULT):
     """Main program generating cropped files and corresponding pickle file
     """
 
     dataset = DatasetCroppedSkeleton(src_dir=src_dir, tgt_dir=tgt_dir,
                                      transform_dir=transform_dir,
                                      bbox_dir=bbox_dir, side=side,
-                                     list_sulci=list_sulci)
+                                     list_sulci=list_sulci, interp=interp)
     dataset.dataset_gen_pipe(number_subjects=number_subjects)
 
 
@@ -381,6 +402,7 @@ def main(argv):
                          bbox_dir=params['bbox_dir'],
                          side=params['side'],
                          list_sulci=params['list_sulci'],
+                         interp=params['interp'],
                          number_subjects=params['nb_subjects'])
     except SystemExit as exc:
         if exc.code != 0:
