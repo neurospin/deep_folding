@@ -1,0 +1,21 @@
+Welcome to deep_folding's documentation!
+========================================
+
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Contents:
+
+   readme
+
+.. toctree::
+   :maxdepth: 6
+
+   deep_folding
+
+Indices and tables
+==================
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`
