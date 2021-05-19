@@ -130,6 +130,7 @@ class Benchmark():
             sub: int giving the subject
         """
         # Suppression of one random simple surface (satisfying both criteria)
+        random.seed(42)
         surface = random.randint(0, len(self.surfaces)-1)
         print(self.surfaces[surface]['label'])
 
@@ -152,6 +153,7 @@ class Benchmark():
             i: int giving the current subject
         """
         sub_added = subjects_list[i+1]
+        #random.seed(42)
         surface = random.randint(0, len(self.surfaces)-1)
 
         if os.path.isdir(self.data_dir + str(sub_added)):
@@ -264,4 +266,4 @@ def generate(b_num, side, ss_size, sulci_list, mode='suppress', bench_size=150):
 
 if __name__ == '__main__':
     generate(111, 'R', 500, sulci_list=['S.T.s.ter.asc.post._right', 'S.T.s.ter.asc.ant._right'],
-         mode='mix')
+         mode='add', bench_size=1)
