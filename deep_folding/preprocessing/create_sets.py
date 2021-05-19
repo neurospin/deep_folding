@@ -97,10 +97,8 @@ def create_hcp_benchmark(side, benchmark, directory, batch_size, handedness=1):
     torch.manual_seed(random_seed)
 
     print([round(i*(len(hcp_dataset_train))) for i in partition])
-    #train_set, val_set, test_set = torch.utils.data.random_split(hcp_dataset_train,
-    #                     [round(i*(len(hcp_dataset_train))) for i in partition])
     train_set, val_set, test_set = torch.utils.data.random_split(hcp_dataset_train,
-                         [553, 147, 147])
+                         [round(i*(len(hcp_dataset_train))) for i in partition])
 
     # Data Augmentation application
     train_set = AugDatasetTransformer(train_set)
