@@ -12,6 +12,8 @@ Anatomist parts (anatomist_tools) must run with brainvisa installed and python2
 
 Deep learning part (preprocessing and utils) must run with python3 and works with pytorch.
 
+Package documentation can be found at `https://neurospin.github.io/deep_folding/index.html <https://neurospin.github.io/deep_folding/index.html>`_.
+
 
 Development
 -----------
@@ -44,4 +46,5 @@ Notebooks are in the repertory notebooks, access using:
 
     bv bash # to enter brainvisa environnment
     jupyter notebook # then click on file to open a notebook
+
 
