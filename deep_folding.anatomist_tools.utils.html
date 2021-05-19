@@ -1,7 +1,7 @@
 
 
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html4" lang="en" >
 <head>
   <meta charset="utf-8" />
   
@@ -28,11 +28,20 @@
   <![endif]-->
   
     
-      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-        <script src="_static/jquery.js"></script>
-        <script src="_static/underscore.js"></script>
-        <script src="_static/doctools.js"></script>
-        <script src="_static/language_data.js"></script>
+      <script type="text/javascript">
+          var DOCUMENTATION_OPTIONS = {
+              URL_ROOT:'./',
+              VERSION:'0.0.1',
+              LANGUAGE:'None',
+              COLLAPSE_INDEX:false,
+              FILE_SUFFIX:'.html',
+              HAS_SOURCE:  true,
+              SOURCELINK_SUFFIX: '.txt'
+          };
+      </script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -98,13 +107,13 @@
 <li class="toctree-l3 current"><a class="reference internal" href="deep_folding.anatomist_tools.html">deep_folding.anatomist_tools package</a><ul class="current">
 <li class="toctree-l4 current"><a class="reference internal" href="deep_folding.anatomist_tools.html#subpackages">Subpackages</a></li>
 <li class="toctree-l4"><a class="reference internal" href="deep_folding.anatomist_tools.html#submodules">Submodules</a></li>
-<li class="toctree-l4"><a class="reference internal" href="deep_folding.anatomist_tools.html#deep-folding-anatomist-tools-benchmark-generation-module">deep_folding.anatomist_tools.benchmark_generation module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="deep_folding.anatomist_tools.html#deep-folding-anatomist-tools-benchmark-pipeline-module">deep_folding.anatomist_tools.benchmark_pipeline module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="deep_folding.anatomist_tools.html#deep-folding-anatomist-tools-bounding-box-module">deep_folding.anatomist_tools.bounding_box module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="deep_folding.anatomist_tools.html#deep-folding-anatomist-tools-dataset-gen-pipe-module">deep_folding.anatomist_tools.dataset_gen_pipe module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="deep_folding.anatomist_tools.html#deep-folding-anatomist-tools-display-module">deep_folding.anatomist_tools.display module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="deep_folding.anatomist_tools.html#deep-folding-anatomist-tools-load-data-module">deep_folding.anatomist_tools.load_data module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="deep_folding.anatomist_tools.html#deep-folding-anatomist-tools-transform-module">deep_folding.anatomist_tools.transform module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="deep_folding.anatomist_tools.html#module-deep_folding.anatomist_tools.benchmark_generation">deep_folding.anatomist_tools.benchmark_generation module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="deep_folding.anatomist_tools.html#module-deep_folding.anatomist_tools.benchmark_pipeline">deep_folding.anatomist_tools.benchmark_pipeline module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="deep_folding.anatomist_tools.html#module-deep_folding.anatomist_tools.bounding_box">deep_folding.anatomist_tools.bounding_box module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="deep_folding.anatomist_tools.html#module-deep_folding.anatomist_tools.dataset_gen_pipe">deep_folding.anatomist_tools.dataset_gen_pipe module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="deep_folding.anatomist_tools.html#module-deep_folding.anatomist_tools.display">deep_folding.anatomist_tools.display module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="deep_folding.anatomist_tools.html#module-deep_folding.anatomist_tools.load_data">deep_folding.anatomist_tools.load_data module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="deep_folding.anatomist_tools.html#module-deep_folding.anatomist_tools.transform">deep_folding.anatomist_tools.transform module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="deep_folding.anatomist_tools.html#module-deep_folding.anatomist_tools">Module contents</a></li>
 </ul>
 </li>
@@ -191,41 +200,76 @@
 <div class="section" id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
 </div>
-<div class="section" id="deep-folding-anatomist-tools-utils-load-bbox-module">
-<h2>deep_folding.anatomist_tools.utils.load_bbox module<a class="headerlink" href="#deep-folding-anatomist-tools-utils-load-bbox-module" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-deep_folding.anatomist_tools.utils.load_bbox">
+<span id="deep-folding-anatomist-tools-utils-load-bbox-module"></span><h2>deep_folding.anatomist_tools.utils.load_bbox module<a class="headerlink" href="#module-deep_folding.anatomist_tools.utils.load_bbox" title="Permalink to this headline">¶</a></h2>
+<p>Getting bounding box from a list of sulci and specific hemisphere</p>
+<p>The aim of this script is to output the bounding box of one or several sulci of
+a specified hemisphere.</p>
+<dl class="function">
+<dt id="deep_folding.anatomist_tools.utils.load_bbox.compute_max_box">
+<code class="descclassname">deep_folding.anatomist_tools.utils.load_bbox.</code><code class="descname">compute_max_box</code><span class="sig-paren">(</span><em>sulci_list</em>, <em>side</em>, <em>talairach_box=False</em>, <em>src_dir='/neurospin/dico/deep_folding_data/data/bbox/'</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.utils.load_bbox.compute_max_box" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function returning maximal bounding box of a given list of sulci</p>
+<p>It reads json files contained in the source directory.
+They are listed in subdirectory ‘L’ or ‘R’ according t hemisphere
+Each json file is the name of the sulcus + ‘json’</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>sulci_list</strong> – a list of sulci</li>
+<li><strong>side</strong> – a string corresponding to the hemisphere, whether ‘L’ or ‘R’</li>
+<li><strong>talairach_box</strong> – a boolean whether using Talairach coordinates or voxels</li>
+<li><strong>src_dir</strong> – path to source directory containing bbox dimensions</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">an array of minimum coordinates of bounding box of given sulci
+bbmax: an array of maximum coordinates of bounding box of given sulci</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">bbmin</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 </div>
 <div class="section" id="module-deep_folding.anatomist_tools.utils.logs">
 <span id="deep-folding-anatomist-tools-utils-logs-module"></span><h2>deep_folding.anatomist_tools.utils.logs module<a class="headerlink" href="#module-deep_folding.anatomist_tools.utils.logs" title="Permalink to this headline">¶</a></h2>
 <p>The aim of this script is to put together useful classes and functions
 used by brainvisa-dependent preprocessing</p>
-<dl class="py class">
+<dl class="class">
 <dt id="deep_folding.anatomist_tools.utils.logs.LogJson">
-<em class="property">class </em><code class="sig-prename descclassname">deep_folding.anatomist_tools.utils.logs.</code><code class="sig-name descname">LogJson</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">json_file</span></em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.utils.logs.LogJson" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>Handles json file lifecycle</p>
+<em class="property">class </em><code class="descclassname">deep_folding.anatomist_tools.utils.logs.</code><code class="descname">LogJson</code><span class="sig-paren">(</span><em>json_file</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.utils.logs.LogJson" title="Permalink to this definition">¶</a></dt>
+<dd><p>Handles json file lifecycle</p>
 <p>Json file is created by overwriting old file.
 Upon loading a ne dictionary, it updates the json file
 by reading back and writing the updated content</p>
-<dl class="py method">
+<dl class="method">
 <dt id="deep_folding.anatomist_tools.utils.logs.LogJson.create_file">
-<code class="sig-name descname">create_file</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.utils.logs.LogJson.create_file" title="Permalink to this definition">¶</a></dt>
+<code class="descname">create_file</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.utils.logs.LogJson.create_file" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creates json file and overwrites old content</p>
 </dd></dl>
 
-<dl class="py method">
+<dl class="method">
 <dt id="deep_folding.anatomist_tools.utils.logs.LogJson.update">
-<code class="sig-name descname">update</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dict_to_add</span></em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.utils.logs.LogJson.update" title="Permalink to this definition">¶</a></dt>
+<code class="descname">update</code><span class="sig-paren">(</span><em>dict_to_add</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.utils.logs.LogJson.update" title="Permalink to this definition">¶</a></dt>
 <dd><p>Updates json file with new dictionary entry</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>dict_to_add</strong> – dictionary appended to json file</p>
-</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>dict_to_add</strong> – dictionary appended to json file</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
-<dl class="py method">
+<dl class="method">
 <dt id="deep_folding.anatomist_tools.utils.logs.LogJson.write_general_info">
-<code class="sig-name descname">write_general_info</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.utils.logs.LogJson.write_general_info" title="Permalink to this definition">¶</a></dt>
+<code class="descname">write_general_info</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.utils.logs.LogJson.write_general_info" title="Permalink to this definition">¶</a></dt>
 <dd><p>Writes general information on json</p>
 <p>It contains information about generation date, git hash/version number.</p>
 </dd></dl>

@@ -1,7 +1,7 @@
 
 
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html4" lang="en" >
 <head>
   <meta charset="utf-8" />
   
@@ -28,11 +28,20 @@
   <![endif]-->
   
     
-      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-        <script src="_static/jquery.js"></script>
-        <script src="_static/underscore.js"></script>
-        <script src="_static/doctools.js"></script>
-        <script src="_static/language_data.js"></script>
+      <script type="text/javascript">
+          var DOCUMENTATION_OPTIONS = {
+              URL_ROOT:'./',
+              VERSION:'0.0.1',
+              LANGUAGE:'None',
+              COLLAPSE_INDEX:false,
+              FILE_SUFFIX:'.html',
+              HAS_SOURCE:  true,
+              SOURCELINK_SUFFIX: '.txt'
+          };
+      </script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -98,13 +107,13 @@
 <li class="toctree-l3 current"><a class="current reference internal" href="#">deep_folding.anatomist_tools package</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#subpackages">Subpackages</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#submodules">Submodules</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#deep-folding-anatomist-tools-benchmark-generation-module">deep_folding.anatomist_tools.benchmark_generation module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#deep-folding-anatomist-tools-benchmark-pipeline-module">deep_folding.anatomist_tools.benchmark_pipeline module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#deep-folding-anatomist-tools-bounding-box-module">deep_folding.anatomist_tools.bounding_box module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#deep-folding-anatomist-tools-dataset-gen-pipe-module">deep_folding.anatomist_tools.dataset_gen_pipe module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#deep-folding-anatomist-tools-display-module">deep_folding.anatomist_tools.display module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#deep-folding-anatomist-tools-load-data-module">deep_folding.anatomist_tools.load_data module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#deep-folding-anatomist-tools-transform-module">deep_folding.anatomist_tools.transform module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-deep_folding.anatomist_tools.benchmark_generation">deep_folding.anatomist_tools.benchmark_generation module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-deep_folding.anatomist_tools.benchmark_pipeline">deep_folding.anatomist_tools.benchmark_pipeline module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-deep_folding.anatomist_tools.bounding_box">deep_folding.anatomist_tools.bounding_box module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-deep_folding.anatomist_tools.dataset_gen_pipe">deep_folding.anatomist_tools.dataset_gen_pipe module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-deep_folding.anatomist_tools.display">deep_folding.anatomist_tools.display module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-deep_folding.anatomist_tools.load_data">deep_folding.anatomist_tools.load_data module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-deep_folding.anatomist_tools.transform">deep_folding.anatomist_tools.transform module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-deep_folding.anatomist_tools">Module contents</a></li>
 </ul>
 </li>
@@ -192,7 +201,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="deep_folding.anatomist_tools.utils.html">deep_folding.anatomist_tools.utils package</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="deep_folding.anatomist_tools.utils.html#submodules">Submodules</a></li>
-<li class="toctree-l2"><a class="reference internal" href="deep_folding.anatomist_tools.utils.html#deep-folding-anatomist-tools-utils-load-bbox-module">deep_folding.anatomist_tools.utils.load_bbox module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="deep_folding.anatomist_tools.utils.html#module-deep_folding.anatomist_tools.utils.load_bbox">deep_folding.anatomist_tools.utils.load_bbox module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="deep_folding.anatomist_tools.utils.html#module-deep_folding.anatomist_tools.utils.logs">deep_folding.anatomist_tools.utils.logs module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="deep_folding.anatomist_tools.utils.html#module-deep_folding.anatomist_tools.utils">Module contents</a></li>
 </ul>
@@ -203,26 +212,642 @@
 <div class="section" id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
 </div>
-<div class="section" id="deep-folding-anatomist-tools-benchmark-generation-module">
-<h2>deep_folding.anatomist_tools.benchmark_generation module<a class="headerlink" href="#deep-folding-anatomist-tools-benchmark-generation-module" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-deep_folding.anatomist_tools.benchmark_generation">
+<span id="deep-folding-anatomist-tools-benchmark-generation-module"></span><h2>deep_folding.anatomist_tools.benchmark_generation module<a class="headerlink" href="#module-deep_folding.anatomist_tools.benchmark_generation" title="Permalink to this headline">¶</a></h2>
+<p>Creating abnormal skeleton images</p>
+<p>The aim of this script is to generate a benchmark of sulcal abnormalities.
+Abnormalities are defined as skeletons with one simple surface missing.
+This simple surface must be completely inside the bounding box of interest and
+include a minimum number of voxels (in order that the anomaly is big enough to
+be considered as abnormal).</p>
+<dl class="function">
+<dt id="deep_folding.anatomist_tools.benchmark_generation.generate">
+<code class="descclassname">deep_folding.anatomist_tools.benchmark_generation.</code><code class="descname">generate</code><span class="sig-paren">(</span><em>b_num</em>, <em>side</em>, <em>ss_size</em>, <em>sulci_list</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.benchmark_generation.generate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates the abnormal skeleton images</p>
+<dl class="docutils">
+<dt>Args: b_num: the benchmark number to create (int)</dt>
+<dd>side: hemisphere, str, whether ‘L’ or ‘R’
+ss_size: Minimal size of simple surface to suppress
+sulci_list: the list of sulci delimiting the bounding box</dd>
+<dt>Returns: list of subjects altered or original</dt>
+<dd>saves abnormal skeletons to saving_dir</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="deep_folding.anatomist_tools.benchmark_generation.generate_add_ss">
+<code class="descclassname">deep_folding.anatomist_tools.benchmark_generation.</code><code class="descname">generate_add_ss</code><span class="sig-paren">(</span><em>b_num</em>, <em>side</em>, <em>ss_size</em>, <em>sulci_list</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.benchmark_generation.generate_add_ss" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a benchmark with skeletons having additional simple surfaces (ss)
+IN: b_num: benchmark number</p>
+<blockquote>
+<div>side: hemisphere, str, whether ‘L’ or ‘R’,
+region: region of the brain
+ss_size: Minimal size of simple surface to suppress</div></blockquote>
+<dl class="docutils">
+<dt>OUT: altered skeletons generated</dt>
+<dd>list of subjects altered or original</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="deep_folding.anatomist_tools.benchmark_generation.get_sub_list">
+<code class="descclassname">deep_folding.anatomist_tools.benchmark_generation.</code><code class="descname">get_sub_list</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.benchmark_generation.get_sub_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns subjects list for which latered skelerons can be created
+Only right handed HCP subjects</p>
+</dd></dl>
+
 </div>
-<div class="section" id="deep-folding-anatomist-tools-benchmark-pipeline-module">
-<h2>deep_folding.anatomist_tools.benchmark_pipeline module<a class="headerlink" href="#deep-folding-anatomist-tools-benchmark-pipeline-module" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-deep_folding.anatomist_tools.benchmark_pipeline">
+<span id="deep-folding-anatomist-tools-benchmark-pipeline-module"></span><h2>deep_folding.anatomist_tools.benchmark_pipeline module<a class="headerlink" href="#module-deep_folding.anatomist_tools.benchmark_pipeline" title="Permalink to this headline">¶</a></h2>
+<p>Generating benchmark of sulcal abnormalities up tp pickle file</p>
+<p>The aim of this script is to generate a benchmark of sulcal abnormalities.
+The script gathers all the steps necessary.</p>
+<dl class="function">
+<dt id="deep_folding.anatomist_tools.benchmark_pipeline.main">
+<code class="descclassname">deep_folding.anatomist_tools.benchmark_pipeline.</code><code class="descname">main</code><span class="sig-paren">(</span><em>argv</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.benchmark_pipeline.main" title="Permalink to this definition">¶</a></dt>
+<dd><p>Main loop to generate abnormal skeletons and create pickle files</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="deep_folding.anatomist_tools.benchmark_pipeline.parse_args">
+<code class="descclassname">deep_folding.anatomist_tools.benchmark_pipeline.</code><code class="descname">parse_args</code><span class="sig-paren">(</span><em>argv</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.benchmark_pipeline.parse_args" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function parsing command-line arguments</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>argv</strong> – a list containing command line arguments</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">a list with source directory names, full path
+sulcus: a string containing the sulcus to analyze
+number_subjects: number of subjects to analyze</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#deep_folding.anatomist_tools.transform.TransformToSPM.src_dir" title="deep_folding.anatomist_tools.transform.TransformToSPM.src_dir">src_dir</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 </div>
-<div class="section" id="deep-folding-anatomist-tools-bounding-box-module">
-<h2>deep_folding.anatomist_tools.bounding_box module<a class="headerlink" href="#deep-folding-anatomist-tools-bounding-box-module" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-deep_folding.anatomist_tools.bounding_box">
+<span id="deep-folding-anatomist-tools-bounding-box-module"></span><h2>deep_folding.anatomist_tools.bounding_box module<a class="headerlink" href="#module-deep_folding.anatomist_tools.bounding_box" title="Permalink to this headline">¶</a></h2>
+<p>The aim of this script is to output bounding box got given sulci
+based on a manually labelled dataset</p>
+<p>Bounding box corresponds to the biggest box that encompasses the given sulci
+on all subjects of the manually labelled dataset. It measures the bounding box
+in the normalized SPM space</p>
+<dl class="class">
+<dt id="deep_folding.anatomist_tools.bounding_box.BoundingBoxMax">
+<em class="property">class </em><code class="descclassname">deep_folding.anatomist_tools.bounding_box.</code><code class="descname">BoundingBoxMax</code><span class="sig-paren">(</span><em>src_dir='/neurospin/lnao/PClean/database_learnclean/all/'</em>, <em>path_to_graph='t1mri/t1/default_analysis/folds/3.3/base2018_manual'</em>, <em>tgt_dir='/neurospin/dico/deep_folding_data/test/bbox'</em>, <em>sulcus='S.T.s.ter.asc.ant._left'</em>, <em>side='L'</em>, <em>image_normalized_spm='/neurospin/hcp/ANALYSIS/3T_morphologist/100206/t1mri/default_acquisition/normalized_SPM_100206.nii'</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.bounding_box.BoundingBoxMax" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determines the maximum Bounding Box around given sulci</p>
+<p>It is determined in the normalized SPM referential</p>
+<dl class="method">
+<dt id="deep_folding.anatomist_tools.bounding_box.BoundingBoxMax.compute_bounding_box">
+<code class="descname">compute_bounding_box</code><span class="sig-paren">(</span><em>number_subjects=-1</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.bounding_box.BoundingBoxMax.compute_bounding_box" title="Permalink to this definition">¶</a></dt>
+<dd><p>Main class program to compute the bounding box</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>number_subjects</strong> – number_subjects to analyze</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="deep_folding.anatomist_tools.bounding_box.BoundingBoxMax.compute_box_voxel">
+<em class="property">static </em><code class="descname">compute_box_voxel</code><span class="sig-paren">(</span><em>bbmin_tal</em>, <em>bbmax_tal</em>, <em>tal_to_normalized_spm</em>, <em>voxel_size</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.bounding_box.BoundingBoxMax.compute_box_voxel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the coordinates of the box as voxels</p>
+<p>Coordinates of the box in voxels are determined in the MNI referential</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>bbmin_tal</strong> – numpy array with the coordinates of the upper right corner
+of the box (AIMS Talairach space)</li>
+<li><strong>bbmax_tal</strong> – numpy array with the coordinates of the lower left corner
+of the box (AIMS Talairach space)</li>
+<li><strong>tal_to_normalized_spm</strong> – transformation used from Talairach space
+to normalized SPM</li>
+<li><strong>voxel_size</strong> – voxel size (in MNI referential or HCP normalized SPM space)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><dl class="docutils">
+<dt>numpy array with the coordinates of the upper right corner</dt>
+<dd><p class="first last">of the box (voxels in MNI space)</p>
+</dd>
+<dt>bblax_vox: numpy array with the coordinates of the lower left corner</dt>
+<dd><p class="first last">of the box (voxels in MNI space)</p>
+</dd>
+</dl>
+</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">bbmin_vox</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="deep_folding.anatomist_tools.bounding_box.BoundingBoxMax.compute_max_box">
+<em class="property">static </em><code class="descname">compute_max_box</code><span class="sig-paren">(</span><em>list_bbmin</em>, <em>list_bbmax</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.bounding_box.BoundingBoxMax.compute_max_box" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the coordinates of the box encompassing all input boxes</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>list_bbmin</strong> – list containing the upper right vertex of the box</li>
+<li><strong>list_bbmax</strong> – list containing the lower left vertex of the box</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><dl class="docutils">
+<dt>numpy array with the x,y,z coordinates</dt>
+<dd><p class="first last">of the upper right corner of the box</p>
+</dd>
+<dt>bblax: numpy array with the x,y,z coordinates</dt>
+<dd><p class="first last">of the lower left corner of the box</p>
+</dd>
+</dl>
+</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">bbmin</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="deep_folding.anatomist_tools.bounding_box.BoundingBoxMax.get_bounding_boxes">
+<code class="descname">get_bounding_boxes</code><span class="sig-paren">(</span><em>subjects</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.bounding_box.BoundingBoxMax.get_bounding_boxes" title="Permalink to this definition">¶</a></dt>
+<dd><p>get bounding boxes of the chosen sulcus for all subjects</p>
+<p>Function that outputs the bounding box for the listed sulci on a manually
+labeled dataset.
+Bounding box corresponds to the biggest box encountered in the manually
+labeled subjects in the AIMS Talairach space, different from the MNI
+Talairach template.
+The bounding box is the smallest rectangular box that
+encompasses the sulcus.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>subjects</strong> – list containing all subjects to be analyzed</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="docutils">
+<dt>list containing the upper right vertex of the box</dt>
+<dd>in the Talairach space</dd>
+<dt>list_bbmax: list containing the lower left vertex of the box</dt>
+<dd>in the Talairach space</dd>
+</dl>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">list_bbmin</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="deep_folding.anatomist_tools.bounding_box.BoundingBoxMax.get_one_bounding_box">
+<code class="descname">get_one_bounding_box</code><span class="sig-paren">(</span><em>graph_filename</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.bounding_box.BoundingBoxMax.get_one_bounding_box" title="Permalink to this definition">¶</a></dt>
+<dd><p>get bounding box of the chosen sulcus for one data graph</p>
+<p>Function that outputs the bounding box for the listed sulci
+for this datagraph. The bounding box is the smallest rectangular box
+that encompasses the chosen sulcus.
+It is given in the AIMS Talairch referential, different from the MNI
+Talairach referential.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>graph_filename</strong> – string being the name of graph file .arg to analyze:
+for example: ‘Lammon_base2018_manual.arg’</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="docutils">
+<dt>numpy array giving the upper right vertex coordinates</dt>
+<dd>of the box in the Talairach space</dd>
+<dt>bbox_max: numpy array fiving the lower left vertex coordinates</dt>
+<dd>of the box in the Talairach space</dd>
+</dl>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">bbox_min</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="deep_folding.anatomist_tools.bounding_box.BoundingBoxMax.list_all_subjects">
+<code class="descname">list_all_subjects</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.bounding_box.BoundingBoxMax.list_all_subjects" title="Permalink to this definition">¶</a></dt>
+<dd><p>List all subjects from the clean database (directory src_dir).</p>
+<p>Subjects are the names of the subdirectories of the root directory.</p>
+<p>Parameters:</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">a list containing all subjects to be analyzed</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">subjects</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="deep_folding.anatomist_tools.bounding_box.BoundingBoxMax.tal_to_normalized_spm">
+<code class="descname">tal_to_normalized_spm</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.bounding_box.BoundingBoxMax.tal_to_normalized_spm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the transformation from AIMS Talairach to normalized SPM</p>
+<p>Computes the transformation from AIMS Talairach space to normalized SPM
+space, MNI space, passing through SPM template.
+Empirically, this was done because some Deep learning results were better
+with SPM template.
+The transform from MNI to SPM template is taken from HCP database</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><dl class="docutils">
+<dt>transformation from AIMS Talairach space to</dt>
+<dd>normalized SPM</dd>
+</dl>
+<p>voxel_size: voxel size (in MNI referential or HCP normalized SPM space)</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#deep_folding.anatomist_tools.bounding_box.BoundingBoxMax.tal_to_normalized_spm" title="deep_folding.anatomist_tools.bounding_box.BoundingBoxMax.tal_to_normalized_spm">tal_to_normalized_spm</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="deep_folding.anatomist_tools.bounding_box.bounding_box">
+<code class="descclassname">deep_folding.anatomist_tools.bounding_box.</code><code class="descname">bounding_box</code><span class="sig-paren">(</span><em>src_dir='/neurospin/lnao/PClean/database_learnclean/all/'</em>, <em>tgt_dir='/neurospin/dico/deep_folding_data/test/bbox'</em>, <em>path_to_graph='t1mri/t1/default_analysis/folds/3.3/base2018_manual'</em>, <em>sulcus='S.T.s.ter.asc.ant._left'</em>, <em>side='L'</em>, <em>number_subjects=-1</em>, <em>image_normalized_spm='/neurospin/hcp/ANALYSIS/3T_morphologist/100206/t1mri/default_acquisition/normalized_SPM_100206.nii'</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.bounding_box.bounding_box" title="Permalink to this definition">¶</a></dt>
+<dd><p>Main program computing the box encompassing the sulcus in all subjects</p>
+<p>The programm loops over all subjects
+and computes in MNI space the voxel coordinates of the box encompassing
+the sulci for all subjects</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>src_dir</strong> – list of strings -&gt; directories of the supervised databases</li>
+<li><strong>tgt_dir</strong> – string giving target directory path</li>
+<li><strong>path_to_graph</strong> – string giving relative path to manually labelled graph</li>
+<li><strong>side</strong> – hemisphere side (either ‘L’ for left, or ‘R’ for right)</li>
+<li><strong>sulcus</strong> – string giving the sulcus to analyze</li>
+<li><strong>number_subjects</strong> – integer giving the number of subjects to analyze,
+by default it is set to _ALL_SUBJECTS (-1).</li>
+<li><strong>image_normalized_spm</strong> – string giving file name (with path) of normalized
+SPM file out of which is extracted the voxel size</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="deep_folding.anatomist_tools.bounding_box.main">
+<code class="descclassname">deep_folding.anatomist_tools.bounding_box.</code><code class="descname">main</code><span class="sig-paren">(</span><em>argv</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.bounding_box.main" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads argument line and determines the max bounding box</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>argv</strong> – a list containing command line arguments</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="deep_folding.anatomist_tools.bounding_box.parse_args">
+<code class="descclassname">deep_folding.anatomist_tools.bounding_box.</code><code class="descname">parse_args</code><span class="sig-paren">(</span><em>argv</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.bounding_box.parse_args" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function parsing command-line arguments</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>argv</strong> – a list containing command line arguments</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">a dictionary with all arugments as keys</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">params</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 </div>
-<div class="section" id="deep-folding-anatomist-tools-dataset-gen-pipe-module">
-<h2>deep_folding.anatomist_tools.dataset_gen_pipe module<a class="headerlink" href="#deep-folding-anatomist-tools-dataset-gen-pipe-module" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-deep_folding.anatomist_tools.dataset_gen_pipe">
+<span id="deep-folding-anatomist-tools-dataset-gen-pipe-module"></span><h2>deep_folding.anatomist_tools.dataset_gen_pipe module<a class="headerlink" href="#module-deep_folding.anatomist_tools.dataset_gen_pipe" title="Permalink to this headline">¶</a></h2>
+<p>Creating pickle file from T1 MRI datas</p>
+<p>The aim of this script is to create dataset of cropped skeletons from MRIs
+saved in a .pickle file.
+Several steps are required: normalization, crop and .pickle generation</p>
+<blockquote>
+<div><p>You can use this program by first entering in the brainvisa environment
+(here brainvisa 5.0.0 installed with singurity) and launching the script
+from the terminal:
+&gt;&gt;&gt; bv bash
+&gt;&gt;&gt; python dataset_gen_pipe.py</p>
+<p>Alternatively, you can launch the script in the interactive terminal ipython:
+&gt;&gt;&gt; %run dataset_gen_pipe.py</p>
+</div></blockquote>
+<dl class="class">
+<dt id="deep_folding.anatomist_tools.dataset_gen_pipe.DatasetCroppedSkeleton">
+<em class="property">class </em><code class="descclassname">deep_folding.anatomist_tools.dataset_gen_pipe.</code><code class="descname">DatasetCroppedSkeleton</code><span class="sig-paren">(</span><em>src_dir='/neurospin/hcp'</em>, <em>tgt_dir='/neurospin/dico/deep_folding_data/test'</em>, <em>transform_dir='/neurospin/dico/deep_folding_data/test/transform'</em>, <em>bbox_dir='/neurospin/dico/deep_folding_data/test/bbox'</em>, <em>list_sulci='S.T.s.ter.asc.ant._left'</em>, <em>side='L'</em>, <em>interp='linear'</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.dataset_gen_pipe.DatasetCroppedSkeleton" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates cropped skeleton files and corresponding pickle file</p>
+<dl class="method">
+<dt id="deep_folding.anatomist_tools.dataset_gen_pipe.DatasetCroppedSkeleton.crop_files">
+<code class="descname">crop_files</code><span class="sig-paren">(</span><em>number_subjects=-1</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.dataset_gen_pipe.DatasetCroppedSkeleton.crop_files" title="Permalink to this definition">¶</a></dt>
+<dd><p>Crop nii files</p>
+<p>The programm loops over all subjects from the input (source) directory.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>number_subjects</strong> – integer giving the number of subjects to analyze,
+by default it is set to _ALL_SUBJECTS (-1).</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="deep_folding.anatomist_tools.dataset_gen_pipe.DatasetCroppedSkeleton.crop_one_file">
+<code class="descname">crop_one_file</code><span class="sig-paren">(</span><em>subject_id</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.dataset_gen_pipe.DatasetCroppedSkeleton.crop_one_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Crops one file</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>subject_id</strong> – string giving the subject ID</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="deep_folding.anatomist_tools.dataset_gen_pipe.DatasetCroppedSkeleton.dataset_gen_pipe">
+<code class="descname">dataset_gen_pipe</code><span class="sig-paren">(</span><em>number_subjects=-1</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.dataset_gen_pipe.DatasetCroppedSkeleton.dataset_gen_pipe" title="Permalink to this definition">¶</a></dt>
+<dd><p>Main API to create pickle files</p>
+<p>The programm loops over all subjects from the input (source) directory.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>number_subjects</strong> – integer giving the number of subjects to analyze,
+by default it is set to _ALL_SUBJECTS (-1).</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="deep_folding.anatomist_tools.dataset_gen_pipe.dataset_gen_pipe">
+<code class="descclassname">deep_folding.anatomist_tools.dataset_gen_pipe.</code><code class="descname">dataset_gen_pipe</code><span class="sig-paren">(</span><em>src_dir='/neurospin/hcp'</em>, <em>tgt_dir='/neurospin/dico/deep_folding_data/test'</em>, <em>transform_dir='/neurospin/dico/deep_folding_data/test/transform'</em>, <em>bbox_dir='/neurospin/dico/deep_folding_data/test/bbox'</em>, <em>side='L'</em>, <em>list_sulci='S.T.s.ter.asc.ant._left'</em>, <em>number_subjects=-1</em>, <em>interp='linear'</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.dataset_gen_pipe.dataset_gen_pipe" title="Permalink to this definition">¶</a></dt>
+<dd><p>Main program generating cropped files and corresponding pickle file</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="deep_folding.anatomist_tools.dataset_gen_pipe.main">
+<code class="descclassname">deep_folding.anatomist_tools.dataset_gen_pipe.</code><code class="descname">main</code><span class="sig-paren">(</span><em>argv</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.dataset_gen_pipe.main" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads argument line and creates cropped files and pickle file</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>argv</strong> – a list containing command line arguments</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="deep_folding.anatomist_tools.dataset_gen_pipe.parse_args">
+<code class="descclassname">deep_folding.anatomist_tools.dataset_gen_pipe.</code><code class="descname">parse_args</code><span class="sig-paren">(</span><em>argv</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.dataset_gen_pipe.parse_args" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function parsing command-line arguments</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>argv</strong> – a list containing command line arguments</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">dictionary with keys: src_dir, tgt_dir, nb_subjects, list_sulci</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">params</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 </div>
-<div class="section" id="deep-folding-anatomist-tools-display-module">
-<h2>deep_folding.anatomist_tools.display module<a class="headerlink" href="#deep-folding-anatomist-tools-display-module" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-deep_folding.anatomist_tools.display">
+<span id="deep-folding-anatomist-tools-display-module"></span><h2>deep_folding.anatomist_tools.display module<a class="headerlink" href="#module-deep_folding.anatomist_tools.display" title="Permalink to this headline">¶</a></h2>
+<p>The aim of this script is to display saved model outputs thanks to Anatomist.
+Model outputs are stored as numpy arrays.</p>
+<dl class="function">
+<dt id="deep_folding.anatomist_tools.display.array_to_ana">
+<code class="descclassname">deep_folding.anatomist_tools.display.</code><code class="descname">array_to_ana</code><span class="sig-paren">(</span><em>ana_a</em>, <em>img</em>, <em>sub_id</em>, <em>phase</em>, <em>status</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.display.array_to_ana" title="Permalink to this definition">¶</a></dt>
+<dd><p>Transforms output tensor into volume readable by Anatomist and defines
+name of the volume displayed in Anatomist window.
+Returns volume displayable by Anatomist</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="deep_folding.anatomist_tools.display.main">
+<code class="descclassname">deep_folding.anatomist_tools.display.</code><code class="descname">main</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.display.main" title="Permalink to this definition">¶</a></dt>
+<dd><p>In the Anatomist window, for each model output, corresponding input will
+also be displayed at its left side.
+Number of columns and view (Sagittal, coronal, frontal) can be specified.
+(It’s better to choose an even number for number of columns to display)</p>
+</dd></dl>
+
 </div>
-<div class="section" id="deep-folding-anatomist-tools-load-data-module">
-<h2>deep_folding.anatomist_tools.load_data module<a class="headerlink" href="#deep-folding-anatomist-tools-load-data-module" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-deep_folding.anatomist_tools.load_data">
+<span id="deep-folding-anatomist-tools-load-data-module"></span><h2>deep_folding.anatomist_tools.load_data module<a class="headerlink" href="#module-deep_folding.anatomist_tools.load_data" title="Permalink to this headline">¶</a></h2>
+<p>Scripts that enables to create a dataframe of numpy arrays from .nii.gz or .nii
+images.</p>
+<dl class="function">
+<dt id="deep_folding.anatomist_tools.load_data.fetch_data">
+<code class="descclassname">deep_folding.anatomist_tools.load_data.</code><code class="descname">fetch_data</code><span class="sig-paren">(</span><em>cropped_dir</em>, <em>tgt_dir=None</em>, <em>side=None</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.load_data.fetch_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a dataframe of data with a column for each subject and associated
+np.array. Generation a dataframe of “normal” images and a dataframe of
+“abnormal” images. Saved these this dataframe to pkl format on the target
+directory</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>cropped_dir</strong> – directory containing cropped images</li>
+<li><strong>tgt_dir</strong> – directory where to save the pickle file</li>
+<li><strong>side</strong> – hemisphere side, either ‘L’ for left or ‘R’ for right hemisphere</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="deep_folding.anatomist_tools.load_data.is_file_nii">
+<code class="descclassname">deep_folding.anatomist_tools.load_data.</code><code class="descname">is_file_nii</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.load_data.is_file_nii" title="Permalink to this definition">¶</a></dt>
+<dd><p>Tests if file is nii file</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>filename</strong> – string giving file name with full path</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">boolean stating if file is nii file</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#deep_folding.anatomist_tools.load_data.is_file_nii" title="deep_folding.anatomist_tools.load_data.is_file_nii">is_file_nii</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 </div>
-<div class="section" id="deep-folding-anatomist-tools-transform-module">
-<h2>deep_folding.anatomist_tools.transform module<a class="headerlink" href="#deep-folding-anatomist-tools-transform-module" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-deep_folding.anatomist_tools.transform">
+<span id="deep-folding-anatomist-tools-transform-module"></span><h2>deep_folding.anatomist_tools.transform module<a class="headerlink" href="#module-deep_folding.anatomist_tools.transform" title="Permalink to this headline">¶</a></h2>
+<p>The aim of this script is to compute transformation files from native MRI space
+to normalized SPM space</p>
+<p>It scans all subjects from src_dir and looks for morphologist analysis folder,
+then produces the transformation file from native space to normalized SPM space,
+saves the results (one transformation file per subject) into directory tgt_dir</p>
+<p class="rubric">Examples</p>
+<p>Specifies the source directory where the MRI data lies, the target directory
+where to put the transform, and the number of subjects to analyse
+(all by default)</p>
+<blockquote>
+<div>$ python transform.py -s /neurospin/hcp -t /path/to/transfo_dir -n all
+$ python transform.py –help</div></blockquote>
+<dl class="class">
+<dt id="deep_folding.anatomist_tools.transform.TransformToSPM">
+<em class="property">class </em><code class="descclassname">deep_folding.anatomist_tools.transform.</code><code class="descname">TransformToSPM</code><span class="sig-paren">(</span><em>src_dir='/neurospin/hcp'</em>, <em>tgt_dir='/neurospin/dico/deep_folding_data/test/transform'</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.transform.TransformToSPM" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes transformation from native to normalized SPM space</p>
+<dl class="attribute">
+<dt id="deep_folding.anatomist_tools.transform.TransformToSPM.src_dir">
+<code class="descname">src_dir</code><a class="headerlink" href="#deep_folding.anatomist_tools.transform.TransformToSPM.src_dir" title="Permalink to this definition">¶</a></dt>
+<dd><p>A string giving the name of the source data directory.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="deep_folding.anatomist_tools.transform.TransformToSPM.tgt_dir">
+<code class="descname">tgt_dir</code><a class="headerlink" href="#deep_folding.anatomist_tools.transform.TransformToSPM.tgt_dir" title="Permalink to this definition">¶</a></dt>
+<dd><p>A string giving the name of the target directory
+in which the transformations are saved.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="deep_folding.anatomist_tools.transform.TransformToSPM.calculate_one_transform">
+<code class="descname">calculate_one_transform</code><span class="sig-paren">(</span><em>subject_id</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.transform.TransformToSPM.calculate_one_transform" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the transformation file of a given subject.</p>
+<p>This transformation enables to go from native space (= MRI space) to
+normalized SPM space. The normalized SPM space  is
+a translation + an axis inversion of the Talairach MNI space.
+The transformation is directly written to the file</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>subject_id</strong> – id of subject whose transformation file is computed</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="deep_folding.anatomist_tools.transform.TransformToSPM.calculate_transforms">
+<code class="descname">calculate_transforms</code><span class="sig-paren">(</span><em>number_subjects=-1</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.transform.TransformToSPM.calculate_transforms" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates transformation file for all subjects.</p>
+<p>This transformation enables to go from native space
+(= MRI subject space) to normalized SPM space.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>number_subjects</strong> – integer giving the number of subjects to analyze,
+by default it is set to _ALL_SUBJECTS (-1).</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="deep_folding.anatomist_tools.transform.main">
+<code class="descclassname">deep_folding.anatomist_tools.transform.</code><code class="descname">main</code><span class="sig-paren">(</span><em>argv</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.transform.main" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads argument line and creates transformation files</p>
+<p>These are transformations from native to normalize SPM space</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>argv</strong> – a list containing command line arguments</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="deep_folding.anatomist_tools.transform.parse_args">
+<code class="descclassname">deep_folding.anatomist_tools.transform.</code><code class="descname">parse_args</code><span class="sig-paren">(</span><em>argv</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.transform.parse_args" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function parsing command-line arguments</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>argv</strong> – a list containing command line arguments</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">source directory name, full path
+tgt_dir: target directory where to save the transformations, full path
+number_subjects: number of subjects to analyze</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#deep_folding.anatomist_tools.transform.TransformToSPM.src_dir" title="deep_folding.anatomist_tools.transform.TransformToSPM.src_dir">src_dir</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="deep_folding.anatomist_tools.transform.transform_to_spm">
+<code class="descclassname">deep_folding.anatomist_tools.transform.</code><code class="descname">transform_to_spm</code><span class="sig-paren">(</span><em>src_dir='/neurospin/hcp'</em>, <em>tgt_dir='/neurospin/dico/deep_folding_data/test/transform'</em>, <em>number_subjects=-1</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.transform.transform_to_spm" title="Permalink to this definition">¶</a></dt>
+<dd><p>High-level API function performing the transform</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>src_dir</strong> – source directory name, full path</li>
+<li><strong>tgt_dir</strong> – target directory where to save the transformations, full path</li>
+<li><strong>number_subjects</strong> – number of subjects to analyze (all=-1 by default)</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 </div>
 <div class="section" id="module-deep_folding.anatomist_tools">
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-deep_folding.anatomist_tools" title="Permalink to this headline">¶</a></h2>
