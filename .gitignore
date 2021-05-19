@@ -8,6 +8,7 @@ build
 dist
 *.egg-info
 notebooks/.ipynb_checkpoints
+notebooks/.vscode
 data/target
 
 # Files #
