@@ -73,7 +73,7 @@ _ALL_SUBJECTS = -1
 
 _SIDE_DEFAULT = 'L'  # hemisphere 'L' or 'R'
 
-_INTERP_DEFAULT = 'linear'  # default interpolation for ApplyAimsTransform
+_INTERP_DEFAULT = 'nearest'  # default interpolation for ApplyAimsTransform
 
 # sulcus to encompass:
 # its name depends on the hemisphere side
