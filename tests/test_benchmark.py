@@ -31,6 +31,7 @@ def test_suppr_benchmark():
     tgt_dir = os.path.join(os.getcwd(), 'data/target/benchmark')
     bbox_dir = os.path.join(os.getcwd(), 'data/reference/bbox/')
     sulci_list=['S.T.s.ter.asc.post._right', 'S.T.s.ter.asc.ant._right']
+    
     benchmark = Benchmark(1, 'R', 500, sulci_list, data_dir=src_dir,
                           saving_dir=tgt_dir, bbox_dir=bbox_dir)
     print(src_dir)
@@ -39,6 +40,14 @@ def test_suppr_benchmark():
     abnormality_test = []
     givers = []
 
+    tgt_dir = os.path.join(os.getcwd(), 'data/target/benchmark/benchmark1/')
+    try:
+        os.makedirs(tgt_dir)
+    except OSError:
+        print ("Creation of the directory %s failed" % tgt_dir)
+    else:
+        print ("Successfully created the directory %s" % tgt_dir)
+        
     for i, sub in enumerate(subjects_list):
         benchmark.get_simple_surfaces(sub)
         if benchmark.surfaces and len(benchmark.surfaces.keys()) > 0:
@@ -47,7 +56,7 @@ def test_suppr_benchmark():
             benchmark.save_file(save_sub)
             benchmark.save_lists(abnormality_test, givers, subjects_list)
 
-    tgt_dir = os.path.join(os.getcwd(), 'data/target/benchmark/benchmark1/')
+
     skel_target = aims.read(os.path.join(tgt_dir, 'output_skeleton_100206.nii.gz')).arraydata()
 
     ref_dir = os.path.join(os.getcwd(), 'data/reference/benchmark')
@@ -77,6 +86,14 @@ def test_add_benchmark():
     abnormality_test = []
     givers = []
 
+    tgt_dir = os.path.join(os.getcwd(), 'data/target/benchmark/benchmark2/')
+    try:
+        os.makedirs(tgt_dir)
+    except OSError:
+        print ("Creation of the directory %s failed" % tgt_dir)
+    else:
+        print ("Successfully created the directory %s" % tgt_dir)
+        
     for i, sub in enumerate(subjects_list):
         benchmark.get_simple_surfaces(sub)
         if benchmark.surfaces and len(benchmark.surfaces.keys()) > 0:
@@ -89,7 +106,6 @@ def test_add_benchmark():
             if len(abnormality_test) == 1:
                 break
 
-    tgt_dir = os.path.join(os.getcwd(), 'data/target/benchmark/benchmark2/')
     skel_target = aims.read(os.path.join(tgt_dir, 'output_skeleton_100307.nii.gz')).arraydata()
 
     ref_dir = os.path.join(os.getcwd(), 'data/reference/benchmark')
