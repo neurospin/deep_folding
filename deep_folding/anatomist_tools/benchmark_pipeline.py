@@ -86,6 +86,9 @@ def parse_args(argv):
     parser.add_argument(
         "-m", "--benchmark_mode", type=str, default=_MODE_DEFAULT,
         help='benchmark creation mode Default is : ' + str(_MODE_DEFAULT))
+    parser.add_argument(
+        "-b", "--benchmark_size", type=int, default=_BENCH_SIZE,
+        help='benchmark size Default is : ' + str(_BENCH_SIZE))
 
     args = parser.parse_args(argv)
     src_dir = args.src_dir  # src_dir is a list
@@ -93,8 +96,9 @@ def parse_args(argv):
     side = args.side
     ss_size = args.ss_size
     mode = args.benchmark_mode
+    bench_size = args.benchmark_size
 
-    return src_dir, sulcus, side, ss_size, mode
+    return src_dir, sulcus, side, ss_size, mode, bench_size
 
 
 _SS_SIZE_DEFAULT = 500
@@ -102,9 +106,10 @@ _SRC_DIR_DEFAULT = '/neurospin/dico/lguillon/mic21/anomalies_set/dataset/'
 _SULCUS_DEFAULT = ['S.T.s.ter.asc.ant._left', 'S.T.s.ter.asc.post._left']
 _SIDE_DEFAULT = 'L'
 _MODE_DEFAULT = 'suppress'
+_BENCH_SIZE = 150
 
 def main(argv):
-    src_dir, sulcus, side, ss_size, mode = parse_args(argv)
+    src_dir, sulcus, side, ss_size, mode, bench_size = parse_args(argv)
     b_num = len(os.walk(src_dir).next()[1]) + 1
     tgt_dir = os.path.join(src_dir, 'benchmark'+str(b_num))
     if not os.path.isdir(tgt_dir):
@@ -112,11 +117,12 @@ def main(argv):
 
     print(' ')
     print('Mode chosen:', mode)
+    print('Chosen Benchmark size: ', bench_size)
     print(' ')
 
     print('=================== Selection and possible alteration of benchmark skeletons ===================')
     generate(b_num, side, ss_size, sulci_list=sulcus,
-             mode=mode, bench_size=150)
+             mode=mode, bench_size=bench_size)
 
     bbox = utils.load_bbox.compute_max_box(sulcus, side)
     print(bbox)
@@ -124,7 +130,6 @@ def main(argv):
     xmin, ymin, zmin = str(bbox[0][0]), str(bbox[0][1]), str(bbox[0][2])
     xmax, ymax, zmax = str(bbox[1][0]), str(bbox[1][1]), str(bbox[1][2])
     box_size = [int(xmax)-int(xmin), int(ymax)-int(ymin), int(zmax)-int(zmin)]
-    print(box_size)
 
     print(' ')
     print('=================== Normalization and crop of skeletons ==================')
