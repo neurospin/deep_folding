@@ -13,6 +13,7 @@
 import os
 import sys
 sys.path.insert(0, os.path.abspath('../..'))
+sys.path.insert(0, os.path.abspath('.'))
 
 # -- Project information -----------------------------------------------------
 
@@ -35,10 +36,11 @@ extensions = [
     'sphinx.ext.coverage',
     'sphinx.ext.githubpages', 
     'sphinx.ext.napoleon',
+    "myExt"
 ]
 
 autosummary_generate = True
-autodoc_typehints = "signature"
+autodoc_typehints = "description"
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -81,6 +83,7 @@ html_static_path = ['_static']
 html_css_files = [
     'custom.css',
 ]
+
 
 # Custom sidebar templates, must be a dictionary that maps document names
 # to template names.
