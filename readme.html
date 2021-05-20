@@ -202,7 +202,20 @@ python -m pytest  <span class="c1"># run tests</span>
 </div>
 <p>Notebooks are in the repertory notebooks, access using:</p>
 <div class="highlight-shell"><div class="highlight"><pre><span></span>bv bash <span class="c1"># to enter brainvisa environnment</span>
+. venv/bin/activate
 jupyter notebook <span class="c1"># then click on file to open a notebook</span>
+</pre></div>
+</div>
+<p>If you want to build the documentation and pushes it to the web:</p>
+<div class="highlight-shell"><div class="highlight"><pre><span></span>bv bash <span class="c1"># to enter brainvisa environnment</span>
+. venv/bin/activate
+<span class="nb">cd</span> docs
+./make_docs.sh
+</pre></div>
+</div>
+<p>If you want to clean the documentation:</p>
+<div class="highlight-shell"><div class="highlight"><pre><span></span><span class="nb">cd</span> docs/source
+make clean
 </pre></div>
 </div>
 </div>
