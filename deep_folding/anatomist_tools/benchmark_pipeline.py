@@ -109,19 +109,25 @@ def main(argv):
     tgt_dir = os.path.join(src_dir, 'benchmark'+str(b_num))
     if not os.path.isdir(tgt_dir):
         os.mkdir(tgt_dir)
+
     print(' ')
-    print('=================== Alteration of original skeletons ===============')
     print('Mode chosen:', mode)
+    print(' ')
+
+    print('=================== Selection and possible alteration of benchmark skeletons ===================')
     generate(b_num, side, ss_size, sulci_list=sulcus,
-             mode=mode, bench_size=2)
+             mode=mode, bench_size=150)
+
     bbox = utils.load_bbox.compute_max_box(sulcus, side)
     print(bbox)
 
     xmin, ymin, zmin = str(bbox[0][0]), str(bbox[0][1]), str(bbox[0][2])
     xmax, ymax, zmax = str(bbox[1][0]), str(bbox[1][1]), str(bbox[1][2])
+    box_size = [int(xmax)-int(xmin), int(ymax)-int(ymin), int(zmax)-int(zmin)]
+    print(box_size)
 
     print(' ')
-    print('=================== Normalization and crop of altered skeletons ===============')
+    print('=================== Normalization and crop of skeletons ==================')
     for img in os.listdir(tgt_dir):
         if '.nii.gz' in img and 'minf' not in img:
             sub = re.search('_(\d{6})', img).group(1)
@@ -137,7 +143,19 @@ def main(argv):
 
             # Crop of the images
             file = os.path.join(tgt_dir, img[:-7] + '_normalized.nii.gz')
-            cmd_bounding_box = ' -x ' + xmin + ' -y ' + ymin + ' -z ' + zmin + ' -X '+ xmax + ' -Y ' + ymax + ' -Z ' + zmax
+            if mode == 'random':
+                # 40 instead of 0 in order to avoid crops with only black voxels
+                random_x = random.randint(40, 157-box_size[0]-1)
+                random_y = random.randint(0, 189-box_size[1]-1)
+                random_z = random.randint(0, 136-box_size[2]-1)
+                print(random_x, random_y, random_z)
+                xmax, ymax, zmax = random_x + box_size[0], random_y + box_size[1], random_z + box_size[2]
+                cmd_bounding_box = ' -x ' + str(random_x) + ' -y ' + str(random_y) + \
+                                   ' -z ' + str(random_z) + ' -X '+ str(xmax) + ' -Y ' + str(ymax) + ' -Z ' + str(zmax)
+                print(cmd_bounding_box)
+            else:
+                cmd_bounding_box = ' -x ' + xmin + ' -y ' + ymin + ' -z ' + zmin + ' -X '+ xmax + ' -Y ' + ymax + ' -Z ' + zmax
+
             cmd_crop = "AimsSubVolume -i " + file + " -o " + file + cmd_bounding_box
             os.system(cmd_crop)
 
