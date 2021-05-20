@@ -29,9 +29,10 @@ def test_suppr_benchmark():
     """
     src_dir = os.path.join(os.getcwd(), 'data/source/unsupervised/ANALYSIS/3T_morphologist/')
     tgt_dir = os.path.join(os.getcwd(), 'data/target/benchmark')
+    bbox_dir = os.path.join(os.getcwd(), 'data/reference/bbox/')
     sulci_list=['S.T.s.ter.asc.post._right', 'S.T.s.ter.asc.ant._right']
     benchmark = Benchmark(1, 'R', 500, sulci_list, data_dir=src_dir,
-                          saving_dir=tgt_dir)
+                          saving_dir=tgt_dir, bbox_dir=bbox_dir)
     print(src_dir)
     subjects_list = ['100206']
 
@@ -66,9 +67,10 @@ def test_add_benchmark():
     """
     src_dir = os.path.join(os.getcwd(), 'data/source/unsupervised/ANALYSIS/3T_morphologist/')
     tgt_dir = os.path.join(os.getcwd(), 'data/target/benchmark')
+    bbox_dir = os.path.join(os.getcwd(), 'data/reference/bbox/')
     sulci_list=['S.T.s.ter.asc.post._right', 'S.T.s.ter.asc.ant._right']
     benchmark = Benchmark(2, 'R', 1000, sulci_list, data_dir=src_dir,
-                          saving_dir=tgt_dir)
+                          saving_dir=tgt_dir, bbox_dir=bbox_dir)
     print(src_dir)
     subjects_list = ['100206', '100307']
 
