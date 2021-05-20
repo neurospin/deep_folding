@@ -107,9 +107,9 @@
 <li class="toctree-l3"><a class="reference internal" href="deep_folding.anatomist_tools.html">deep_folding.anatomist_tools package</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">deep_folding.preprocessing package</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#submodules">Submodules</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#deep-folding-preprocessing-create-sets-module">deep_folding.preprocessing.create_sets module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#deep-folding-preprocessing-datasets-module">deep_folding.preprocessing.datasets module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#deep-folding-preprocessing-pynet-transforms-module">deep_folding.preprocessing.pynet_transforms module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-deep_folding.preprocessing.create_sets">deep_folding.preprocessing.create_sets module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-deep_folding.preprocessing.datasets">deep_folding.preprocessing.datasets module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-deep_folding.preprocessing.pynet_transforms">deep_folding.preprocessing.pynet_transforms module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-deep_folding.preprocessing">Module contents</a></li>
 </ul>
 </li>
@@ -193,14 +193,162 @@
 <div class="section" id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
 </div>
-<div class="section" id="deep-folding-preprocessing-create-sets-module">
-<h2>deep_folding.preprocessing.create_sets module<a class="headerlink" href="#deep-folding-preprocessing-create-sets-module" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-deep_folding.preprocessing.create_sets">
+<span id="deep-folding-preprocessing-create-sets-module"></span><h2>deep_folding.preprocessing.create_sets module<a class="headerlink" href="#module-deep_folding.preprocessing.create_sets" title="Permalink to this headline">¶</a></h2>
+<p>The aim of this script is to create pytorch dataloaders from MRIs saved as
+numpy arrays in a .pickle.</p>
+<dl class="function">
+<dt id="deep_folding.preprocessing.create_sets.create_benchmark_test">
+<code class="descclassname">deep_folding.preprocessing.create_sets.</code><code class="descname">create_benchmark_test</code><span class="sig-paren">(</span><em>benchmark</em>, <em>side</em>, <em>handedness=1</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.preprocessing.create_sets.create_benchmark_test" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates test datasets from benchmark of altered skeletons
+(cf anatomist_tools.benchmark_generation module)
+IN: benchmark: int, number of benchmark</p>
+<blockquote>
+<div>handedness: int, 1 if right handed, 2 if left handed</div></blockquote>
+<p>OUT: dataset_test_abnor_loader</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="deep_folding.preprocessing.create_sets.create_hcp_benchmark">
+<code class="descclassname">deep_folding.preprocessing.create_sets.</code><code class="descname">create_hcp_benchmark</code><span class="sig-paren">(</span><em>side</em>, <em>benchmark</em>, <em>directory</em>, <em>batch_size</em>, <em>handedness=1</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.preprocessing.create_sets.create_hcp_benchmark" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates datasets from HCP data and depending on dataset split of benchmark
+generation (cf anatomist_tools.benchmark_generation module)
+/!ONLY DIFFERENCE FROM create_hcp_sets function is only that it creates
+sets from benchmark split.
+IN: side: str, ‘right’ or ‘left’</p>
+<blockquote>
+<div>handedness: int, 1 if right handed, 2 if left handed
+directory: str, folder in which save the results
+batch_size: int, size of training batches</div></blockquote>
+<dl class="docutils">
+<dt>OUT: root_dir,</dt>
+<dd>dataset_train_loader,
+dataset_val_loader,
+dataset_test_loader</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="deep_folding.preprocessing.create_sets.create_hcp_sets">
+<code class="descclassname">deep_folding.preprocessing.create_sets.</code><code class="descname">create_hcp_sets</code><span class="sig-paren">(</span><em>skeleton</em>, <em>side</em>, <em>directory</em>, <em>batch_size</em>, <em>handedness=0</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.preprocessing.create_sets.create_hcp_sets" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates datasets from HCP data
+IN: skeleton: boolean, True if input is skeleton, False otherwise,</p>
+<blockquote>
+<div>side: str, ‘right’ or ‘left’
+handedness: int, 0 if mixed ind, 1 if right handed, 2 if left handed
+directory: str, folder in which save the results
+batch_size: int, size of training batches
+weights: list, list of weights to apply to skeleton values</div></blockquote>
+<dl class="docutils">
+<dt>OUT: root_dir: created directory where results will be stored</dt>
+<dd>dataset_train_loader, dataset_val_loader, dataset_test_loader: loaders
+that will be used for training and testing</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="deep_folding.preprocessing.create_sets.create_left_handed_set">
+<code class="descclassname">deep_folding.preprocessing.create_sets.</code><code class="descname">create_left_handed_set</code><span class="sig-paren">(</span><em>skeleton</em>, <em>side</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.preprocessing.create_sets.create_left_handed_set" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates dataset of left handed HCP individuals
+IN: skeleton: boolean, True if input is skeleton, False otherwise,</p>
+<blockquote>
+<div>side: str, corresponds to hemisphere’s side ‘right’ or ‘left’</div></blockquote>
+<p>OUT:</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="deep_folding.preprocessing.create_sets.create_loader_from_csv">
+<code class="descclassname">deep_folding.preprocessing.create_sets.</code><code class="descname">create_loader_from_csv</code><span class="sig-paren">(</span><em>subject_list</em>, <em>side</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.preprocessing.create_sets.create_loader_from_csv" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a dataloader from a list of subjects
+IN: subject_list: list of subjects to put in loader, csv file</p>
+<blockquote>
+<div>side: ‘left’ or ‘right’ hemisphere, str</div></blockquote>
+<p>OUT: dataloader</p>
+</dd></dl>
+
 </div>
-<div class="section" id="deep-folding-preprocessing-datasets-module">
-<h2>deep_folding.preprocessing.datasets module<a class="headerlink" href="#deep-folding-preprocessing-datasets-module" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-deep_folding.preprocessing.datasets">
+<span id="deep-folding-preprocessing-datasets-module"></span><h2>deep_folding.preprocessing.datasets module<a class="headerlink" href="#module-deep_folding.preprocessing.datasets" title="Permalink to this headline">¶</a></h2>
+<p>Tools in order to create pytorch dataloaders</p>
+<dl class="class">
+<dt id="deep_folding.preprocessing.datasets.AugDatasetTransformer">
+<em class="property">class </em><code class="descclassname">deep_folding.preprocessing.datasets.</code><code class="descname">AugDatasetTransformer</code><span class="sig-paren">(</span><em>base_dataset</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.preprocessing.datasets.AugDatasetTransformer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">torch.utils.data.dataset.Dataset</span></code></p>
+<p>Custom dataset that applies data augmentation on a dataset processed
+through TensorDataset or Skeleton Dataset classes.
+Transformations are performed on CPU.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="deep_folding.preprocessing.datasets.SkeletonDataset">
+<em class="property">class </em><code class="descclassname">deep_folding.preprocessing.datasets.</code><code class="descname">SkeletonDataset</code><span class="sig-paren">(</span><em>dataframe</em>, <em>filenames=None</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.preprocessing.datasets.SkeletonDataset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Custom dataset for skeleton images that includes image file paths.
+dataframe: dataframe containing training and testing arrays
+filenames: optional, list of corresponding filenames
+Works on CPUs</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="deep_folding.preprocessing.datasets.TensorDataset">
+<em class="property">class </em><code class="descclassname">deep_folding.preprocessing.datasets.</code><code class="descname">TensorDataset</code><span class="sig-paren">(</span><em>data_tensor</em>, <em>filenames</em>, <em>skeleton</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.preprocessing.datasets.TensorDataset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Custom dataset that includes image file paths.
+Applies different transformations to data depending on the type of input.
+IN: data_tensor: tensor containing MRIs as numpy arrays</p>
+<blockquote>
+<div>filenames: list of subjects’ IDs
+skeleton: boolean, whether input is skeleton images or not</div></blockquote>
+<p>OUT: tensor of [batch, sample, subject ID]</p>
+</dd></dl>
+
 </div>
-<div class="section" id="deep-folding-preprocessing-pynet-transforms-module">
-<h2>deep_folding.preprocessing.pynet_transforms module<a class="headerlink" href="#deep-folding-preprocessing-pynet-transforms-module" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-deep_folding.preprocessing.pynet_transforms">
+<span id="deep-folding-preprocessing-pynet-transforms-module"></span><h2>deep_folding.preprocessing.pynet_transforms module<a class="headerlink" href="#module-deep_folding.preprocessing.pynet_transforms" title="Permalink to this headline">¶</a></h2>
+<p>Module that defines common transformations that can be applied when the dataset
+is loaded.</p>
+<dl class="class">
+<dt id="deep_folding.preprocessing.pynet_transforms.Downsample">
+<em class="property">class </em><code class="descclassname">deep_folding.preprocessing.pynet_transforms.</code><code class="descname">Downsample</code><span class="sig-paren">(</span><em>scale</em>, <em>with_channels=True</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.preprocessing.pynet_transforms.Downsample" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>A class to downsample an array.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="deep_folding.preprocessing.pynet_transforms.DownsampleTensor">
+<em class="property">class </em><code class="descclassname">deep_folding.preprocessing.pynet_transforms.</code><code class="descname">DownsampleTensor</code><span class="sig-paren">(</span><em>scale</em>, <em>with_channels=True</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.preprocessing.pynet_transforms.DownsampleTensor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>A class to downsample a tensor.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="deep_folding.preprocessing.pynet_transforms.NormalizeHisto">
+<em class="property">class </em><code class="descclassname">deep_folding.preprocessing.pynet_transforms.</code><code class="descname">NormalizeHisto</code><span class="sig-paren">(</span><em>arr</em>, <em>*args</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.preprocessing.pynet_transforms.NormalizeHisto" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Class to normalize voxels’ intensity values to interval</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="deep_folding.preprocessing.pynet_transforms.NormalizeSkeleton">
+<em class="property">class </em><code class="descclassname">deep_folding.preprocessing.pynet_transforms.</code><code class="descname">NormalizeSkeleton</code><span class="sig-paren">(</span><em>arr</em>, <em>*args</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.preprocessing.pynet_transforms.NormalizeSkeleton" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Class to normalize skeleton objects,
+black voxels: 0
+grey and white voxels: 1</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="deep_folding.preprocessing.pynet_transforms.Padding">
+<em class="property">class </em><code class="descclassname">deep_folding.preprocessing.pynet_transforms.</code><code class="descname">Padding</code><span class="sig-paren">(</span><em>shape</em>, <em>nb_channels=1</em>, <em>fill_value=0</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.preprocessing.pynet_transforms.Padding" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>A class to pad an image.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="deep_folding.preprocessing.pynet_transforms.PaddingTensor">
+<em class="property">class </em><code class="descclassname">deep_folding.preprocessing.pynet_transforms.</code><code class="descname">PaddingTensor</code><span class="sig-paren">(</span><em>shape</em>, <em>nb_channels=1</em>, <em>fill_value=0</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.preprocessing.pynet_transforms.PaddingTensor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>A class to pad a tensor</p>
+</dd></dl>
+
 </div>
 <div class="section" id="module-deep_folding.preprocessing">
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-deep_folding.preprocessing" title="Permalink to this headline">¶</a></h2>
