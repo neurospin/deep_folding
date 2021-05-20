@@ -58,6 +58,7 @@ import utils.load_bbox
 
 _DEFAULT_DATA_DIR = '/neurospin/hcp/ANALYSIS/3T_morphologist/'
 _DEFAULT_SAVING_DIR = '/neurospin/dico/lguillon/mic21/anomalies_set/dataset/'
+_DEFAULT_BBOX_DIR = '/neurospin/dico/deep_folding_data/data/bbox/'
 
 
 class Benchmark():
@@ -65,7 +66,8 @@ class Benchmark():
     """
 
     def __init__(self, b_num, side, ss_size, sulci_list,
-                 data_dir=_DEFAULT_DATA_DIR, saving_dir=_DEFAULT_SAVING_DIR):
+                 data_dir=_DEFAULT_DATA_DIR, saving_dir=_DEFAULT_SAVING_DIR,
+                 bbox_dir=_DEFAULT_BBOX_DIR):
         """Inits with list of directories, bounding box and sulci
 
         Args:
@@ -84,8 +86,12 @@ class Benchmark():
         self.data_dir = data_dir
         self.saving_dir = os.path.join(saving_dir, 'benchmark'+str(self.b_num))
         self.abnormality_test = []
-        self.bbmin, self.bbmax = utils.load_bbox.compute_max_box(sulci_list, side, talairach_box=True)
+        self.bbmin, self.bbmax = utils.load_bbox.compute_max_box(sulci_list, side,
+                                talairach_box=True, src_dir=bbox_dir)
         print(self.bbmin, self.bbmax)
+        self.cpt_skel_1 = 't1mri/default_acquisition/default_analysis/segmentation'
+        self.cpt_skel_2 = 'skeleton_'
+        self.cpt_skel_3 = '.nii.gz'
 
     def get_simple_surfaces(self, sub):
         """Selects simple surfaces of one subject that satisfy following
@@ -97,9 +103,6 @@ class Benchmark():
         """
         cpt_arg_1 = 't1mri/default_acquisition/default_analysis/folds/3.1/default_session_auto'
         cpt_arg_2 = '_default_session_auto.arg'
-        self.cpt_skel_1 = 't1mri/default_acquisition/default_analysis/segmentation'
-        self.cpt_skel_2 = 'skeleton_'
-        self.cpt_skel_3 = '.nii.gz'
 
         if os.path.isdir(os.path.join(self.data_dir, str(sub) + '/')):
             self.surfaces = dict()
@@ -130,6 +133,7 @@ class Benchmark():
             sub: int giving the subject
         """
         # Suppression of one random simple surface (satisfying both criteria)
+        random.seed(42)
         surface = random.randint(0, len(self.surfaces)-1)
         print(self.surfaces[surface]['label'])
 
@@ -152,6 +156,7 @@ class Benchmark():
             i: int giving the current subject
         """
         sub_added = subjects_list[i+1]
+        #random.seed(42)
         surface = random.randint(0, len(self.surfaces)-1)
 
         if os.path.isdir(self.data_dir + str(sub_added)):
@@ -170,6 +175,14 @@ class Benchmark():
 
         save_subject = sub_added
         return save_subject
+
+    def random_skel(self, sub):
+        """
+        """
+        if os.path.isdir(self.data_dir + str(sub)):
+            skel_file = os.path.join(self.data_dir, str(sub), self.cpt_skel_1,
+                                     self.side + self.cpt_skel_2 + str(sub) + self.cpt_skel_3)
+            self.skel = aims.read(skel_file)
 
     def save_file(self, sub):
         """Saves the modified skeleton
@@ -239,22 +252,25 @@ def generate(b_num, side, ss_size, sulci_list, mode='suppress', bench_size=150):
 
     for i, sub in enumerate(subjects_list):
         print(sub)
-        benchmark.get_simple_surfaces(sub)
-        if benchmark.surfaces and len(benchmark.surfaces.keys()) > 0:
-            if mode == 'suppress' or (mode=='mix' and i<bench_size/2):
-                # Suppression of simple surfaces
-                save_sub = benchmark.delete_ss(sub)
-            elif mode == 'add' or (mode=='mix' and i>=bench_size/2):
-                # Addition of simple surfaces
-                save_sub = benchmark.add_ss(subjects_list, i)
-                givers.append(sub)
+        save_sub = sub
+        if mode != 'random':
+            benchmark.get_simple_surfaces(sub)
+            if benchmark.surfaces and len(benchmark.surfaces.keys()) > 0:
+                if mode == 'suppress' or (mode=='mix' and i<bench_size/2):
+                    # Suppression of simple surfaces
+                    save_sub = benchmark.delete_ss(sub)
+                elif mode == 'add' or (mode=='mix' and i>=bench_size/2):
+                    # Addition of simple surfaces
+                    save_sub = benchmark.add_ss(subjects_list, i)
+                    givers.append(sub)
+        else:
+            benchmark.random_skel(sub)
+        benchmark.save_file(save_sub)
 
-            # Addition of modified graph to abnormality_test set
-            abnormality_test.append(save_sub)
-            benchmark.save_file(save_sub)
-
-            if len(abnormality_test) == bench_size:
-                break
+        # Addition of modified graph to abnormality_test set
+        abnormality_test.append(save_sub)
+        if len(abnormality_test) == bench_size:
+            break
     benchmark.save_lists(abnormality_test, givers, subjects_list)
 
 
@@ -263,5 +279,5 @@ def generate(b_num, side, ss_size, sulci_list, mode='suppress', bench_size=150):
 ######################################################################
 
 if __name__ == '__main__':
-    generate(111, 'R', 500, sulci_list=['S.T.s.ter.asc.post._right', 'S.T.s.ter.asc.ant._right'],
-         mode='mix')
+    generate(222, 'R', 500, sulci_list=['S.T.s.ter.asc.post._right', 'S.T.s.ter.asc.ant._right'],
+         mode='suppr', bench_size=4)

@@ -1,0 +1,34 @@
+{
+    "bbmax_AIMS_Talairach": [
+        -35.273687771086315, 
+        76.30337489488505, 
+        2.4001623205840588
+    ], 
+    "bbmax_voxel": [
+        43, 
+        149, 
+        84
+    ], 
+    "bbmin_AIMS_Talairach": [
+        -73.3850136399607, 
+        26.096661612857133, 
+        -65.89842015239913
+    ], 
+    "bbmin_voxel": [
+        8, 
+        95, 
+        23
+    ], 
+    "date": "2021-04-26 18:21:44", 
+    "git_sha": "f0edfbdd06bb23786f8a8fb07dbaed96601bdbf4", 
+    "is_git": true, 
+    "nb_subjects": 61, 
+    "repo_working_dir": "/home/jc225751/Program/dicoFolding", 
+    "side": "R", 
+    "src_dir": [
+        "/neurospin/dico/data/bv_databases/human/pclean/all"
+    ], 
+    "sulcus": "S.T.s.ter.asc.ant._right", 
+    "tgt_dir": "/neurospin/dico/deep_folding_data/data/bbox", 
+    "timestamp": 1619454104.595638
+}
