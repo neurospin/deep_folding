@@ -9,6 +9,6 @@ setup(
     long_description=open('README.rst').read(),
     install_requires=['six', 'numpy', 'pytest', 'GitPython', 'typing'],
     url='https://github.com/neurospin/deep_folding',
-    author='Louise Guillon and Joël Chavas',
+    author='Louise Guillon and Joel Chavas',
     author_email=''
 )

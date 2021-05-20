@@ -45,6 +45,23 @@ Notebooks are in the repertory notebooks, access using:
 .. code-block:: shell
 
     bv bash # to enter brainvisa environnment
+    . venv/bin/activate
     jupyter notebook # then click on file to open a notebook
 
+If you want to build the documentation and pushes it to the web:
+
+.. code-block:: shell
+
+    bv bash # to enter brainvisa environnment
+    . venv/bin/activate
+    cd docs
+    ./make_docs.sh
+
+
+If you want to clean the documentation:
+
+.. code-block:: shell
+
+    cd docs/source
+    make clean
 

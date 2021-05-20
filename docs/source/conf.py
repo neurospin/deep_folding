@@ -13,7 +13,6 @@
 import os
 import sys
 sys.path.insert(0, os.path.abspath('../..'))
-sys.path.insert(0, os.path.abspath('.'))
 
 # -- Project information -----------------------------------------------------
 
@@ -36,7 +35,6 @@ extensions = [
     'sphinx.ext.coverage',
     'sphinx.ext.githubpages', 
     'sphinx.ext.napoleon',
-    "myExt"
 ]
 
 autosummary_generate = True
