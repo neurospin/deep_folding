@@ -220,33 +220,115 @@ Abnormalities are defined as skeletons with one simple surface missing.
 This simple surface must be completely inside the bounding box of interest and
 include a minimum number of voxels (in order that the anomaly is big enough to
 be considered as abnormal).</p>
-<dl class="function">
-<dt id="deep_folding.anatomist_tools.benchmark_generation.generate">
-<code class="descclassname">deep_folding.anatomist_tools.benchmark_generation.</code><code class="descname">generate</code><span class="sig-paren">(</span><em>b_num</em>, <em>side</em>, <em>ss_size</em>, <em>sulci_list</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.benchmark_generation.generate" title="Permalink to this definition">¶</a></dt>
-<dd><p>Generates the abnormal skeleton images</p>
-<dl class="docutils">
-<dt>Args: b_num: the benchmark number to create (int)</dt>
-<dd>side: hemisphere, str, whether ‘L’ or ‘R’
-ss_size: Minimal size of simple surface to suppress
-sulci_list: the list of sulci delimiting the bounding box</dd>
-<dt>Returns: list of subjects altered or original</dt>
-<dd>saves abnormal skeletons to saving_dir</dd>
+<dl class="class">
+<dt id="deep_folding.anatomist_tools.benchmark_generation.Benchmark">
+<em class="property">class </em><code class="descclassname">deep_folding.anatomist_tools.benchmark_generation.</code><code class="descname">Benchmark</code><span class="sig-paren">(</span><em>b_num</em>, <em>side</em>, <em>ss_size</em>, <em>sulci_list</em>, <em>data_dir='/neurospin/hcp/ANALYSIS/3T_morphologist/'</em>, <em>saving_dir='/neurospin/dico/lguillon/mic21/anomalies_set/dataset/'</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.benchmark_generation.Benchmark" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates benchmark of altered skeletons</p>
+<dl class="method">
+<dt id="deep_folding.anatomist_tools.benchmark_generation.Benchmark.add_ss">
+<code class="descname">add_ss</code><span class="sig-paren">(</span><em>subjects_list</em>, <em>i</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.benchmark_generation.Benchmark.add_ss" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds one simple surface from subject i to subject i+1 skeleton</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>subjects_list</strong> – list of subjects</li>
+<li><strong>i</strong> – int giving the current subject</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="deep_folding.anatomist_tools.benchmark_generation.Benchmark.delete_ss">
+<code class="descname">delete_ss</code><span class="sig-paren">(</span><em>sub</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.benchmark_generation.Benchmark.delete_ss" title="Permalink to this definition">¶</a></dt>
+<dd><p>Deletes one simple surface</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>sub</strong> – int giving the subject</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="deep_folding.anatomist_tools.benchmark_generation.Benchmark.get_simple_surfaces">
+<code class="descname">get_simple_surfaces</code><span class="sig-paren">(</span><em>sub</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.benchmark_generation.Benchmark.get_simple_surfaces" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Selects simple surfaces of one subject that satisfy following</dt>
+<dd>conditions: size &gt;= given ss_size and completely included in the
+bouding box</dd>
 </dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>sub</strong> – int giving the subject</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="deep_folding.anatomist_tools.benchmark_generation.Benchmark.save_file">
+<code class="descname">save_file</code><span class="sig-paren">(</span><em>sub</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.benchmark_generation.Benchmark.save_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Saves the modified skeleton</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>sub</strong> – int giving the subject</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="deep_folding.anatomist_tools.benchmark_generation.Benchmark.save_lists">
+<code class="descname">save_lists</code><span class="sig-paren">(</span><em>abnormality_test</em>, <em>givers</em>, <em>subjects_list</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.benchmark_generation.Benchmark.save_lists" title="Permalink to this definition">¶</a></dt>
+<dd><p>Saves lists of modified subjects</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>abnormality_test</strong> – list of modified subjects</li>
+<li><strong>givers</strong> – in case of simple surface addition, list of subjects whose
+one of the simple surface has been added to another subject</li>
+<li><strong>subjects_list</strong> – list of subjects</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="function">
-<dt id="deep_folding.anatomist_tools.benchmark_generation.generate_add_ss">
-<code class="descclassname">deep_folding.anatomist_tools.benchmark_generation.</code><code class="descname">generate_add_ss</code><span class="sig-paren">(</span><em>b_num</em>, <em>side</em>, <em>ss_size</em>, <em>sulci_list</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.benchmark_generation.generate_add_ss" title="Permalink to this definition">¶</a></dt>
-<dd><p>Creates a benchmark with skeletons having additional simple surfaces (ss)
-IN: b_num: benchmark number</p>
-<blockquote>
-<div>side: hemisphere, str, whether ‘L’ or ‘R’,
-region: region of the brain
-ss_size: Minimal size of simple surface to suppress</div></blockquote>
-<dl class="docutils">
-<dt>OUT: altered skeletons generated</dt>
-<dd>list of subjects altered or original</dd>
-</dl>
+<dt id="deep_folding.anatomist_tools.benchmark_generation.generate">
+<code class="descclassname">deep_folding.anatomist_tools.benchmark_generation.</code><code class="descname">generate</code><span class="sig-paren">(</span><em>b_num</em>, <em>side</em>, <em>ss_size</em>, <em>sulci_list</em>, <em>mode='suppress'</em>, <em>bench_size=150</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.benchmark_generation.generate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates a benchmark</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>b_num</strong> – number of the benchmark to create</li>
+<li><strong>side</strong> – hemisphere side (either L for left, or R for right hemisphere)</li>
+<li><strong>sulci_list</strong> – list of sulcus names</li>
+<li><strong>mode</strong> – string giving the type of benchmark to create (‘suppress’, ‘add’
+or ‘mix’)</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
@@ -259,14 +341,11 @@ Only right handed HCP subjects</p>
 </div>
 <div class="section" id="module-deep_folding.anatomist_tools.benchmark_pipeline">
 <span id="deep-folding-anatomist-tools-benchmark-pipeline-module"></span><h2>deep_folding.anatomist_tools.benchmark_pipeline module<a class="headerlink" href="#module-deep_folding.anatomist_tools.benchmark_pipeline" title="Permalink to this headline">¶</a></h2>
-<p>Generating benchmark of sulcal abnormalities up tp pickle file</p>
-<p>The aim of this script is to generate a benchmark of sulcal abnormalities.
-The script gathers all the steps necessary.</p>
+<p>Full pipeline to create a benchmark of abnormalities.</p>
 <dl class="function">
 <dt id="deep_folding.anatomist_tools.benchmark_pipeline.main">
 <code class="descclassname">deep_folding.anatomist_tools.benchmark_pipeline.</code><code class="descname">main</code><span class="sig-paren">(</span><em>argv</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.benchmark_pipeline.main" title="Permalink to this definition">¶</a></dt>
-<dd><p>Main loop to generate abnormal skeletons and create pickle files</p>
-</dd></dl>
+<dd></dd></dl>
 
 <dl class="function">
 <dt id="deep_folding.anatomist_tools.benchmark_pipeline.parse_args">
@@ -570,7 +649,7 @@ from the terminal:
 </div></blockquote>
 <dl class="class">
 <dt id="deep_folding.anatomist_tools.dataset_gen_pipe.DatasetCroppedSkeleton">
-<em class="property">class </em><code class="descclassname">deep_folding.anatomist_tools.dataset_gen_pipe.</code><code class="descname">DatasetCroppedSkeleton</code><span class="sig-paren">(</span><em>src_dir='/neurospin/hcp'</em>, <em>tgt_dir='/neurospin/dico/deep_folding_data/test'</em>, <em>transform_dir='/neurospin/dico/deep_folding_data/test/transform'</em>, <em>bbox_dir='/neurospin/dico/deep_folding_data/test/bbox'</em>, <em>list_sulci='S.T.s.ter.asc.ant._left'</em>, <em>side='L'</em>, <em>interp='linear'</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.dataset_gen_pipe.DatasetCroppedSkeleton" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">deep_folding.anatomist_tools.dataset_gen_pipe.</code><code class="descname">DatasetCroppedSkeleton</code><span class="sig-paren">(</span><em>src_dir='/neurospin/hcp'</em>, <em>tgt_dir='/neurospin/dico/deep_folding_data/test'</em>, <em>transform_dir='/neurospin/dico/deep_folding_data/test/transform'</em>, <em>bbox_dir='/neurospin/dico/deep_folding_data/test/bbox'</em>, <em>list_sulci='S.T.s.ter.asc.ant._left'</em>, <em>side='L'</em>, <em>interp='nearest'</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.dataset_gen_pipe.DatasetCroppedSkeleton" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generates cropped skeleton files and corresponding pickle file</p>
 <dl class="method">
 <dt id="deep_folding.anatomist_tools.dataset_gen_pipe.DatasetCroppedSkeleton.crop_files">
@@ -622,7 +701,7 @@ by default it is set to _ALL_SUBJECTS (-1).</td>
 
 <dl class="function">
 <dt id="deep_folding.anatomist_tools.dataset_gen_pipe.dataset_gen_pipe">
-<code class="descclassname">deep_folding.anatomist_tools.dataset_gen_pipe.</code><code class="descname">dataset_gen_pipe</code><span class="sig-paren">(</span><em>src_dir='/neurospin/hcp'</em>, <em>tgt_dir='/neurospin/dico/deep_folding_data/test'</em>, <em>transform_dir='/neurospin/dico/deep_folding_data/test/transform'</em>, <em>bbox_dir='/neurospin/dico/deep_folding_data/test/bbox'</em>, <em>side='L'</em>, <em>list_sulci='S.T.s.ter.asc.ant._left'</em>, <em>number_subjects=-1</em>, <em>interp='linear'</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.dataset_gen_pipe.dataset_gen_pipe" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">deep_folding.anatomist_tools.dataset_gen_pipe.</code><code class="descname">dataset_gen_pipe</code><span class="sig-paren">(</span><em>src_dir='/neurospin/hcp'</em>, <em>tgt_dir='/neurospin/dico/deep_folding_data/test'</em>, <em>transform_dir='/neurospin/dico/deep_folding_data/test/transform'</em>, <em>bbox_dir='/neurospin/dico/deep_folding_data/test/bbox'</em>, <em>side='L'</em>, <em>list_sulci='S.T.s.ter.asc.ant._left'</em>, <em>number_subjects=-1</em>, <em>interp='nearest'</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.dataset_gen_pipe.dataset_gen_pipe" title="Permalink to this definition">¶</a></dt>
 <dd><p>Main program generating cropped files and corresponding pickle file</p>
 </dd></dl>
 
