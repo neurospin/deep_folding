@@ -53,7 +53,7 @@ from glob import glob
 import random
 import pandas as pd
 import os
-import utils.load_bbox
+import deep_folding.anatomist_tools.utils as utils
 
 
 _DEFAULT_DATA_DIR = '/neurospin/hcp/ANALYSIS/3T_morphologist/'
