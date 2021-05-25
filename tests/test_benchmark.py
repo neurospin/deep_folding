@@ -14,6 +14,27 @@ def equal_skeletons(skel_ref, skel_target):
     equal_skeleton = np.array_equal(skel_ref, skel_target)
     return equal_skeleton
 
+def are_arrays_almost_equal(arr1, arr2, epsilon, max_number_different_pixels):
+    """Returns True if arrays arr1 and arr2 are almost equal
+
+	arr1 and arr2 are almost equal if at most max_number_different_pixels pixels
+	differ by more than epsilon
+
+	Args:
+		arr1: first numpy array
+		arr2: second numpy array
+		epsilon: max allowed difference between pixels values
+		max_number_different_pixels: max allowed different number of pixels
+
+	Returns:
+		equal_arrays: True if arrays are almost equal
+		number_different_pixels: number of pixels differing by more thanepsilon
+    """
+    difference = (abs(arr1 - arr2) > epsilon)
+    number_different_pixels = np.count_nonzero(difference)
+    print("Number of different pixels = ", number_different_pixels)
+    equal_arrays = number_different_pixels <= max_number_different_pixels
+    return equal_arrays, number_different_pixels
 
 def equal_csv_files(csv1, csv2):
     """Returns True if csv1 and csv2 are identical
@@ -42,11 +63,11 @@ def test_suppr_benchmark():
 
     tgt_dir = os.path.join(os.getcwd(), 'data/target/benchmark/benchmark1/')
     try:
-        os.makedirs(tgt_dir)
+        if not os.path.exists(tgt_dir):
+            os.makedirs(tgt_dir)
     except OSError:
         print ("Creation of the directory %s failed" % tgt_dir)
-    else:
-        print ("Successfully created the directory %s" % tgt_dir)
+    print ("Successfully created the directory %s" % tgt_dir)
         
     for i, sub in enumerate(subjects_list):
         benchmark.get_simple_surfaces(sub)
@@ -63,6 +84,7 @@ def test_suppr_benchmark():
     skel_ref = aims.read(os.path.join(ref_dir, 'skeleton_100206_suppr.nii.gz')).arraydata()
 
     equal_skel = equal_skeletons(skel_ref, skel_target)
+    # equal_skel,_ = are_arrays_almost_equal(skel_ref, skel_target, 2, 1000)
     assert equal_skel
 
     tgt_csv = os.path.join(os.getcwd(), 'data/target/benchmark/benchmark1/abnormality_test.csv')
