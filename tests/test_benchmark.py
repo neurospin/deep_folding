@@ -52,8 +52,8 @@ def test_suppr_benchmark():
     tgt_dir = os.path.join(os.getcwd(), 'data/target/benchmark')
     bbox_dir = os.path.join(os.getcwd(), 'data/reference/bbox/')
     sulci_list=['S.T.s.ter.asc.post._right', 'S.T.s.ter.asc.ant._right']
-    
-    benchmark = Benchmark(1, 'R', 500, sulci_list, data_dir=src_dir,
+
+    benchmark = Benchmark(1, 'R', 1000, sulci_list, data_dir=src_dir,
                           saving_dir=tgt_dir, bbox_dir=bbox_dir)
     print(src_dir)
     subjects_list = ['100206']
@@ -68,7 +68,7 @@ def test_suppr_benchmark():
     except OSError:
         print ("Creation of the directory %s failed" % tgt_dir)
     print ("Successfully created the directory %s" % tgt_dir)
-        
+
     for i, sub in enumerate(subjects_list):
         benchmark.get_simple_surfaces(sub)
         if benchmark.surfaces and len(benchmark.surfaces.keys()) > 0:
@@ -115,7 +115,7 @@ def test_add_benchmark():
         print ("Creation of the directory %s failed" % tgt_dir)
     else:
         print ("Successfully created the directory %s" % tgt_dir)
-        
+
     for i, sub in enumerate(subjects_list):
         benchmark.get_simple_surfaces(sub)
         if benchmark.surfaces and len(benchmark.surfaces.keys()) > 0:
