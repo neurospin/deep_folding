@@ -14,28 +14,6 @@ def equal_skeletons(skel_ref, skel_target):
     equal_skeleton = np.array_equal(skel_ref, skel_target)
     return equal_skeleton
 
-def are_arrays_almost_equal(arr1, arr2, epsilon, max_number_different_pixels):
-    """Returns True if arrays arr1 and arr2 are almost equal
-
-	arr1 and arr2 are almost equal if at most max_number_different_pixels pixels
-	differ by more than epsilon
-
-	Args:
-		arr1: first numpy array
-		arr2: second numpy array
-		epsilon: max allowed difference between pixels values
-		max_number_different_pixels: max allowed different number of pixels
-
-	Returns:
-		equal_arrays: True if arrays are almost equal
-		number_different_pixels: number of pixels differing by more thanepsilon
-    """
-    difference = (abs(arr1 - arr2) > epsilon)
-    number_different_pixels = np.count_nonzero(difference)
-    print("Number of different pixels = ", number_different_pixels)
-    equal_arrays = number_different_pixels <= max_number_different_pixels
-    return equal_arrays, number_different_pixels
-
 def equal_csv_files(csv1, csv2):
     """Returns True if csv1 and csv2 are identical
     """
