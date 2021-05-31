@@ -25,12 +25,12 @@ Development
     # Install for development
     bv bash
     cd deep_folding
-    virtualenv -p /casa/install/bin/python --system-site-packages venv
+    virtualenv --python=python3 --system-site-packages venv
     . venv/bin/activate
-    pip install -e .
+    pip3 install -e .
 
     # Tests
-    python -m pytest  # run tests
+    python3 -m pytest  # run tests
 
 
 
