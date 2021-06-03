@@ -67,6 +67,7 @@ import six
 
 from deep_folding.anatomist_tools.utils.logs import LogJson
 from deep_folding.anatomist_tools.utils.load_bbox import compute_max_box
+from deep_folding.anatomist_tools.utils.resample import resample
 from deep_folding.anatomist_tools.load_data import fetch_data
 
 _ALL_SUBJECTS = -1
@@ -74,6 +75,8 @@ _ALL_SUBJECTS = -1
 _SIDE_DEFAULT = 'L'  # hemisphere 'L' or 'R'
 
 _INTERP_DEFAULT = 'nearest'  # default interpolation for ApplyAimsTransform
+
+_RESAMPLING_DEFAULT = None # if None, resampling method is AimsApplyTransform
 
 # sulcus to encompass:
 # its name depends on the hemisphere side
@@ -88,10 +91,10 @@ _SRC_DIR_DEFAULT = '/neurospin/hcp'
 # Directory that contains the transformation file
 # from native to MNI through SPM
 # These files have been created with spm_skeleton
-_TRANSFORM_DIR_DEFAULT = '/neurospin/dico/deep_folding_data/test/transform'
+_TRANSFORM_DIR_DEFAULT = '/neurospin/dico/deep_folding_data/data/transform'
 
 # Directory containing bounding box json files
-_BBOX_DIR_DEFAULT = '/neurospin/dico/deep_folding_data/test/bbox'
+_BBOX_DIR_DEFAULT = '/neurospin/dico/deep_folding_data/data/bbox'
 
 # Output (target) directory
 # -------------------------
@@ -108,7 +111,8 @@ class DatasetCroppedSkeleton:
                  bbox_dir=_BBOX_DIR_DEFAULT,
                  list_sulci=_SULCUS_DEFAULT,
                  side=_SIDE_DEFAULT,
-                 interp=_INTERP_DEFAULT):
+                 interp=_INTERP_DEFAULT,
+                 resampling=_RESAMPLING_DEFAULT):
         """Inits with list of directories and list of sulci
 
         Args:
@@ -135,6 +139,9 @@ class DatasetCroppedSkeleton:
         self.bbox_dir = bbox_dir
         self.side = side
         self.interp = interp
+        self.resampling = resampling
+        if self.resampling:
+            self.bbox_dir = '/neurospin/dico/deep_folding_data/test/bbox/resampling_bastien/'
 
         # Morphologist directory
         self.morphologist_dir = join(self.src_dir, "ANALYSIS/3T_morphologist")
@@ -190,13 +197,20 @@ class DatasetCroppedSkeleton:
         file_cropped = join(self.cropped_dir, self.cropped_file % subject)
 
         # Normalization and resampling of skeleton images
-        cmd_normalize = 'AimsApplyTransform' + \
-                        ' -i ' + file_skeleton + \
-                        ' -o ' + file_cropped + \
-                        ' -m ' + file_transform + \
-                        ' -r ' + file_SPM + \
-                        ' -t ' + self.interp
-        os.system(cmd_normalize)
+        if self.resampling:
+            resample(file_skeleton,
+                     file_cropped,
+                     output_vs=(2,2,2),
+                     transformation=file_transform)
+
+        else :
+            cmd_normalize = 'AimsApplyTransform' + \
+                            ' -i ' + file_skeleton + \
+                            ' -o ' + file_cropped + \
+                            ' -m ' + file_transform + \
+                            ' -r ' + file_SPM + \
+                            ' -t ' + self.interp
+            os.system(cmd_normalize)
 
         # Take the coordinates of the bounding box
         bbmin = self.bbmin
@@ -336,8 +350,14 @@ def parse_args(argv):
              "n[earest], l[inear], q[uadratic], c[cubic], quartic, "
              "quintic, six[thorder], seven[thorder]. "
              "Modes may also be specified as order number: "
-             "0=nearest, 1=linear..."
-    )
+             "0=nearest, 1=linear...")
+    parser.add_argument(
+        "-p", "--resampling", type=str, default=None,
+        help='Method of resampling to perform. '
+             'Type of resampling: '
+             's[ulcus] for Bastien method'
+             'If None, AimsApplyTransform is used.'
+             'Default is : None')
 
     params = {}
 
@@ -349,6 +369,7 @@ def parse_args(argv):
     params['list_sulci'] = args.sulcus  # a list of sulci
     params['side'] = args.side
     params['interp'] = args.interp
+    params['resampling'] = args.resampling
 
     number_subjects = args.nb_subjects
 
@@ -372,14 +393,15 @@ def dataset_gen_pipe(src_dir=_SRC_DIR_DEFAULT, tgt_dir=_TGT_DIR_DEFAULT,
                      transform_dir=_TRANSFORM_DIR_DEFAULT,
                      bbox_dir=_BBOX_DIR_DEFAULT, side=_SIDE_DEFAULT,
                      list_sulci=_SULCUS_DEFAULT, number_subjects=_ALL_SUBJECTS,
-                     interp=_INTERP_DEFAULT):
+                     interp=_INTERP_DEFAULT, resampling=_RESAMPLING_DEFAULT):
     """Main program generating cropped files and corresponding pickle file
     """
 
     dataset = DatasetCroppedSkeleton(src_dir=src_dir, tgt_dir=tgt_dir,
                                      transform_dir=transform_dir,
                                      bbox_dir=bbox_dir, side=side,
-                                     list_sulci=list_sulci, interp=interp)
+                                     list_sulci=list_sulci, interp=interp,
+                                     resampling=resampling)
     dataset.dataset_gen_pipe(number_subjects=number_subjects)
 
 
@@ -403,7 +425,8 @@ def main(argv):
                          side=params['side'],
                          list_sulci=params['list_sulci'],
                          interp=params['interp'],
-                         number_subjects=params['nb_subjects'])
+                         number_subjects=params['nb_subjects'],
+                         resampling=params['resampling'])
     except SystemExit as exc:
         if exc.code != 0:
             six.reraise(*sys.exc_info())
