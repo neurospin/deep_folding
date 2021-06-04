@@ -96,6 +96,7 @@ _SRC_DIR_DEFAULT = '/neurospin/hcp'
 _TRANSFORM_DIR_DEFAULT = '/neurospin/dico/deep_folding_data/data/transform'
 
 # Directory containing bounding box json files
+# default corresponds to bounding boxes computed for voxels of 1mm
 _BBOX_DIR_DEFAULT = '/neurospin/dico/deep_folding_data/data/bbox'
 
 # Output (target) directory
@@ -144,8 +145,6 @@ class DatasetCroppedSkeleton:
         self.interp = interp
         self.resampling = resampling
         self.out_voxel_size = out_voxel_size
-        if self.out_voxel_size == (2, 2, 2):
-            self.bbox_dir = '/neurospin/dico/deep_folding_data/test/bbox/resampling_bastien/'
 
         # Morphologist directory
         self.morphologist_dir = join(self.src_dir, "ANALYSIS/3T_morphologist")
