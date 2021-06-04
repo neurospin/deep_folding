@@ -94,7 +94,8 @@ class BoundingBoxMax:
                  tgt_dir=_TGT_DIR_DEFAULT,
                  sulcus=_SULCUS_DEFAULT,
                  side=_SIDE_DEFAULT,
-                 image_normalized_spm=_IMAGE_NORMALIZED_SPM_DEFAULT):
+                 image_normalized_spm=_IMAGE_NORMALIZED_SPM_DEFAULT,
+                 out_voxel_size=None):
         """Inits with list of directories and list of sulci
 
         Args:
@@ -125,7 +126,7 @@ class BoundingBoxMax:
         self.tgt_dir = tgt_dir
         self.side = side
         self.image_normalized_spm = image_normalized_spm
-
+        self.out_voxel_size = out_voxel_size
 
 
         # Json full name is the name of the sulcus + .json
@@ -322,9 +323,10 @@ class BoundingBoxMax:
         # Tranformation from the Talairach space to the native space
         tal_to_normalized_spm = normalized_spm_to_spm_template.inverse() \
                                 * tal_to_spm_template
-
-        voxel_size = image_normalized_spm.header()['voxel_size'][:3]
-
+        if self.out_voxel_size:
+            voxel_size = self.out_voxel_size
+        else:
+            voxel_size = image_normalized_spm.header()['voxel_size'][:3]
 
         return tal_to_normalized_spm, voxel_size
 
@@ -386,7 +388,8 @@ class BoundingBoxMax:
             # Writes number of subjects and directory names to json file
             dict_to_add = {'nb_subjects': len(subjects),
                            'src_dir': self.src_dir,
-                           'tgt_dir': self.tgt_dir}
+                           'tgt_dir': self.tgt_dir,
+                           'out_voxel_size': 1 if self.out_voxel_size is None else self.out_voxel_size}
             self.json.update(dict_to_add=dict_to_add)
 
             # Determines the box encompassing the sulcus for all subjects
@@ -426,7 +429,8 @@ def bounding_box(src_dir=_SRC_DIR_DEFAULT, tgt_dir=_TGT_DIR_DEFAULT,
                  path_to_graph=_PATH_TO_GRAPH_DEFAULT,
                  sulcus=_SULCUS_DEFAULT, side=_SIDE_DEFAULT,
                  number_subjects=_ALL_SUBJECTS,
-                 image_normalized_spm=_IMAGE_NORMALIZED_SPM_DEFAULT):
+                 image_normalized_spm=_IMAGE_NORMALIZED_SPM_DEFAULT,
+                 out_voxel_size=None):
     """ Main program computing the box encompassing the sulcus in all subjects
 
   The programm loops over all subjects
@@ -448,7 +452,8 @@ def bounding_box(src_dir=_SRC_DIR_DEFAULT, tgt_dir=_TGT_DIR_DEFAULT,
     box = BoundingBoxMax(src_dir=src_dir, tgt_dir=tgt_dir,
                          path_to_graph=path_to_graph,
                          sulcus=sulcus, side=side,
-                         image_normalized_spm=image_normalized_spm)
+                         image_normalized_spm=image_normalized_spm,
+                         out_voxel_size=out_voxel_size)
     bbmin_vox, bbmax_vox = box.compute_bounding_box(
         number_subjects=number_subjects)
 
@@ -502,6 +507,10 @@ def parse_args(argv):
         help='Number of subjects to take into account, or \'all\'. '
              '0 subject is allowed, for debug purpose. '
              'Default is : all')
+    parser.add_argument(
+        "-v", "--out_voxel_size", type=int, default=None,
+        help='Voxel size of of bounding box. '
+             'Default is : None')
 
     params = {}
 
@@ -512,6 +521,7 @@ def parse_args(argv):
     params['image_normalized_spm'] = args.image_normalized_SPM
     params['sulcus'] = args.sulcus  # sulcus is a string
     params['side'] = args.side
+    params['out_voxel_size'] = args.out_voxel_size
 
 
     number_subjects = args.nb_subjects
@@ -549,7 +559,8 @@ def main(argv):
                      path_to_graph=params['path_to_graph'],
                      tgt_dir=params['tgt_dir'],
                      sulcus=params['sulcus'], side=params['side'],
-                     number_subjects=params['nb_subjects'])
+                     number_subjects=params['nb_subjects'],
+                     out_voxel_size=params['out_voxel_size'])
     except SystemExit as exc:
         if exc.code != 0:
             six.reraise(*sys.exc_info())
