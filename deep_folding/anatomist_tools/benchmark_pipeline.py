@@ -45,7 +45,6 @@ from __future__ import print_function
 
 from benchmark_generation import *
 from deep_folding.anatomist_tools.utils.resample import resample
-#from deep_folding.anatomist_tools.utils.load_bbox import compute_max_box
 
 import re
 import sys
@@ -102,6 +101,10 @@ def parse_args(argv):
         help="Bounding box directory where json files containing "
              "bounding box coordinates have been stored. "
              "Default is : " + _BBOX_DIR_DEFAULT)
+    parser.add_argument(
+        "-j", "--subjects_list", type=str, default=_SUBJECT_LIST_DEFAULT,
+        help="Subjects list from which create benchmark "
+             "Default is : " + str(_SUBJECT_LIST_DEFAULT))
 
     args = parser.parse_args(argv)
     src_dir = args.src_dir  # src_dir is a list
@@ -112,8 +115,9 @@ def parse_args(argv):
     bench_size = args.benchmark_size
     resampling = args.resampling
     bbox_dir = args.bbox_dir
+    subjects_list = args.subjects_list
 
-    return src_dir, sulcus, side, ss_size, mode, bench_size, resampling, bbox_dir
+    return src_dir, sulcus, side, ss_size, mode, bench_size, resampling, bbox_dir, subjects_list
 
 
 _SS_SIZE_DEFAULT = 1000
@@ -124,9 +128,10 @@ _MODE_DEFAULT = 'suppress'
 _BENCH_SIZE = 150
 _RESAMPLING_DEFAULT = None
 _BBOX_DIR_DEFAULT = '/neurospin/dico/deep_folding_data/data/bbox'
+_SUBJECT_LIST_DEFAULT = None
 
 def main(argv):
-    src_dir, sulcus, side, ss_size, mode, bench_size, resampling, bbox_dir = parse_args(argv)
+    src_dir, sulcus, side, ss_size, mode, bench_size, resampling, bbox_dir, subjects_list = parse_args(argv)
     b_num = len(next(os.walk(src_dir))[1]) + 1
     tgt_dir = os.path.join(src_dir, 'benchmark'+str(b_num))
     if not os.path.isdir(tgt_dir):
@@ -139,7 +144,7 @@ def main(argv):
 
     print('=================== Selection and possible alteration of benchmark skeletons ===================')
     generate(b_num, side, ss_size, sulci_list=sulcus,
-             mode=mode, bench_size=bench_size)
+             mode=mode, bench_size=bench_size, subjects_list=subjects_list)
 
     bbox = compute_max_box(sulcus, side, src_dir=bbox_dir)
     print(bbox)
