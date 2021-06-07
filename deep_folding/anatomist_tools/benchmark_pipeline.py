@@ -44,6 +44,8 @@ from __future__ import division
 from __future__ import print_function
 
 from benchmark_generation import *
+from deep_folding.anatomist_tools.utils.resample import resample
+#from deep_folding.anatomist_tools.utils.load_bbox import compute_max_box
 
 import re
 import sys
@@ -89,6 +91,17 @@ def parse_args(argv):
     parser.add_argument(
         "-b", "--benchmark_size", type=int, default=_BENCH_SIZE,
         help='benchmark size Default is : ' + str(_BENCH_SIZE))
+    parser.add_argument(
+        "-p", "--resampling", type=str, default=None,
+        help='Method of resampling to perform. '
+             'Type of resampling: s[ulcus] for Bastien method'
+             'If None, AimsApplyTransform is used.'
+             'Default is : None')
+    parser.add_argument(
+        "-o", "--bbox_dir", type=str, default=_BBOX_DIR_DEFAULT,
+        help="Bounding box directory where json files containing "
+             "bounding box coordinates have been stored. "
+             "Default is : " + _BBOX_DIR_DEFAULT)
 
     args = parser.parse_args(argv)
     src_dir = args.src_dir  # src_dir is a list
@@ -97,20 +110,24 @@ def parse_args(argv):
     ss_size = args.ss_size
     mode = args.benchmark_mode
     bench_size = args.benchmark_size
+    resampling = args.resampling
+    bbox_dir = args.bbox_dir
 
-    return src_dir, sulcus, side, ss_size, mode, bench_size
+    return src_dir, sulcus, side, ss_size, mode, bench_size, resampling, bbox_dir
 
 
-_SS_SIZE_DEFAULT = 500
+_SS_SIZE_DEFAULT = 1000
 _SRC_DIR_DEFAULT = '/neurospin/dico/lguillon/mic21/anomalies_set/dataset/'
-_SULCUS_DEFAULT = ['S.T.s.ter.asc.ant._left', 'S.T.s.ter.asc.post._left']
-_SIDE_DEFAULT = 'L'
+_SULCUS_DEFAULT = ['S.T.s.ter.asc.ant._right', 'S.T.s.ter.asc.post._right']
+_SIDE_DEFAULT = 'R'
 _MODE_DEFAULT = 'suppress'
 _BENCH_SIZE = 150
+_RESAMPLING_DEFAULT = None
+_BBOX_DIR_DEFAULT = '/neurospin/dico/deep_folding_data/data/bbox'
 
 def main(argv):
-    src_dir, sulcus, side, ss_size, mode, bench_size = parse_args(argv)
-    b_num = len(os.walk(src_dir).next()[1]) + 1
+    src_dir, sulcus, side, ss_size, mode, bench_size, resampling, bbox_dir = parse_args(argv)
+    b_num = len(next(os.walk(src_dir))[1]) + 1
     tgt_dir = os.path.join(src_dir, 'benchmark'+str(b_num))
     if not os.path.isdir(tgt_dir):
         os.mkdir(tgt_dir)
@@ -124,7 +141,7 @@ def main(argv):
     generate(b_num, side, ss_size, sulci_list=sulcus,
              mode=mode, bench_size=bench_size)
 
-    bbox = utils.load_bbox.compute_max_box(sulcus, side)
+    bbox = compute_max_box(sulcus, side, src_dir=bbox_dir)
     print(bbox)
 
     xmin, ymin, zmin = str(bbox[0][0]), str(bbox[0][1]), str(bbox[0][2])
@@ -136,15 +153,21 @@ def main(argv):
     for img in os.listdir(tgt_dir):
         if '.nii.gz' in img and 'minf' not in img:
             sub = re.search('_(\d{6})', img).group(1)
-
             # Normalization and resampling of altered skeleton images
             dir_m = '/neurospin/dico/lguillon/skeleton/transfo_pre_process/natif_to_template_spm_' + sub +'.trm'
             dir_r = '/neurospin/hcp/ANALYSIS/3T_morphologist/' + sub + '/t1mri/default_acquisition/normalized_SPM_' + sub +'.nii'
-            cmd_normalize = "AimsApplyTransform -i " + tgt_dir +'/' + img + \
-                            " -o " + tgt_dir + '/' + img[:-7] + \
-                            "_normalized.nii.gz -m " + dir_m + " -r " + \
-                            dir_r + " -t nearest"
-            os.system(cmd_normalize)
+            file_skeleton = tgt_dir + '/' + img
+            file_cropped = tgt_dir + '/' + img[:-7] + "_normalized.nii.gz"
+
+            if resampling:
+                resample(file_skeleton, file_cropped, output_vs=(2, 2, 2),
+                         transformation=dir_m)
+            else:
+                cmd_normalize = "AimsApplyTransform -i " + tgt_dir +'/' + img + \
+                                " -o " + tgt_dir + '/' + img[:-7] + \
+                                "_normalized.nii.gz -m " + dir_m + " -r " + \
+                                dir_r + " -t nearest"
+                os.system(cmd_normalize)
 
             # Crop of the images
             file = os.path.join(tgt_dir, img[:-7] + '_normalized.nii.gz')
@@ -158,11 +181,22 @@ def main(argv):
                 cmd_bounding_box = ' -x ' + str(random_x) + ' -y ' + str(random_y) + \
                                    ' -z ' + str(random_z) + ' -X '+ str(xmax) + ' -Y ' + str(ymax) + ' -Z ' + str(zmax)
                 print(cmd_bounding_box)
+
             else:
+                if mode == 'asymmetry':
+                    # for left hemisphere
+                    xmin, ymin, zmin = '52', '50', '12'
+                    xmax, ymax, zmax = '74', '86', '47'
+
                 cmd_bounding_box = ' -x ' + xmin + ' -y ' + ymin + ' -z ' + zmin + ' -X '+ xmax + ' -Y ' + ymax + ' -Z ' + zmax
 
             cmd_crop = "AimsSubVolume -i " + file + " -o " + file + cmd_bounding_box
             os.system(cmd_crop)
+
+            if mode == 'asymmetry':
+                print('ici')
+                cmd_flip = "AimsFlip -i " + file + " -o " + file + " -m XX"
+                os.system(cmd_flip)
 
     input_dict = {'sulci_list': sulcus, 'simple_surface_min_size': ss_size,
                   'side': side, 'mode': mode}
