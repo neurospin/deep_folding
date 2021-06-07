@@ -53,7 +53,7 @@ from glob import glob
 import random
 import pandas as pd
 import os
-import deep_folding.anatomist_tools.utils as utils
+from deep_folding.anatomist_tools.utils.load_bbox import compute_max_box
 
 
 _DEFAULT_DATA_DIR = '/neurospin/hcp/ANALYSIS/3T_morphologist/'
@@ -86,7 +86,7 @@ class Benchmark():
         self.data_dir = data_dir
         self.saving_dir = os.path.join(saving_dir, 'benchmark'+str(self.b_num))
         self.abnormality_test = []
-        self.bbmin, self.bbmax = utils.load_bbox.compute_max_box(sulci_list, side,
+        self.bbmin, self.bbmax = compute_max_box(sulci_list, side,
                                 talairach_box=True, src_dir=bbox_dir)
         print(self.bbmin, self.bbmax)
         self.cpt_skel_1 = 't1mri/default_acquisition/default_analysis/segmentation'
