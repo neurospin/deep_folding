@@ -263,7 +263,7 @@ def generate(b_num, side, ss_size, sulci_list, mode='suppress', bench_size=150):
                     # Addition of simple surfaces
                     save_sub = benchmark.add_ss(subjects_list, i)
                     givers.append(sub)
-        else:
+        elif mode == 'random' or mode == 'asymmetry':
             benchmark.random_skel(sub)
         benchmark.save_file(save_sub)
 
