@@ -144,8 +144,8 @@ class DatasetCroppedSkeleton:
         self.interp = interp
         self.resampling = resampling
         self.out_voxel_size = out_voxel_size
-        if self.out_voxel_size == (2, 2, 2):
-            self.bbox_dir = '/neurospin/dico/deep_folding_data/test/bbox/resampling_bastien/'
+        #if self.out_voxel_size == (2, 2, 2):
+        #    self.bbox_dir = '/neurospin/dico/deep_folding_data/test/bbox/resampling_bastien/'
 
         # Morphologist directory
         self.morphologist_dir = join(self.src_dir, "ANALYSIS/3T_morphologist")
@@ -162,6 +162,7 @@ class DatasetCroppedSkeleton:
         self.normalized_spm_file = 'normalized_SPM_%(subject)s.nii'
         self.skeleton_file = 'default_analysis/segmentation/' \
                              '%(side)sskeleton_%(subject)s.nii.gz'
+        self.skeleton_file = '%(side)sskeleton_%(subject)s.nii.gz'
 
         # Names of files in function of dictionary: keys -> 'subject' and 'side'
         self.transform_file = 'natif_to_template_spm_%(subject)s.trm'
@@ -197,6 +198,8 @@ class DatasetCroppedSkeleton:
 
         # Skeleton file name
         file_skeleton = join(subject_dir, self.skeleton_file % subject)
+        file_skeleton = join('/neurospin/dico/lguillon/skeleton/resampling_nn_2mm/Rcrops/flip_test_L.nii.gz')
+        file_skeleton = join('/neurospin/dico/lguillon/skeleton/resampling_nn_2mm/Rcrops/Lskeleton_100307.nii.gz')
         # Creates output (cropped) file name
         file_cropped = join(self.cropped_dir, self.cropped_file % subject)
 
@@ -250,6 +253,7 @@ class DatasetCroppedSkeleton:
                 list_all_subjects
                 if number_subjects == _ALL_SUBJECTS
                 else list_all_subjects[:number_subjects])
+            list_subjects = ['100307']
 
             # Creates target and cropped directory
             if not os.path.exists(self.tgt_dir):
