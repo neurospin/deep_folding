@@ -263,12 +263,14 @@ def generate(b_num, side, ss_size, sulci_list, mode='suppress', bench_size=150):
                     # Addition of simple surfaces
                     save_sub = benchmark.add_ss(subjects_list, i)
                     givers.append(sub)
+                benchmark.save_file(save_sub)
+                # Addition of modified graph to abnormality_test set
+                abnormality_test.append(save_sub)
         elif mode == 'random' or mode == 'asymmetry':
             benchmark.random_skel(sub)
-        benchmark.save_file(save_sub)
-
-        # Addition of modified graph to abnormality_test set
-        abnormality_test.append(save_sub)
+            benchmark.save_file(save_sub)
+            # Addition of modified graph to abnormality_test set
+            abnormality_test.append(save_sub)
         if len(abnormality_test) == bench_size:
             break
     benchmark.save_lists(abnormality_test, givers, subjects_list)
@@ -279,5 +281,5 @@ def generate(b_num, side, ss_size, sulci_list, mode='suppress', bench_size=150):
 ######################################################################
 
 if __name__ == '__main__':
-    generate(222, 'R', 500, sulci_list=['S.T.s.ter.asc.post._right', 'S.T.s.ter.asc.ant._right'],
-         mode='suppr', bench_size=4)
+    generate(333, 'R', 1000, sulci_list=['S.T.s.ter.asc.post._right', 'S.T.s.ter.asc.ant._right'],
+         mode='suppress', bench_size=4)
