@@ -53,7 +53,7 @@ from glob import glob
 import random
 import pandas as pd
 import os
-import deep_folding.anatomist_tools.utils as utils
+from deep_folding.anatomist_tools.utils.load_bbox import compute_max_box
 
 
 _DEFAULT_DATA_DIR = '/neurospin/hcp/ANALYSIS/3T_morphologist/'
@@ -86,7 +86,7 @@ class Benchmark():
         self.data_dir = data_dir
         self.saving_dir = os.path.join(saving_dir, 'benchmark'+str(self.b_num))
         self.abnormality_test = []
-        self.bbmin, self.bbmax = utils.load_bbox.compute_max_box(sulci_list, side,
+        self.bbmin, self.bbmax = compute_max_box(sulci_list, side,
                                 talairach_box=True, src_dir=bbox_dir)
         print(self.bbmin, self.bbmax)
         self.cpt_skel_1 = 't1mri/default_acquisition/default_analysis/segmentation'
@@ -218,23 +218,28 @@ class Benchmark():
         df_givers.to_csv(os.path.join(self.saving_dir, 'givers.csv'))
 
 
-def get_sub_list():
+def get_sub_list(subjects_list):
     """Returns subjects list for which latered skelerons can be created
     Only right handed HCP subjects
     """
-    # Selection of right handed subjects only
-    right_handed = pd.read_csv('/neurospin/dico/lguillon/hcp_info/right_handed.csv')
-    subjects_list = list(right_handed['Subject'].astype(str))
-    # Check whether subjects' files exist
-    hcp_sub = os.listdir('/neurospin/hcp/ANALYSIS/3T_morphologist/')
-    subjects_list = [sub for sub in subjects_list if sub in hcp_sub]
+    if subjects_list:
+        subjects_list = pd.read_csv(subjects_list)
+        subjects_list = list(subjects_list['0'])
+    else:
+        # Selection of right handed subjects only
+        right_handed = pd.read_csv('/neurospin/dico/lguillon/hcp_info/right_handed.csv')
+        subjects_list = list(right_handed['Subject'].astype(str))
+        # Check whether subjects' files exist
+        hcp_sub = os.listdir('/neurospin/hcp/ANALYSIS/3T_morphologist/')
+        subjects_list = [sub for sub in subjects_list if sub in hcp_sub]
 
-    random.shuffle(subjects_list)
+        random.shuffle(subjects_list)
 
     return subjects_list
 
 
-def generate(b_num, side, ss_size, sulci_list, mode='suppress', bench_size=150):
+def generate(b_num, side, ss_size, sulci_list, mode='suppress', bench_size=150,
+             subjects_list=None):
     """
     Generates a benchmark
 
@@ -248,12 +253,12 @@ def generate(b_num, side, ss_size, sulci_list, mode='suppress', bench_size=150):
     benchmark = Benchmark(b_num, side, ss_size, sulci_list)
     abnormality_test = []
     givers = []
-    subjects_list = get_sub_list()
+    subjects_list = get_sub_list(subjects_list)
 
     for i, sub in enumerate(subjects_list):
         print(sub)
         save_sub = sub
-        if mode != 'random':
+        if mode in ['suppress', 'add', 'mix']:
             benchmark.get_simple_surfaces(sub)
             if benchmark.surfaces and len(benchmark.surfaces.keys()) > 0:
                 if mode == 'suppress' or (mode=='mix' and i<bench_size/2):
@@ -263,12 +268,14 @@ def generate(b_num, side, ss_size, sulci_list, mode='suppress', bench_size=150):
                     # Addition of simple surfaces
                     save_sub = benchmark.add_ss(subjects_list, i)
                     givers.append(sub)
-        else:
+                benchmark.save_file(save_sub)
+                # Addition of modified graph to abnormality_test set
+                abnormality_test.append(save_sub)
+        elif mode == 'random' or mode == 'asymmetry':
             benchmark.random_skel(sub)
-        benchmark.save_file(save_sub)
-
-        # Addition of modified graph to abnormality_test set
-        abnormality_test.append(save_sub)
+            benchmark.save_file(save_sub)
+            # Addition of modified graph to abnormality_test set
+            abnormality_test.append(save_sub)
         if len(abnormality_test) == bench_size:
             break
     benchmark.save_lists(abnormality_test, givers, subjects_list)
@@ -279,5 +286,5 @@ def generate(b_num, side, ss_size, sulci_list, mode='suppress', bench_size=150):
 ######################################################################
 
 if __name__ == '__main__':
-    generate(222, 'R', 500, sulci_list=['S.T.s.ter.asc.post._right', 'S.T.s.ter.asc.ant._right'],
-         mode='suppr', bench_size=4)
+    generate(333, 'R', 1000, sulci_list=['S.T.s.ter.asc.post._right', 'S.T.s.ter.asc.ant._right'],
+         mode='suppress', bench_size=4)
