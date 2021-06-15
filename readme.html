@@ -1,7 +1,7 @@
 
 
 <!DOCTYPE html>
-<html class="writer-html4" lang="en" >
+<html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8" />
   
@@ -13,6 +13,9 @@
   
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
 
   
   
@@ -28,20 +31,11 @@
   <![endif]-->
   
     
-      <script type="text/javascript">
-          var DOCUMENTATION_OPTIONS = {
-              URL_ROOT:'./',
-              VERSION:'0.0.1',
-              LANGUAGE:'None',
-              COLLAPSE_INDEX:false,
-              FILE_SUFFIX:'.html',
-              HAS_SOURCE:  true,
-              SOURCELINK_SUFFIX: '.txt'
-          };
-      </script>
-        <script type="text/javascript" src="_static/jquery.js"></script>
-        <script type="text/javascript" src="_static/underscore.js"></script>
-        <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -183,38 +177,38 @@ MRIs are processed through BrainVISA/Morphologist tools.</p>
 </div>
 <div class="section" id="development">
 <h1>Development<a class="headerlink" href="#development" title="Permalink to this headline">¶</a></h1>
-<div class="highlight-shell"><div class="highlight"><pre><span></span>git clone https://github.com/neurospin/deep_folding.git
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>git clone https://github.com/neurospin/deep_folding.git
 
 <span class="c1"># Install for development</span>
 bv bash
 <span class="nb">cd</span> deep_folding
-virtualenv -p /casa/install/bin/python --system-site-packages venv
+virtualenv --python<span class="o">=</span>python3 --system-site-packages venv
 . venv/bin/activate
-pip install -e .
+pip3 install -e .
 
 <span class="c1"># Tests</span>
-python -m pytest  <span class="c1"># run tests</span>
+python3 -m pytest  <span class="c1"># run tests</span>
 </pre></div>
 </div>
 <p>If you want to install the package:</p>
-<div class="highlight-shell"><div class="highlight"><pre><span></span>python setup.py install
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python setup.py install
 </pre></div>
 </div>
 <p>Notebooks are in the repertory notebooks, access using:</p>
-<div class="highlight-shell"><div class="highlight"><pre><span></span>bv bash <span class="c1"># to enter brainvisa environnment</span>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>bv bash <span class="c1"># to enter brainvisa environnment</span>
 . venv/bin/activate
 jupyter notebook <span class="c1"># then click on file to open a notebook</span>
 </pre></div>
 </div>
 <p>If you want to build the documentation and pushes it to the web:</p>
-<div class="highlight-shell"><div class="highlight"><pre><span></span>bv bash <span class="c1"># to enter brainvisa environnment</span>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>bv bash <span class="c1"># to enter brainvisa environnment</span>
 . venv/bin/activate
 <span class="nb">cd</span> docs
 ./make_docs.sh
 </pre></div>
 </div>
 <p>If you want to clean the documentation:</p>
-<div class="highlight-shell"><div class="highlight"><pre><span></span><span class="nb">cd</span> docs/source
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> docs/source
 make clean
 </pre></div>
 </div>

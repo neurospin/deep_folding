@@ -1,7 +1,7 @@
 
 
 <!DOCTYPE html>
-<html class="writer-html4" lang="en" >
+<html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8" />
   
@@ -13,6 +13,9 @@
   
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
 
   
   
@@ -28,20 +31,11 @@
   <![endif]-->
   
     
-      <script type="text/javascript">
-          var DOCUMENTATION_OPTIONS = {
-              URL_ROOT:'./',
-              VERSION:'0.0.1',
-              LANGUAGE:'None',
-              COLLAPSE_INDEX:false,
-              FILE_SUFFIX:'.html',
-              HAS_SOURCE:  true,
-              SOURCELINK_SUFFIX: '.txt'
-          };
-      </script>
-        <script type="text/javascript" src="_static/jquery.js"></script>
-        <script type="text/javascript" src="_static/underscore.js"></script>
-        <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -107,7 +101,7 @@
 <li class="toctree-l3"><a class="reference internal" href="deep_folding.preprocessing.html">deep_folding.preprocessing package</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">deep_folding.utils package</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#submodules">Submodules</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#module-deep_folding.utils.pytorchtools">deep_folding.utils.pytorchtools module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#deep-folding-utils-pytorchtools-module">deep_folding.utils.pytorchtools module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-deep_folding.utils.save_results">deep_folding.utils.save_results module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-deep_folding.utils">Module contents</a></li>
 </ul>
@@ -191,43 +185,31 @@
 <div class="section" id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
 </div>
-<div class="section" id="module-deep_folding.utils.pytorchtools">
-<span id="deep-folding-utils-pytorchtools-module"></span><h2>deep_folding.utils.pytorchtools module<a class="headerlink" href="#module-deep_folding.utils.pytorchtools" title="Permalink to this headline">¶</a></h2>
-<p>From <a class="reference external" href="https://github.com/Bjarten/early-stopping-pytorch/blob/master/pytorchtools.py">https://github.com/Bjarten/early-stopping-pytorch/blob/master/pytorchtools.py</a></p>
-<dl class="class">
-<dt id="deep_folding.utils.pytorchtools.EarlyStopping">
-<em class="property">class </em><code class="descclassname">deep_folding.utils.pytorchtools.</code><code class="descname">EarlyStopping</code><span class="sig-paren">(</span><em>patience=7</em>, <em>verbose=False</em>, <em>delta=0</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.utils.pytorchtools.EarlyStopping" title="Permalink to this definition">¶</a></dt>
-<dd><p>Early stops the training if validation loss doesn’t improve after a given patience.</p>
-<dl class="method">
-<dt id="deep_folding.utils.pytorchtools.EarlyStopping.save_checkpoint">
-<code class="descname">save_checkpoint</code><span class="sig-paren">(</span><em>val_loss</em>, <em>model</em>, <em>root_dir</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.utils.pytorchtools.EarlyStopping.save_checkpoint" title="Permalink to this definition">¶</a></dt>
-<dd><p>Saves model when validation loss decrease.</p>
-</dd></dl>
-
-</dd></dl>
-
+<div class="section" id="deep-folding-utils-pytorchtools-module">
+<h2>deep_folding.utils.pytorchtools module<a class="headerlink" href="#deep-folding-utils-pytorchtools-module" title="Permalink to this headline">¶</a></h2>
 </div>
 <div class="section" id="module-deep_folding.utils.save_results">
 <span id="deep-folding-utils-save-results-module"></span><h2>deep_folding.utils.save_results module<a class="headerlink" href="#module-deep_folding.utils.save_results" title="Permalink to this headline">¶</a></h2>
-<dl class="function">
-<dt id="deep_folding.utils.save_results.create_folder">
-<code class="descclassname">deep_folding.utils.save_results.</code><code class="descname">create_folder</code><span class="sig-paren">(</span><em>root_dir</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.utils.save_results.create_folder" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="deep_folding.utils.save_results.create_folder">
+<span class="sig-prename descclassname"><span class="pre">deep_folding.utils.save_results.</span></span><span class="sig-name descname"><span class="pre">create_folder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">root_dir</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.utils.save_results.create_folder" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creates folder in whiche results will be saved
 in :  directory where to create the folder
 out : / creatin of a folder</p>
 </dd></dl>
 
-<dl class="function">
-<dt id="deep_folding.utils.save_results.save_logs">
-<code class="descclassname">deep_folding.utils.save_results.</code><code class="descname">save_logs</code><span class="sig-paren">(</span><em>input_dict</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.utils.save_results.save_logs" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="deep_folding.utils.save_results.save_logs">
+<span class="sig-prename descclassname"><span class="pre">deep_folding.utils.save_results.</span></span><span class="sig-name descname"><span class="pre">save_logs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_dict</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.utils.save_results.save_logs" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creates and saves a log file with all information of the run
 in : dico like {module:’python file’</p>
 <blockquote>
-<div>input: {date : ‘’, data: ‘split’ or ‘all’, loss_type :’’,
+<div><p>input: {date : ‘’, data: ‘split’ or ‘all’, loss_type :’’,
 batch_size: ‘’, nb_epoch:’’, root_dir:’’,
 input_type:’jeff crops or normalized crops’,
 skeleton: ‘True or False’},
-output: {loss_train:’’, loss_test:’’}}</div></blockquote>
+output: {loss_train:’’, loss_test:’’}}</p>
+</div></blockquote>
 </dd></dl>
 
 </div>
