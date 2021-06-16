@@ -10,6 +10,7 @@ dist
 notebooks/.ipynb_checkpoints
 notebooks/.vscode
 data/target
+.cache
 
 # Files #
 ################
