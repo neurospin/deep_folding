@@ -144,7 +144,8 @@ def main(argv):
 
     print('=================== Selection and possible alteration of benchmark skeletons ===================')
     generate(b_num, side, ss_size, sulci_list=sulcus,
-             mode=mode, bench_size=bench_size, subjects_list=subjects_list)
+             mode=mode, bench_size=bench_size, subjects_list=subjects_list,
+             bbox_dir=bbox_dir)
 
     bbox = compute_max_box(sulcus, side, src_dir=bbox_dir)
     print(bbox)
@@ -177,10 +178,11 @@ def main(argv):
             # Crop of the images
             file = os.path.join(tgt_dir, img[:-7] + '_normalized.nii.gz')
             if mode == 'random':
-                # 40 instead of 0 in order to avoid crops with only black voxels
-                random_x = random.randint(40, 157-box_size[0]-1)
-                random_y = random.randint(0, 189-box_size[1]-1)
-                random_z = random.randint(0, 136-box_size[2]-1)
+                # 42 instead of 0 in order to avoid crops with only black voxels
+                # Int 108 and 91 depend on downsampling and normalization
+                random_x = random.randint(0, 42)
+                random_y = random.randint(0, 108-box_size[1]-1)
+                random_z = random.randint(0, 91-box_size[2]-1)
                 print(random_x, random_y, random_z)
                 xmax, ymax, zmax = random_x + box_size[0], random_y + box_size[1], random_z + box_size[2]
                 cmd_bounding_box = ' -x ' + str(random_x) + ' -y ' + str(random_y) + \
