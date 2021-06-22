@@ -142,6 +142,7 @@ class Benchmark():
         bck_map = self.surfaces[surface]['aims_ss']
         for voxel in bck_map[0].keys():
             self.skel.setValue(0, voxel[0], voxel[1], voxel[2])
+            print('la')
 
         bck_map_bottom = self.surfaces[surface]['aims_bottom']
         for voxel in bck_map_bottom[0].keys():
