@@ -66,7 +66,7 @@ from deep_folding.anatomist_tools.utils.logs import LogJson
 _ALL_SUBJECTS = -1
 
 _SRC_DIR_DEFAULT = "/neurospin/hcp"
-_TGT_DIR_DEFAULT = "/neurospin/dico/deep_folding_data/test/transform"
+_TGT_DIR_DEFAULT = "/neurospin/dico/data/deep_folding/test/transform"
 
 
 class TransformToSPM:

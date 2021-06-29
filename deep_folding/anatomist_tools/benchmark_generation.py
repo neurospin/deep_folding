@@ -58,7 +58,7 @@ from deep_folding.anatomist_tools.utils.load_bbox import compute_max_box
 
 _DEFAULT_DATA_DIR = '/neurospin/hcp/ANALYSIS/3T_morphologist/'
 _DEFAULT_SAVING_DIR = '/neurospin/dico/lguillon/mic21/anomalies_set/dataset/'
-_DEFAULT_BBOX_DIR = '/neurospin/dico/deep_folding_data/data/bbox/'
+_DEFAULT_BBOX_DIR = '/neurospin/dico/data/deep_folding/data/bbox/'
 
 
 class Benchmark():

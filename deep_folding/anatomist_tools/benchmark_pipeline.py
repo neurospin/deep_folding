@@ -127,7 +127,7 @@ _SIDE_DEFAULT = 'R'
 _MODE_DEFAULT = 'suppress'
 _BENCH_SIZE = 150
 _RESAMPLING_DEFAULT = None
-_BBOX_DIR_DEFAULT = '/neurospin/dico/deep_folding_data/data/bbox'
+_BBOX_DIR_DEFAULT = '/neurospin/dico/data/deep_folding/data/bbox'
 _SUBJECT_LIST_DEFAULT = None
 
 def main(argv):
