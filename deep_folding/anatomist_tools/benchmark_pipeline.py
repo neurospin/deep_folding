@@ -51,6 +51,16 @@ import sys
 import argparse
 import json
 
+_SS_SIZE_DEFAULT = 1000
+_SRC_DIR_DEFAULT = '/neurospin/dico/lguillon/mic21/anomalies_set/dataset/'
+_SULCUS_DEFAULT = ['S.T.s.ter.asc.ant._right', 'S.T.s.ter.asc.post._right']
+_SIDE_DEFAULT = 'R'
+_MODE_DEFAULT = 'suppress'
+_BENCH_SIZE = 150
+_RESAMPLING_DEFAULT = None
+_BBOX_DIR_DEFAULT = '/neurospin/dico/deep_folding_data/data/bbox'
+_SUBJECT_LIST_DEFAULT = None
+
 
 def parse_args(argv):
     """Function parsing command-line arguments
@@ -119,16 +129,6 @@ def parse_args(argv):
 
     return src_dir, sulcus, side, ss_size, mode, bench_size, resampling, bbox_dir, subjects_list
 
-
-_SS_SIZE_DEFAULT = 1000
-_SRC_DIR_DEFAULT = '/neurospin/dico/lguillon/mic21/anomalies_set/dataset/'
-_SULCUS_DEFAULT = ['S.T.s.ter.asc.ant._right', 'S.T.s.ter.asc.post._right']
-_SIDE_DEFAULT = 'R'
-_MODE_DEFAULT = 'suppress'
-_BENCH_SIZE = 150
-_RESAMPLING_DEFAULT = None
-_BBOX_DIR_DEFAULT = '/neurospin/dico/deep_folding_data/data/bbox'
-_SUBJECT_LIST_DEFAULT = None
 
 def main(argv):
     src_dir, sulcus, side, ss_size, mode, bench_size, resampling, bbox_dir, subjects_list = parse_args(argv)

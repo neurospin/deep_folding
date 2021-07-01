@@ -17,8 +17,9 @@ contest.py
 *.swp
 README.rst.*
 
-# pycharm and virtualenv folders #
-##################################
+# pycharm, vscode and virtualenv folders #
+##########################################
 .idea
 venv
 .cache
+.vscode

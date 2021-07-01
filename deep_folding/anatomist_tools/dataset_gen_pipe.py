@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-# /usr/bin/env python2.7 + brainvisa compliant env
+# /usr/bin/env python3 
+# + brainvisa compliant env
 #
 #  This software and supporting documentation are distributed by
 #      Institut Federatif de Recherche 49
