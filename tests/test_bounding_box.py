@@ -35,7 +35,7 @@ def test_bounding_box():
 	image_normalized_spm = os.path.join(norm_dir, sub_dir, file_name)
 
 	# Gets sulcus name
-	sulcus = 'S.T.s.ter.asc.ant._left'
+	sulcus = 'S.T.s.ter.asc.ant.'
 	side = 'L'
 
 	# Determines the bounding box around the sulcus
