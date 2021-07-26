@@ -45,6 +45,7 @@ from __future__ import print_function
 
 from benchmark_generation import *
 from deep_folding.anatomist_tools.utils.resample import resample
+from deep_folding.anatomist_tools.utils.sulcus_side import complete_sulci_name
 
 import re
 import sys
@@ -122,7 +123,7 @@ def parse_args(argv):
 
 _SS_SIZE_DEFAULT = 1000
 _SRC_DIR_DEFAULT = '/neurospin/dico/lguillon/mic21/anomalies_set/dataset/'
-_SULCUS_DEFAULT = ['S.T.s.ter.asc.ant._right', 'S.T.s.ter.asc.post._right']
+_SULCUS_DEFAULT = ['S.T.s.ter.asc.ant.', 'S.T.s.ter.asc.post.']
 _SIDE_DEFAULT = 'R'
 _MODE_DEFAULT = 'suppress'
 _BENCH_SIZE = 150
@@ -132,12 +133,14 @@ _SUBJECT_LIST_DEFAULT = None
 
 def main(argv):
     src_dir, sulcus, side, ss_size, mode, bench_size, resampling, bbox_dir, subjects_list = parse_args(argv)
+    sulcus = complete_sulci_name(sulcus, side)
     b_num = len(next(os.walk(src_dir))[1]) + 1
     tgt_dir = os.path.join(src_dir, 'benchmark'+str(b_num))
     if not os.path.isdir(tgt_dir):
         os.mkdir(tgt_dir)
 
     print(' ')
+    print('Sulci list: ', sulcus)
     print('Mode chosen:', mode)
     print('Chosen Benchmark size: ', bench_size)
     print(' ')
