@@ -62,7 +62,6 @@ def complete_sulci_name(sulci_list, side):
 
     for sulcus in sulci_list:
          sulcus += suffix
-         #print(sulcus)
          full_sulci_list.append(sulcus)
     return full_sulci_list
 
