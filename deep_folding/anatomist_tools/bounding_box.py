@@ -57,6 +57,7 @@ import numpy as np
 
 from soma import aims
 from deep_folding.anatomist_tools.utils.logs import LogJson
+from deep_folding.anatomist_tools.utils.sulcus_side import complete_sulci_name
 
 _ALL_SUBJECTS = -1
 
@@ -71,7 +72,7 @@ _SIDE_DEFAULT = 'L'
 
 # sulcus to encompass:
 # its name depends on the hemisphere side
-_SULCUS_DEFAULT = 'S.T.s.ter.asc.ant._left'
+_SULCUS_DEFAULT = 'S.T.s.ter.asc.ant.'
 
 # Gives the relative path to the manually labelled graph .arg
 # in the supervise
@@ -125,6 +126,7 @@ class BoundingBoxMax:
         self.sulcus = sulcus
         self.tgt_dir = tgt_dir
         self.side = side
+        self.sulcus = complete_sulci_name(sulcus, side)
         self.image_normalized_spm = image_normalized_spm
         self.out_voxel_size = out_voxel_size
 
