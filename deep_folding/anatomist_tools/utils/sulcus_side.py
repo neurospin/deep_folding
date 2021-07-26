@@ -55,17 +55,23 @@ def complete_sulci_name(sulci_list, side):
     Returns:
         full_sulci_list: a list with full sulci names, ie with side included
     """
-
-    full_sulci_list = []
-    side = 'right' if side=='R' else 'left'
-    suffix = '_' + side
-
-    for sulcus in sulci_list:
-         sulcus += suffix
-         full_sulci_list.append(sulcus)
-    return full_sulci_list
+    if any("right" in s for s in sulci_list) or any("left" in s for s in sulci_list):
+        return sulci_list
+    else:
+        side = 'right' if side=='R' else 'left'
+        suffix = '_' + side
+        if isinstance(sulci_list, list):
+            full_sulci_list = []
+            for sulcus in sulci_list:
+                sulcus += suffix
+                full_sulci_list.append(sulcus)
+            return full_sulci_list
+        else:
+            return sulci_list + suffix
 
 
 if __name__== '__main__':
     fsl = complete_sulci_name(['S.T.s.ter.asc.ant.', 'F.I.P.'], 'L')
+    print(fsl)
+    fsl = complete_sulci_name('S.T.s.ter.asc.ant.', 'L')
     print(fsl)
