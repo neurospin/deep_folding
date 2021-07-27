@@ -54,6 +54,7 @@ import random
 import pandas as pd
 import os
 from deep_folding.anatomist_tools.utils.load_bbox import compute_max_box
+from deep_folding.anatomist_tools.utils.sulcus_side import complete_sulci_name
 
 
 _DEFAULT_DATA_DIR = '/neurospin/hcp/ANALYSIS/3T_morphologist/'
@@ -83,10 +84,11 @@ class Benchmark():
         self.side = side
         self.ss_size = ss_size
         self.sulci_list = sulci_list
+        self.sulci_list = complete_sulci_name(self.sulci_list, self.side)
         self.data_dir = data_dir
         self.saving_dir = os.path.join(saving_dir, 'benchmark'+str(self.b_num))
         self.abnormality_test = []
-        self.bbmin, self.bbmax = compute_max_box(sulci_list, side,
+        self.bbmin, self.bbmax = compute_max_box(self.sulci_list, side,
                                 talairach_box=True, src_dir=bbox_dir)
         print(self.bbmin, self.bbmax)
         self.cpt_skel_1 = 't1mri/default_acquisition/default_analysis/segmentation'
@@ -286,5 +288,5 @@ def generate(b_num, side, ss_size, sulci_list, mode='suppress', bench_size=150,
 ######################################################################
 
 if __name__ == '__main__':
-    generate(333, 'R', 1000, sulci_list=['S.T.s.ter.asc.post._right', 'S.T.s.ter.asc.ant._right'],
+    generate(333, 'R', 1000, sulci_list=['S.T.s.ter.asc.post.', 'S.T.s.ter.asc.ant.'],
          mode='suppress', bench_size=4)

@@ -68,6 +68,7 @@ import six
 from deep_folding.anatomist_tools.utils.logs import LogJson
 from deep_folding.anatomist_tools.utils.load_bbox import compute_max_box
 from deep_folding.anatomist_tools.utils.resample import resample
+from deep_folding.anatomist_tools.utils.sulcus_side import complete_sulci_name
 from deep_folding.anatomist_tools.load_data import fetch_data
 
 _ALL_SUBJECTS = -1
@@ -82,7 +83,7 @@ _OUT_VOXEL_SIZE = (1, 1, 1) # default output voxel size for Bastien's resampling
 
 # sulcus to encompass:
 # its name depends on the hemisphere side
-_SULCUS_DEFAULT = 'S.T.s.ter.asc.ant._left'
+_SULCUS_DEFAULT = 'S.T.s.ter.asc.ant.'
 
 # Input directories
 # -----------------
@@ -133,15 +134,15 @@ class DatasetCroppedSkeleton:
         """
 
         self.src_dir = src_dir
-
+        self.side = side
         # Transforms sulcus in a list of sulci
         self.list_sulci = ([list_sulci] if isinstance(list_sulci, str)
                            else list_sulci)
+        self.list_sulci = complete_sulci_name(self.list_sulci, self.side)
 
         self.tgt_dir = tgt_dir
         self.transform_dir = transform_dir
         self.bbox_dir = bbox_dir
-        self.side = side
         self.interp = interp
         self.resampling = resampling
         self.out_voxel_size = out_voxel_size
