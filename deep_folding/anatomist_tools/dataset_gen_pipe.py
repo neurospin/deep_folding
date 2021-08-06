@@ -91,6 +91,10 @@ _SULCUS_DEFAULT = 'S.T.s.ter.asc.ant.'
 # Input directory contaning the morphologist analysis of the HCP database
 _SRC_DIR_DEFAULT = '/neurospin/hcp'
 
+# Directory where subjects to be processed are stored.
+# Default is for HCP dataset
+_MORPHOLOGIST_DIR_DEFAULT = 'ANALYSIS/3T_morphologist'
+
 # Directory that contains the transformation file
 # from native to MNI through SPM
 # These files have been created with spm_skeleton
@@ -113,6 +117,7 @@ class DatasetCroppedSkeleton:
                  tgt_dir=_TGT_DIR_DEFAULT,
                  transform_dir=_TRANSFORM_DIR_DEFAULT,
                  bbox_dir=_BBOX_DIR_DEFAULT,
+                 morphologist_dir=_MORPHOLOGIST_DIR_DEFAULT,
                  list_sulci=_SULCUS_DEFAULT,
                  side=_SIDE_DEFAULT,
                  interp=_INTERP_DEFAULT,
@@ -143,12 +148,13 @@ class DatasetCroppedSkeleton:
         self.tgt_dir = tgt_dir
         self.transform_dir = transform_dir
         self.bbox_dir = bbox_dir
+        self.morphologist_dir = morphologist_dir
         self.interp = interp
         self.resampling = resampling
         self.out_voxel_size = out_voxel_size
 
         # Morphologist directory
-        self.morphologist_dir = join(self.src_dir, "ANALYSIS/3T_morphologist")
+        self.morphologist_dir = join(self.src_dir, self.morphologist_dir)
         # default acquisition subdirectory
         self.acquisition_dir = "%(subject)s/t1mri/default_acquisition"
         # (input) name of normalized SPM file
@@ -243,7 +249,8 @@ class DatasetCroppedSkeleton:
         if number_subjects:
 
             # subjects are detected as the directory names under src_dir
-            list_all_subjects = listdir(self.morphologist_dir)
+            list_all_subjects = [dI for dI in os.listdir(self.morphologist_dir)\
+             if os.path.isdir(os.path.join(self.morphologist_dir,dI))]
 
             # Gives the possibility to list only the first number_subjects
             list_subjects = (
@@ -337,6 +344,9 @@ def parse_args(argv):
              'bounding box coordinates have been stored. '
              'Default is : ' + _BBOX_DIR_DEFAULT)
     parser.add_argument(
+        "-m", "--morphologist_dir", type=str, default=_MORPHOLOGIST_DIR_DEFAULT,
+        help='Directory where subjects to be processed are stored')
+    parser.add_argument(
         "-u", "--sulcus", type=str, default=_SULCUS_DEFAULT, nargs='+',
         help='Sulcus name around which we determine the bounding box. '
              'If there are several sulci, add all sulci '
@@ -382,6 +392,7 @@ def parse_args(argv):
     params['interp'] = args.interp
     params['resampling'] = args.resampling
     params['out_voxel_size'] = tuple(args.out_voxel_size)
+    params['morphologist_dir'] = args.morphologist_dir
 
     number_subjects = args.nb_subjects
 
@@ -403,18 +414,21 @@ def parse_args(argv):
 
 def dataset_gen_pipe(src_dir=_SRC_DIR_DEFAULT, tgt_dir=_TGT_DIR_DEFAULT,
                      transform_dir=_TRANSFORM_DIR_DEFAULT,
-                     bbox_dir=_BBOX_DIR_DEFAULT, side=_SIDE_DEFAULT,
-                     list_sulci=_SULCUS_DEFAULT, number_subjects=_ALL_SUBJECTS,
-                     interp=_INTERP_DEFAULT, resampling=_RESAMPLING_DEFAULT,
+                     bbox_dir=_BBOX_DIR_DEFAULT,
+                     morphologist_dir=_MORPHOLOGIST_DIR_DEFAULT,
+                     side=_SIDE_DEFAULT, list_sulci=_SULCUS_DEFAULT,
+                     number_subjects=_ALL_SUBJECTS, interp=_INTERP_DEFAULT,
+                     resampling=_RESAMPLING_DEFAULT,
                      out_voxel_size=_OUT_VOXEL_SIZE):
     """Main program generating cropped files and corresponding pickle file
     """
 
     dataset = DatasetCroppedSkeleton(src_dir=src_dir, tgt_dir=tgt_dir,
                                      transform_dir=transform_dir,
-                                     bbox_dir=bbox_dir, side=side,
-                                     list_sulci=list_sulci, interp=interp,
-                                     resampling=resampling,
+                                     bbox_dir=bbox_dir,
+                                     morphologist_dir=morphologist_dir,
+                                     side=side, list_sulci=list_sulci,
+                                     interp=interp, resampling=resampling,
                                      out_voxel_size=out_voxel_size)
     dataset.dataset_gen_pipe(number_subjects=number_subjects)
 
@@ -436,6 +450,7 @@ def main(argv):
                          tgt_dir=params['tgt_dir'],
                          transform_dir=params['transform_dir'],
                          bbox_dir=params['bbox_dir'],
+                         morphologist_dir=params['morphologist_dir'],
                          side=params['side'],
                          list_sulci=params['list_sulci'],
                          interp=params['interp'],
