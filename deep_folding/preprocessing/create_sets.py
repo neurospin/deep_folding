@@ -69,7 +69,8 @@ def create_hcp_benchmark(side, benchmark, directory, batch_size, handedness=1):
     """
     date_exp = date.today().strftime("%d%m%y")
 
-    train_list = pd.read_csv('/neurospin/dico/lguillon/mic21/anomalies_set/dataset/benchmark' + str(benchmark) + '/0_Rside/train.csv')
+    #train_list = pd.read_csv('/neurospin/dico/lguillon/mic21/anomalies_set/dataset/benchmark' + str(benchmark) + '/0_Rside/train.csv')
+    train_list = pd.read_csv('/neurospin/dico/lguillon/mic21/anomalies_set/dataset/benchmark' + str(benchmark) + '/train.csv')
     train_list = train_list.rename(columns={"0":"Subject"})
 
     loss_type = 'CrossEnt'
@@ -77,18 +78,17 @@ def create_hcp_benchmark(side, benchmark, directory, batch_size, handedness=1):
     print(root_dir)
     save_results.create_folder(root_dir)
 
-    data_dir = '/neurospin/dico/lguillon/skeleton/sts_crop/'
-
-    if handedness == 1:
-        input_data = side + '_hemi_rightH_sts_crop_skeleton'
-    else:
-        input_data = side + '_hemi_leftH_sts_crop_skeleton'
-    print(input_data)
+    #data_dir = '/neurospin/dico/lguillon/skeleton/sts_crop/'
+    data_dir = '/neurospin/dico/lguillon/'
+    input_data = 'Rskeleton'
     tmp = pd.read_pickle(data_dir + input_data +'.pkl')
-    train = pd.merge(tmp, train_list.Subject.astype(str), on='Subject')
+    tmp = tmp.T
+    tmp = tmp.rename(columns={0:'ID'})
+    train = pd.merge(tmp, train_list.Subject.astype(str), left_on = tmp.index, right_on='Subject')
     train = train.reset_index(drop=True)
+    filenames = list(train.Subject)
 
-    hcp_dataset_train = SkeletonDataset(dataframe=train)
+    hcp_dataset_train = SkeletonDataset(dataframe=train, filenames=filenames)
 
     # Split training set into train, val and test
     partition = [0.7, 0.2, 0.1]

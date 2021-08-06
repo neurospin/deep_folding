@@ -16,6 +16,7 @@ is loaded.
 # Imports
 import collections
 import numpy as np
+import copy
 import matplotlib.pyplot as plt
 import torch
 import torch.nn.functional as func
@@ -188,7 +189,7 @@ class Padding(object):
                 padding.append((half_shape_i, half_shape_i + 1))
         for cnt in range(len(arr.shape) - len(padding)):
             padding.append((0, 0))
-        #print(padding)
+
         fill_arr = np.pad(arr, padding, mode="constant",
                           constant_values=fill_value)
         return fill_arr
@@ -282,12 +283,12 @@ class NormalizeSkeleton(object):
     black voxels: 0
     grey and white voxels: 1
     """
-    def __init__(self, arr, *args):
+    def __init__(self, nb_cls=3):
         """ Initialize the instance"""
-        self.arr = arr
+        self.nb_cls = nb_cls
         # self.maximum = self.arr.max()
 
-    def __call__(self):
+    def __call__(self, arr):
         # self.arr = self.arr/self.maximum
         #self.arr[self.arr == 11] = 1
         #self.arr[self.arr >= 10] = 2
@@ -298,13 +299,15 @@ class NormalizeSkeleton(object):
         self.arr[self.arr == 11] = 1"""
         # With 3 classes
         #print(type(np.unique(self.arr.cpu().numpy())))
-        """if len(np.unique(self.arr.cpu().numpy()))>3:
-            self.arr[self.arr < 11] = 0 # inside the brain
-            self.arr[self.arr > 11] = 2 # sulci
-            self.arr[self.arr == 11] = 1 # out of the brain"""
+        #norm_arr = copy.deepcopy(arr)
+        #norm_arr[norm_arr < 11] = 0 # inside the brain
+        #norm_arr[norm_arr > 11] = 2 # sulci
+        #norm_arr[norm_arr == 11] = 1 # out of the brain"""
+        arr[arr > 11] = 2 # sulci
+        arr[arr == 11] = 1
         # With only 2 classes:
-        self.arr[self.arr == 0] = 0 # inside the brain
-        self.arr[self.arr > 0] = 1 # sulci + out of the brain
+        #self.arr[self.arr == 0] = 0 # inside the brain
+        #self.arr[self.arr > 0] = 1 # sulci + out of the brain
         #print(torch.unique(self.arr))
 
-        return self.arr
+        return arr
