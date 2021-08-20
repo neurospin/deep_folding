@@ -190,6 +190,7 @@ class DatasetCroppedSkeleton:
 
         # Identifies 'subject' in a mapping (for file and directory namings)
         subject = {'subject': subject_id, 'side': self.side}
+        print(subject_id)
 
         # Names directory where subject analysis files are stored
         subject_dir = \
@@ -203,38 +204,39 @@ class DatasetCroppedSkeleton:
 
         # Skeleton file name
         file_skeleton = join(subject_dir, self.skeleton_file % subject)
-        # Creates output (cropped) file name
-        file_cropped = join(self.cropped_dir, self.cropped_file % subject)
+        if os.path.exists(file_skeleton) and os.path.exists(file_transform):
+            # Creates output (cropped) file name
+            file_cropped = join(self.cropped_dir, self.cropped_file % subject)
 
-        # Normalization and resampling of skeleton images
-        if self.resampling:
-            resample(file_skeleton,
-                     file_cropped,
-                     output_vs=self.out_voxel_size,
-                     transformation=file_transform)
+            # Normalization and resampling of skeleton images
+            if self.resampling:
+                resample(file_skeleton,
+                        file_cropped,
+                        output_vs=self.out_voxel_size,
+                        transformation=file_transform)
 
-        else :
-            cmd_normalize = 'AimsApplyTransform' + \
-                            ' -i ' + file_skeleton + \
-                            ' -o ' + file_cropped + \
-                            ' -m ' + file_transform + \
-                            ' -r ' + file_SPM + \
-                            ' -t ' + self.interp
-            os.system(cmd_normalize)
+            else :
+                cmd_normalize = 'AimsApplyTransform' + \
+                                ' -i ' + file_skeleton + \
+                                ' -o ' + file_cropped + \
+                                ' -m ' + file_transform + \
+                                ' -r ' + file_SPM + \
+                                ' -t ' + self.interp
+                os.system(cmd_normalize)
 
-        # Take the coordinates of the bounding box
-        bbmin = self.bbmin
-        bbmax = self.bbmax
-        xmin, ymin, zmin = str(bbmin[0]), str(bbmin[1]), str(bbmin[2])
-        xmax, ymax, zmax = str(bbmax[0]), str(bbmax[1]), str(bbmax[2])
+            # Take the coordinates of the bounding box
+            bbmin = self.bbmin
+            bbmax = self.bbmax
+            xmin, ymin, zmin = str(bbmin[0]), str(bbmin[1]), str(bbmin[2])
+            xmax, ymax, zmax = str(bbmax[0]), str(bbmax[1]), str(bbmax[2])
 
-        # Crop of the images based on bounding box
-        cmd_bounding_box = ' -x ' + xmin + ' -y ' + ymin + ' -z ' + zmin + \
+            # Crop of the images based on bounding box
+            cmd_bounding_box = ' -x ' + xmin + ' -y ' + ymin + ' -z ' + zmin + \
                            ' -X ' + xmax + ' -Y ' + ymax + ' -Z ' + zmax
-        cmd_crop = 'AimsSubVolume' + \
+            cmd_crop = 'AimsSubVolume' + \
                    ' -i ' + file_cropped + \
                    ' -o ' + file_cropped + cmd_bounding_box
-        os.system(cmd_crop)
+            os.system(cmd_crop)
 
     def crop_files(self, number_subjects=_ALL_SUBJECTS):
         """Crop nii files
