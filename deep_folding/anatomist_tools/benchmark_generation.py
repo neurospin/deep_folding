@@ -240,7 +240,8 @@ def get_sub_list(subjects_list):
 
 
 def generate(b_num, side, ss_size, sulci_list, mode='suppress', bench_size=150,
-             subjects_list=None, saving_dir=_DEFAULT_SAVING_DIR):
+             subjects_list=None, saving_dir=_DEFAULT_SAVING_DIR,
+             bbox_dir=_DEFAULT_BBOX_DIR):
     """
     Generates a benchmark
 
@@ -251,7 +252,8 @@ def generate(b_num, side, ss_size, sulci_list, mode='suppress', bench_size=150,
         mode: string giving the type of benchmark to create ('suppress', 'add'
               or 'mix')
     """
-    benchmark = Benchmark(b_num, side, ss_size, sulci_list, saving_dir)
+    benchmark = Benchmark(b_num, side, ss_size, sulci_list, saving_dir,
+                          bbox_dir=bbox_dir)
     abnormality_test = []
     givers = []
     subjects_list = get_sub_list(subjects_list)
