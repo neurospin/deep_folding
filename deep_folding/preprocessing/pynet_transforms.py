@@ -305,6 +305,7 @@ class NormalizeSkeleton(object):
         #norm_arr[norm_arr == 11] = 1 # out of the brain"""
         arr[arr > 11] = 2 # sulci
         arr[arr == 11] = 1
+        arr[arr==10] = 1
         # With only 2 classes:
         #self.arr[self.arr == 0] = 0 # inside the brain
         #self.arr[self.arr > 0] = 1 # sulci + out of the brain
