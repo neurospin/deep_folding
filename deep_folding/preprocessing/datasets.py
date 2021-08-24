@@ -117,16 +117,13 @@ class SkeletonDataset():
         if self.filenames:
             filename = self.filenames[idx]
             sample = np.expand_dims(np.squeeze(self.df.iloc[idx][0]), axis=0)
-            print('la')
             #sample = np.expand_dims(np.squeeze(sample, axis=3), axis=0)
         else:
-            print('ici')
             filename = self.df.iloc[idx]['ID']
             sample = self.df.iloc[idx][0]
 
         fill_value = 1
         #sample = NormalizeSkeleton(sample)()
-        print(np.unique(sample))
         self.transform = transforms.Compose([NormalizeSkeleton(),
                          Padding([1, 40, 40, 40], fill_value=fill_value)
                          ])
