@@ -286,29 +286,15 @@ class NormalizeSkeleton(object):
     def __init__(self, nb_cls=3):
         """ Initialize the instance"""
         self.nb_cls = nb_cls
-        # self.maximum = self.arr.max()
 
     def __call__(self, arr):
-        # self.arr = self.arr/self.maximum
-        #self.arr[self.arr == 11] = 1
-        #self.arr[self.arr >= 10] = 2
-        #print(torch.unique(self.arr))
-        #print("Here.... Transformation ! ")
-        """self.arr[self.arr < 11] = 0
-        self.arr[self.arr > 11] = 2
-        self.arr[self.arr == 11] = 1"""
-        # With 3 classes
-        #print(type(np.unique(self.arr.cpu().numpy())))
-        #norm_arr = copy.deepcopy(arr)
-        #norm_arr[norm_arr < 11] = 0 # inside the brain
-        #norm_arr[norm_arr > 11] = 2 # sulci
-        #norm_arr[norm_arr == 11] = 1 # out of the brain"""
-        arr[arr > 11] = 2 # sulci
-        arr[arr == 11] = 1
-        arr[arr==10] = 1
-        # With only 2 classes:
-        #self.arr[self.arr == 0] = 0 # inside the brain
-        #self.arr[self.arr > 0] = 1 # sulci + out of the brain
-        #print(torch.unique(self.arr))
+        if self.nb_cls==3:
+            arr[arr < 11] = 0
+            arr[arr > 11] = 2
+            arr[arr == 11] = 1
+
+        else: # output is binary image
+            arr[arr == 0] = 0 # inside the brain
+            arr[arr > 0] = 1 # sulci + out of the brain
 
         return arr
