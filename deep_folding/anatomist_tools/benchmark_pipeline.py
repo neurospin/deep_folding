@@ -70,11 +70,9 @@ def parse_args(argv):
         prog='create_benchmark.py',
         description='Generates benchmark of sulcal abnormalities')
     parser.add_argument(
-        "-s", "--src_dir", type=str, default=_SRC_DIR_DEFAULT, nargs='+',
-        help='Source directory where the MRI data lies. '
-             'If there are several directories, add all directories '
-             'one after the other. Example: -s DIR_1 DIR_2. '
-             'Default is : ' + _SRC_DIR_DEFAULT)
+        "-t", "--tgt_dir", type=str, default=_TGT_DIR_DEFAULT,
+        help='Target directory where to save the benchmark. '
+             'Default is : ' + _TGT_DIR_DEFAULT)
     parser.add_argument(
         "-u", "--sulcus", default=_SULCUS_DEFAULT, nargs='+',
         help='Sulcus name around which we determine the bounding box. '
@@ -108,8 +106,8 @@ def parse_args(argv):
              "Default is : " + str(_SUBJECT_LIST_DEFAULT))
 
     args = parser.parse_args(argv)
-    src_dir = args.src_dir  # src_dir is a list
-    sulcus = args.sulcus  # sulcus is a string
+    tgt_dir = args.tgt_dir  # src_dir is a string
+    sulcus = args.sulcus  # sulcus is a list
     side = args.side
     ss_size = args.ss_size
     mode = args.benchmark_mode
@@ -118,11 +116,11 @@ def parse_args(argv):
     bbox_dir = args.bbox_dir
     subjects_list = args.subjects_list
 
-    return src_dir, sulcus, side, ss_size, mode, bench_size, resampling, bbox_dir, subjects_list
+    return tgt_dir, sulcus, side, ss_size, mode, bench_size, resampling, bbox_dir, subjects_list
 
 
 _SS_SIZE_DEFAULT = 1000
-_SRC_DIR_DEFAULT = '/neurospin/dico/lguillon/mic21/anomalies_set/dataset/'
+_TGT_DIR_DEFAULT = '/neurospin/dico/lguillon/mic21/anomalies_set/dataset/'
 _SULCUS_DEFAULT = ['S.T.s.ter.asc.ant.', 'S.T.s.ter.asc.post.']
 _SIDE_DEFAULT = 'R'
 _MODE_DEFAULT = 'suppress'
@@ -132,10 +130,10 @@ _BBOX_DIR_DEFAULT = '/neurospin/dico/data/deep_folding/data/bbox'
 _SUBJECT_LIST_DEFAULT = None
 
 def main(argv):
-    src_dir, sulcus, side, ss_size, mode, bench_size, resampling, bbox_dir, subjects_list = parse_args(argv)
+    tgt_dir, sulcus, side, ss_size, mode, bench_size, resampling, bbox_dir, subjects_list = parse_args(argv)
     sulcus = complete_sulci_name(sulcus, side)
-    b_num = len(next(os.walk(src_dir))[1]) + 1
-    tgt_dir = os.path.join(src_dir, 'benchmark'+str(b_num))
+    b_num = len(next(os.walk(tgt_dir))[1]) + 1
+    tgt_dir = os.path.join(tgt_dir, 'benchmark'+str(b_num))
     if not os.path.isdir(tgt_dir):
         os.mkdir(tgt_dir)
 
@@ -146,8 +144,9 @@ def main(argv):
     print(' ')
 
     print('=================== Selection and possible alteration of benchmark skeletons ===================')
-    generate(b_num, side, ss_size, sulci_list=sulcus,
-             mode=mode, bench_size=bench_size, subjects_list=subjects_list)
+    generate(b_num, side, ss_size, sulci_list=sulcus, saving_dir=tgt_dir,
+             mode=mode, bench_size=bench_size, subjects_list=subjects_list,
+             bbox_dir=bbox_dir)
 
     bbox = compute_max_box(sulcus, side, src_dir=bbox_dir)
     print(bbox)
@@ -180,10 +179,11 @@ def main(argv):
             # Crop of the images
             file = os.path.join(tgt_dir, img[:-7] + '_normalized.nii.gz')
             if mode == 'random':
-                # 40 instead of 0 in order to avoid crops with only black voxels
-                random_x = random.randint(40, 157-box_size[0]-1)
-                random_y = random.randint(0, 189-box_size[1]-1)
-                random_z = random.randint(0, 136-box_size[2]-1)
+                # 42 instead of 0 in order to avoid crops with only black voxels
+                # Int 108 and 91 depend on downsampling and normalization
+                random_x = random.randint(0, 42)
+                random_y = random.randint(0, 108-box_size[1]-1)
+                random_z = random.randint(0, 91-box_size[2]-1)
                 print(random_x, random_y, random_z)
                 xmax, ymax, zmax = random_x + box_size[0], random_y + box_size[1], random_z + box_size[2]
                 cmd_bounding_box = ' -x ' + str(random_x) + ' -y ' + str(random_y) + \

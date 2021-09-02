@@ -66,9 +66,8 @@ class Benchmark():
     """Generates benchmark of altered skeletons
     """
 
-    def __init__(self, b_num, side, ss_size, sulci_list,
-                 data_dir=_DEFAULT_DATA_DIR, saving_dir=_DEFAULT_SAVING_DIR,
-                 bbox_dir=_DEFAULT_BBOX_DIR):
+    def __init__(self, b_num, side, ss_size, sulci_list, saving_dir,
+                 data_dir=_DEFAULT_DATA_DIR, bbox_dir=_DEFAULT_BBOX_DIR):
         """Inits with list of directories, bounding box and sulci
 
         Args:
@@ -86,7 +85,7 @@ class Benchmark():
         self.sulci_list = sulci_list
         self.sulci_list = complete_sulci_name(self.sulci_list, self.side)
         self.data_dir = data_dir
-        self.saving_dir = os.path.join(saving_dir, 'benchmark'+str(self.b_num))
+        self.saving_dir = saving_dir
         self.abnormality_test = []
         self.bbmin, self.bbmax = compute_max_box(self.sulci_list, side,
                                 talairach_box=True, src_dir=bbox_dir)
@@ -241,7 +240,8 @@ def get_sub_list(subjects_list):
 
 
 def generate(b_num, side, ss_size, sulci_list, mode='suppress', bench_size=150,
-             subjects_list=None):
+             subjects_list=None, saving_dir=_DEFAULT_SAVING_DIR,
+             bbox_dir=_DEFAULT_BBOX_DIR):
     """
     Generates a benchmark
 
@@ -252,7 +252,8 @@ def generate(b_num, side, ss_size, sulci_list, mode='suppress', bench_size=150,
         mode: string giving the type of benchmark to create ('suppress', 'add'
               or 'mix')
     """
-    benchmark = Benchmark(b_num, side, ss_size, sulci_list)
+    benchmark = Benchmark(b_num, side, ss_size, sulci_list, saving_dir,
+                          bbox_dir=bbox_dir)
     abnormality_test = []
     givers = []
     subjects_list = get_sub_list(subjects_list)

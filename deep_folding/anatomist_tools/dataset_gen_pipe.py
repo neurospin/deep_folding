@@ -91,6 +91,10 @@ _SULCUS_DEFAULT = 'S.T.s.ter.asc.ant.'
 # Input directory contaning the morphologist analysis of the HCP database
 _SRC_DIR_DEFAULT = '/neurospin/hcp'
 
+# Directory where subjects to be processed are stored.
+# Default is for HCP dataset
+_MORPHOLOGIST_DIR_DEFAULT = 'ANALYSIS/3T_morphologist'
+
 # Directory that contains the transformation file
 # from native to MNI through SPM
 # These files have been created with spm_skeleton
@@ -113,6 +117,7 @@ class DatasetCroppedSkeleton:
                  tgt_dir=_TGT_DIR_DEFAULT,
                  transform_dir=_TRANSFORM_DIR_DEFAULT,
                  bbox_dir=_BBOX_DIR_DEFAULT,
+                 morphologist_dir=_MORPHOLOGIST_DIR_DEFAULT,
                  list_sulci=_SULCUS_DEFAULT,
                  side=_SIDE_DEFAULT,
                  interp=_INTERP_DEFAULT,
@@ -143,12 +148,13 @@ class DatasetCroppedSkeleton:
         self.tgt_dir = tgt_dir
         self.transform_dir = transform_dir
         self.bbox_dir = bbox_dir
+        self.morphologist_dir = morphologist_dir
         self.interp = interp
         self.resampling = resampling
         self.out_voxel_size = out_voxel_size
 
         # Morphologist directory
-        self.morphologist_dir = join(self.src_dir, "ANALYSIS/3T_morphologist")
+        self.morphologist_dir = join(self.src_dir, self.morphologist_dir)
         # default acquisition subdirectory
         self.acquisition_dir = "%(subject)s/t1mri/default_acquisition"
         # (input) name of normalized SPM file
@@ -184,6 +190,7 @@ class DatasetCroppedSkeleton:
 
         # Identifies 'subject' in a mapping (for file and directory namings)
         subject = {'subject': subject_id, 'side': self.side}
+        print(subject_id)
 
         # Names directory where subject analysis files are stored
         subject_dir = \
@@ -197,38 +204,39 @@ class DatasetCroppedSkeleton:
 
         # Skeleton file name
         file_skeleton = join(subject_dir, self.skeleton_file % subject)
-        # Creates output (cropped) file name
-        file_cropped = join(self.cropped_dir, self.cropped_file % subject)
+        if os.path.exists(file_skeleton) and os.path.exists(file_transform):
+            # Creates output (cropped) file name
+            file_cropped = join(self.cropped_dir, self.cropped_file % subject)
 
-        # Normalization and resampling of skeleton images
-        if self.resampling:
-            resample(file_skeleton,
-                     file_cropped,
-                     output_vs=self.out_voxel_size,
-                     transformation=file_transform)
+            # Normalization and resampling of skeleton images
+            if self.resampling:
+                resample(file_skeleton,
+                        file_cropped,
+                        output_vs=self.out_voxel_size,
+                        transformation=file_transform)
 
-        else :
-            cmd_normalize = 'AimsApplyTransform' + \
-                            ' -i ' + file_skeleton + \
-                            ' -o ' + file_cropped + \
-                            ' -m ' + file_transform + \
-                            ' -r ' + file_SPM + \
-                            ' -t ' + self.interp
-            os.system(cmd_normalize)
+            else :
+                cmd_normalize = 'AimsApplyTransform' + \
+                                ' -i ' + file_skeleton + \
+                                ' -o ' + file_cropped + \
+                                ' -m ' + file_transform + \
+                                ' -r ' + file_SPM + \
+                                ' -t ' + self.interp
+                os.system(cmd_normalize)
 
-        # Take the coordinates of the bounding box
-        bbmin = self.bbmin
-        bbmax = self.bbmax
-        xmin, ymin, zmin = str(bbmin[0]), str(bbmin[1]), str(bbmin[2])
-        xmax, ymax, zmax = str(bbmax[0]), str(bbmax[1]), str(bbmax[2])
+            # Take the coordinates of the bounding box
+            bbmin = self.bbmin
+            bbmax = self.bbmax
+            xmin, ymin, zmin = str(bbmin[0]), str(bbmin[1]), str(bbmin[2])
+            xmax, ymax, zmax = str(bbmax[0]), str(bbmax[1]), str(bbmax[2])
 
-        # Crop of the images based on bounding box
-        cmd_bounding_box = ' -x ' + xmin + ' -y ' + ymin + ' -z ' + zmin + \
+            # Crop of the images based on bounding box
+            cmd_bounding_box = ' -x ' + xmin + ' -y ' + ymin + ' -z ' + zmin + \
                            ' -X ' + xmax + ' -Y ' + ymax + ' -Z ' + zmax
-        cmd_crop = 'AimsSubVolume' + \
+            cmd_crop = 'AimsSubVolume' + \
                    ' -i ' + file_cropped + \
                    ' -o ' + file_cropped + cmd_bounding_box
-        os.system(cmd_crop)
+            os.system(cmd_crop)
 
     def crop_files(self, number_subjects=_ALL_SUBJECTS):
         """Crop nii files
@@ -243,7 +251,8 @@ class DatasetCroppedSkeleton:
         if number_subjects:
 
             # subjects are detected as the directory names under src_dir
-            list_all_subjects = listdir(self.morphologist_dir)
+            list_all_subjects = [dI for dI in os.listdir(self.morphologist_dir)\
+             if os.path.isdir(os.path.join(self.morphologist_dir,dI))]
 
             # Gives the possibility to list only the first number_subjects
             list_subjects = (
@@ -337,6 +346,9 @@ def parse_args(argv):
              'bounding box coordinates have been stored. '
              'Default is : ' + _BBOX_DIR_DEFAULT)
     parser.add_argument(
+        "-m", "--morphologist_dir", type=str, default=_MORPHOLOGIST_DIR_DEFAULT,
+        help='Directory where subjects to be processed are stored')
+    parser.add_argument(
         "-u", "--sulcus", type=str, default=_SULCUS_DEFAULT, nargs='+',
         help='Sulcus name around which we determine the bounding box. '
              'If there are several sulci, add all sulci '
@@ -382,6 +394,7 @@ def parse_args(argv):
     params['interp'] = args.interp
     params['resampling'] = args.resampling
     params['out_voxel_size'] = tuple(args.out_voxel_size)
+    params['morphologist_dir'] = args.morphologist_dir
 
     number_subjects = args.nb_subjects
 
@@ -403,18 +416,21 @@ def parse_args(argv):
 
 def dataset_gen_pipe(src_dir=_SRC_DIR_DEFAULT, tgt_dir=_TGT_DIR_DEFAULT,
                      transform_dir=_TRANSFORM_DIR_DEFAULT,
-                     bbox_dir=_BBOX_DIR_DEFAULT, side=_SIDE_DEFAULT,
-                     list_sulci=_SULCUS_DEFAULT, number_subjects=_ALL_SUBJECTS,
-                     interp=_INTERP_DEFAULT, resampling=_RESAMPLING_DEFAULT,
+                     bbox_dir=_BBOX_DIR_DEFAULT,
+                     morphologist_dir=_MORPHOLOGIST_DIR_DEFAULT,
+                     side=_SIDE_DEFAULT, list_sulci=_SULCUS_DEFAULT,
+                     number_subjects=_ALL_SUBJECTS, interp=_INTERP_DEFAULT,
+                     resampling=_RESAMPLING_DEFAULT,
                      out_voxel_size=_OUT_VOXEL_SIZE):
     """Main program generating cropped files and corresponding pickle file
     """
 
     dataset = DatasetCroppedSkeleton(src_dir=src_dir, tgt_dir=tgt_dir,
                                      transform_dir=transform_dir,
-                                     bbox_dir=bbox_dir, side=side,
-                                     list_sulci=list_sulci, interp=interp,
-                                     resampling=resampling,
+                                     bbox_dir=bbox_dir,
+                                     morphologist_dir=morphologist_dir,
+                                     side=side, list_sulci=list_sulci,
+                                     interp=interp, resampling=resampling,
                                      out_voxel_size=out_voxel_size)
     dataset.dataset_gen_pipe(number_subjects=number_subjects)
 
@@ -436,6 +452,7 @@ def main(argv):
                          tgt_dir=params['tgt_dir'],
                          transform_dir=params['transform_dir'],
                          bbox_dir=params['bbox_dir'],
+                         morphologist_dir=params['morphologist_dir'],
                          side=params['side'],
                          list_sulci=params['list_sulci'],
                          interp=params['interp'],
