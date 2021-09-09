@@ -6,7 +6,7 @@ import numpy as np
 from soma import aims, aimsalgo
 
 
-def resample(input_image, output_image, transformation=None, output_vs=None, background=0):
+def resample(input_image, output_image, transformation=None, output_vs=None, background=11):
     """
         Transform and resample a volume that as discret values
 
@@ -19,7 +19,7 @@ def resample(input_image, output_image, transformation=None, output_vs=None, bac
         output_vs: tuple
             Output voxel size (default: None, no resampling)
         background: int
-            Background value (default: 0)
+            Background value (default: 11)
 
         Return
         ------
