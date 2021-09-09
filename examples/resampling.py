@@ -23,7 +23,7 @@ print("Output:", rvol.header()['volume_dimension'], rvol.header()['voxel_size'])
 
 print("\nResampling (with specific order)")
 tic = time()
-orvol = resample(skeleton, None, (2, 2, 2), 11, [80, 60, 11, 30, 40, 70, 10, 0])
+orvol = resample(skeleton, None, (2, 2, 2), values=[80, 60, 30, 40, 70, 10, 0])
 print('Resampling took {:.0f} seconds'.format(time()-tic))
 aims.write(orvol, ors_skeleton)
 print("Output:", orvol.header()['volume_dimension'],

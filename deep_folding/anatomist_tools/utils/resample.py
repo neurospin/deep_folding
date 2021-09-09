@@ -1,12 +1,13 @@
 """
-Script from https://github.com/BastienCagna/labelresample.git
+    Resample a volume that contains discret values
 """
-
 import numpy as np
 from soma import aims, aimsalgo
+from time import time
 
 
-def resample(input_image, output_image, transformation=None, output_vs=None, background=11):
+def resample(input_image, transformation, output_vs=None, background=0,
+             values=None):
     """
         Transform and resample a volume that as discret values
 
@@ -20,12 +21,17 @@ def resample(input_image, output_image, transformation=None, output_vs=None, bac
             Output voxel size (default: None, no resampling)
         background: int
             Background value (default: 11)
+        values: []
+            Array of unique values ordered by descendent priority. If not given,
+            priority is set by ascendent values
 
         Return
         ------
         resampled_vol:
             Transformed and resampled volume
     """
+    tic = time()
+
     # Read inputs
     vol = aims.read(input_image)
     vol_dt = vol.__array__()
@@ -47,6 +53,9 @@ def resample(input_image, output_image, transformation=None, output_vs=None, bac
         output_vs = vol.header()['voxel_size'][:3]
         new_dim = vol.header()['volume_dimension'][:3]
 
+    print("Time before resampling: {}s".format(time()-tic))
+    tic = time()
+
     # Transform the background
     # Using the inverse is more straightforward and supports non-linear
     # transforms
@@ -59,21 +68,32 @@ def resample(input_image, output_image, transformation=None, output_vs=None, bac
     resampler.resample_inv(vol, inv_trm, 0, resampled)
     resampled_dt = np.asarray(resampled)
 
+    print("Background resampling: {}s".format(time()-tic))
+    tic = time()
+
+    if values is None:
+        values = sorted(np.unique(vol_dt[vol_dt != background]))
+    else:
+        # Reverse order as value are passed by descendent priority
+        values = values[::-1]
+
     # Create one bucket by value (except background)
     # FIXME: Create several buckets because I didn't understood how to add
     #  several bucket to a BucketMap
-    values = np.unique(vol_dt[vol_dt != background])
-    # TODO: add pissiblity to order values by priority
     for i, v in enumerate(values):
+        toc = time()
         bck = aims.BucketMap_VOID()
         bck.setSizeXYZT(*vol.header()['voxel_size'][:3], 1.)
         bk0 = bck[0]
         for p in np.vstack(np.where(vol_dt == v)[:3]).T:
             bk0[list(p)] = v
-
+        t_bck = time() - toc
+        toc = time()
         bck2 = aimsalgo.resampleBucket(bck, trm, inv_trm, output_vs)
-
+        t_rs = time() - toc
+        toc = time()
         # FIXME: Could not assign the correct value with the converter.
+        # TODO: try to reduce time consumation of this part!
         # Using the converter, the new_dim must incremented
         # conv = aims.Converter(intype=bck2, outtype=aims.AimsData(vol))
         # conv.convert(bck2, resampled)
@@ -83,14 +103,10 @@ def resample(input_image, output_image, transformation=None, output_vs=None, bac
             if c[0] < new_dim[0] and c[1] < new_dim[1] and c[2] < new_dim[2]:
                 resampled_dt[c[0], c[1], c[2]] = values[i]
 
-    aims.write(resampled, output_image)
+        print("Time for value {} ({} voxels): {}s".format(
+            v, np.sum(np.where(vol_dt == v)), time() - tic))
+        print("\t{}s to create the bucket\n\t{}s to resample bucket\n"
+              "\t{}s to assign values".format(t_bck, t_rs, time()-toc))
+        tic = time()
+
     return resampled
-
-
-if __name__ == '__main__':
-    dir = '/neurospin/dico/lguillon/skeleton/resampling_nn_2mm/Rcrops/'
-    input_image = dir + 'Rskeleton_100307.nii.gz'
-    tr = '/neurospin/dico/deep_folding_data/data/transform/natif_to_template_spm_100307.trm'
-    #input_image = dir + '129533_normalized.nii.gz'
-    resampled = resample(input_image, output_vs=(2,2,2),transformation=tr)
-    aims.write(resampled, dir + 'test_5_trm.nii.gz')
