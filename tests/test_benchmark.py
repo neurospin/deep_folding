@@ -27,7 +27,7 @@ def test_suppr_benchmark():
     """Tests suppr benchmark generation
     """
     src_dir = os.path.join(os.getcwd(), 'data/source/unsupervised/ANALYSIS/3T_morphologist/')
-    tgt_dir = os.path.join(os.getcwd(), 'data/target/benchmark')
+    tgt_dir = os.path.join(os.getcwd(), 'data/target/benchmark/benchmark1')
     bbox_dir = os.path.join(os.getcwd(), 'data/reference/bbox/')
     sulci_list=['S.T.s.ter.asc.post._right', 'S.T.s.ter.asc.ant._right']
 
@@ -39,7 +39,6 @@ def test_suppr_benchmark():
     abnormality_test = []
     givers = []
 
-    tgt_dir = os.path.join(os.getcwd(), 'data/target/benchmark/benchmark1/')
     try:
         if not os.path.exists(tgt_dir):
             os.makedirs(tgt_dir)
@@ -75,7 +74,7 @@ def test_add_benchmark():
     """Tests add ss benchmark generation
     """
     src_dir = os.path.join(os.getcwd(), 'data/source/unsupervised/ANALYSIS/3T_morphologist/')
-    tgt_dir = os.path.join(os.getcwd(), 'data/target/benchmark')
+    tgt_dir = os.path.join(os.getcwd(), 'data/target/benchmark/benchmark2')
     bbox_dir = os.path.join(os.getcwd(), 'data/reference/bbox/')
     sulci_list=['S.T.s.ter.asc.post._right', 'S.T.s.ter.asc.ant._right']
     benchmark = Benchmark(2, 'R', 1000, sulci_list, data_dir=src_dir,
@@ -85,8 +84,6 @@ def test_add_benchmark():
 
     abnormality_test = []
     givers = []
-
-    tgt_dir = os.path.join(os.getcwd(), 'data/target/benchmark/benchmark2/')
     try:
         os.makedirs(tgt_dir)
     except OSError:
