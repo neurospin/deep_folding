@@ -7,7 +7,7 @@ setup(
     license='CeCILL license version 2',
     description='Deep learning utilities to characterize sulcus patterns',
     long_description=open('README.rst').read(),
-    install_requires=['six', 'numpy', 'pytest', 'GitPython', 'typing'],
+    install_requires=['six', 'numpy', 'pytest', 'GitPython', 'typing', 'joblib'],
     url='https://github.com/neurospin/deep_folding',
     author='Louise Guillon and Joel Chavas',
     author_email=''

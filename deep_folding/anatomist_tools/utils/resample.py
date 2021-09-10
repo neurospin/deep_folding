@@ -2,12 +2,14 @@
     Resample a volume that contains discret values
 """
 import numpy as np
+import logging
 from soma import aims, aimsalgo
 from time import time
 
+log = logging.getLogger(__name__)
 
 def resample(input_image, transformation, output_vs=None, background=11,
-             values=None):
+             values=None, verbose=True):
     """
         Transform and resample a volume that as discret values
 
@@ -30,6 +32,9 @@ def resample(input_image, transformation, output_vs=None, background=11,
         resampled_vol:
             Transformed and resampled volume
     """
+    
+    if verbose:
+        logging.basicConfig(level=logging.INFO)
     tic = time()
 
     # Read inputs
@@ -53,7 +58,7 @@ def resample(input_image, transformation, output_vs=None, background=11,
         output_vs = vol.header()['voxel_size'][:3]
         new_dim = vol.header()['volume_dimension'][:3]
 
-    print("Time before resampling: {}s".format(time()-tic))
+    log.info("Time before resampling: {}s".format(time()-tic))
     tic = time()
 
     # Transform the background
@@ -68,7 +73,7 @@ def resample(input_image, transformation, output_vs=None, background=11,
     resampler.resample_inv(vol, inv_trm, 0, resampled)
     resampled_dt = np.asarray(resampled)
 
-    print("Background resampling: {}s".format(time()-tic))
+    log.info("Background resampling: {}s".format(time()-tic))
     tic = time()
 
     if values is None:
@@ -103,9 +108,9 @@ def resample(input_image, transformation, output_vs=None, background=11,
             if c[0] < new_dim[0] and c[1] < new_dim[1] and c[2] < new_dim[2]:
                 resampled_dt[c[0], c[1], c[2]] = values[i]
 
-        print("Time for value {} ({} voxels): {}s".format(
+        log.info("Time for value {} ({} voxels): {}s".format(
             v, np.sum(np.where(vol_dt == v)), time() - tic))
-        print("\t{}s to create the bucket\n\t{}s to resample bucket\n"
+        log.info("\t{}s to create the bucket\n\t{}s to resample bucket\n"
               "\t{}s to assign values".format(t_bck, t_rs, time()-toc))
         tic = time()
 
