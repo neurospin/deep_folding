@@ -2,12 +2,14 @@ from soma import aims
 from deep_folding.anatomist_tools.utils.resample import resample
 import numpy as np
 from time import time
+import os
 
-
-skeleton = "/home/bastien/data/archi/t1-1mm-1/025/t1mri/default_acquisition/" \
-           "default_analysis/segmentation/Lskeleton_025.nii.gz"
-rs_skeleton = "/var/tmp/resampled_Lskeleton_025.nii.gz"
-ors_skeleton = "/var/tmp/ordered_resampled_Lskeleton_025.nii.gz"
+cwd_dir = os.path.join(os.getcwd(), "../")
+src_dir = os.path.join(cwd_dir, "data/source/archi/t1-1mm-1/025/t1mri/default_acquisition")
+skeleton = os.path.join(src_dir, "default_analysis/segmentation/Lskeleton_025.nii.gz")
+tgt_dir = os.path.join(cwd_dir, "data/target/resampling")
+rs_skeleton = os.path.join(tgt_dir, "resampled_Lskeleton_025.nii.gz")
+ors_skeleton = os.path.join(tgt_dir, "ordered_resampled_Lskeleton_025.nii.gz")
 
 
 vol = aims.read(skeleton)
