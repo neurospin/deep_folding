@@ -65,6 +65,8 @@ import numpy as np
 
 import six
 
+from soma import aims
+
 from deep_folding.anatomist_tools.utils.logs import LogJson
 from deep_folding.anatomist_tools.utils.load_bbox import compute_max_box
 from deep_folding.anatomist_tools.utils.resample import resample
@@ -210,11 +212,10 @@ class DatasetCroppedSkeleton:
 
             # Normalization and resampling of skeleton images
             if self.resampling:
-                resample(file_skeleton,
-                        file_cropped,
-                        output_vs=self.out_voxel_size,
-                        transformation=file_transform)
-
+                resampled = resample(input_image=file_skeleton,
+			         output_vs=self.out_voxel_size,
+			         transformation=file_transform)
+                aims.write(resampled, file_cropped)
             else :
                 cmd_normalize = 'AimsApplyTransform' + \
                                 ' -i ' + file_skeleton + \
