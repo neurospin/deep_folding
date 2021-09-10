@@ -6,7 +6,7 @@ from soma import aims, aimsalgo
 from time import time
 
 
-def resample(input_image, transformation, output_vs=None, background=0,
+def resample(input_image, transformation, output_vs=None, background=11,
              values=None):
     """
         Transform and resample a volume that as discret values
