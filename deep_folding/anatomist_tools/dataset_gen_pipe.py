@@ -67,11 +67,16 @@ import six
 
 from soma import aims
 
+from pqdm.processes import pqdm
+from joblib import cpu_count
+
 from deep_folding.anatomist_tools.utils.logs import LogJson
 from deep_folding.anatomist_tools.utils.load_bbox import compute_max_box
 from deep_folding.anatomist_tools.utils.resample import resample
 from deep_folding.anatomist_tools.utils.sulcus_side import complete_sulci_name
 from deep_folding.anatomist_tools.load_data import fetch_data
+
+from tqdm import tqdm
 
 _ALL_SUBJECTS = -1
 
@@ -106,10 +111,16 @@ _TRANSFORM_DIR_DEFAULT = '/neurospin/dico/data/deep_folding/data/transform'
 # default corresponds to bounding boxes computed for voxels of 1mm
 _BBOX_DIR_DEFAULT = '/neurospin/dico/data/deep_folding/data/bbox'
 
-# Output (target) directory
+# Directory containing bounding box json files
+# default corresponds to bounding boxes computed for voxinput 
 # -------------------------
 _TGT_DIR_DEFAULT = '/neurospin/dico/data/deep_folding/test'
 
+def define_njobs():
+    """Returns number of cpus used by main loop
+    """
+    nb_cpus = cpu_count()
+    return max(nb_cpus-2, 1)
 
 class DatasetCroppedSkeleton:
     """Generates cropped skeleton files and corresponding pickle file
@@ -192,7 +203,6 @@ class DatasetCroppedSkeleton:
 
         # Identifies 'subject' in a mapping (for file and directory namings)
         subject = {'subject': subject_id, 'side': self.side}
-        print(subject_id)
 
         # Names directory where subject analysis files are stored
         subject_dir = \
@@ -213,8 +223,9 @@ class DatasetCroppedSkeleton:
             # Normalization and resampling of skeleton images
             if self.resampling:
                 resampled = resample(input_image=file_skeleton,
-			         output_vs=self.out_voxel_size,
-			         transformation=file_transform)
+                                     output_vs=self.out_voxel_size,
+                                     transformation=file_transform,
+                                     verbose=False)
                 aims.write(resampled, file_cropped)
             else :
                 cmd_normalize = 'AimsApplyTransform' + \
@@ -237,7 +248,9 @@ class DatasetCroppedSkeleton:
             cmd_crop = 'AimsSubVolume' + \
                    ' -i ' + file_cropped + \
                    ' -o ' + file_cropped + cmd_bounding_box
-            os.system(cmd_crop)
+            
+            # Sts output from AimsSubVolume is recorded in var_output
+            var_output = os.popen(cmd_crop).read()
 
     def crop_files(self, number_subjects=_ALL_SUBJECTS):
         """Crop nii files
@@ -282,16 +295,21 @@ class DatasetCroppedSkeleton:
                            'resampling_type': 'AimsApplyTransform' if self.resampling is None else 'Bastien',
                            'out_voxel_size': self.out_voxel_size
                            }
+            
             self.json.update(dict_to_add=dict_to_add)
 
-            for subject in list_subjects:
-                self.crop_one_file(subject)
+            print(list_subjects)
+
+            pqdm(list_subjects, self.crop_one_file, n_jobs=define_njobs())
+            #Parallel(n_jobs = define_njobs())(delayed(self.crop_one_file)(subject)
+            #                                  for subject in list_subjects)
 
     def dataset_gen_pipe(self, number_subjects=_ALL_SUBJECTS):
         """Main API to create pickle files
 
         The programm loops over all subjects from the input (source) directory.
-
+            # Writes number of subjects and directory names to json file
+            dict_to_add = {'nb_subjects': len(list_subjects),joblib import Parallel, delayed
         Args:
             number_subjects: integer giving the number of subjects to analyze,
                 by default it is set to _ALL_SUBJECTS (-1).
