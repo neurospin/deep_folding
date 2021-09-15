@@ -40,8 +40,8 @@
 ######################################################################
 # Imports and global variables definitions
 ######################################################################
-from __future__ import division
-from __future__ import print_function
+from pqdm.processes import pqdm
+from joblib import cpu_count
 
 from benchmark_generation import *
 from deep_folding.anatomist_tools.utils.resample import resample
@@ -129,83 +129,125 @@ _RESAMPLING_DEFAULT = None
 _BBOX_DIR_DEFAULT = '/neurospin/dico/data/deep_folding/data/bbox'
 _SUBJECT_LIST_DEFAULT = None
 
+
+def define_njobs():
+    """Returns number of cpus used by main loop
+    """
+    nb_cpus = cpu_count()
+    return max(nb_cpus-2, 1)
+
+
+class BenchmarkPipe:
+    """
+    """
+
+    def __init__(self, tgt_dir, sulcus, side, ss_size, mode, bench_size,
+                 resampling, bbox_dir, subjects_list):
+        self.resampling = resampling
+        self.mode = mode
+        self.sulcus = complete_sulci_name(sulcus, side)
+        self.ss_size = ss_size
+        self.bench_size = bench_size
+        self.bbox_dir = bbox_dir
+        self.side = side
+        self.subjects_list = subjects_list
+        self.b_num = len(next(os.walk(tgt_dir))[1]) + 1
+        print(self.b_num)
+        self.tgt_dir = os.path.join(tgt_dir, 'benchmark'+str(self.b_num))
+        if not os.path.isdir(self.tgt_dir):
+            os.mkdir(self.tgt_dir)
+        print(self.mode)
+
+    def get_sub_list(self):
+        list_subjects = []
+        for img in os.listdir(self.tgt_dir):
+            if '.nii.gz' in img and 'minf' not in img:
+                sub = re.search('_(\d{6})', img).group(1)
+                list_subjects.append(sub)
+        return list_subjects
+
+
+    def crop_one_file(self, sub):
+        dir_m = '/neurospin/dico/lguillon/skeleton/transfo_pre_process/natif_to_template_spm_' + sub +'.trm'
+        dir_r = '/neurospin/hcp/ANALYSIS/3T_morphologist/' + sub + '/t1mri/default_acquisition/normalized_SPM_' + sub +'.nii'
+        skel_prefix = 'output_skeleton_'
+        file_skeleton = os.path.join(self.tgt_dir, skel_prefix + sub + '.nii.gz')
+        file_cropped = os.path.join(self.tgt_dir, sub + '_normalized.nii.gz')
+
+        if self.resampling:
+            resampled = resample(file_skeleton, output_vs=(2, 2, 2),
+                                 transformation=dir_m)
+
+            aims.write(resampled, file_cropped)
+        else:
+            cmd_normalize = "AimsApplyTransform -i " + file_skeleton + \
+                            " -o " + file_cropped +" -m " + dir_m + " -r " + \
+                            dir_r + " -t nearest"
+            os.system(cmd_normalize)
+
+        # Crop of the images
+        if self.mode == 'random':
+            # 42 instead of 0 in order to avoid crops with only black voxels
+            # Int 108 and 91 depend on downsampling and normalization
+            random_x = random.randint(0, 42-self.box_size[0]-1)
+            random_y = random.randint(0, 108-self.box_size[1]-1)
+            random_z = random.randint(0, 91-self.box_size[2]-1)
+            xmax, ymax, zmax = random_x + self.box_size[0], random_y + self.box_size[1], random_z + self.box_size[2]
+            cmd_bounding_box = ' -x ' + str(random_x) + ' -y ' + str(random_y) + \
+                               ' -z ' + str(random_z) + ' -X '+ str(xmax) + ' -Y ' + str(ymax) + ' -Z ' + str(zmax)
+
+        else:
+            if self.mode == 'asymmetry':
+                # for left hemisphere
+                xmin, ymin, zmin = '52', '50', '12'
+                xmax, ymax, zmax = '74', '86', '47'
+
+            cmd_bounding_box = ' -x ' + xmin + ' -y ' + ymin + ' -z ' + zmin + ' -X '+ xmax + ' -Y ' + ymax + ' -Z ' + zmax
+
+        cmd_crop = "AimsSubVolume -i " + file_cropped + " -o " + file_cropped + cmd_bounding_box
+        os.system(cmd_crop)
+
+        if self.mode == 'asymmetry':
+            cmd_flip = "AimsFlip -i " + file_cropped + " -o " + file_cropped + " -m XX"
+            os.system(cmd_flip)
+
+    def launch_pipe(self):
+        print(' ')
+        print('Sulci list: ', self.sulcus)
+        print('Mode chosen:', self.mode)
+        print('Chosen Benchmark size: ', self.bench_size)
+        print(' ')
+
+        print('=================== Selection and possible alteration of benchmark skeletons ===================')
+        generate(self.b_num, self.side, self.ss_size, sulci_list=self.sulcus,
+                 saving_dir=self.tgt_dir, mode=self.mode, bbox_dir=self.bbox_dir,
+                 bench_size=self.bench_size, subjects_list=self.subjects_list
+                )
+
+        bbox = compute_max_box(self.sulcus, self.side, src_dir=self.bbox_dir)
+        print(bbox)
+
+        xmin, ymin, zmin = str(bbox[0][0]), str(bbox[0][1]), str(bbox[0][2])
+        xmax, ymax, zmax = str(bbox[1][0]), str(bbox[1][1]), str(bbox[1][2])
+        self.box_size = [int(xmax)-int(xmin), int(ymax)-int(ymin), int(zmax)-int(zmin)]
+
+        print(' ')
+        print('=================== Normalization and crop of skeletons ==================')
+
+        list_subjects = self.get_sub_list()
+        pqdm(list_subjects, self.crop_one_file, n_jobs=define_njobs())
+
+
+
 def main(argv):
     tgt_dir, sulcus, side, ss_size, mode, bench_size, resampling, bbox_dir, subjects_list = parse_args(argv)
-    sulcus = complete_sulci_name(sulcus, side)
-    b_num = len(next(os.walk(tgt_dir))[1]) + 1
-    tgt_dir = os.path.join(tgt_dir, 'benchmark'+str(b_num))
-    if not os.path.isdir(tgt_dir):
-        os.mkdir(tgt_dir)
 
-    print(' ')
-    print('Sulci list: ', sulcus)
-    print('Mode chosen:', mode)
-    print('Chosen Benchmark size: ', bench_size)
-    print(' ')
 
-    print('=================== Selection and possible alteration of benchmark skeletons ===================')
-    generate(b_num, side, ss_size, sulci_list=sulcus, saving_dir=tgt_dir,
-             mode=mode, bench_size=bench_size, subjects_list=subjects_list,
-             bbox_dir=bbox_dir)
+    benchmark = BenchmarkPipe(tgt_dir, sulcus, side, ss_size, mode, bench_size,
+                              resampling, bbox_dir, subjects_list)
 
-    bbox = compute_max_box(sulcus, side, src_dir=bbox_dir)
-    print(bbox)
+    benchmark.launch_pipe()
 
-    xmin, ymin, zmin = str(bbox[0][0]), str(bbox[0][1]), str(bbox[0][2])
-    xmax, ymax, zmax = str(bbox[1][0]), str(bbox[1][1]), str(bbox[1][2])
-    box_size = [int(xmax)-int(xmin), int(ymax)-int(ymin), int(zmax)-int(zmin)]
-
-    print(' ')
-    print('=================== Normalization and crop of skeletons ==================')
-    for img in os.listdir(tgt_dir):
-        if '.nii.gz' in img and 'minf' not in img:
-            sub = re.search('_(\d{6})', img).group(1)
-            # Normalization and resampling of altered skeleton images
-            dir_m = '/neurospin/dico/lguillon/skeleton/transfo_pre_process/natif_to_template_spm_' + sub +'.trm'
-            dir_r = '/neurospin/hcp/ANALYSIS/3T_morphologist/' + sub + '/t1mri/default_acquisition/normalized_SPM_' + sub +'.nii'
-            file_skeleton = tgt_dir + '/' + img
-            file_cropped = tgt_dir + '/' + img[:-7] + "_normalized.nii.gz"
-
-            if resampling:
-                resampled = resample(file_skeleton, output_vs=(2, 2, 2),
-                                     transformation=dir_m)
-                aims.write(resampled, file_cropped)
-            else:
-                cmd_normalize = "AimsApplyTransform -i " + tgt_dir +'/' + img + \
-                                " -o " + tgt_dir + '/' + img[:-7] + \
-                                "_normalized.nii.gz -m " + dir_m + " -r " + \
-                                dir_r + " -t nearest"
-                os.system(cmd_normalize)
-
-            # Crop of the images
-            file = os.path.join(tgt_dir, img[:-7] + '_normalized.nii.gz')
-            if mode == 'random':
-                # 42 instead of 0 in order to avoid crops with only black voxels
-                # Int 108 and 91 depend on downsampling and normalization
-                random_x = random.randint(0, 42)
-                random_y = random.randint(0, 108-box_size[1]-1)
-                random_z = random.randint(0, 91-box_size[2]-1)
-                print(random_x, random_y, random_z)
-                xmax, ymax, zmax = random_x + box_size[0], random_y + box_size[1], random_z + box_size[2]
-                cmd_bounding_box = ' -x ' + str(random_x) + ' -y ' + str(random_y) + \
-                                   ' -z ' + str(random_z) + ' -X '+ str(xmax) + ' -Y ' + str(ymax) + ' -Z ' + str(zmax)
-                print(cmd_bounding_box)
-
-            else:
-                if mode == 'asymmetry':
-                    # for left hemisphere
-                    xmin, ymin, zmin = '52', '50', '12'
-                    xmax, ymax, zmax = '74', '86', '47'
-
-                cmd_bounding_box = ' -x ' + xmin + ' -y ' + ymin + ' -z ' + zmin + ' -X '+ xmax + ' -Y ' + ymax + ' -Z ' + zmax
-
-            cmd_crop = "AimsSubVolume -i " + file + " -o " + file + cmd_bounding_box
-            os.system(cmd_crop)
-
-            if mode == 'asymmetry':
-                print('ici')
-                cmd_flip = "AimsFlip -i " + file + " -o " + file + " -m XX"
-                os.system(cmd_flip)
 
     input_dict = {'sulci_list': sulcus, 'simple_surface_min_size': ss_size,
                   'side': side, 'mode': mode}
