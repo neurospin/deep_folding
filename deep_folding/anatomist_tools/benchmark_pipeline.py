@@ -167,8 +167,9 @@ def main(argv):
             file_cropped = tgt_dir + '/' + img[:-7] + "_normalized.nii.gz"
 
             if resampling:
-                resample(file_skeleton, file_cropped, output_vs=(2, 2, 2),
-                         transformation=dir_m)
+                resampled = resample(file_skeleton, output_vs=(2, 2, 2),
+                                     transformation=dir_m)
+                aims.write(resampled, file_cropped)
             else:
                 cmd_normalize = "AimsApplyTransform -i " + tgt_dir +'/' + img + \
                                 " -o " + tgt_dir + '/' + img[:-7] + \
