@@ -88,13 +88,13 @@
               
             
             
-              <p class="caption"><span class="caption-text">README:</span></p>
+              <p class="caption" role="heading"><span class="caption-text">README:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="readme.html">Deep folding</a></li>
 <li class="toctree-l1"><a class="reference internal" href="readme.html#prerequisites">Prerequisites</a></li>
 <li class="toctree-l1"><a class="reference internal" href="readme.html#development">Development</a></li>
 </ul>
-<p class="caption"><span class="caption-text">API documentation</span></p>
+<p class="caption" role="heading"><span class="caption-text">API documentation</span></p>
 <ul class="current">
 <li class="toctree-l1 current"><a class="reference internal" href="deep_folding.html">deep_folding package</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="deep_folding.html#subpackages">Subpackages</a><ul class="current">
@@ -267,10 +267,10 @@ by reading back and writing the updated content</p>
 </div>
 <div class="section" id="module-deep_folding.anatomist_tools.utils.resample">
 <span id="deep-folding-anatomist-tools-utils-resample-module"></span><h2>deep_folding.anatomist_tools.utils.resample module<a class="headerlink" href="#module-deep_folding.anatomist_tools.utils.resample" title="Permalink to this headline">¶</a></h2>
-<p>Script from <a class="reference external" href="https://github.com/BastienCagna/labelresample.git">https://github.com/BastienCagna/labelresample.git</a></p>
+<p>Resample a volume that contains discret values</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="deep_folding.anatomist_tools.utils.resample.resample">
-<span class="sig-prename descclassname"><span class="pre">deep_folding.anatomist_tools.utils.resample.</span></span><span class="sig-name descname"><span class="pre">resample</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_image</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_image</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transformation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_vs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">background</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.utils.resample.resample" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">deep_folding.anatomist_tools.utils.resample.</span></span><span class="sig-name descname"><span class="pre">resample</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_image</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transformation</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_vs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">background</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">11</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">values</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.utils.resample.resample" title="Permalink to this definition">¶</a></dt>
 <dd><p>Transform and resample a volume that as discret values</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -278,7 +278,9 @@ by reading back and writing the updated content</p>
 <li><p><strong>input_image</strong> (<em>file</em>) – Path to the input volume (.nii or .nii.gz file)</p></li>
 <li><p><strong>transformation</strong> (<em>file</em>) – Linear transformation file (.trm file)</p></li>
 <li><p><strong>output_vs</strong> (<em>tuple</em>) – Output voxel size (default: None, no resampling)</p></li>
-<li><p><strong>background</strong> (<em>int</em>) – Background value (default: 0)</p></li>
+<li><p><strong>background</strong> (<em>int</em>) – Background value (default: 11)</p></li>
+<li><p><strong>values</strong> (<em>[</em><em>]</em>) – Array of unique values ordered by descendent priority. If not given,
+priority is set by ascendent values</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -286,6 +288,35 @@ by reading back and writing the updated content</p>
 </dd>
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>resampled_vol</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-deep_folding.anatomist_tools.utils.sulcus_side">
+<span id="deep-folding-anatomist-tools-utils-sulcus-side-module"></span><h2>deep_folding.anatomist_tools.utils.sulcus_side module<a class="headerlink" href="#module-deep_folding.anatomist_tools.utils.sulcus_side" title="Permalink to this headline">¶</a></h2>
+<p>Getting complete sulci names based on generic name and side</p>
+<p>The aim of this script is to output the complete name of sulci. For instance,
+giving “S.T.s.ter.asc.ant” and right side, script outputs
+“S.T.s.ter.asc.ant._right”</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="deep_folding.anatomist_tools.utils.sulcus_side.complete_sulci_name">
+<span class="sig-prename descclassname"><span class="pre">deep_folding.anatomist_tools.utils.sulcus_side.</span></span><span class="sig-name descname"><span class="pre">complete_sulci_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sulci_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">side</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.utils.sulcus_side.complete_sulci_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function gathering sulci and side to obtain full name of sulci</p>
+<p>It reads suli prefixes from a list and adds a suffix depending on a given
+side.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sulci_list</strong> – a list of sulci</p></li>
+<li><p><strong>side</strong> – a string corresponding to the hemisphere, whether ‘L’ or ‘R’</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>a list with full sulci names, ie with side included</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>full_sulci_list</p>
 </dd>
 </dl>
 </dd></dl>
