@@ -20,6 +20,22 @@ deep\_folding\.anatomist\_tools\.utils\.logs module
     :undoc-members:
     :show-inheritance:
 
+deep\_folding\.anatomist\_tools\.utils\.resample module
+-------------------------------------------------------
+
+.. automodule:: deep_folding.anatomist_tools.utils.resample
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+deep\_folding\.anatomist\_tools\.utils\.sulcus\_side module
+-----------------------------------------------------------
+
+.. automodule:: deep_folding.anatomist_tools.utils.sulcus_side
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 
 Module contents
 ---------------
