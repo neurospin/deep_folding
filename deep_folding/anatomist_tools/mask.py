@@ -57,6 +57,7 @@ import numpy as np
 
 from soma import aims
 from deep_folding.anatomist_tools.utils.logs import LogJson
+from deep_folding.anatomist_tools.utils.resample import resample
 from deep_folding.anatomist_tools.utils.sulcus_side import complete_sulci_name
 
 _ALL_SUBJECTS = -1
@@ -96,7 +97,9 @@ class BoundingBoxMax:
                  sulcus=_SULCUS_DEFAULT,
                  side=_SIDE_DEFAULT,
                  image_normalized_spm=_IMAGE_NORMALIZED_SPM_DEFAULT,
-                 out_voxel_size=None):
+                 out_voxel_size=None,
+                 transform_file=None,
+                 skeleton_file=None):
         """Inits with list of directories and list of sulci
 
         Args:
@@ -129,12 +132,14 @@ class BoundingBoxMax:
         self.sulcus = complete_sulci_name(sulcus, side)
         self.image_normalized_spm = image_normalized_spm
         self.out_voxel_size = out_voxel_size
-
+        self.transform_file = transform_file
+        self.skeleton_file = skeleton_file
 
         # Json full name is the name of the sulcus + .json
         # and is kept under the subdirectory Left or Right
         json_file = join(self.tgt_dir, self.side, self.sulcus + '.json')
         self.json = LogJson(json_file)
+        self.mask = aims.Volume()
 
     def list_all_subjects(self):
         """List all subjects from the clean database (directory src_dir).
@@ -164,6 +169,68 @@ class BoundingBoxMax:
                         subjects.append(subject_d)
 
         return subjects
+
+    def create_mask(self):
+        """Creates aims volume
+        
+        Parameters:
+            subject: one subject of the list    
+        """
+
+        # Creates and puts to 0 an aims volume
+        # with the correct size and pixel size
+        voxel_size = (self.out_voxel_size,
+                      self.out_voxel_size,
+                      self.out_voxel_size)
+        self.mask = resample(input_image=self.skeleton_file,
+                            output_vs=voxel_size,
+                            transformation=self.transform_file,
+                            verbose=False)
+        arr = np.asarray(self.mask)
+        arr.fill(0)
+
+    def increment_one_mask(self, graph_filename):
+        """Increments self.mask of 1 where there is the sulcus
+
+      Parameters:
+        graph_filename: string being the name of graph file .arg to analyze:
+                        for example: 'Lammon_base2018_manual.arg'
+
+      """
+
+        # Reads the data graph and transforms it to AIMS Talairach referential
+        # Note that this is NOT the MNI Talairach referential
+        # This is the Talairach referential used in AIMS
+        # There are several Talairach referentials
+        graph = aims.read(graph_filename)
+        voxel_size = graph['voxel_size'][:3]
+        tal_transfo = aims.GraphManip.talairach(graph)
+
+        # Transform to the MNI Talairach
+        tal_to_normalized_spm, voxel_size_out = self.tal_to_normalized_spm()
+
+
+        # Gets the min and max coordinates of the sulci
+        # by looping over all the vertices of the graph
+        for vertex in graph.vertices():
+            vname = vertex.get('name')
+            if vname != self.sulcus:
+                continue
+            for bucket_name in ('aims_ss', 'aims_bottom', 'aims_other'):
+                bucket = vertex.get(bucket_name)
+                if bucket is not None:
+                    voxels_real = np.asarray(
+                        [tal_to_normalized_spm.transform(\
+                            tal_transfo.transform(\
+                                np.array(voxel) * voxel_size))
+                         for voxel in bucket[0].keys()])
+                    voxels = np.round(np.array(voxels_real) / voxel_size_out).astype(int)
+
+                    if voxels.shape == (0,):
+                        continue
+                    for i,j,k in voxels:
+                        self.mask[i,j,k,0] += 1
+
 
     def get_one_bounding_box(self, graph_filename):
         """get bounding box of the chosen sulcus for one data graph
@@ -207,6 +274,7 @@ class BoundingBoxMax:
                     voxels = np.asarray(
                         [tal_transfo.transform(np.array(voxel) * voxel_size)
                          for voxel in bucket[0].keys()])
+                    print("Voxels shape", voxels.shape)
 
                     if voxels.shape == (0,):
                         continue
@@ -249,7 +317,7 @@ class BoundingBoxMax:
 
         for sub in subjects:
             print(sub)
-            # Its substitutes 'subject' in graph_file name
+            # It substitutes 'subject' in graph_file name
             graph_file = sub['graph_file'] % sub
             # It looks for a graph file .arg
             sulci_pattern = glob.glob(join(sub['dir'], graph_file))[0]
@@ -260,6 +328,23 @@ class BoundingBoxMax:
             list_bbmax.append([bbox_max[0], bbox_max[1], bbox_max[2]])
 
         return list_bbmin, list_bbmax
+
+    def increment_mask(self, subjects):
+        """increment mask for the chosen sulcus for all subjects
+
+      Parameters:
+        subjects: list containing all subjects to be analyzed
+      """
+
+        for sub in subjects:
+            print(sub)
+            # It substitutes 'subject' in graph_file name
+            graph_file = sub['graph_file'] % sub
+            # It looks for a graph file .arg
+            sulci_pattern = glob.glob(join(sub['dir'], graph_file))[0]
+
+            self.increment_one_mask(sulci_pattern % sub)
+
 
     @staticmethod
     def compute_max_box(list_bbmin, list_bbmax):
@@ -394,6 +479,12 @@ class BoundingBoxMax:
                            'out_voxel_size': 1 if self.out_voxel_size is None else self.out_voxel_size}
             self.json.update(dict_to_add=dict_to_add)
 
+            # Creates volume that will take the mask
+            self.create_mask()
+
+            # Increments mask for each sulcus and subjects
+            self.increment_mask(subjects)
+
             # Determines the box encompassing the sulcus for all subjects
             # The coordinates are determined in AIMS Talairach space
             list_bbmin, list_bbmax = self.get_bounding_boxes(subjects)
@@ -432,7 +523,9 @@ def bounding_box(src_dir=_SRC_DIR_DEFAULT, tgt_dir=_TGT_DIR_DEFAULT,
                  sulcus=_SULCUS_DEFAULT, side=_SIDE_DEFAULT,
                  number_subjects=_ALL_SUBJECTS,
                  image_normalized_spm=_IMAGE_NORMALIZED_SPM_DEFAULT,
-                 out_voxel_size=None):
+                 out_voxel_size=None,
+                 transform_file=None, 
+                 skeleton_file=None):
     """ Main program computing the box encompassing the sulcus in all subjects
 
   The programm loops over all subjects
@@ -449,17 +542,21 @@ def bounding_box(src_dir=_SRC_DIR_DEFAULT, tgt_dir=_TGT_DIR_DEFAULT,
             by default it is set to _ALL_SUBJECTS (-1).
       image_normalized_spm: string giving file name (with path) of normalized
             SPM file out of which is extracted the voxel size
+      transform_file: transform file from the subject ref space to MNI
+      skeleton_file: skeleton file of the reference subject
   """
 
     box = BoundingBoxMax(src_dir=src_dir, tgt_dir=tgt_dir,
                          path_to_graph=path_to_graph,
                          sulcus=sulcus, side=side,
                          image_normalized_spm=image_normalized_spm,
-                         out_voxel_size=out_voxel_size)
+                         out_voxel_size=out_voxel_size,
+                         transform_file=transform_file,
+                         skeleton_file=skeleton_file)
     bbmin_vox, bbmax_vox = box.compute_bounding_box(
         number_subjects=number_subjects)
 
-    return bbmin_vox, bbmax_vox
+    return bbmin_vox, bbmax_vox, box.mask
 
 
 def parse_args(argv):
@@ -475,7 +572,7 @@ def parse_args(argv):
     # Parse command line arguments
     parser = argparse.ArgumentParser(
         prog='bounding_box.py',
-        description='Computes bounding box around the named sulcus')
+        description='Computes mask and bounding box around the named sulcus')
     parser.add_argument(
         "-s", "--src_dir", type=str, default=_SRC_DIR_DEFAULT, nargs='+',
         help='Source directory where the MRI data lies. '
@@ -513,6 +610,12 @@ def parse_args(argv):
         "-v", "--out_voxel_size", type=int, default=None,
         help='Voxel size of of bounding box. '
              'Default is : None')
+    parser.add_argument(
+        "-f", "--transform_file", type=str, 
+        help='Transform file path to normalized SPM space for the given subjecy ')
+    parser.add_argument(
+        "-k", "--skeleton_file", type=str, 
+        help='Skeleton file path of the given subject, same hemisphere. ')
 
     params = {}
 
@@ -524,7 +627,8 @@ def parse_args(argv):
     params['sulcus'] = args.sulcus  # sulcus is a string
     params['side'] = args.side
     params['out_voxel_size'] = args.out_voxel_size
-
+    params['transform_file'] = args.transform_file
+    params['skeleton_file'] = args.skeleton_file
 
     number_subjects = args.nb_subjects
 
@@ -562,7 +666,9 @@ def main(argv):
                      tgt_dir=params['tgt_dir'],
                      sulcus=params['sulcus'], side=params['side'],
                      number_subjects=params['nb_subjects'],
-                     out_voxel_size=params['out_voxel_size'])
+                     out_voxel_size=params['out_voxel_size'],
+                     transform_file=params['transform_file'],
+                     skeleton_file=params['skeleton_file'])
     except SystemExit as exc:
         if exc.code != 0:
             six.reraise(*sys.exc_info())

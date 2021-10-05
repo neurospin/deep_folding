@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!python
 # -*- coding: utf-8 -*-
 #
 #  This software and supporting documentation are distributed by
@@ -145,6 +145,9 @@ class TransformToSPM:
                                      self.to_talairach_MNI_file % subject)
         natif_to_mni = aims.read(to_talairach_MNI_file)
 
+        print(f'natif_to_mni =')
+        print(f'{natif_to_mni}')
+
         # Fetches template's transformation from Talairach MNI to normalized SPM
         # The first transformation[0] of the file normalized_spm
         # is the transformation from normalized SPM to Talairach MNI
@@ -157,12 +160,17 @@ class TransformToSPM:
         # print(template.header()['transformations'][0])
 
         # Combination of transformations
-        natif_to_normalized_spm = mni_to_normalized_spm * natif_to_mni
+        natif_to_normalized_spm =  natif_to_mni * mni_to_normalized_spm
+        print(f'mni_to_normalized_spm =')
+        print(f'{mni_to_normalized_spm}')
 
         # Saving of transformation files
         natif_to_normalized_spm_file = join(
             self.tgt_dir, self.natif_to_normalized_spm_file % subject)
         aims.write(natif_to_normalized_spm, natif_to_normalized_spm_file)
+
+        print(f'natif_to_normalized_spm =')
+        print(f'{natif_to_normalized_spm}')
 
     def calculate_transforms(self, number_subjects=_ALL_SUBJECTS):
         """Calculates transformation file for all subjects.

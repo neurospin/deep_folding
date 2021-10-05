@@ -1,5 +1,5 @@
+#!python
 # -*- coding: utf-8 -*-
-# /usr/bin/env python2.7 + brainvisa compliant env
 #
 #  This software and supporting documentation are distributed by
 #      Institut Federatif de Recherche 49
@@ -250,6 +250,8 @@ class DatasetCroppedSkeleton:
                    ' -o ' + file_cropped + cmd_bounding_box
             
             # Sts output from AimsSubVolume is recorded in var_output
+            # Put following command to get the output
+            # os.popen(cmd_crop).read()
             var_output = os.popen(cmd_crop).read()
 
     def crop_files(self, number_subjects=_ALL_SUBJECTS):
