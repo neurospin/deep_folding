@@ -40,7 +40,7 @@ based on a manually labelled dataset
 
 Bounding box corresponds to the biggest box that encompasses the given sulci
 on all subjects of the manually labelled dataset. It measures the bounding box
-in the normalized SPM space
+in the MNI152  space
 """
 
 from __future__ import division
@@ -79,16 +79,12 @@ _SULCUS_DEFAULT = 'S.T.s.ter.asc.ant.'
 # in the supervise
 _PATH_TO_GRAPH_DEFAULT = "t1mri/t1/default_analysis/folds/3.3/base2018_manual"
 
-# A normalized SPM image to get the voxel size
-_IMAGE_NORMALIZED_SPM_DEFAULT = '/neurospin/hcp/' \
-                        'ANALYSIS/3T_morphologist/100206/' \
-                        't1mri/default_acquisition/normalized_SPM_100206.nii'
-
 
 class BoundingBoxMax:
     """Determines the maximum Bounding Box around given sulci
 
-    It is determined in the normalized SPM referential
+    It is determined in the  MNI ICBM152 nonlinear 2009c asymmetrical template
+    http://www.bic.mni.mcgill.ca/~vfonov/icbm/2009/mni_icbm152_nlin_asym_09b_nifti.zip
     """
 
     def __init__(self, src_dir=_SRC_DIR_DEFAULT,
@@ -96,9 +92,7 @@ class BoundingBoxMax:
                  tgt_dir=_TGT_DIR_DEFAULT,
                  sulcus=_SULCUS_DEFAULT,
                  side=_SIDE_DEFAULT,
-                 image_normalized_spm=_IMAGE_NORMALIZED_SPM_DEFAULT,
                  out_voxel_size=None,
-                 transform_file=None,
                  skeleton_file=None):
         """Inits with list of directories and list of sulci
 
@@ -108,8 +102,6 @@ class BoundingBoxMax:
             tgt_dir: name of target directory with full path
             sulcus: sulcus name
             side: hemisphere side (either L for left, or R for right hemisphere)
-            image_normalized_spm: string giving file name (with path) of
-                normalized SPM file out of which is extracted the voxel size
         """
 
         # Transforms input source dir to a list of strings
@@ -130,9 +122,10 @@ class BoundingBoxMax:
         self.tgt_dir = tgt_dir
         self.side = side
         self.sulcus = complete_sulci_name(sulcus, side)
-        self.image_normalized_spm = image_normalized_spm
-        self.out_voxel_size = out_voxel_size
-        self.transform_file = transform_file
+        self.voxel_size_out = (out_voxel_size,
+                               out_voxel_size,
+                               out_voxel_size,
+                               1)
         self.skeleton_file = skeleton_file
 
         # Json full name is the name of the sulcus + .json
@@ -171,23 +164,23 @@ class BoundingBoxMax:
         return subjects
 
     def create_mask(self):
-        """Creates aims volume
-        
+        """Creates aims volume in MNI ICBM152 nonlinear 2009c asymmetrical template
+        http://www.bic.mni.mcgill.ca/~vfonov/icbm/2009/mni_icbm152_nlin_asym_09b_nifti.zip
+
         Parameters:
             subject: one subject of the list    
         """
 
         # Creates and puts to 0 an aims volume
         # with the correct size and pixel size
-        voxel_size = (self.out_voxel_size,
-                      self.out_voxel_size,
-                      self.out_voxel_size)
-        self.mask = resample(input_image=self.skeleton_file,
-                            output_vs=voxel_size,
-                            transformation=self.transform_file,
-                            verbose=False)
-        arr = np.asarray(self.mask)
-        arr.fill(0)
+        hdr = aims.StandardReferentials.icbm2009cTemplateHeader()
+        resampling_ratio = np.array(hdr['voxel_size']) / self.voxel_size_out
+        orig_dim = hdr['volume_dimension']
+        new_dim = list((resampling_ratio * orig_dim).astype(int))
+        
+        self.mask = aims.Volume(hdr['volume_dimension'], dtype='S16')
+        self.mask.copyHeaderFrom(hdr)
+        self.mask.header()['voxel_size'] = self.voxel_size_out
 
     def increment_one_mask(self, graph_filename):
         """Increments self.mask of 1 where there is the sulcus
@@ -198,17 +191,11 @@ class BoundingBoxMax:
 
       """
 
-        # Reads the data graph and transforms it to AIMS Talairach referential
-        # Note that this is NOT the MNI Talairach referential
-        # This is the Talairach referential used in AIMS
-        # There are several Talairach referentials
+        # Reads the data graph and transforms it to MNI ICBM152 referential
         graph = aims.read(graph_filename)
-        voxel_size = graph['voxel_size'][:3]
-        tal_transfo = aims.GraphManip.talairach(graph)
-
-        # Transform to the MNI Talairach
-        tal_to_normalized_spm, voxel_size_out = self.tal_to_normalized_spm()
-
+        g_to_icbm_template = aims.GraphManip.getICBM2009cTemplateTransform(graph)
+        voxel_size_in = graph['voxel_size'][:3]
+        arr = np.asarray(self.mask)
 
         # Gets the min and max coordinates of the sulci
         # by looping over all the vertices of the graph
@@ -220,16 +207,14 @@ class BoundingBoxMax:
                 bucket = vertex.get(bucket_name)
                 if bucket is not None:
                     voxels_real = np.asarray(
-                        [tal_to_normalized_spm.transform(\
-                            tal_transfo.transform(\
-                                np.array(voxel) * voxel_size))
+                        [g_to_icbm_template.transform(np.array(voxel) * voxel_size_in)
                          for voxel in bucket[0].keys()])
-                    voxels = np.round(np.array(voxels_real) / voxel_size_out).astype(int)
+                    voxels = np.round(np.array(voxels_real) / self.voxel_size_out[:3]).astype(int)
 
                     if voxels.shape == (0,):
                         continue
                     for i,j,k in voxels:
-                        self.mask[i,j,k,0] += 1
+                        arr[i,j,k,0] += 1
 
 
     def get_one_bounding_box(self, graph_filename):
@@ -238,8 +223,7 @@ class BoundingBoxMax:
       Function that outputs the bounding box for the listed sulci
       for this datagraph. The bounding box is the smallest rectangular box
       that encompasses the chosen sulcus.
-      It is given in the AIMS Talairch referential, different from the MNI
-      Talairach referential.
+      It is given in the MNI 152 referential.
 
       Parameters:
         graph_filename: string being the name of graph file .arg to analyze:
@@ -247,9 +231,9 @@ class BoundingBoxMax:
 
       Returns:
         bbox_min: numpy array giving the upper right vertex coordinates
-                of the box in the Talairach space
+                of the box in the MNI 152 referential
         bbox_max: numpy array fiving the lower left vertex coordinates
-                of the box in the Talairach space
+                of the box in the MNI 152 referential
       """
 
         # Reads the data graph and transforms it to AIMS Talairach referential
@@ -257,8 +241,8 @@ class BoundingBoxMax:
         # This is the Talairach referential used in AIMS
         # There are several Talairach referentials
         graph = aims.read(graph_filename)
-        voxel_size = graph['voxel_size'][:3]
-        tal_transfo = aims.GraphManip.talairach(graph)
+        voxel_size_in = graph['voxel_size'][:3]
+        g_to_icbm_template = aims.GraphManip.getICBM2009cTemplateTransform(graph)
         bbox_min = None
         bbox_max = None
 
@@ -272,9 +256,10 @@ class BoundingBoxMax:
                 bucket = vertex.get(bucket_name)
                 if bucket is not None:
                     voxels = np.asarray(
-                        [tal_transfo.transform(np.array(voxel) * voxel_size)
+                        [g_to_icbm_template.transform(np.array(voxel) * voxel_size_in)
                          for voxel in bucket[0].keys()])
                     print("Voxels shape", voxels.shape)
+                    voxels = np.array(voxels) / self.voxel_size_out[:3]
 
                     if voxels.shape == (0,):
                         continue
@@ -285,8 +270,8 @@ class BoundingBoxMax:
                         ([bbox_max] if bbox_max is not None else [])
                         + [voxels]), axis=0)
 
-        print('box (AIMS Talairach) min:', bbox_min)
-        print('box (AIMS Talairach) max:', bbox_max)
+        print('box (MNI 152) min:', bbox_min)
+        print('box (MNI 152) max:', bbox_max)
 
         return bbox_min, bbox_max
 
@@ -296,8 +281,7 @@ class BoundingBoxMax:
       Function that outputs the bounding box for the listed sulci on a manually
       labeled dataset.
       Bounding box corresponds to the biggest box encountered in the manually
-      labeled subjects in the AIMS Talairach space, different from the MNI
-      Talairach template.
+      labeled subjects in the MNI1 152 space.
       The bounding box is the smallest rectangular box that
       encompasses the sulcus.
 
@@ -306,9 +290,9 @@ class BoundingBoxMax:
 
       Returns:
         list_bbmin: list containing the upper right vertex of the box
-                    in the Talairach space
+                    in the MNI 152 space
         list_bbmax: list containing the lower left vertex of the box
-                    in the Talairach space
+                    in the MNI 152 space
       """
 
         # Initialization
@@ -345,6 +329,12 @@ class BoundingBoxMax:
 
             self.increment_one_mask(sulci_pattern % sub)
 
+    def filter_mask(self):
+        """Filter mask
+      """
+
+      vol_filt = scipy.ndimage.gaussian_filter(vol.astype(float), 0.5, order=0, output=None, mode='reflect', cval=0.0, truncate=4.0)  
+
 
     @staticmethod
     def compute_max_box(list_bbmin, list_bbmax):
@@ -373,65 +363,17 @@ class BoundingBoxMax:
 
         return bbmin, bbmax
 
-    def tal_to_normalized_spm(self):
-        """Returns the transformation from AIMS Talairach to normalized SPM
-
-      Computes the transformation from AIMS Talairach space to normalized SPM
-      space, MNI space, passing through SPM template.
-      Empirically, this was done because some Deep learning results were better
-      with SPM template.
-      The transform from MNI to SPM template is taken from HCP database
-
-      Returns:
-        tal_to_normalized_spm: transformation from AIMS Talairach space to
-                    normalized SPM
-        voxel_size: voxel size (in MNI referential or HCP normalized SPM space)
-      """
-
-        # Gets the transformation file from brainvisa directory structure
-        # Transforms from AIMS Talairach to the true MNI space with the origin
-        # at the center
-        # It is in /casa/install/share/brainvisa-share-5.0/transformation
-        tal_to_spm_template = aims.read(
-            aims.carto.Paths.findResourceFile(
-                'transformation/talairach_TO_spm_template_novoxels.trm'))
-
-        # Gets a normalized SPM file from the morphologist analysis
-        image_normalized_spm = aims.read(self.image_normalized_spm)
-
-        # Tranformation from the normalized SPM
-        # to the template SPM
-        # normalized_spm_to_spm_template = aims.AffineTransformation3d(
-        #    image_normalized_spm.header()['transformations'][-1])
-        normalized_spm_to_spm_template = aims.read(
-            aims.carto.Paths.findResourceFile(
-                'transformation/spm_template_TO_spm_template_novoxels.trm'))
-
-        # Tranformation from the Talairach space to the native space
-        tal_to_normalized_spm = normalized_spm_to_spm_template.inverse() \
-                                * tal_to_spm_template
-        if self.out_voxel_size:
-            voxel_size = self.out_voxel_size
-        else:
-            voxel_size = image_normalized_spm.header()['voxel_size'][:3]
-
-        return tal_to_normalized_spm, voxel_size
-
     @staticmethod
-    def compute_box_voxel(bbmin_tal, bbmax_tal,
-                          tal_to_normalized_spm, voxel_size):
+    def compute_box_voxel(bbmin_tal, bbmax_tal):
         """Returns the coordinates of the box as voxels
 
       Coordinates of the box in voxels are determined in the MNI referential
 
       Parameters:
         bbmin_tal: numpy array with the coordinates of the upper right corner
-                of the box (AIMS Talairach space)
+                of the box (MNI152 space)
         bbmax_tal: numpy array with the coordinates of the lower left corner
-                of the box (AIMS Talairach space)
-        tal_to_normalized_spm: transformation used from Talairach space
-                to normalized SPM
-        voxel_size: voxel size (in MNI referential or HCP normalized SPM space)
+                of the box (MNI152 space)
 
       Returns:
         bbmin_vox: numpy array with the coordinates of the upper right corner
@@ -440,13 +382,9 @@ class BoundingBoxMax:
                 of the box (voxels in MNI space)
       """
 
-        # Application of the transformation to bbox
-        bbmin_mni = tal_to_normalized_spm.transform(bbmin_tal)
-        bbmax_mni = tal_to_normalized_spm.transform(bbmax_tal)
-
         # To go back from mms to voxels
-        bbmin_vox = np.round(np.array(bbmin_mni) / voxel_size).astype(int)
-        bbmax_vox = np.round(np.array(bbmax_mni) / voxel_size).astype(int)
+        bbmin_vox = np.round(np.array(bbmin_tal))
+        bbmax_vox = np.round(np.array(bbmax_tal))
 
         return bbmin_vox, bbmax_vox
 
@@ -476,7 +414,7 @@ class BoundingBoxMax:
             dict_to_add = {'nb_subjects': len(subjects),
                            'src_dir': self.src_dir,
                            'tgt_dir': self.tgt_dir,
-                           'out_voxel_size': 1 if self.out_voxel_size is None else self.out_voxel_size}
+                           'out_voxel_size': self.voxel_size_out[0]}
             self.json.update(dict_to_add=dict_to_add)
 
             # Creates volume that will take the mask
@@ -485,24 +423,21 @@ class BoundingBoxMax:
             # Increments mask for each sulcus and subjects
             self.increment_mask(subjects)
 
+            # Filters mask
+            self.filter_mask()
+
             # Determines the box encompassing the sulcus for all subjects
-            # The coordinates are determined in AIMS Talairach space
+            # The coordinates are determined in MNI 152  space
             list_bbmin, list_bbmax = self.get_bounding_boxes(subjects)
             bbmin_tal, bbmax_tal = self.compute_max_box(list_bbmin, list_bbmax)
 
-            dict_to_add = {'bbmin_AIMS_Talairach': bbmin_tal.tolist(),
-                           'bbmax_AIMS_Talairach': bbmax_tal.tolist()}
-
-            # Computes the transform from the AIMS Talairach space
-            # to normalized SPM space
-            tal_to_normalized_spm, voxel_size = self.tal_to_normalized_spm()
+            dict_to_add = {'bbmin_MNI152': bbmin_tal.tolist(),
+                           'bbmax_MNI152': bbmax_tal.tolist()}
 
             # Determines the box encompassing the sulcus for all subjects
             # The coordinates are determined in voxels in MNI space
             bbmin_vox, bbmax_vox = self.compute_box_voxel(bbmin_tal,
-                                                          bbmax_tal,
-                                                          tal_to_normalized_spm,
-                                                          voxel_size)
+                                                          bbmax_tal)
 
             dict_to_add.update({'side': self.side,
                                 'sulcus': self.sulcus,
@@ -522,9 +457,7 @@ def bounding_box(src_dir=_SRC_DIR_DEFAULT, tgt_dir=_TGT_DIR_DEFAULT,
                  path_to_graph=_PATH_TO_GRAPH_DEFAULT,
                  sulcus=_SULCUS_DEFAULT, side=_SIDE_DEFAULT,
                  number_subjects=_ALL_SUBJECTS,
-                 image_normalized_spm=_IMAGE_NORMALIZED_SPM_DEFAULT,
                  out_voxel_size=None,
-                 transform_file=None, 
                  skeleton_file=None):
     """ Main program computing the box encompassing the sulcus in all subjects
 
@@ -539,19 +472,14 @@ def bounding_box(src_dir=_SRC_DIR_DEFAULT, tgt_dir=_TGT_DIR_DEFAULT,
       side: hemisphere side (either 'L' for left, or 'R' for right)
       sulcus: string giving the sulcus to analyze
       number_subjects: integer giving the number of subjects to analyze,
-            by default it is set to _ALL_SUBJECTS (-1).
-      image_normalized_spm: string giving file name (with path) of normalized
-            SPM file out of which is extracted the voxel size
-      transform_file: transform file from the subject ref space to MNI
+            by default it is set to _ALL_SUBJECTS (-1)
       skeleton_file: skeleton file of the reference subject
   """
 
     box = BoundingBoxMax(src_dir=src_dir, tgt_dir=tgt_dir,
                          path_to_graph=path_to_graph,
                          sulcus=sulcus, side=side,
-                         image_normalized_spm=image_normalized_spm,
                          out_voxel_size=out_voxel_size,
-                         transform_file=transform_file,
                          skeleton_file=skeleton_file)
     bbmin_vox, bbmax_vox = box.compute_bounding_box(
         number_subjects=number_subjects)
@@ -591,12 +519,6 @@ def parse_args(argv):
         "-i", "--side", type=str, default=_SIDE_DEFAULT,
         help='Hemisphere side. Default is : ' + _SIDE_DEFAULT)
     parser.add_argument(
-        "-m", "--image_normalized_SPM", type=str,
-        default=_IMAGE_NORMALIZED_SPM_DEFAULT,
-        help='Name (with path) of normalized SPM image. '
-             'It is used to determine voxel size. '
-             'Default is : ' + _IMAGE_NORMALIZED_SPM_DEFAULT)
-    parser.add_argument(
         "-p", "--path_to_graph", type=str,
         default=_PATH_TO_GRAPH_DEFAULT,
         help='Relative path to manually labelled graph. '
@@ -611,9 +533,6 @@ def parse_args(argv):
         help='Voxel size of of bounding box. '
              'Default is : None')
     parser.add_argument(
-        "-f", "--transform_file", type=str, 
-        help='Transform file path to normalized SPM space for the given subjecy ')
-    parser.add_argument(
         "-k", "--skeleton_file", type=str, 
         help='Skeleton file path of the given subject, same hemisphere. ')
 
@@ -623,11 +542,9 @@ def parse_args(argv):
     params['src_dir'] = args.src_dir  # src_dir is a list
     params['path_to_graph'] = args.path_to_graph
     params['tgt_dir']= args.tgt_dir # tgt_dir is a string, only one directory
-    params['image_normalized_spm'] = args.image_normalized_SPM
     params['sulcus'] = args.sulcus  # sulcus is a string
     params['side'] = args.side
     params['out_voxel_size'] = args.out_voxel_size
-    params['transform_file'] = args.transform_file
     params['skeleton_file'] = args.skeleton_file
 
     number_subjects = args.nb_subjects
@@ -664,10 +581,10 @@ def main(argv):
         bounding_box(src_dir=params['src_dir'],
                      path_to_graph=params['path_to_graph'],
                      tgt_dir=params['tgt_dir'],
-                     sulcus=params['sulcus'], side=params['side'],
+                     sulcus=params['sulcus'],
+                     side=params['side'],
                      number_subjects=params['nb_subjects'],
                      out_voxel_size=params['out_voxel_size'],
-                     transform_file=params['transform_file'],
                      skeleton_file=params['skeleton_file'])
     except SystemExit as exc:
         if exc.code != 0:
