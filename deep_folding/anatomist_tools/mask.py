@@ -333,9 +333,9 @@ class BoundingBoxMax:
     def filter_mask(self):
         """Smooths the mask with Gaussian Filter
         """
-        arr = np.asarray(self.mask)[:, :, :, 0]
-        arr = scipy.ndimage.gaussian_filter(arr.astype(float), 0.5, order=0, output=None, mode='reflect', truncate=4.0)
-        self.mask = aims.Volume(np.expand_dims(arr, axis=3))
+        arr = np.asarray(self.mask)
+        arr_filter = scipy.ndimage.gaussian_filter(arr.astype(float), 0.5, order=0, output=None, mode='reflect', truncate=4.0)
+        arr[:] = (arr_filter> 0.001).astype(int)
 
     @staticmethod
     def compute_max_box(list_bbmin, list_bbmax):
