@@ -43,8 +43,8 @@ on all subjects of the manually labelled dataset. It measures the bounding box
 in the MNI152  space
 """
 
-from __future__ import division
-from __future__ import print_function
+#from __future__ import division
+#from __future__ import print_function
 
 import sys
 import glob
@@ -54,6 +54,7 @@ import argparse
 import six
 
 import numpy as np
+import scipy
 
 from soma import aims
 from deep_folding.anatomist_tools.utils.logs import LogJson
@@ -168,7 +169,7 @@ class BoundingBoxMax:
         http://www.bic.mni.mcgill.ca/~vfonov/icbm/2009/mni_icbm152_nlin_asym_09b_nifti.zip
 
         Parameters:
-            subject: one subject of the list    
+            subject: one subject of the list
         """
 
         # Creates and puts to 0 an aims volume
@@ -177,7 +178,7 @@ class BoundingBoxMax:
         resampling_ratio = np.array(hdr['voxel_size']) / self.voxel_size_out
         orig_dim = hdr['volume_dimension']
         new_dim = list((resampling_ratio * orig_dim).astype(int))
-        
+
         self.mask = aims.Volume(hdr['volume_dimension'], dtype='S16')
         self.mask.copyHeaderFrom(hdr)
         self.mask.header()['voxel_size'] = self.voxel_size_out
@@ -330,11 +331,11 @@ class BoundingBoxMax:
             self.increment_one_mask(sulci_pattern % sub)
 
     def filter_mask(self):
-        """Filter mask
-      """
-
-      vol_filt = scipy.ndimage.gaussian_filter(vol.astype(float), 0.5, order=0, output=None, mode='reflect', cval=0.0, truncate=4.0)  
-
+        """Smooths the mask with Gaussian Filter
+        """
+        arr = np.asarray(self.mask)[:, :, :, 0]
+        arr = scipy.ndimage.gaussian_filter(arr.astype(float), 0.5, order=0, output=None, mode='reflect', truncate=4.0)
+        self.mask = aims.Volume(np.expand_dims(arr, axis=3))
 
     @staticmethod
     def compute_max_box(list_bbmin, list_bbmax):
@@ -423,7 +424,7 @@ class BoundingBoxMax:
             # Increments mask for each sulcus and subjects
             self.increment_mask(subjects)
 
-            # Filters mask
+            # Smoothing and filling of the mask with gaussian filtering
             self.filter_mask()
 
             # Determines the box encompassing the sulcus for all subjects
@@ -533,7 +534,7 @@ def parse_args(argv):
         help='Voxel size of of bounding box. '
              'Default is : None')
     parser.add_argument(
-        "-k", "--skeleton_file", type=str, 
+        "-k", "--skeleton_file", type=str,
         help='Skeleton file path of the given subject, same hemisphere. ')
 
     params = {}
