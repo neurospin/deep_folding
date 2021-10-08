@@ -79,7 +79,10 @@ class DatasetHullRemoved:
 
     def __init__(self, src_dir=_SRC_DIR_DEFAULT,
                  tgt_dir=_TGT_DIR_DEFAULT,
-                 side=_SIDE_DEFAULT):
+                 side=_SIDE_DEFAULT,
+                 number_subjects=_ALL_SUBJECTS,
+                 list_subjects=None,
+                 file_subjects=None):
         """Inits with list of directories and side
 
         Args:
@@ -91,6 +94,24 @@ class DatasetHullRemoved:
         self.side = side
         self.src_dir = os.path.join(src_dir, f"{self.side}crops")
         self.tgt_dir = tgt_dir
+
+        if list_subjects:
+             self.list_subjects = list_subjects
+
+        elif file_subjects:
+            self.list_subjects = pd.read_csv(file_subjects)
+
+        else:
+            if number_subjects:
+                # subjects are detected as the directory names under src_dir
+                list_all_subjects = [dI[:6] for dI in os.listdir(self.src_dir)\
+                 if os.path.isdir(self.src_dir) and 'minf' not in dI]
+
+                # Gives the possibility to list only the first number_subjects
+                self.list_subjects = (
+                    list_all_subjects
+                    if number_subjects == _ALL_SUBJECTS
+                    else list_all_subjects[:number_subjects])
 
     def remove_hull(self, padding, ext):
         """Removes the pixels on the hull
@@ -155,7 +176,7 @@ class DatasetHullRemoved:
         # Writing of the mesh in tgt_dir folder
         aims.write(m, f"{self.tgt_dir}mesh_{subject_id}.gii")
 
-    def create_meshes(self, number_subjects=_ALL_SUBJECTS):
+    def create_meshes(self):
         """Creates meshes from skeleton crops (.nii files)
 
         The programm loops over all subjects from the input (source) directory.
@@ -163,22 +184,13 @@ class DatasetHullRemoved:
             number_subjects: integer giving the number of subjects to analyze,
                 by default it is set to _ALL_SUBJECTS (-1).
         """
-        if number_subjects:
-            # subjects are detected as the directory names under src_dir
-            list_all_subjects = [dI[:6] for dI in os.listdir(self.src_dir)\
-             if os.path.isdir(self.src_dir) and 'minf' not in dI]
 
-            # Gives the possibility to list only the first number_subjects
-            list_subjects = (
-                list_all_subjects
-                if number_subjects == _ALL_SUBJECTS
-                else list_all_subjects[:number_subjects])
+        # Creates target directory
+        if not os.path.exists(self.tgt_dir):
+            os.makedirs(self.tgt_dir)
 
-            # Creates target directory
-            if not os.path.exists(self.tgt_dir):
-                os.makedirs(self.tgt_dir)
-
-            pqdm(list_subjects, self.create_one_mesh, n_jobs=define_njobs())
+        # Parallelization of mesh generation
+        pqdm(self.list_subjects, self.create_one_mesh, n_jobs=define_njobs())
 
 
 def parse_args(argv):
@@ -211,6 +223,15 @@ def parse_args(argv):
         help='Number of subjects to take into account, or \'all\'. '
              '0 subject is allowed, for debug purpose.'
              'Default is : all')
+    parser.add_argument(
+        "-l", "--subjects_list", type=list, default=None,
+        help='python list containing subjects for whom creating meshes'
+             'Default is : None')
+    parser.add_argument(
+        "-f", "--subjects_file", type=str, default=None,
+        help='csv file containing subjects for whom creating meshes'
+             '0 subject is allowed, for debug purpose.'
+             'Default is : None')
 
     params = {}
 
@@ -236,7 +257,6 @@ def parse_args(argv):
     return params
 
 
-
 def main(argv):
     # This code permits to catch SystemExit with exit code 0
     # such as the one raised when "--help" is given as argument
@@ -246,8 +266,10 @@ def main(argv):
         # Actual API
         dataset = DatasetHullRemoved(src_dir=params['src_dir'],
                                      tgt_dir=params['tgt_dir'],
-                                     side=params['side'])
-        dataset.create_meshes(params['nb_subjects'])
+                                     side=params['side'],
+                                     number_subjects=params['nb_subjects'],
+                                     list_subjects=None,
+                                     file_subjects=None)
 
     except SystemExit as exc:
         if exc.code != 0:
