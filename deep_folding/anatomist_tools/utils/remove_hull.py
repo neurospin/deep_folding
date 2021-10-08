@@ -244,10 +244,10 @@ def main(argv):
         # Parsing arguments
         params = parse_args(argv)
         # Actual API
-        dataset = DatasetHullRemoved(src_dir=_SRC_DIR_DEFAULT,
-                                     tgt_dir=_TGT_DIR_DEFAULT,
-                                     side=_SIDE_DEFAULT)
-        dataset.create_meshes()
+        dataset = DatasetHullRemoved(src_dir=params['src_dir'],
+                                     tgt_dir=params['tgt_dir'],
+                                     side=params['side'])
+        dataset.create_meshes(params['nb_subjects'])
 
     except SystemExit as exc:
         if exc.code != 0:
