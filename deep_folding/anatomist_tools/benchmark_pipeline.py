@@ -144,7 +144,7 @@ class BenchmarkPipe:
 
     def __init__(self, tgt_dir, sulcus, side, ss_size, mode, bench_size,
                  resampling, bbox_dir, subjects_list):
-        """Inits woth list of directory, side, list of sulci
+        """Inits with list of directory, side, list of sulci
 
         Args:
             tgt_dir: name of target (output) directory with full path
