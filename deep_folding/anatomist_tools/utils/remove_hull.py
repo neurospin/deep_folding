@@ -168,13 +168,15 @@ class DatasetHullRemoved:
         self.threshold_and_binarize(threshold)
 
         # Conversion of volume to bucket
-        bucket = c(self.arr)
-
+        bucket_map = c(self.arr)
+        bucket = bucket_map[0]
+        bucket = np.array([bucket.keys()[k].list() for k in range(len(bucket.keys()))])
         # Conversion of bucket to mesh
-        m = cld.bucket_to_mesh(bucket[0])
+        m = cld.bucket_to_mesh(bucket_map[0])
 
         # Writing of the mesh in tgt_dir folder
         aims.write(m, f"{self.tgt_dir}mesh_{subject_id}.gii")
+        return bucket
 
     def create_meshes(self):
         """Creates meshes from skeleton crops (.nii files)
@@ -190,8 +192,9 @@ class DatasetHullRemoved:
             os.makedirs(self.tgt_dir)
 
         # Parallelization of mesh generation
-        pqdm(self.list_subjects, self.create_one_mesh, n_jobs=define_njobs())
-
+        result = pqdm(self.list_subjects, self.create_one_mesh, n_jobs=define_njobs())
+        buckets = dict(zip(self.list_subjects, result))
+        return buckets
 
 def parse_args(argv):
     """Function parsing command-line arguments
@@ -270,6 +273,8 @@ def main(argv):
                                      number_subjects=params['nb_subjects'],
                                      list_subjects=None,
                                      file_subjects=None)
+
+        dataset.create_meshes()
 
     except SystemExit as exc:
         if exc.code != 0:
