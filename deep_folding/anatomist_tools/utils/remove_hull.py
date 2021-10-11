@@ -55,6 +55,13 @@ import sys
 from pqdm.processes import pqdm
 from joblib import cpu_count
 
+_AIMS_BINARY_ONE = 32767
+_EXTERNAL = 11 # Value of external part
+_INTERNAL = 0 # Value of the internal part of the brain
+
+_DEFAULT_PADDING = 1 # local window in which to look for external valye
+_DEFAULT_THRESHOLD = 12 # Looks for skeleton values equal or above to _DEFAULT_THRESHOLD
+
 _ALL_SUBJECTS = -1
 
 # Input directory contaning the morphologist analysis of the HCP database
@@ -122,22 +129,25 @@ class DatasetHullRemoved:
             padding: padding of the image, equal to the extension ext
             ext: local array extension in which to look for external and internal pixels
         """
-        arr_pad = np.pad(self.arr, ((padding,padding), (padding,padding), (padding,padding), (0,0)), 'constant', constant_values=0)
-        EXTERNAL = 11 # Value of external part
-        INTERNAL = 0 # Value of the internal part of the brain
+        arr_pad = np.pad(self.arr, 
+                        ((padding,padding), (padding,padding), (padding,padding),
+                        (0,0)),
+                        'constant',
+                        constant_values=0)
+
         l = 0 # last t dimension
-        coords = np.argwhere(arr_pad > EXTERNAL)
+        coords = np.argwhere(arr_pad > _EXTERNAL)
 
         for i,j,k,l in coords:
-            if arr_pad[i,j,k,l] != EXTERNAL and arr_pad[i,j,k,l] != INTERNAL:
+            if arr_pad[i,j,k,l] != _EXTERNAL and arr_pad[i,j,k,l] != _INTERNAL:
                 local_array = arr_pad[i-ext:i+ext+1,j-ext:j+ext+1,k-ext:k+ext+1,l]
-                if np.any(local_array == 0) and np.any(local_array == 11):
+                if np.any(local_array == _INTERNAL) and np.any(local_array == _EXTERNAL):
                     self.arr[i-padding,j-padding,k-padding,l] = 0
 
     def threshold_and_binarize(self, threshold):
         """Threshold images"""
         self.arr[np.where(self.arr < threshold)]= 0
-        self.arr[np.where(self.arr >= threshold)]= 32767
+        self.arr[np.where(self.arr >= threshold)]= _AIMS_BINARY_ONE
         self.arr = aims.Volume(self.arr)
 
     def create_one_mesh(self, subject_id):
@@ -149,9 +159,9 @@ class DatasetHullRemoved:
         c = aims.Converter_rc_ptr_Volume_S16_BucketMap_VOID()
 
         # Constant definition
-        padding = 1
-        ext = 1 # extent (equal to padding)
-        threshold = 12 # 30 if to keep only bottom values
+        padding = _DEFAULT_PADDING
+        ext = _DEFAULT_PADDING # extent (equal to padding)
+        threshold = _DEFAULT_THRESHOLD
 
         # Names directory where subject analysis files are stored
         subject_dir = \
