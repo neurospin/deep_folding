@@ -99,7 +99,7 @@ class BoundingBoxMax:
 
         Args:
             src_dir: list of strings naming ful path source directories
-            path_to_graph: list of strings naming relative path to labelle graph
+            path_to_graph: list of strings naming relative path to labelled graph
             tgt_dir: name of target directory with full path
             sulcus: sulcus name
             side: hemisphere side (either L for left, or R for right hemisphere)
@@ -179,7 +179,7 @@ class BoundingBoxMax:
         orig_dim = hdr['volume_dimension']
         new_dim = list((resampling_ratio * orig_dim).astype(int))
 
-        self.mask = aims.Volume(hdr['volume_dimension'], dtype='S16')
+        self.mask = aims.Volume(new_dim, dtype='S16')
         self.mask.copyHeaderFrom(hdr)
         self.mask.header()['voxel_size'] = self.voxel_size_out
 
@@ -219,7 +219,7 @@ class BoundingBoxMax:
 
 
     def get_one_bounding_box(self, graph_filename):
-        """get bounding box of the chosen sulcus for one data graph
+        """get bounding box of the chosen sulcus for one data graph in MNI 152
 
       Function that outputs the bounding box for the listed sulci
       for this datagraph. The bounding box is the smallest rectangular box
@@ -317,9 +317,9 @@ class BoundingBoxMax:
     def increment_mask(self, subjects):
         """increment mask for the chosen sulcus for all subjects
 
-      Parameters:
-        subjects: list containing all subjects to be analyzed
-      """
+        Parameters:
+            subjects: list containing all subjects to be analyzed
+        """
 
         for sub in subjects:
             print(sub)
