@@ -40,7 +40,7 @@ hull and to use this new volume for visualization if needed.
 
 """
 import moving_averages as ma
-import colorado as cld
+import dico_toolbox as dtx
 
 # pyAims import
 from soma import aims
@@ -129,7 +129,7 @@ class DatasetHullRemoved:
             padding: padding of the image, equal to the extension ext
             ext: local array extension in which to look for external and internal pixels
         """
-        arr_pad = np.pad(self.arr, 
+        arr_pad = np.pad(self.arr,
                         ((padding,padding), (padding,padding), (padding,padding),
                         (0,0)),
                         'constant',
@@ -182,7 +182,7 @@ class DatasetHullRemoved:
         bucket = bucket_map[0]
         bucket = np.array([bucket.keys()[k].list() for k in range(len(bucket.keys()))])
         # Conversion of bucket to mesh
-        m = cld.bucket_to_mesh(bucket_map[0])
+        m = dtx.aims_tools.bucket_to_mesh(bucket_map[0])
 
         # Writing of the mesh in tgt_dir folder
         aims.write(m, f"{self.tgt_dir}mesh_{subject_id}.gii")
