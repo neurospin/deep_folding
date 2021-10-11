@@ -52,9 +52,6 @@ Several steps are required: normalization, crop and .pickle generation
 
 """
 
-from __future__ import division
-from __future__ import print_function
-
 import argparse
 import sys
 import os
@@ -112,7 +109,7 @@ _TRANSFORM_DIR_DEFAULT = '/neurospin/dico/data/deep_folding/data/transform'
 _BBOX_DIR_DEFAULT = '/neurospin/dico/data/deep_folding/data/bbox'
 
 # Directory containing bounding box json files
-# default corresponds to bounding boxes computed for voxinput 
+# default corresponds to bounding boxes computed for voxinput
 # -------------------------
 _TGT_DIR_DEFAULT = '/neurospin/dico/data/deep_folding/test'
 
@@ -139,7 +136,7 @@ class DatasetCroppedSkeleton:
         """Inits with list of directories and list of sulci
 
         Args:
-            src_dir: list of strings naming ful path source directories,
+            src_dir: list of strings naming full path source directories,
                     containing MRI images
             tgt_dir: name of target (output) directory with full path
             transform_dir: directory containing transformation files
@@ -248,7 +245,7 @@ class DatasetCroppedSkeleton:
             cmd_crop = 'AimsSubVolume' + \
                    ' -i ' + file_cropped + \
                    ' -o ' + file_cropped + cmd_bounding_box
-            
+
             # Sts output from AimsSubVolume is recorded in var_output
             # Put following command to get the output
             # os.popen(cmd_crop).read()
@@ -297,7 +294,7 @@ class DatasetCroppedSkeleton:
                            'resampling_type': 'AimsApplyTransform' if self.resampling is None else 'Bastien',
                            'out_voxel_size': self.out_voxel_size
                            }
-            
+
             self.json.update(dict_to_add=dict_to_add)
 
             print(list_subjects)
