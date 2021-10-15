@@ -41,49 +41,27 @@ a specified hemisphere.
 """
 
 from os.path import join
+from soma import aims
+from scipy import ndimage
+import numpy as np
 import json
-from deep_folding.anatomist_tools.bounding_box import BoundingBoxMax
 
 
-_BOX_DIR_DEFAULT = "/neurospin/dico/deep_folding_data/data/bbox/"
-_MASK_DIR_DEFAULT = "/neurospin/dico/deep_folding_data/data/bbox/"
+_MASK_DIR_DEFAULT = "/neurospin/dico/deep_folding_data/data/mask/"
 
 
-def compute_max_box(sulci_list, side, talairach_box=False, src_dir=_BOSK_DIR_DEFAULT):
-    """Function returning maximal bounding box of a given list of sulci
+def compute_bbox_mask(arr):
+    
+    # Gets location of bounding box as slices
+    loc = ndimage.find_objects(arr)[0]
+    bbmin = []
+    bbmax = []
+    
+    for slicing in loc:
+        bbmin.append(slicing.start)
+        bbmax.append(slicing.stop)
 
-    It reads json files contained in the source directory.
-    They are listed in subdirectory 'L' or 'R' according t hemisphere
-    Each json file is the name of the sulcus + 'json'
-
-    Args:
-        sulci_list: a list of sulci
-        side: a string corresponding to the hemisphere, whether 'L' or 'R'
-        talairach_box: a boolean whether using Talairach coordinates or voxels
-        src_dir: path to source directory containing bbox dimensions
-
-    Returns:
-        bbmin: an array of minimum coordinates of bounding box of given sulci
-        bbmax: an array of maximum coordinates of bounding box of given sulci
-    """
-
-    list_bbmin, list_bbmax = [], []
-    if talairach_box:
-        rad = 'AIMS_Talairach'
-    else:
-        rad = 'voxel'
-
-    for sulcus in sulci_list:
-        with open(join(src_dir, side, sulcus + '.json')) as json_file:
-            sulcus = json.load(json_file)
-
-            list_bbmin.append(sulcus['bbmin_'+rad])
-            list_bbmax.append(sulcus['bbmax_'+rad])
-
-    bbmin_npy, bbmax_npy = BoundingBoxMax.compute_max_box(list_bbmin=list_bbmin,
-                                                          list_bbmax=list_bbmax)
-
-    return bbmin_npy, bbmax_npy
+    return bbmin, bbmax
 
 def compute_mask(sulci_list, side, mask_dir=_MASK_DIR_DEFAULT):
     """Function returning mask combining mask over several sulci
@@ -97,33 +75,39 @@ def compute_mask(sulci_list, side, mask_dir=_MASK_DIR_DEFAULT):
         mask_dir: path to source directory containing masks
 
     Returns:
-        mask: AIMS volume containing combined mask
-        bbmin: an array of minimum coordinates of bounding box of given sulci
-        bbmax: an array of maximum coordinates of bounding box of given sulci
+        mask_result: AIMS volume containing combined mask
+        bbmin: an array of minimum coordinates of min box around the mask
+        bbmax: an array of maximum coordinates of max_box around the mask
     """
 
-    list_bbmin, list_bbmax = [], []
-    if talairach_box:
-        rad = 'AIMS_Talairach'
-    else:
-        rad = 'voxel'
-
+    # Initializes and fills list of masks, each repreented as an aims volume
+    list_masks = []
+    
     for sulcus in sulci_list:
-        with open(join(src_dir, side, sulcus + '.json')) as json_file:
-            sulcus = json.load(json_file)
+        mask_file = join(mask_dir, side, sulcus + '.nii.gz')
+        list_masks.append(aims.read(mask_file))
+    
+    # Computes the mask being a combination of all masks
+    mask_result = list_masks[0]
+    
+    arr_result = np.asarray(mask_result).astype(bool)
+    for mask in list_masks[1:]:
+        arr = np.asarray(mask)
+        arr_result += arr.astype(bool)
+        
+    arr_result = arr_result.astype(int)
+    np.asarray(mask_result)[:] = arr_result
+    
+    # Computes the mask bounding box
+    bbmin, bbmax = compute_bbox_mask(arr_result)
+        
+    return mask_result, bbmin, bbmax
 
-            list_bbmin.append(sulcus['bbmin_'+rad])
-            list_bbmax.append(sulcus['bbmax_'+rad])
-
-    bbmin_npy, bbmax_npy = BoundingBoxMax.compute_max_box(list_bbmin=list_bbmin,
-                                                          list_bbmax=list_bbmax)
-
-    return bbmin_npy, bbmax_npy
 
 
 if __name__ == '__main__':
-    bbmin, bbmax = compute_max_box(['S.T.s.ter.asc.ant._left',
+    arr_mask, bbmin, bbmax = compute_mask(['S.T.s.ter.asc.ant._left',
                                     'S.T.s.ter.asc.test._left'],
-                        'L')
+                                    'L')
     print("bbmin = ", bbmin)
     print("bbmax = ", bbmax)

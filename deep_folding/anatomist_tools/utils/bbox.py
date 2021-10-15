@@ -41,14 +41,39 @@ a specified hemisphere.
 """
 
 from os.path import join
+import numpy as np
 import json
-from deep_folding.anatomist_tools.bounding_box import BoundingBoxMax
 
 
-_SRC_DIR_DEFAULT = "/neurospin/dico/deep_folding_data/data/bbox/"
+_BOX_DIR_DEFAULT = "/neurospin/dico/deep_folding_data/data/bbox/"
 
+def compute_max_box(list_bbmin, list_bbmax):
+    """Returns the coordinates of the box encompassing all input boxes
 
-def compute_max_box(sulci_list, side, talairach_box=False, src_dir=_SRC_DIR_DEFAULT):
+    Parameters:
+    list_bbmin: list containing the upper right vertex of the box
+    list_bbmax: list containing the lower left vertex of the box
+
+    Returns:
+    bbmin: numpy array with the x,y,z coordinates
+                of the upper right corner of the box
+    bblax: numpy array with the x,y,z coordinates
+                of the lower left corner of the box
+    """
+
+    bbmin = np.array(
+        [min([val[0] for k, val in enumerate(list_bbmin)]),
+            min([val[1] for k, val in enumerate(list_bbmin)]),
+            min([val[2] for k, val in enumerate(list_bbmin)])])
+
+    bbmax = np.array(
+        [max([val[0] for k, val in enumerate(list_bbmax)]),
+            max([val[1] for k, val in enumerate(list_bbmax)]),
+            max([val[2] for k, val in enumerate(list_bbmax)])])
+
+    return bbmin, bbmax
+
+def compute_max_box(sulci_list, side, talairach_box=False, src_dir=_BOX_DIR_DEFAULT):
     """Function returning maximal bounding box of a given list of sulci
 
     It reads json files contained in the source directory.
@@ -79,8 +104,8 @@ def compute_max_box(sulci_list, side, talairach_box=False, src_dir=_SRC_DIR_DEFA
             list_bbmin.append(sulcus['bbmin_'+rad])
             list_bbmax.append(sulcus['bbmax_'+rad])
 
-    bbmin_npy, bbmax_npy = BoundingBoxMax.compute_max_box(list_bbmin=list_bbmin,
-                                                          list_bbmax=list_bbmax)
+    bbmin_npy, bbmax_npy = compute_max_box(list_bbmin=list_bbmin,
+                                           list_bbmax=list_bbmax)
 
     return bbmin_npy, bbmax_npy
 
