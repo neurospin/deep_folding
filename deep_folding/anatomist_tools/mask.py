@@ -281,8 +281,65 @@ class BoundingBoxMax:
         print('box (MNI 152) max:', bbox_max)
 
         return bbox_min, bbox_max
+    
+    def get_one_bounding_box_aims_talairach(self, graph_filename):
+        """get bounding box of the chosen sulcus for one data graph
 
-    def get_bounding_boxes(self, subjects):
+      Function that outputs the bounding box for the listed sulci
+      for this datagraph. The bounding box is the smallest rectangular box
+      that encompasses the chosen sulcus.
+      It is given in the AIMS Talairch referential, different from the MNI
+      Talairach referential.
+
+      Parameters:
+        graph_filename: string being the name of graph file .arg to analyze:
+                        for example: 'Lammon_base2018_manual.arg'
+
+      Returns:
+        bbox_min: numpy array giving the upper right vertex coordinates
+                of the box in the Talairach space
+        bbox_max: numpy array fiving the lower left vertex coordinates
+                of the box in the Talairach space
+      """
+
+        # Reads the data graph and transforms it to AIMS Talairach referential
+        # Note that this is NOT the MNI Talairach referential
+        # This is the Talairach referential used in AIMS
+        # There are several Talairach referentials
+        graph = aims.read(graph_filename)
+        voxel_size = graph['voxel_size'][:3]
+        tal_transfo = aims.GraphManip.talairach(graph)
+        bbox_min = None
+        bbox_max = None
+
+        # Gets the min and max coordinates of the sulci
+        # by looping over all the vertices of the graph
+        for vertex in graph.vertices():
+            vname = vertex.get('name')
+            if vname != self.sulcus:
+                continue
+            for bucket_name in ('aims_ss', 'aims_bottom', 'aims_other'):
+                bucket = vertex.get(bucket_name)
+                if bucket is not None:
+                    voxels = np.asarray(
+                        [tal_transfo.transform(np.array(voxel) * voxel_size)
+                         for voxel in bucket[0].keys()])
+
+                    if voxels.shape == (0,):
+                        continue
+                    bbox_min = np.min(np.vstack(
+                        ([bbox_min] if bbox_min is not None else [])
+                        + [voxels]), axis=0)
+                    bbox_max = np.max(np.vstack(
+                        ([bbox_max] if bbox_max is not None else [])
+                        + [voxels]), axis=0)
+
+        print('box (AIMS Talairach) min:', bbox_min)
+        print('box (AIMS Talairach) max:', bbox_max)
+
+        return bbox_min, bbox_max
+
+    def get_bounding_boxes(self, subjects, referential):
         """get bounding boxes of the chosen sulcus for all subjects
 
       Function that outputs the bounding box for the listed sulci on a manually
@@ -300,6 +357,7 @@ class BoundingBoxMax:
                     in the MNI 152 space
         list_bbmax: list containing the lower left vertex of the box
                     in the MNI 152 space
+        referential: 'MNI152' or 'AIMS_Talairach'
       """
 
         # Initialization
@@ -313,7 +371,12 @@ class BoundingBoxMax:
             # It looks for a graph file .arg
             sulci_pattern = glob.glob(join(sub['dir'], graph_file))[0]
 
-            bbox_min, bbox_max = self.get_one_bounding_box(sulci_pattern % sub)
+            if referential == 'MNI152':
+                bbox_min, bbox_max = \
+                    self.get_one_bounding_box(sulci_pattern % sub)
+            else:
+                bbox_min, bbox_max = \
+                    self.get_one_bounding_box_aims_talairach(sulci_pattern % sub)
 
             list_bbmin.append([bbox_min[0], bbox_min[1], bbox_min[2]])
             list_bbmax.append([bbox_max[0], bbox_max[1], bbox_max[2]])
@@ -350,15 +413,15 @@ class BoundingBoxMax:
         print(self.mask_file)
         aims.write(self.mask, self.mask_file)
 
-    def compute_box_voxel(self, bbmin_tal, bbmax_tal):
+    def compute_box_voxel(self, bbmin_mni152, bbmax_mni152):
         """Returns the coordinates of the box as voxels
 
       Coordinates of the box in voxels are determined in the MNI referential
 
       Parameters:
-        bbmin_tal: numpy array with the coordinates of the upper right corner
+        bbmin_mni152: numpy array with the coordinates of the upper right corner
                 of the box (MNI152 space)
-        bbmax_tal: numpy array with the coordinates of the lower left corner
+        bbmax_mni152: numpy array with the coordinates of the lower left corner
                 of the box (MNI152 space)
         voxel_size: voxel size (in MNI referential or HCP normalized SPM space)
 
@@ -371,8 +434,8 @@ class BoundingBoxMax:
 
         # To go back from mms to voxels
         voxel_size = self.voxel_size_out
-        bbmin_vox = np.round(np.array(bbmin_tal) / voxel_size[:3]).astype(int)
-        bbmax_vox = np.round(np.array(bbmax_tal) / voxel_size[:3]).astype(int)
+        bbmin_vox = np.round(np.array(bbmin_mni152) / voxel_size[:3]).astype(int)
+        bbmax_vox = np.round(np.array(bbmax_mni152) / voxel_size[:3]).astype(int)
 
         return bbmin_vox, bbmax_vox
 
@@ -420,16 +483,25 @@ class BoundingBoxMax:
 
             # Determines the box encompassing the sulcus for all subjects
             # The coordinates are determined in MNI 152  space
-            list_bbmin, list_bbmax = self.get_bounding_boxes(subjects)
-            bbmin_tal, bbmax_tal = compute_max(list_bbmin, list_bbmax)
+            list_bbmin, list_bbmax = self.get_bounding_boxes(subjects,
+                                                             referential='MNI152')
+            bbmin_mni152, bbmax_mni152 = compute_max(list_bbmin, list_bbmax)
 
-            dict_to_add = {'bbmin_MNI152': bbmin_tal.tolist(),
-                           'bbmax_MNI152': bbmax_tal.tolist()}
+            # Determines the box encompassing the sulcus for all subjects
+            # The coordinates are determined in AIMS Talairach  space
+            list_bbmin, list_bbmax = self.get_bounding_boxes(subjects,
+                                                             referential='AIMS-Talairach')
+            bbmin_tal, bbmax_tal = compute_max(list_bbmin, list_bbmax)
+            
+            dict_to_add = {'bbmin_MNI152': bbmin_mni152.tolist(),
+                           'bbmax_MNI152': bbmax_mni152.tolist(),
+                           'bbmin_AIMS_Talairach': bbmin_tal.tolist(),
+                           'bbmax_AIMS_Talairach': bbmax_tal.tolist()}
 
             # Determines the box encompassing the sulcus for all subjects
             # The coordinates are determined in voxels in MNI space
-            bbmin_vox, bbmax_vox = self.compute_box_voxel(bbmin_tal,
-                                                          bbmax_tal)
+            bbmin_vox, bbmax_vox = self.compute_box_voxel(bbmin_mni152,
+                                                          bbmax_mni152)
 
             dict_to_add.update({'side': self.side,
                                 'sulcus': self.sulcus,
