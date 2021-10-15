@@ -133,6 +133,7 @@ class DatasetCroppedSkeleton:
     def __init__(self, src_dir=_SRC_DIR_DEFAULT,
                  tgt_dir=_TGT_DIR_DEFAULT,
                  bbox_dir=_BBOX_DIR_DEFAULT,
+                 mask_dir=_MASK_DIR_DEFAULT,
                  morphologist_dir=_MORPHOLOGIST_DIR_DEFAULT,
                  list_sulci=_SULCUS_DEFAULT,
                  side=_SIDE_DEFAULT,
@@ -164,6 +165,7 @@ class DatasetCroppedSkeleton:
 
         self.tgt_dir = tgt_dir
         self.bbox_dir = bbox_dir
+        self.mask_dir=mask_dir
         self.morphologist_dir = morphologist_dir
         self.interp = interp
         self.resampling = resampling
@@ -181,7 +183,9 @@ class DatasetCroppedSkeleton:
         # Names of files in function of dictionary: keys -> 'subject' and 'side'
         # Files from morphologist pipeline
         self.skeleton_file = 'default_analysis/segmentation/' \
-                             '%(side)sskeleton_%(subject)s.nii.gz'
+                            '%(side)sskeleton_%(subject)s.nii.gz'
+        self.graph_file = 'default_analysis/folds/3.1/default_session_auto/' \
+                             '%(side)s%(subject)s_default_session_auto.arg'
 
         # Names of files in function of dictionary: keys -> 'subject' and 'side'
         self.cropped_file = '%(subject)s_normalized.nii.gz'
@@ -243,9 +247,9 @@ class DatasetCroppedSkeleton:
         vol = aims.read(file_cropped)
         arr = np.asarray(vol)
         arr_mask = np.asarray(self.mask)
-        np.asarray(vol)[:] = arr[np.where(arr_mask == 1)]
+        np.asarray(vol)[:] = arr # arr[np.where(arr_mask == 1)]
         
-        vol_cropped = aims.VolumeView(vol, self.bbmin, self.bbmax)
+        vol_cropped = aims.VolumeView(vol, self.bbmin, self.bbmax-self.bbmin)
         aims.write(vol_cropped, file_cropped)
 
     def crop_one_file(self, subject_id, verbose=False):
@@ -266,6 +270,8 @@ class DatasetCroppedSkeleton:
         file_skeleton = join(subject_dir, self.skeleton_file % subject)
         
         # Creates transformation MNI template
+        file_graph = join(subject_dir, self.graph_file % subject)
+        graph = aims.read(file_graph)
         g_to_icbm_template = aims.GraphManip.getICBM2009cTemplateTransform(graph)
         g_to_icbm_template_file = self.g_to_icbm_template_file % subject
         aims.write(g_to_icbm_template, g_to_icbm_template_file)
@@ -288,7 +294,7 @@ class DatasetCroppedSkeleton:
                                 ' -m ' + g_to_icbm_template_file + \
                                 ' -r ' + self.ref_file + \
                                 ' -t ' + self.interp + \
-                                ' --bg ' + _EXTERNAL
+                                ' --bg ' + str(_EXTERNAL)
                 os.system(cmd_normalize)
 
             # Cropping of skeleton image
@@ -331,6 +337,7 @@ class DatasetCroppedSkeleton:
             dict_to_add = {'nb_subjects': len(list_subjects),
                            'src_dir': self.src_dir,
                            'bbox_dir': self.bbox_dir,
+                           'mask_dir': self.mask_dir,
                            'side': self.side,
                            'interp': self.interp,
                            'list_sulci': self.list_sulci,
@@ -345,12 +352,13 @@ class DatasetCroppedSkeleton:
             
             # Defines referential
             self.define_referentials()
-            self.define_transformation
 
             # Performs cropping for each file in a parallelized way
             print(list_subjects)
 
-            pqdm(list_subjects, self.crop_one_file, n_jobs=define_njobs())
+            for sub in list_subjects:
+                self.crop_one_file(sub)
+            # pqdm(list_subjects, self.crop_one_file, n_jobs=define_njobs())
 
 
     def dataset_gen_pipe(self, number_subjects=_ALL_SUBJECTS):
@@ -377,7 +385,7 @@ class DatasetCroppedSkeleton:
                 self.mask, self.bbmin, self.bbmax = \
                     compute_mask(sulci_list=self.list_sulci,
                                 side=self.side,
-                                src_dir=self.mask_dir)
+                                mask_dir=self.mask_dir)
             else:
                 raise ValueError('Cropping must be either \'bbox\' or \'mask\'')
                 
@@ -472,6 +480,7 @@ def parse_args(argv):
     params['src_dir'] = args.src_dir
     params['tgt_dir'] = args.tgt_dir
     params['bbox_dir'] = args.bbox_dir
+    params['mask_dir'] = args.mask_dir
     params['list_sulci'] = args.sulcus  # a list of sulci
     params['side'] = args.side
     params['interp'] = args.interp
@@ -501,6 +510,7 @@ def parse_args(argv):
 def dataset_gen_pipe(src_dir=_SRC_DIR_DEFAULT,
                      tgt_dir=_TGT_DIR_DEFAULT,
                      bbox_dir=_BBOX_DIR_DEFAULT,
+                     mask_dir=_MASK_DIR_DEFAULT,
                      morphologist_dir=_MORPHOLOGIST_DIR_DEFAULT,
                      side=_SIDE_DEFAULT,
                      list_sulci=_SULCUS_DEFAULT,
@@ -512,8 +522,10 @@ def dataset_gen_pipe(src_dir=_SRC_DIR_DEFAULT,
     """Main program generating cropped files and corresponding pickle file
     """
 
-    dataset = DatasetCroppedSkeleton(src_dir=src_dir, tgt_dir=tgt_dir,
+    dataset = DatasetCroppedSkeleton(src_dir=src_dir,
+                                     tgt_dir=tgt_dir,
                                      bbox_dir=bbox_dir,
+                                     mask_dir=mask_dir,
                                      morphologist_dir=morphologist_dir,
                                      side=side,
                                      list_sulci=list_sulci,
@@ -540,6 +552,7 @@ def main(argv):
         dataset_gen_pipe(src_dir=params['src_dir'],
                          tgt_dir=params['tgt_dir'],
                          bbox_dir=params['bbox_dir'],
+                         mask_dir=params['mask_dir'],
                          morphologist_dir=params['morphologist_dir'],
                          side=params['side'],
                          list_sulci=params['list_sulci'],

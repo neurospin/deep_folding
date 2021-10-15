@@ -59,7 +59,7 @@ import scipy
 from soma import aims
 from deep_folding.anatomist_tools.utils.logs import LogJson
 from deep_folding.anatomist_tools.utils.resample import resample
-from deep_folding.anatomist_tools.utils.bbox import compute_max_box
+from deep_folding.anatomist_tools.utils.bbox import compute_max
 from deep_folding.anatomist_tools.utils.sulcus_side import complete_sulci_name
 
 _ALL_SUBJECTS = -1
@@ -68,7 +68,7 @@ _ALL_SUBJECTS = -1
 _SRC_DIR_DEFAULT = "/neurospin/lnao/PClean/database_learnclean/all/"
 
 # Default directory to which we write the bounding box results
-_TGT_DIR_DEFAULT = "/neurospin/dico/data/deep_folding/test/bbox"
+_bbox_dir_DEFAULT = "/neurospin/dico/data/deep_folding/test/bbox"
 
 # Default directory to which we write the masks
 _MASK_DIR_DEFAULT = "/neurospin/dico/data/deep_folding/test/mask"
@@ -94,7 +94,7 @@ class BoundingBoxMax:
 
     def __init__(self, src_dir=_SRC_DIR_DEFAULT,
                  path_to_graph=_PATH_TO_GRAPH_DEFAULT,
-                 tgt_dir=_TGT_DIR_DEFAULT,
+                 bbox_dir=_bbox_dir_DEFAULT,
                  mask_dir=_MASK_DIR_DEFAULT,
                  sulcus=_SULCUS_DEFAULT,
                  side=_SIDE_DEFAULT,
@@ -104,7 +104,7 @@ class BoundingBoxMax:
         Args:
             src_dir: list of strings naming ful path source directories
             path_to_graph: list of strings naming relative path to labelled graph
-            tgt_dir: name of target directory with full path
+            bbox_dir: name of target directory with full path
             sulcus: sulcus name
             side: hemisphere side (either L for left, or R for right hemisphere)
         """
@@ -124,7 +124,7 @@ class BoundingBoxMax:
                               + '/%(side)s%(subject)s*.arg')
 
         self.sulcus = sulcus
-        self.tgt_dir = tgt_dir
+        self.bbox_dir = bbox_dir
         self.mask_dir = mask_dir
         self.side = side
         self.sulcus = complete_sulci_name(sulcus, side)
@@ -135,7 +135,7 @@ class BoundingBoxMax:
 
         # Json full name is the name of the sulcus + .json
         # and is kept under the subdirectory Left or Right
-        json_file = join(self.tgt_dir, self.side, self.sulcus + '.json')
+        json_file = join(self.bbox_dir, self.side, self.sulcus + '.json')
         self.json = LogJson(json_file)
         self.mask = aims.Volume()
         self.mask_file = join(self.mask_dir, self.side, self.sulcus + '.nii.gz')
@@ -345,6 +345,8 @@ class BoundingBoxMax:
 
     def write_mask(self):
         """Writes mask on mask file"""
+        mask_file_dir = os.path.dirname(self.mask_file)
+        os.makedirs(mask_file_dir, exist_ok=True)
         print(self.mask_file)
         aims.write(self.mask, self.mask_file)
 
@@ -393,8 +395,8 @@ class BoundingBoxMax:
                 else subjects[:number_subjects])
 
             # Creates target bbox dir if it doesn't exist
-            if not os.path.exists(self.tgt_dir):
-                os.mkdir(self.tgt_dir)
+            if not os.path.exists(self.bbox_dir):
+                os.mkdir(self.bbox_dir)
 
             # Creates target mask dir if it doesn't exist
             if not os.path.exists(self.mask_dir):
@@ -403,7 +405,7 @@ class BoundingBoxMax:
             # Writes number of subjects and directory names to json file
             dict_to_add = {'nb_subjects': len(subjects),
                            'src_dir': self.src_dir,
-                           'tgt_dir': self.tgt_dir,
+                           'bbox_dir': self.bbox_dir,
                            'out_voxel_size': self.voxel_size_out[0]}
             self.json.update(dict_to_add=dict_to_add)
 
@@ -419,7 +421,7 @@ class BoundingBoxMax:
             # Determines the box encompassing the sulcus for all subjects
             # The coordinates are determined in MNI 152  space
             list_bbmin, list_bbmax = self.get_bounding_boxes(subjects)
-            bbmin_tal, bbmax_tal = compute_max_box(list_bbmin, list_bbmax)
+            bbmin_tal, bbmax_tal = compute_max(list_bbmin, list_bbmax)
 
             dict_to_add = {'bbmin_MNI152': bbmin_tal.tolist(),
                            'bbmax_MNI152': bbmax_tal.tolist()}
@@ -445,7 +447,7 @@ class BoundingBoxMax:
         return bbmin_vox, bbmax_vox
 
 
-def bounding_box(src_dir=_SRC_DIR_DEFAULT, tgt_dir=_TGT_DIR_DEFAULT,
+def bounding_box(src_dir=_SRC_DIR_DEFAULT, bbox_dir=_bbox_dir_DEFAULT,
                  mask_dir=_MASK_DIR_DEFAULT,
                  path_to_graph=_PATH_TO_GRAPH_DEFAULT,
                  sulcus=_SULCUS_DEFAULT, side=_SIDE_DEFAULT,
@@ -459,7 +461,7 @@ def bounding_box(src_dir=_SRC_DIR_DEFAULT, tgt_dir=_TGT_DIR_DEFAULT,
 
   Args:
       src_dir: list of strings -> directories of the supervised databases
-      tgt_dir: string giving target bbox directory path
+      bbox_dir: string giving target bbox directory path
       mask_dir: string giving target mask directory path 
       path_to_graph: string giving relative path to manually labelled graph
       side: hemisphere side (either 'L' for left, or 'R' for right)
@@ -469,7 +471,7 @@ def bounding_box(src_dir=_SRC_DIR_DEFAULT, tgt_dir=_TGT_DIR_DEFAULT,
       skeleton_file: skeleton file of the reference subject
   """
 
-    box = BoundingBoxMax(src_dir=src_dir, tgt_dir=tgt_dir,
+    box = BoundingBoxMax(src_dir=src_dir, bbox_dir=bbox_dir,
                          mask_dir=mask_dir,
                          path_to_graph=path_to_graph,
                          sulcus=sulcus, side=side,
@@ -492,7 +494,7 @@ def parse_args(argv):
 
     # Parse command line arguments
     parser = argparse.ArgumentParser(
-        prog='bounding_box.py',
+        prog='mask.py',
         description='Computes mask and bounding box around the named sulcus')
     parser.add_argument(
         "-s", "--src_dir", type=str, default=_SRC_DIR_DEFAULT, nargs='+',
@@ -501,9 +503,9 @@ def parse_args(argv):
              'one after the other. Example: -s DIR_1 DIR_2. '
              'Default is : ' + _SRC_DIR_DEFAULT)
     parser.add_argument(
-        "-t", "--tgt_dir", type=str, default=_TGT_DIR_DEFAULT,
+        "-t", "--bbox_dir", type=str, default=_bbox_dir_DEFAULT,
         help='Target directory where to store the output bbox json files. '
-             'Default is : ' + _TGT_DIR_DEFAULT)
+             'Default is : ' + _bbox_dir_DEFAULT)
     parser.add_argument(
         "-m", "--mask_dir", type=str, default=_MASK_DIR_DEFAULT,
         help='Target directory where to store the output mask files. '
@@ -535,8 +537,8 @@ def parse_args(argv):
     args = parser.parse_args(argv)
     params['src_dir'] = args.src_dir  # src_dir is a list
     params['path_to_graph'] = args.path_to_graph
-    params['tgt_dir']= args.tgt_dir # tgt_dir is a string, only one directory
-    params['mask_dir']= args.mask_dir # tgt_dir is a string, only one directory
+    params['bbox_dir']= args.bbox_dir # bbox_dir is a string, only one directory
+    params['mask_dir']= args.mask_dir # bbox_dir is a string, only one directory
     params['sulcus'] = args.sulcus  # sulcus is a string
     params['side'] = args.side
     params['out_voxel_size'] = args.out_voxel_size
@@ -574,7 +576,7 @@ def main(argv):
         # Actual API
         bounding_box(src_dir=params['src_dir'],
                      path_to_graph=params['path_to_graph'],
-                     tgt_dir=params['tgt_dir'],
+                     bbox_dir=params['bbox_dir'],
                      mask_dir=params['mask_dir'],
                      sulcus=params['sulcus'],
                      side=params['side'],

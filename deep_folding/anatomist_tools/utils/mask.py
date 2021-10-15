@@ -61,7 +61,7 @@ def compute_bbox_mask(arr):
         bbmin.append(slicing.start)
         bbmax.append(slicing.stop)
 
-    return bbmin, bbmax
+    return np.array(bbmin), np.array(bbmax)
 
 def compute_mask(sulci_list, side, mask_dir=_MASK_DIR_DEFAULT):
     """Function returning mask combining mask over several sulci

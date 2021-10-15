@@ -47,7 +47,7 @@ import json
 
 _BOX_DIR_DEFAULT = "/neurospin/dico/deep_folding_data/data/bbox/"
 
-def compute_max_box(list_bbmin, list_bbmax):
+def compute_max(list_bbmin, list_bbmax):
     """Returns the coordinates of the box encompassing all input boxes
 
     Parameters:
@@ -104,8 +104,8 @@ def compute_max_box(sulci_list, side, talairach_box=False, src_dir=_BOX_DIR_DEFA
             list_bbmin.append(sulcus['bbmin_'+rad])
             list_bbmax.append(sulcus['bbmax_'+rad])
 
-    bbmin_npy, bbmax_npy = compute_max_box(list_bbmin=list_bbmin,
-                                           list_bbmax=list_bbmax)
+    bbmin_npy, bbmax_npy = compute_max(list_bbmin=list_bbmin,
+                                       list_bbmax=list_bbmax)
 
     return bbmin_npy, bbmax_npy
 
