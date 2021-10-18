@@ -189,11 +189,11 @@ class BoundingBoxMax:
     def increment_one_mask(self, graph_filename):
         """Increments self.mask of 1 where there is the sulcus
 
-      Parameters:
-        graph_filename: string being the name of graph file .arg to analyze:
-                        for example: 'Lammon_base2018_manual.arg'
+        Parameters:
+            graph_filename: string being the name of graph file .arg to analyze:
+                            for example: 'Lammon_base2018_manual.arg'
 
-      """
+        """
 
         # Reads the data graph and transforms it to MNI ICBM152 referential
         graph = aims.read(graph_filename)
@@ -222,7 +222,6 @@ class BoundingBoxMax:
                     for i,j,k in voxels:
                         arr[i,j,k,0] += 1
 
-
     def get_one_bounding_box(self, graph_filename):
         """get bounding box of the chosen sulcus for one data graph in MNI 152
 
@@ -248,7 +247,8 @@ class BoundingBoxMax:
         # There are several Talairach referentials
         graph = aims.read(graph_filename)
         voxel_size_in = graph['voxel_size'][:3]
-        g_to_icbm_template = aims.GraphManip.getICBM2009cTemplateTransform(graph)
+        g_to_icbm_template = \
+            aims.GraphManip.getICBM2009cTemplateTransform(graph)
         bbox_min = None
         bbox_max = None
 
@@ -281,65 +281,8 @@ class BoundingBoxMax:
         print('box (MNI 152) max:', bbox_max)
 
         return bbox_min, bbox_max
-    
-    def get_one_bounding_box_aims_talairach(self, graph_filename):
-        """get bounding box of the chosen sulcus for one data graph
 
-      Function that outputs the bounding box for the listed sulci
-      for this datagraph. The bounding box is the smallest rectangular box
-      that encompasses the chosen sulcus.
-      It is given in the AIMS Talairch referential, different from the MNI
-      Talairach referential.
-
-      Parameters:
-        graph_filename: string being the name of graph file .arg to analyze:
-                        for example: 'Lammon_base2018_manual.arg'
-
-      Returns:
-        bbox_min: numpy array giving the upper right vertex coordinates
-                of the box in the Talairach space
-        bbox_max: numpy array fiving the lower left vertex coordinates
-                of the box in the Talairach space
-      """
-
-        # Reads the data graph and transforms it to AIMS Talairach referential
-        # Note that this is NOT the MNI Talairach referential
-        # This is the Talairach referential used in AIMS
-        # There are several Talairach referentials
-        graph = aims.read(graph_filename)
-        voxel_size = graph['voxel_size'][:3]
-        tal_transfo = aims.GraphManip.talairach(graph)
-        bbox_min = None
-        bbox_max = None
-
-        # Gets the min and max coordinates of the sulci
-        # by looping over all the vertices of the graph
-        for vertex in graph.vertices():
-            vname = vertex.get('name')
-            if vname != self.sulcus:
-                continue
-            for bucket_name in ('aims_ss', 'aims_bottom', 'aims_other'):
-                bucket = vertex.get(bucket_name)
-                if bucket is not None:
-                    voxels = np.asarray(
-                        [tal_transfo.transform(np.array(voxel) * voxel_size)
-                         for voxel in bucket[0].keys()])
-
-                    if voxels.shape == (0,):
-                        continue
-                    bbox_min = np.min(np.vstack(
-                        ([bbox_min] if bbox_min is not None else [])
-                        + [voxels]), axis=0)
-                    bbox_max = np.max(np.vstack(
-                        ([bbox_max] if bbox_max is not None else [])
-                        + [voxels]), axis=0)
-
-        print('box (AIMS Talairach) min:', bbox_min)
-        print('box (AIMS Talairach) max:', bbox_max)
-
-        return bbox_min, bbox_max
-
-    def get_bounding_boxes(self, subjects, referential):
+    def get_bounding_boxes(self, subjects):
         """get bounding boxes of the chosen sulcus for all subjects
 
       Function that outputs the bounding box for the listed sulci on a manually
@@ -357,7 +300,6 @@ class BoundingBoxMax:
                     in the MNI 152 space
         list_bbmax: list containing the lower left vertex of the box
                     in the MNI 152 space
-        referential: 'MNI152' or 'AIMS_Talairach'
       """
 
         # Initialization
@@ -371,12 +313,8 @@ class BoundingBoxMax:
             # It looks for a graph file .arg
             sulci_pattern = glob.glob(join(sub['dir'], graph_file))[0]
 
-            if referential == 'MNI152':
-                bbox_min, bbox_max = \
-                    self.get_one_bounding_box(sulci_pattern % sub)
-            else:
-                bbox_min, bbox_max = \
-                    self.get_one_bounding_box_aims_talairach(sulci_pattern % sub)
+            bbox_min, bbox_max = \
+                self.get_one_bounding_box(sulci_pattern % sub)
 
             list_bbmin.append([bbox_min[0], bbox_min[1], bbox_min[2]])
             list_bbmax.append([bbox_max[0], bbox_max[1], bbox_max[2]])
@@ -439,6 +377,20 @@ class BoundingBoxMax:
 
         return bbmin_vox, bbmax_vox
 
+    def transform_to_aims_talairach(self, bbmin_mni152, bbmax_mni152):
+        """Transform bbox coordinates from MNI152 to AIMS talairach referential"""
+        
+        g_icbm_template_to_talairach = \
+            aims.StandardReferentials.talairachToICBM2009cTemplate().inverse()
+        bbmin_tal = g_icbm_template_to_talairach.transform(bbmin_mni152)
+        bbmin_tal = np.asarray(bbmin_tal)
+        bbmax_tal = g_icbm_template_to_talairach.transform(bbmax_mni152)
+        bbmax_tal = np.asarray(bbmax_tal)
+        print('box (AIMS Talairach) min:', bbmin_tal.tolist())
+        print('box (AIMS Talairach) max:', bbmax_tal.tolist())
+        
+        return bbmin_tal, bbmax_tal
+
     def compute_bounding_box(self, number_subjects=_ALL_SUBJECTS):
         """Main class program to compute the bounding box
 
@@ -483,15 +435,11 @@ class BoundingBoxMax:
 
             # Determines the box encompassing the sulcus for all subjects
             # The coordinates are determined in MNI 152  space
-            list_bbmin, list_bbmax = self.get_bounding_boxes(subjects,
-                                                             referential='MNI152')
+            list_bbmin, list_bbmax = self.get_bounding_boxes(subjects)
             bbmin_mni152, bbmax_mni152 = compute_max(list_bbmin, list_bbmax)
-
-            # Determines the box encompassing the sulcus for all subjects
-            # The coordinates are determined in AIMS Talairach  space
-            list_bbmin, list_bbmax = self.get_bounding_boxes(subjects,
-                                                             referential='AIMS-Talairach')
-            bbmin_tal, bbmax_tal = compute_max(list_bbmin, list_bbmax)
+            
+            bbmin_tal, bbmax_tal = \
+                self.transform_to_aims_talairach(bbmin_mni152, bbmax_mni152)
             
             dict_to_add = {'bbmin_MNI152': bbmin_mni152.tolist(),
                            'bbmax_MNI152': bbmax_mni152.tolist(),

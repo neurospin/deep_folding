@@ -166,7 +166,7 @@ class BoundingBoxMax:
 
         return subjects
 
-    def get_one_bounding_box(self, graph_filename):
+    def get_one_bounding_box_aims_talairach(self, graph_filename):
         """get bounding box of the chosen sulcus for one data graph
 
       Function that outputs the bounding box for the listed sulci
