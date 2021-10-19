@@ -1,5 +1,5 @@
+#!python
 # -*- coding: utf-8 -*-
-# /usr/bin/env python2.7 + brainvisa compliant env
 #
 #  This software and supporting documentation are distributed by
 #      Institut Federatif de Recherche 49
@@ -57,6 +57,7 @@ import numpy as np
 
 from soma import aims
 from deep_folding.anatomist_tools.utils.logs import LogJson
+from deep_folding.anatomist_tools.utils.bbox import compute_max_box
 from deep_folding.anatomist_tools.utils.sulcus_side import complete_sulci_name
 
 _ALL_SUBJECTS = -1
@@ -165,7 +166,7 @@ class BoundingBoxMax:
 
         return subjects
 
-    def get_one_bounding_box(self, graph_filename):
+    def get_one_bounding_box_aims_talairach(self, graph_filename):
         """get bounding box of the chosen sulcus for one data graph
 
       Function that outputs the bounding box for the listed sulci
@@ -261,33 +262,6 @@ class BoundingBoxMax:
 
         return list_bbmin, list_bbmax
 
-    @staticmethod
-    def compute_max_box(list_bbmin, list_bbmax):
-        """Returns the coordinates of the box encompassing all input boxes
-
-      Parameters:
-        list_bbmin: list containing the upper right vertex of the box
-        list_bbmax: list containing the lower left vertex of the box
-
-      Returns:
-        bbmin: numpy array with the x,y,z coordinates
-                    of the upper right corner of the box
-        bblax: numpy array with the x,y,z coordinates
-                    of the lower left corner of the box
-      """
-
-        bbmin = np.array(
-            [min([val[0] for k, val in enumerate(list_bbmin)]),
-             min([val[1] for k, val in enumerate(list_bbmin)]),
-             min([val[2] for k, val in enumerate(list_bbmin)])])
-
-        bbmax = np.array(
-            [max([val[0] for k, val in enumerate(list_bbmax)]),
-             max([val[1] for k, val in enumerate(list_bbmax)]),
-             max([val[2] for k, val in enumerate(list_bbmax)])])
-
-        return bbmin, bbmax
-
     def tal_to_normalized_spm(self):
         """Returns the transformation from AIMS Talairach to normalized SPM
 
@@ -350,7 +324,7 @@ class BoundingBoxMax:
 
       Returns:
         bbmin_vox: numpy array with the coordinates of the upper right corner
-                of the box (voxels in MNI space)
+                of the box (voxels in MNI space)compite_b
         bblax_vox: numpy array with the coordinates of the lower left corner
                 of the box (voxels in MNI space)
       """
@@ -397,7 +371,7 @@ class BoundingBoxMax:
             # Determines the box encompassing the sulcus for all subjects
             # The coordinates are determined in AIMS Talairach space
             list_bbmin, list_bbmax = self.get_bounding_boxes(subjects)
-            bbmin_tal, bbmax_tal = self.compute_max_box(list_bbmin, list_bbmax)
+            bbmin_tal, bbmax_tal = compute_max_box(list_bbmin, list_bbmax)
 
             dict_to_add = {'bbmin_AIMS_Talairach': bbmin_tal.tolist(),
                            'bbmax_AIMS_Talairach': bbmax_tal.tolist()}
@@ -484,7 +458,7 @@ def parse_args(argv):
              'Default is : ' + _SRC_DIR_DEFAULT)
     parser.add_argument(
         "-t", "--tgt_dir", type=str, default=_TGT_DIR_DEFAULT,
-        help='Target directory where to store the output transformation files. '
+        help='Target directory where to store the output bbox json files. '
              'Default is : ' + _TGT_DIR_DEFAULT)
     parser.add_argument(
         "-u", "--sulcus", type=str, default=_SULCUS_DEFAULT,
