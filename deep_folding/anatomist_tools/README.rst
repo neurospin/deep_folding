@@ -6,11 +6,7 @@ This folder contains scripts that work with BrainVISA/Anatomist.
 Description of modules
 ======================
 
-transform.py
-------------------
-Writes the transformation files from native space to normalized SPM space
-
-bbox_definition.py
+mask.py
 ------------------
 Outputs the bounding box of a specific sulcus based on a manually labeled dataset.
 Boundig boxes ared defined in the normalized SPM space
@@ -32,4 +28,8 @@ Creates altered skeletons (with some simple surfaces lacking) benchmark.
 benchmark_pipeline.py
 ---------------------
 Normalizes, resamples and crops the altered skeletons.
+
+Tutorial: generate a dataset
+============================
+
 
