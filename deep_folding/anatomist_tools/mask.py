@@ -54,7 +54,7 @@ import argparse
 import six
 
 import numpy as np
-import scipy
+import scipy.ndimage
 
 from soma import aims
 from deep_folding.anatomist_tools.utils.logs import LogJson
@@ -65,7 +65,7 @@ from deep_folding.anatomist_tools.utils.sulcus_side import complete_sulci_name
 _ALL_SUBJECTS = -1
 
 # Default directory in which lies the manually segmented database
-_SRC_DIR_DEFAULT = "/neurospin/lnao/PClean/database_learnclean/all/"
+_SRC_DIR_DEFAULT = "/neurospin/dico/data/bv_databases/human/pclean/all"
 
 # Default directory to which we write the bounding box results
 _bbox_dir_DEFAULT = "/neurospin/dico/data/deep_folding/test/bbox"
@@ -411,11 +411,11 @@ class BoundingBoxMax:
 
             # Creates target bbox dir if it doesn't exist
             if not os.path.exists(self.bbox_dir):
-                os.mkdir(self.bbox_dir)
+                os.makedirs(self.bbox_dir)
 
             # Creates target mask dir if it doesn't exist
             if not os.path.exists(self.mask_dir):
-                os.mkdir(self.mask_dir)
+                os.makedirs(self.mask_dir)
 
             # Writes number of subjects and directory names to json file
             dict_to_add = {'nb_subjects': len(subjects),
