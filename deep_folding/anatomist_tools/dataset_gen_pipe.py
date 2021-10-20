@@ -107,15 +107,15 @@ _MORPHOLOGIST_DIR_DEFAULT = 'ANALYSIS/3T_morphologist'
 
 # Directory containing bounding box json files
 # default corresponds to bounding boxes computed for voxels of 1mm
-_BBOX_DIR_DEFAULT = '/neurospin/dico/data/deep_folding/data/bbox'
+_BBOX_DIR_DEFAULT = '/neurospin/dico/data/deep_folding/data/bbox/1mm'
 
 # Directory containing mask files
-_MASK_DIR_DEFAULT = '/neurospin/dico/data/deep_folding/data/mask'
+_MASK_DIR_DEFAULT = '/neurospin/dico/data/deep_folding/data/mask/1mm'
 
 # Directory containing bounding box json files
 # default corresponds to bounding boxes computed for voxinput
 # -------------------------
-_TGT_DIR_DEFAULT = '/neurospin/dico/data/deep_folding/test'
+_TGT_DIR_DEFAULT = '/neurospin/dico/data/deep_folding/test/crops/STS_branches/bbox/nearest/1mm'
 
 # temporary directory
 temp_dir = tempfile.mkdtemp()
@@ -466,8 +466,8 @@ def parse_args(argv):
         "-c", "--cropping", type=str, default=None,
         help='Method of to select and crop the image. '
              'Type of cropping: '
-             'bbox: for bounding box cropping'
-             'mask: selection based on a mask'
+             'bbox: for bounding box cropping. '
+             'mask: selection based on a mask. '
              'Default is : bbox')
     parser.add_argument(
         "-v", "--out_voxel_size", type=int, nargs='+', default=_OUT_VOXEL_SIZE,

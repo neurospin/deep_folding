@@ -68,10 +68,10 @@ _ALL_SUBJECTS = -1
 _SRC_DIR_DEFAULT = "/neurospin/dico/data/bv_databases/human/pclean/all"
 
 # Default directory to which we write the bounding box results
-_bbox_dir_DEFAULT = "/neurospin/dico/data/deep_folding/test/bbox"
+_bbox_dir_DEFAULT = "/neurospin/dico/data/deep_folding/test/bbox/1mm"
 
 # Default directory to which we write the masks
-_MASK_DIR_DEFAULT = "/neurospin/dico/data/deep_folding/test/mask"
+_MASK_DIR_DEFAULT = "/neurospin/dico/data/deep_folding/test/mask/1mm"
 
 # hemisphere 'L' or 'R'
 _SIDE_DEFAULT = 'L'
