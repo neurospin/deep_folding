@@ -266,10 +266,7 @@ class BoundingBoxMax:
                          for voxel in bucket[0].keys()])
                     if voxels.shape == (0,):
                         continue
-                    voxels = np.array(voxels) / self.voxel_size_out[:3]
 
-                    if voxels.shape == (0,):
-                        continue
                     bbox_min = np.min(np.vstack(
                         ([bbox_min] if bbox_min is not None else [])
                         + [voxels]), axis=0)
@@ -379,7 +376,7 @@ class BoundingBoxMax:
 
     def transform_to_aims_talairach(self, bbmin_mni152, bbmax_mni152):
         """Transform bbox coordinates from MNI152 to AIMS talairach referential"""
-        
+
         g_icbm_template_to_talairach = \
             aims.StandardReferentials.talairachToICBM2009cTemplate().inverse()
         bbmin_tal = g_icbm_template_to_talairach.transform(bbmin_mni152)
@@ -388,7 +385,7 @@ class BoundingBoxMax:
         bbmax_tal = np.asarray(bbmax_tal)
         print('box (AIMS Talairach) min:', bbmin_tal.tolist())
         print('box (AIMS Talairach) max:', bbmax_tal.tolist())
-        
+
         return bbmin_tal, bbmax_tal
 
     def compute_bounding_box(self, number_subjects=_ALL_SUBJECTS):
@@ -433,14 +430,17 @@ class BoundingBoxMax:
             # Smoothing and filling of the mask with gaussian filtering
             self.filter_mask()
 
+            # Saving of generated masks
+            self.write_mask()
+
             # Determines the box encompassing the sulcus for all subjects
             # The coordinates are determined in MNI 152  space
             list_bbmin, list_bbmax = self.get_bounding_boxes(subjects)
             bbmin_mni152, bbmax_mni152 = compute_max(list_bbmin, list_bbmax)
-            
+
             bbmin_tal, bbmax_tal = \
                 self.transform_to_aims_talairach(bbmin_mni152, bbmax_mni152)
-            
+
             dict_to_add = {'bbmin_MNI152': bbmin_mni152.tolist(),
                            'bbmax_MNI152': bbmax_mni152.tolist(),
                            'bbmin_AIMS_Talairach': bbmin_tal.tolist(),
@@ -458,8 +458,7 @@ class BoundingBoxMax:
             self.json.update(dict_to_add=dict_to_add)
             print("box (voxel): min = ", bbmin_vox)
             print("box (voxel): max = ", bbmax_vox)
-
-            self.write_mask()
+            
         else:
             bbmin_vox = 0
             bbmax_vox = 0
@@ -482,7 +481,7 @@ def bounding_box(src_dir=_SRC_DIR_DEFAULT, bbox_dir=_bbox_dir_DEFAULT,
   Args:
       src_dir: list of strings -> directories of the supervised databases
       bbox_dir: string giving target bbox directory path
-      mask_dir: string giving target mask directory path 
+      mask_dir: string giving target mask directory path
       path_to_graph: string giving relative path to manually labelled graph
       side: hemisphere side (either 'L' for left, or 'R' for right)
       sulcus: string giving the sulcus to analyze
