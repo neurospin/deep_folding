@@ -281,6 +281,7 @@ class DatasetCroppedSkeleton:
             file_cropped = join(self.cropped_dir, self.cropped_file % subject)
 
             # Normalization and resampling of skeleton images
+            print(self.cropping)
             if self.resampling:
                 resampled = resample(input_image=file_skeleton,
                                      output_vs=self.out_voxel_size,
@@ -297,10 +298,11 @@ class DatasetCroppedSkeleton:
                                 ' --bg ' + str(_EXTERNAL)
                 os.system(cmd_normalize)
 
+            print(self.cropping)
             # Cropping of skeleton image
             if self.cropping == 'bbox':
                 self.crop_bbox(file_cropped, verbose)
-            elif self.cropping == 'mask':
+            else:
                 self.crop_mask(file_cropped, verbose)
 
 
@@ -356,9 +358,9 @@ class DatasetCroppedSkeleton:
             # Performs cropping for each file in a parallelized way
             print(list_subjects)
 
-            # for sub in list_subjects:
-            #     self.crop_one_file(sub)
-            pqdm(list_subjects, self.crop_one_file, n_jobs=define_njobs())
+            for sub in list_subjects:
+                self.crop_one_file(sub)
+            # pqdm(list_subjects, self.crop_one_file, n_jobs=define_njobs())
 
 
     def dataset_gen_pipe(self, number_subjects=_ALL_SUBJECTS):
