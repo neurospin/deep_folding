@@ -47,12 +47,16 @@ def resample(input_image, transformation, output_vs=None, background=11,
         trm = aims.AffineTransformation3d(np.eye(4))
     inv_trm = trm.inverse()
 
+    ##################################
+    # Definition of voxel size and dim
+    ##################################
+
     if output_vs:
         output_vs = np.array(output_vs)
-
+        hdr = aims.StandardReferentials.icbm2009cTemplateHeader()
         # New volume dimensions
-        resampling_ratio = np.array(vol.header()['voxel_size'][:3]) / output_vs
-        orig_dim = vol.header()['volume_dimension'][:3]
+        resampling_ratio = np.array(hdr['voxel_size'][:3]) / output_vs
+        orig_dim = hdr['volume_dimension'][:3]
         new_dim = list((resampling_ratio * orig_dim).astype(int))
     else:
         output_vs = vol.header()['voxel_size'][:3]
