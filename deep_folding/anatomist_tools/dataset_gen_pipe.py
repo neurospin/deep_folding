@@ -247,7 +247,7 @@ class DatasetCroppedSkeleton:
         vol = aims.read(file_cropped)
         arr = np.asarray(vol)
         arr_mask = np.asarray(self.mask)
-        np.asarray(vol)[:] = arr # arr[np.where(arr_mask == 1)]
+        np.asarray(vol)[:] = arr[np.where(arr_mask == 1)]
         
         vol_cropped = aims.VolumeView(vol, self.bbmin, self.bbmax-self.bbmin)
         aims.write(vol_cropped, file_cropped)
