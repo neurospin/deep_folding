@@ -41,21 +41,24 @@ from soma import aims
 from soma import aimsalgo as ago
 import random
 import os
+import sys
+import argparse
 
 
 _SULCUS_DEFAULT = 'S.C.'
 _SIDE_DEFAULT = 'R'
+_OUT_VOXEL_SIZE = (2, 2, 2)
 
 
-def check(side, sulcus, out_voxel_size, nb_subject):
+def check(side=_SIDE_DEFAULT, sulcus=_SULCUS_DEFAULT, out_voxel_size=_OUT_VOXEL_SIZE, nb_subjects=1):
     """
     """
-    morpho_dir = "/home/lg261972/Documents/mnt/n4hhcp/hcp/ANALYSIS/3T_morphologist"
+    morpho_dir = "/mnt/n4hhcp/hcp/ANALYSIS/3T_morphologist"
     vs = out_voxel_size[0]
     side = 'right' if side=='R' else 'left'
 
     list_sub = os.listdir(morpho_dir)
-    subject_list = random.sample(list_sub, nb_subject)
+    subject_list = random.sample(list_sub, nb_subjects)
 
     for subject in subject_list:
         # Loading of subject graph
@@ -73,14 +76,14 @@ def check(side, sulcus, out_voxel_size, nb_subject):
 
         g_to_rw = g_to_icbm.inverse()
 
-        mask = aims.read(f"/ns_remote/dico/data/deep_folding/new/mask/{vs}mm/R/{sulcus}_{side}.nii.gz")
+        mask = aims.read(f"/neurospin/dico/data/deep_folding/new/mask/{vs}mm/R/{sulcus}_{side}.nii.gz")
 
         resampler = ago.ResamplerFactory(mask).getResampler(0)
         resampler.setDefaultValue(0)
         resampler.setRef(mask)
         resampler.resample(mask, g_to_rw, 0, masked_resampled)
 
-        aims.write(masked_resampled, f"/ns_remote/dico/data/deep_folding/new/QC_skeleton/{vs}mm/mask_resampled_{subject}_{sulcus}_{side}.nii.gz")
+        aims.write(masked_resampled, f"/neurospin/dico/data/deep_folding/new/QC_skeleton/{vs}mm/mask_resampled_{subject}_{sulcus}_{side}.nii.gz")
 
 
 def parse_args(argv):
@@ -117,10 +120,10 @@ def parse_args(argv):
     params = {}
 
     args = parser.parse_args(argv)
-    params['list_sulci'] = args.sulcus  # a list of sulci
+    params['sulcus'] = args.sulcus  # a list of sulci
     params['side'] = args.side
     params['out_voxel_size'] = tuple(args.out_voxel_size)
-    params['nb_subjects'] = number_subjects
+    params['nb_subjects'] = args.nb_subjects
 
     return params
 
@@ -131,17 +134,13 @@ def main(argv):
     Args:
         argv: a list containing command line arguments
     """
+    # Parsing arguments
+    params = parse_args(argv)
 
-    # This code permits to catch SystemExit with exit code 0
-    # such as the one raised when "--help" is given as argument
-    try:
-        # Parsing arguments
-        params = parse_args(argv)
-
-        check(side=side,
-              list_sulci=params['list_sulci'],
-              out_voxel_size=params['out_voxel_size'],
-              nb_subjects=params['nb_subjects'])
+    check(side=params['side'],
+          sulcus=params['sulcus'],
+          out_voxel_size=params['out_voxel_size'],
+          nb_subjects=params['nb_subjects'])
 
 ######################################################################
 # Main program
