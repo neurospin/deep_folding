@@ -39,34 +39,115 @@
 
 from soma import aims
 from soma import aimsalgo as ago
+import random
+import os
 
 
-def check(subject):
+_SULCUS_DEFAULT = 'S.C.'
+_SIDE_DEFAULT = 'R'
+
+
+def check(side, sulcus, out_voxel_size, nb_subject):
     """
     """
-    # Loading of subject graph
-    graph_dir = f"/home/lg261972/Documents/mnt/n4hhcp/hcp/ANALYSIS/3T_morphologist/{subject}/t1mri/default_acquisition/default_analysis/folds/3.1/default_session_auto/R{subject}_default_session_auto.arg"
-    graph = aims.read(graph_dir)
+    morpho_dir = "/home/lg261972/Documents/mnt/n4hhcp/hcp/ANALYSIS/3T_morphologist"
+    vs = out_voxel_size[0]
+    side = 'right' if side=='R' else 'left'
 
-    # Loading of subject skeleton
-    skeleton_dir = f"/home/lg261972/Documents/mnt/n4hhcp/hcp/ANALYSIS/3T_morphologist/{subject}/t1mri/default_acquisition/default_analysis/segmentation/Rskeleton_{subject}.nii.gz"
-    skeleton = aims.read(skeleton_dir)
+    list_sub = os.listdir(morpho_dir)
+    subject_list = random.sample(list_sub, nb_subject)
 
-    masked_resampled = aims.Volume(skeleton.header()['volume_dimension'][:3], dtype=skeleton.__array__().dtype)
-    masked_resampled.header()['voxel_size'] = skeleton.header()['voxel_size'][:3]
+    for subject in subject_list:
+        # Loading of subject graph
+        graph_dir = f"{morpho_dir}/{subject}/t1mri/default_acquisition/default_analysis/folds/3.1/default_session_auto/R{subject}_default_session_auto.arg"
+        graph = aims.read(graph_dir)
 
-    g_to_icbm = aims.GraphManip.getICBM2009cTemplateTransform(graph)
+        # Loading of subject skeleton
+        skeleton_dir = f"{morpho_dir}/{subject}/t1mri/default_acquisition/default_analysis/segmentation/Rskeleton_{subject}.nii.gz"
+        skeleton = aims.read(skeleton_dir)
 
-    g_to_rw = g_to_icbm.inverse()
+        masked_resampled = aims.Volume(skeleton.header()['volume_dimension'][:3], dtype=skeleton.__array__().dtype)
+        masked_resampled.header()['voxel_size'] = skeleton.header()['voxel_size'][:3]
 
-    mask = aims.read(f"/nfs/neurospin/dico/data/deep_folding/new/mask/2mm/R/S.C._right.nii.gz")
+        g_to_icbm = aims.GraphManip.getICBM2009cTemplateTransform(graph)
 
-    resampler = ago.ResamplerFactory(mask).getResampler(0)
-    resampler.setDefaultValue(0)
-    resampler.setRef(mask)
-    resampler.resample(mask, g_to_rw, 0, masked_resampled)
+        g_to_rw = g_to_icbm.inverse()
 
-    aims.write(masked_resampled, f"/nfs/neurospin/dico/data/deep_folding/new/QC_skeleton/mask_resampled_{subject}.nii.gz")
+        mask = aims.read(f"/ns_remote/dico/data/deep_folding/new/mask/{vs}mm/R/{sulcus}_{side}.nii.gz")
+
+        resampler = ago.ResamplerFactory(mask).getResampler(0)
+        resampler.setDefaultValue(0)
+        resampler.setRef(mask)
+        resampler.resample(mask, g_to_rw, 0, masked_resampled)
+
+        aims.write(masked_resampled, f"/ns_remote/dico/data/deep_folding/new/QC_skeleton/{vs}mm/mask_resampled_{subject}_{sulcus}_{side}.nii.gz")
 
 
-check('585862')
+def parse_args(argv):
+    """Function parsing command-line arguments
+
+    Args:
+        argv: a list containing command line arguments
+
+    Returns:
+        params: dictionary with keys: src_dir, tgt_dir, nb_subjects, list_sulci
+    """
+    # Parse command line arguments
+    parser = argparse.ArgumentParser(
+        prog='mask_qc.py',
+        description='Generates masks in subject skeleton space')
+
+    parser.add_argument(
+        "-u", "--sulcus", type=str, default=_SULCUS_DEFAULT,
+        help='Sulcus name around which we determine the bounding box. '
+             'Default is : ' + _SULCUS_DEFAULT)
+    parser.add_argument(
+        "-i", "--side", type=str, default=_SIDE_DEFAULT,
+        help='Hemisphere side (either L or R). Default is : ' + _SIDE_DEFAULT)
+    parser.add_argument(
+        "-v", "--out_voxel_size", type=int, nargs='+', default=_OUT_VOXEL_SIZE,
+        help='Voxel size of output images'
+             'Default is : 1 1 1')
+    parser.add_argument(
+        "-n", "--nb_subjects", type=int, default=None,
+        help='Number of subjects to take into account.'
+             'If not precised, all subjects are processed'
+             'Default is : None')
+
+    params = {}
+
+    args = parser.parse_args(argv)
+    params['list_sulci'] = args.sulcus  # a list of sulci
+    params['side'] = args.side
+    params['out_voxel_size'] = tuple(args.out_voxel_size)
+    params['nb_subjects'] = number_subjects
+
+    return params
+
+
+def main(argv):
+    """Reads argument line and creates cropped files and pickle file
+
+    Args:
+        argv: a list containing command line arguments
+    """
+
+    # This code permits to catch SystemExit with exit code 0
+    # such as the one raised when "--help" is given as argument
+    try:
+        # Parsing arguments
+        params = parse_args(argv)
+
+        check(side=side,
+              list_sulci=params['list_sulci'],
+              out_voxel_size=params['out_voxel_size'],
+              nb_subjects=params['nb_subjects'])
+
+######################################################################
+# Main program
+######################################################################
+
+if __name__ == '__main__':
+    # This permits to call main also from another python program
+    # without having to make system calls
+    main(argv=sys.argv[1:])
