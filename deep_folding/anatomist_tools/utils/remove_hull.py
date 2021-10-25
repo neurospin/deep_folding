@@ -164,11 +164,11 @@ class DatasetHullRemoved:
         threshold = _DEFAULT_THRESHOLD
 
         # Names directory where subject analysis files are stored
-        subject_dir = \
+        subject_file = \
             os.path.join(self.src_dir, f"{subject_id}_normalized.nii.gz")
 
         # Reads nifti as AIMS volume and conversion to array
-        vol = aims.read(subject_dir)
+        vol = aims.read(subject_file)
         self.arr = np.asarray(vol)
 
         # Removes hull
@@ -203,6 +203,10 @@ class DatasetHullRemoved:
 
         # Parallelization of mesh generation
         result = pqdm(self.list_subjects, self.create_one_mesh, n_jobs=define_njobs())
+        # result = []
+        # for sub in self.list_subjects:
+        #     bucket = self.create_one_mesh(sub)
+        #     result.append(bucket)
         buckets = dict(zip(self.list_subjects, result))
         return buckets
 
