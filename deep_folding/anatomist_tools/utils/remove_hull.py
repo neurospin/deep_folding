@@ -182,10 +182,10 @@ class DatasetHullRemoved:
         bucket = bucket_map[0]
         bucket = np.array([bucket.keys()[k].list() for k in range(len(bucket.keys()))])
         # Conversion of bucket to mesh
-        m = dtx.aims_tools.bucket_to_mesh(bucket_map[0])
+        m = dtx._aims_tools.bucket_to_mesh(bucket_map[0])
 
         # Writing of the mesh in tgt_dir folder
-        aims.write(m, f"{self.tgt_dir}mesh_{subject_id}.gii")
+        aims.write(m, f"{self.tgt_dir}/mesh_{subject_id}.gii")
         return bucket
 
     def create_meshes(self):
