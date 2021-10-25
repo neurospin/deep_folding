@@ -247,7 +247,7 @@ class DatasetCroppedSkeleton:
         vol = aims.read(file_cropped)
         arr = np.asarray(vol)
         arr_mask = np.asarray(self.mask)
-        np.asarray(vol)[:] = arr # arr[np.where(arr_mask == 1)]
+        arr[arr_mask == 0] = 0
         
         vol_cropped = aims.VolumeView(vol, self.bbmin, self.bbmax-self.bbmin)
         aims.write(vol_cropped, file_cropped)
@@ -300,7 +300,7 @@ class DatasetCroppedSkeleton:
             # Cropping of skeleton image
             if self.cropping == 'bbox':
                 self.crop_bbox(file_cropped, verbose)
-            elif self.cropping == 'mask':
+            else:
                 self.crop_mask(file_cropped, verbose)
 
 
