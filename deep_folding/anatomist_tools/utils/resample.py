@@ -69,6 +69,7 @@ def resample(input_image, transformation, output_vs=None, background=11,
     # Using the inverse is more straightforward and supports non-linear
     # transforms
     resampled = aims.Volume(new_dim, dtype=vol_dt.dtype)
+    resampled.copyHeaderFrom(hdr)
     resampled.header()['voxel_size'] = output_vs
     # 0 order (nearest neightbours) resampling
     resampler = aimsalgo.ResamplerFactory(vol).getResampler(0)

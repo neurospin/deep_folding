@@ -249,8 +249,25 @@ class DatasetCroppedSkeleton:
         arr_mask = np.asarray(self.mask)
         arr[arr_mask == 0] = 0
         
-        vol_cropped = aims.VolumeView(vol, self.bbmin, self.bbmax-self.bbmin)
-        aims.write(vol_cropped, file_cropped)
+        # Take the coordinates of the bounding box
+        bbmin = self.bbmin
+        bbmax = self.bbmax
+        xmin, ymin, zmin = str(bbmin[0]), str(bbmin[1]), str(bbmin[2])
+        xmax, ymax, zmax = str(bbmax[0]), str(bbmax[1]), str(bbmax[2])
+
+        aims.write(vol, file_cropped)
+
+        # Defines rop of the images based on bounding box
+        cmd_bounding_box = ' -x ' + xmin + ' -y ' + ymin + ' -z ' + zmin + \
+                        ' -X ' + xmax + ' -Y ' + ymax + ' -Z ' + zmax
+        cmd_crop = 'AimsSubVolume' + \
+                ' -i ' + file_cropped + \
+                ' -o ' + file_cropped + cmd_bounding_box
+
+        if verbose:
+            os.popen(cmd_crop).read()
+        else:
+            var_output = os.popen(cmd_crop).read()
 
     def crop_one_file(self, subject_id, verbose=False):
         """Crops one file
