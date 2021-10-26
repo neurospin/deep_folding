@@ -246,7 +246,7 @@ class DatasetCroppedSkeleton:
         """Crops according to mask"""
         vol = aims.read(file_cropped)
         arr = np.asarray(vol)
-        arr_mask = np.asarray(self.mask)
+        arr_mask = np.asarray(self.mask) + (arr==_EXTERNAL)
         arr[arr_mask == 0] = 0
         
         # Take the coordinates of the bounding box
