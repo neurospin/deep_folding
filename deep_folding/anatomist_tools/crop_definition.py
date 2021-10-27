@@ -333,13 +333,8 @@ class BoundingBoxMax:
             sulci_pattern = glob.glob(join(sub['dir'], graph_file))[0]
 
             self.increment_one_mask(sulci_pattern % sub)
-
-    def filter_mask(self):
-        """Smooths the mask with Gaussian Filter
-        """
         arr = np.asarray(self.mask)
-        arr_filter = scipy.ndimage.gaussian_filter(arr.astype(float), 0.5, order=0, output=None, mode='reflect', truncate=4.0)
-        arr[:] = (arr_filter> 0.001).astype(int)
+        arr = arr / float(len(subjects))
 
     def write_mask(self):
         """Writes mask on mask file"""
@@ -428,7 +423,7 @@ class BoundingBoxMax:
             self.increment_mask(subjects)
 
             # Smoothing and filling of the mask with gaussian filtering
-            self.filter_mask()
+            #self.filter_mask()
 
             # Saving of generated masks
             self.write_mask()
@@ -458,7 +453,7 @@ class BoundingBoxMax:
             self.json.update(dict_to_add=dict_to_add)
             print("box (voxel): min = ", bbmin_vox)
             print("box (voxel): max = ", bbmax_vox)
-            
+
         else:
             bbmin_vox = 0
             bbmax_vox = 0
