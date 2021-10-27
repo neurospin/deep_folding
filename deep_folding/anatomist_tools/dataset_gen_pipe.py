@@ -60,6 +60,7 @@ from os.path import join
 import tempfile
 
 import numpy as np
+import scipy.ndimage
 
 import six
 
@@ -72,6 +73,7 @@ from deep_folding.anatomist_tools.utils.logs import LogJson
 from deep_folding.anatomist_tools.utils.bbox import compute_max_box
 from deep_folding.anatomist_tools.utils.mask import compute_mask
 from deep_folding.anatomist_tools.utils.resample import resample
+from deep_folding.anatomist_tools.utils import remove_hull
 from deep_folding.anatomist_tools.utils.sulcus_side import complete_sulci_name
 from deep_folding.anatomist_tools.load_data import fetch_data
 
@@ -210,7 +212,7 @@ class DatasetCroppedSkeleton:
         hdr = aims.StandardReferentials.icbm2009cTemplateHeader()
         voxel_size = np.concatenate((self.out_voxel_size, [1]))
         resampling_ratio = np.array(hdr['voxel_size']) / voxel_size
-            
+
         orig_dim = hdr['volume_dimension']
         new_dim = list((resampling_ratio * orig_dim).astype(int))
 
@@ -242,13 +244,27 @@ class DatasetCroppedSkeleton:
         else:
             var_output = os.popen(cmd_crop).read()
 
+    def filter_mask(self):
+        """Smooths the mask with Gaussian Filter
+        """
+        arr = np.asarray(self.mask)
+        arr_filter = scipy.ndimage.gaussian_filter(arr.astype(float), sigma=0.5,
+                             order=0, output=None, mode='reflect', truncate=4.0)
+        arr[:] = (arr_filter> 0.001).astype(int)
+
     def crop_mask(self, file_cropped, verbose):
         """Crops according to mask"""
         vol = aims.read(file_cropped)
+
         arr = np.asarray(vol)
+        remove_hull.remove_hull(arr)
+
+        #arr_mask = np.asarray(self.mask)
+        self.filter_mask()
         arr_mask = np.asarray(self.mask)
         arr[arr_mask == 0] = 0
-        
+        arr[arr == _EXTERNAL] = 0
+
         # Take the coordinates of the bounding box
         bbmin = self.bbmin
         bbmax = self.bbmax
@@ -285,7 +301,7 @@ class DatasetCroppedSkeleton:
 
         # Skeleton file name
         file_skeleton = join(subject_dir, self.skeleton_file % subject)
-        
+
         # Creates transformation MNI template
         file_graph = join(subject_dir, self.graph_file % subject)
         graph = aims.read(file_graph)
@@ -366,14 +382,14 @@ class DatasetCroppedSkeleton:
                            'out_voxel_size': self.out_voxel_size
                            }
             self.json.update(dict_to_add=dict_to_add)
-            
+
             # Defines referential
             self.define_referentials()
 
             # Performs cropping for each file in a parallelized way
             print(list_subjects)
 
-            # for sub in list_subjects:
+            #for sub in list_subjects:
             #     self.crop_one_file(sub)
             pqdm(list_subjects, self.crop_one_file, n_jobs=define_njobs())
 
@@ -391,7 +407,7 @@ class DatasetCroppedSkeleton:
 
         self.json.write_general_info()
 
-        # Computes bounding box and mask 
+        # Computes bounding box and mask
         if number_subjects:
             if self.cropping == 'bbox':
                 self.bbmin, self.bbmax = compute_max_box(sulci_list=self.list_sulci,
@@ -405,10 +421,10 @@ class DatasetCroppedSkeleton:
                                 mask_dir=self.mask_dir)
             else:
                 raise ValueError('Cropping must be either \'bbox\' or \'mask\'')
-                
+
         # Generate cropped files
         self.crop_files(number_subjects=number_subjects)
-        
+
         # Creation of .pickle file for all subjects
         if number_subjects:
             fetch_data(cropped_dir=self.cropped_dir,
