@@ -51,6 +51,8 @@ import glob
 import numpy as np
 import argparse
 import sys
+import six
+import pandas as pd
 
 from pqdm.processes import pqdm
 from joblib import cpu_count
@@ -80,8 +82,82 @@ def define_njobs():
     nb_cpus = cpu_count()
     return max(nb_cpus-2, 1)
 
+
+def remove_hull(arr, padding=_DEFAULT_PADDING, ext=_DEFAULT_PADDING):
+    """Removes the pixels on the hull.
+
+    Pixels on the hull are defined as being in contact with both the internal and external part.
+    This function removes the hull in place
+
+    Args:
+        arr: numpy array modified in the array
+        padding: padding of the image, equal to the extension ext
+        ext: local array extension in which to look for external and internal pixels
+    """
+    arr_pad = np.pad(arr,
+                    ((padding,padding), (padding,padding), (padding,padding),
+                    (0,0)),
+                    'constant',
+                    constant_values=0)
+
+    l = 0 # last t dimension
+    coords = np.argwhere(arr_pad > _EXTERNAL)
+
+    for i,j,k,l in coords:
+        if arr_pad[i,j,k,l] != _EXTERNAL and arr_pad[i,j,k,l] != _INTERNAL:
+            local_array = arr_pad[i-ext:i+ext+1,j-ext:j+ext+1,k-ext:k+ext+1,l]
+            if np.any(local_array == _INTERNAL) and np.any(local_array == _EXTERNAL):
+                arr[i-padding,j-padding,k-padding,l] = 0
+
+
+def threshold_and_binarize(arr, threshold=_DEFAULT_THRESHOLD):
+    """Threshold images
+    
+    Args:
+        arr: numpy array
+    """
+    arr[np.where(arr < threshold)]= 0
+    arr[np.where(arr >= threshold)]= _AIMS_BINARY_ONE
+    arr = aims.Volume(arr)
+
+def convert_array_to_bucket(arr):
+    """Converts array to bucket
+    
+    Args:
+        arr: numpy array
+    """
+    c = aims.Converter_rc_ptr_Volume_S16_BucketMap_VOID()
+    bucket_map = c(arr)
+    bucket = bucket_map[0]
+    bucket = np.array([bucket.keys()[k].list() for k in range(len(bucket.keys()))])
+    return bucket_map, bucket
+
+def create_one_mesh(vol, padding=_DEFAULT_PADDING, ext=_DEFAULT_PADDING, threshold=_DEFAULT_THRESHOLD):
+    """Creates
+    
+    Args:
+        vol: aims volume
+    """
+    arr = np.asarray(vol)
+
+    # Removes hull
+    remove_hull(arr, padding, ext)
+
+    # Thresholds and "binarizes"
+    threshold_and_binarize(arr, threshold)
+
+    # Conversion of volume to bucket
+    bucket, bucket_map = convert_array_to_bucket(arr)
+
+    # Conversion of bucket to mesh
+    mesh = dtx._aims_tools.bucket_to_mesh(bucket_map[0])
+
+    return bucket, mesh
+
+
+
 class DatasetHullRemoved:
-    """Generates meshes of crops removing hull
+    """Generates meshes of crops without hull
     """
 
     def __init__(self, src_dir=_SRC_DIR_DEFAULT,
@@ -120,43 +196,12 @@ class DatasetHullRemoved:
                     if number_subjects == _ALL_SUBJECTS
                     else list_all_subjects[:number_subjects])
 
-    def remove_hull(self, padding, ext):
-        """Removes the pixels on the hull
-        Pixels on the hull are defined as being in contact with both the internal and external part
-
-        Args:
-            arr: numpy array modified in the array
-            padding: padding of the image, equal to the extension ext
-            ext: local array extension in which to look for external and internal pixels
-        """
-        arr_pad = np.pad(self.arr,
-                        ((padding,padding), (padding,padding), (padding,padding),
-                        (0,0)),
-                        'constant',
-                        constant_values=0)
-
-        l = 0 # last t dimension
-        coords = np.argwhere(arr_pad > _EXTERNAL)
-
-        for i,j,k,l in coords:
-            if arr_pad[i,j,k,l] != _EXTERNAL and arr_pad[i,j,k,l] != _INTERNAL:
-                local_array = arr_pad[i-ext:i+ext+1,j-ext:j+ext+1,k-ext:k+ext+1,l]
-                if np.any(local_array == _INTERNAL) and np.any(local_array == _EXTERNAL):
-                    self.arr[i-padding,j-padding,k-padding,l] = 0
-
-    def threshold_and_binarize(self, threshold):
-        """Threshold images"""
-        self.arr[np.where(self.arr < threshold)]= 0
-        self.arr[np.where(self.arr >= threshold)]= _AIMS_BINARY_ONE
-        self.arr = aims.Volume(self.arr)
-
     def create_one_mesh(self, subject_id):
         """Creates one mesh from a skeleton crop (.nii file)
 
         Args:
             subject_id: string giving the subject ID
         """
-        c = aims.Converter_rc_ptr_Volume_S16_BucketMap_VOID()
 
         # Constant definition
         padding = _DEFAULT_PADDING
@@ -172,15 +217,14 @@ class DatasetHullRemoved:
         self.arr = np.asarray(vol)
 
         # Removes hull
-        self.remove_hull(padding, ext)
+        remove_hull(self.arr, padding, ext)
 
         # Thresholds and "binarizes"
-        self.threshold_and_binarize(threshold)
+        threshold_and_binarize(self.arr, threshold)
 
         # Conversion of volume to bucket
-        bucket_map = c(self.arr)
-        bucket = bucket_map[0]
-        bucket = np.array([bucket.keys()[k].list() for k in range(len(bucket.keys()))])
+        bucket, bucket_map = convert_array_to_bucket(self.arr)
+
         # Conversion of bucket to mesh
         m = dtx._aims_tools.bucket_to_mesh(bucket_map[0])
 
