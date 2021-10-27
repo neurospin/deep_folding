@@ -182,11 +182,11 @@ class DatasetHullRemoved:
         bucket = bucket_map[0]
         bucket = np.array([bucket.keys()[k].list() for k in range(len(bucket.keys()))])
         # Conversion of bucket to mesh
-        m = dtx._aims_tools.bucket_to_mesh(bucket_map[0])
+        mesh = dtx._aims_tools.bucket_to_mesh(bucket_map[0])
 
         # Writing of the mesh in tgt_dir folder
-        aims.write(m, f"{self.tgt_dir}/mesh_{subject_id}.gii")
-        return bucket
+        aims.write(mesh, f"{self.tgt_dir}/mesh_{subject_id}.gii")
+        return bucket, mesh
 
     def create_meshes(self):
         """Creates meshes from skeleton crops (.nii files)
@@ -202,13 +202,16 @@ class DatasetHullRemoved:
             os.makedirs(self.tgt_dir)
 
         # Parallelization of mesh generation
-        result = pqdm(self.list_subjects, self.create_one_mesh, n_jobs=define_njobs())
-        # result = []
-        # for sub in self.list_subjects:
-        #     bucket = self.create_one_mesh(sub)
-        #     result.append(bucket)
-        buckets = dict(zip(self.list_subjects, result))
-        return buckets
+        # result = pqdm(self.list_subjects, self.create_one_mesh, n_jobs=define_njobs())
+        buckets = []
+        meshes = []
+        for sub in self.list_subjects:
+            bucket, mesh = self.create_one_mesh(sub)
+            buckets.append(bucket)
+            meshes.append(mesh)
+        buckets_dict = dict(zip(self.list_subjects, buckets))
+        meshes_dict = dict(zip(self.list_subjects, meshes))
+        return buckets_dict, meshes_dict
 
 def parse_args(argv):
     """Function parsing command-line arguments
