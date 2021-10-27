@@ -118,16 +118,15 @@ def threshold_and_binarize(arr, threshold=_DEFAULT_THRESHOLD):
     """
     arr[np.where(arr < threshold)]= 0
     arr[np.where(arr >= threshold)]= _AIMS_BINARY_ONE
-    arr = aims.Volume(arr)
 
-def convert_array_to_bucket(arr):
-    """Converts array to bucket
+def convert_volume_to_bucket(vol):
+    """Converts volume to bucket
     
     Args:
         arr: numpy array
     """
     c = aims.Converter_rc_ptr_Volume_S16_BucketMap_VOID()
-    bucket_map = c(arr)
+    bucket_map = c(vol)
     bucket = bucket_map[0]
     bucket = np.array([bucket.keys()[k].list() for k in range(len(bucket.keys()))])
     return bucket_map, bucket
@@ -147,12 +146,12 @@ def create_one_mesh(vol, padding=_DEFAULT_PADDING, ext=_DEFAULT_PADDING, thresho
     threshold_and_binarize(arr, threshold)
 
     # Conversion of volume to bucket
-    bucket, bucket_map = convert_array_to_bucket(arr)
+    bucket_map, bucket = convert_volume_to_bucket(vol)
 
     # Conversion of bucket to mesh
     mesh = dtx._aims_tools.bucket_to_mesh(bucket_map[0])
 
-    return bucket, mesh
+    return bucket_map, bucket, mesh
 
 
 
@@ -223,7 +222,7 @@ class DatasetHullRemoved:
         threshold_and_binarize(self.arr, threshold)
 
         # Conversion of volume to bucket
-        bucket, bucket_map = convert_array_to_bucket(self.arr)
+        bucket_map, bucket = convert_volume_to_bucket(self.arr)
 
         # Conversion of bucket to mesh
         m = dtx._aims_tools.bucket_to_mesh(bucket_map[0])
