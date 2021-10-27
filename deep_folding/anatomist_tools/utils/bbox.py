@@ -103,10 +103,10 @@ def compute_max_box(sulci_list, side, talairach_box=False, src_dir=_BOX_DIR_DEFA
 
             list_bbmin.append(sulcus['bbmin_'+rad])
             list_bbmax.append(sulcus['bbmax_'+rad])
-
+    print(list_bbmin, list_bbmax)
     bbmin_npy, bbmax_npy = compute_max(list_bbmin=list_bbmin,
                                        list_bbmax=list_bbmax)
-
+    print(bbmin_npy, bbmax_npy)
     return bbmin_npy, bbmax_npy
 
 
