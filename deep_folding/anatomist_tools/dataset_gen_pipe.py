@@ -73,6 +73,7 @@ from deep_folding.anatomist_tools.utils.logs import LogJson
 from deep_folding.anatomist_tools.utils.bbox import compute_max_box
 from deep_folding.anatomist_tools.utils.mask import compute_mask
 from deep_folding.anatomist_tools.utils.resample import resample
+from deep_folding.anatomist_tools.utils import remove_hull
 from deep_folding.anatomist_tools.utils.sulcus_side import complete_sulci_name
 from deep_folding.anatomist_tools.load_data import fetch_data
 
@@ -254,10 +255,15 @@ class DatasetCroppedSkeleton:
     def crop_mask(self, file_cropped, verbose):
         """Crops according to mask"""
         vol = aims.read(file_cropped)
+
         arr = np.asarray(vol)
+        remove_hull.remove_hull(arr)
+
         #arr_mask = np.asarray(self.mask)
-        arr_mask = np.asarray(self.filter_mask())
+        self.filter_mask()
+        arr_mask = np.asarray(self.mask)
         arr[arr_mask == 0] = 0
+        arr[arr == _EXTERNAL] = 0
 
         # Take the coordinates of the bounding box
         bbmin = self.bbmin
@@ -383,9 +389,9 @@ class DatasetCroppedSkeleton:
             # Performs cropping for each file in a parallelized way
             print(list_subjects)
 
-            for sub in list_subjects:
-                 self.crop_one_file(sub)
-            #pqdm(list_subjects, self.crop_one_file, n_jobs=define_njobs())
+            #for sub in list_subjects:
+            #     self.crop_one_file(sub)
+            pqdm(list_subjects, self.crop_one_file, n_jobs=define_njobs())
 
 
     def dataset_gen_pipe(self, number_subjects=_ALL_SUBJECTS):
