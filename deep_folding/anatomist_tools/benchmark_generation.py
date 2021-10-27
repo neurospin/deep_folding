@@ -53,11 +53,11 @@ from glob import glob
 import random
 import pandas as pd
 import os
-from deep_folding.anatomist_tools.utils.load_bbox import compute_max_box
+from deep_folding.anatomist_tools.utils.bbox import compute_max_box
 from deep_folding.anatomist_tools.utils.sulcus_side import complete_sulci_name
 
 
-_DEFAULT_DATA_DIR = '/neurospin/hcp/ANALYSIS/3T_morphologist/'
+_DEFAULT_DATA_DIR = '/mnt/n4hhcp/hcp/ANALYSIS/3T_morphologist/'
 _DEFAULT_SAVING_DIR = '/neurospin/dico/lguillon/mic21/anomalies_set/dataset/'
 _DEFAULT_BBOX_DIR = '/neurospin/dico/data/deep_folding/data/bbox/'
 
@@ -231,7 +231,7 @@ def get_sub_list(subjects_list):
         right_handed = pd.read_csv('/neurospin/dico/lguillon/hcp_info/right_handed.csv')
         subjects_list = list(right_handed['Subject'].astype(str))
         # Check whether subjects' files exist
-        hcp_sub = os.listdir('/neurospin/hcp/ANALYSIS/3T_morphologist/')
+        hcp_sub = os.listdir(_DEFAULT_DATA_DIR)
         subjects_list = [sub for sub in subjects_list if sub in hcp_sub]
 
         random.shuffle(subjects_list)

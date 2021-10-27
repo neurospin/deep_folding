@@ -47,6 +47,7 @@ from benchmark_generation import *
 from deep_folding.anatomist_tools.utils.resample import resample
 from deep_folding.anatomist_tools.utils.sulcus_side import complete_sulci_name
 
+import tempfile
 import re
 import sys
 import argparse
@@ -130,6 +131,8 @@ _RESAMPLING_DEFAULT = None
 _BBOX_DIR_DEFAULT = '/neurospin/dico/data/deep_folding/data/bbox'
 _SUBJECT_LIST_DEFAULT = None
 
+# temporary directory
+temp_dir = tempfile.mkdtemp()
 
 def define_njobs():
     """Returns number of cpus used by main loop
@@ -191,15 +194,31 @@ class BenchmarkPipe:
         Args:
             sub: string giving the subject ID
         """
-        dir_m = '/neurospin/dico/lguillon/skeleton/transfo_pre_process/natif_to_template_spm_' + sub +'.trm'
-        dir_r = '/neurospin/hcp/ANALYSIS/3T_morphologist/' + sub + '/t1mri/default_acquisition/normalized_SPM_' + sub +'.nii'
+        g_to_icbm_template_file = os.path.join(temp_dir, f"file_g_to_icbm_{sub}.trm")
+        morphologist_dir = '/mnt/n4hhcp/hcp/ANALYSIS/3T_morphologist'
+        acquisition_dir = f"{sub}/t1mri/default_acquisition"
+        graph_file = f"default_analysis/folds/3.1/default_session_auto/" \
+                             f"{self.side}{sub}_default_session_auto.arg"
+
+        # Names directory where subject analysis files are stored
+        subject_dir = \
+            os.path.join(morphologist_dir, acquisition_dir)
+        # Creates transformation MNI template
+        file_graph = os.path.join(subject_dir, graph_file)
+        graph = aims.read(file_graph)
+        g_to_icbm_template = aims.GraphManip.getICBM2009cTemplateTransform(graph)
+        g_to_icbm_template_file = os.path.join(f"file_g_to_icbm_{sub}.trm")
+        aims.write(g_to_icbm_template, g_to_icbm_template_file)
+        #dir_m = '/neurospin/dico/lguillon/skeleton/transfo_pre_process/natif_to_template_spm_' + sub +'.trm'
+        #dir_r = '/neurospin/hcp/ANALYSIS/3T_morphologist/' + sub + '/t1mri/default_acquisition/normalized_SPM_' + sub +'.nii'
         skel_prefix = 'output_skeleton_'
         file_skeleton = os.path.join(self.tgt_dir, skel_prefix + sub + '.nii.gz')
         file_cropped = os.path.join(self.tgt_dir, sub + '_normalized.nii.gz')
 
         if self.resampling:
             resampled = resample(file_skeleton, output_vs=(2, 2, 2),
-                                 transformation=dir_m)
+                                 transformation=g_to_icbm_template_file,
+                                 verbose=False)
 
             aims.write(resampled, file_cropped)
         else:
@@ -224,7 +243,10 @@ class BenchmarkPipe:
                 # We compare other hemisphere box size
                 asym = 'R' if self.side=='L' else 'L'
                 # Bbox of crop on opposite hemisphere
+                print('bbox dir', self.bbox_dir)
                 bbox_asym = compute_max_box(complete_sulci_name(self.sulcus_raw, asym), asym, src_dir=self.bbox_dir)
+                print(complete_sulci_name(self.sulcus_raw, asym))
+                print(bbox_asym)
                 xmin_asym, ymin_asym, zmin_asym = bbox_asym[0][0], bbox_asym[0][1], bbox_asym[0][2]
                 xmax_asym, ymax_asym, zmax_asym = bbox_asym[1][0], bbox_asym[1][1], bbox_asym[1][2]
                 # Size of crop on opposite hemisphere
@@ -272,12 +294,13 @@ class BenchmarkPipe:
         self.xmin, self.ymin, self.zmin = str(bbox[0][0]), str(bbox[0][1]), str(bbox[0][2])
         self.xmax, self.ymax, self.zmax = str(bbox[1][0]), str(bbox[1][1]), str(bbox[1][2])
         self.box_size = [int(self.xmax)-int(self.xmin), int(self.ymax)-int(self.ymin), int(self.zmax)-int(self.zmin)]
-
         print(' ')
+        print(self.box_size)
         print('=================== Normalization and crop of skeletons ==================')
 
         list_subjects = self.get_sub_list()
         pqdm(list_subjects, self.crop_one_file, n_jobs=define_njobs())
+        #self.crop_one_file(list_subjects[0])
 
         input_dict = {'sulci_list': self.sulcus, 'simple_surface_min_size': self.ss_size,
                       'side': self.side, 'mode': self.mode}
