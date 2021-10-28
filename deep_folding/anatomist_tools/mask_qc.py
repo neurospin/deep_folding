@@ -43,6 +43,7 @@ import random
 import os
 import sys
 import argparse
+import scipy.ndimage
 
 
 _SULCUS_DEFAULT = 'S.C.'
@@ -76,14 +77,19 @@ def check(side=_SIDE_DEFAULT, sulcus=_SULCUS_DEFAULT, out_voxel_size=_OUT_VOXEL_
 
         g_to_rw = g_to_icbm.inverse()
 
-        mask = aims.read(f"/neurospin/dico/data/deep_folding/new/mask/{vs}mm/R/{sulcus}_{side}.nii.gz")
+        mask = aims.read(f"/neurospin/dico/data/deep_folding/new_v1/mask/{vs}mm/R/{sulcus}_{side}.nii.gz")
+        arr = np.asarray(mask)
+        arr_filter = scipy.ndimage.gaussian_filter(arr.astype(float), sigma=0.5,
+                             order=0, output=None, mode='reflect', truncate=4.0)
 
+        arr[:] = (arr_filter> 0.001).astype(int)
+        mask = aims.Volume(arr)
         resampler = ago.ResamplerFactory(mask).getResampler(0)
         resampler.setDefaultValue(0)
         resampler.setRef(mask)
         resampler.resample(mask, g_to_rw, 0, masked_resampled)
 
-        aims.write(masked_resampled, f"/neurospin/dico/data/deep_folding/new/QC_skeleton/{vs}mm/mask_resampled_{subject}_{sulcus}_{side}.nii.gz")
+        aims.write(masked_resampled, f"/neurospin/dico/data/deep_folding/new_v1/QC_skeleton/{vs}mm/mask_resampled_{subject}_{sulcus}_{side}.nii.gz")
 
 
 def parse_args(argv):
