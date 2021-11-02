@@ -50,6 +50,8 @@ import numpy as np
 _SULCUS_DEFAULT = 'S.C.'
 _SIDE_DEFAULT = 'R'
 _OUT_VOXEL_SIZE = (2, 2, 2)
+_INPUT_DIR_DEFAULT = "/neurospin/dico/data/deep_folding/new_v1/mask"
+_OUTPUT_DIR_DEFAULT = "/neurospin/dico/data/deep_folding/new_v1/QC_skeleton"
 
 
 def check(side=_SIDE_DEFAULT, sulcus=_SULCUS_DEFAULT, out_voxel_size=_OUT_VOXEL_SIZE, nb_subjects=1):
@@ -80,7 +82,7 @@ def check(side=_SIDE_DEFAULT, sulcus=_SULCUS_DEFAULT, out_voxel_size=_OUT_VOXEL_
 
         g_to_rw = g_to_icbm.inverse()
 
-        mask = aims.read(f"/neurospin/dico/data/deep_folding/new_v1/mask/{vs}mm/R/{sulcus}_{side}.nii.gz")
+        mask = aims.read(f"{_INPUT_DIR_DEFAULT}/{vs}mm/R/{sulcus}_{side}.nii.gz")
 
         resampler = ago.ResamplerFactory(mask).getResampler(0)
         resampler.setDefaultValue(0)
@@ -95,7 +97,7 @@ def check(side=_SIDE_DEFAULT, sulcus=_SULCUS_DEFAULT, out_voxel_size=_OUT_VOXEL_
         masked_resampled_f = aims.Volume(arr)
         masked_resampled_f.header()['voxel_size'] = skeleton.header()['voxel_size'][:3]
 
-        aims.write(masked_resampled_f, f"/neurospin/dico/data/deep_folding/new_v1/QC_skeleton/{vs}mm/mask_resampled_{subject}_{sulcus}_{side}.nii.gz")
+        aims.write(masked_resampled_f, f"{_OUTPUT_DIR_DEFAULT}/{vs}mm/mask_resampled_{subject}_{sulcus}_{side}.nii.gz")
 
 
 def parse_args(argv):
