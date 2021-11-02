@@ -312,11 +312,13 @@ class BoundingBoxMax:
 
             bbox_min, bbox_max = \
                 self.get_one_bounding_box(sulci_pattern % sub)
+            if bbox_min is not None:
+                list_bbmin.append([bbox_min[0], bbox_min[1], bbox_min[2]])
+                list_bbmax.append([bbox_max[0], bbox_max[1], bbox_max[2]])
 
-            list_bbmin.append([bbox_min[0], bbox_min[1], bbox_min[2]])
-            list_bbmax.append([bbox_max[0], bbox_max[1], bbox_max[2]])
-
-        return list_bbmin, list_bbmax
+                return list_bbmin, list_bbmax
+            else:
+                print('no sulcus found')
 
     def increment_mask(self, subjects):
         """increment mask for the chosen sulcus for all subjects
