@@ -222,7 +222,7 @@ class DatasetHullRemoved:
         threshold_and_binarize(self.arr, threshold)
 
         # Conversion of volume to bucket
-        bucket_map, bucket = convert_volume_to_bucket(self.arr)
+        bucket_map, bucket = convert_volume_to_bucket(vol)
 
         # Conversion of bucket to mesh
         m = dtx._aims_tools.bucket_to_mesh(bucket_map[0])
