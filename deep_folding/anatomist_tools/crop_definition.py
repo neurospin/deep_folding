@@ -280,7 +280,7 @@ class BoundingBoxMax:
         return bbox_min, bbox_max
 
     def get_bounding_boxes(self, subjects):
-        """get bounding boxes of the chosen sulcus for all subjects
+        """get bounding boxes of the chosen sulcus for all subjects.
 
       Function that outputs the bounding box for the listed sulci on a manually
       labeled dataset.
@@ -312,9 +312,16 @@ class BoundingBoxMax:
 
             bbox_min, bbox_max = \
                 self.get_one_bounding_box(sulci_pattern % sub)
+            if bbox_min is not None:
+                list_bbmin.append([bbox_min[0], bbox_min[1], bbox_min[2]])
+                list_bbmax.append([bbox_max[0], bbox_max[1], bbox_max[2]])
+            else:
+                print(f'No sulcus found for {sub}; it can be OK.')
 
-            list_bbmin.append([bbox_min[0], bbox_min[1], bbox_min[2]])
-            list_bbmax.append([bbox_max[0], bbox_max[1], bbox_max[2]])
+        if not list_bbmin:
+            raise ValueError('No sulcus named {self.sulcus} found '
+                        'for the whole dataset. '
+                        'It is an error. You should check sulcus name.') 
 
         return list_bbmin, list_bbmax
 
