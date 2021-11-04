@@ -53,12 +53,15 @@ from glob import glob
 import random
 import pandas as pd
 import os
-from deep_folding.anatomist_tools.utils.load_bbox import compute_max_box
+from deep_folding.anatomist_tools.utils.bbox import compute_max_box
+from deep_folding.anatomist_tools.utils.mask import compute_mask
 from deep_folding.anatomist_tools.utils.sulcus_side import complete_sulci_name
+import dico_toolbox as dtx
 
 
-_DEFAULT_DATA_DIR = '/neurospin/hcp/ANALYSIS/3T_morphologist/'
-_DEFAULT_SAVING_DIR = '/neurospin/dico/lguillon/mic21/anomalies_set/dataset/'
+_DEFAULT_DATA_DIR = '/mnt/n4hhcp/hcp/ANALYSIS/3T_morphologist/'
+_DEFAULT_MASK_DIR = '/neurospin/dico/data/deep_folding/new_v1/mask/2mm/'
+_DEFAULT_SAVING_DIR = '/neurospin/dico/lguillon/ohbm_22/'
 _DEFAULT_BBOX_DIR = '/neurospin/dico/data/deep_folding/data/bbox/'
 
 
@@ -67,7 +70,8 @@ class Benchmark():
     """
 
     def __init__(self, b_num, side, ss_size, sulci_list, saving_dir,
-                 data_dir=_DEFAULT_DATA_DIR, bbox_dir=_DEFAULT_BBOX_DIR):
+                 data_dir=_DEFAULT_DATA_DIR, bbox_dir=_DEFAULT_BBOX_DIR,
+                 mask_dir=_DEFAULT_MASK_DIR, mask=True):
         """Inits with list of directories, bounding box and sulci
 
         Args:
@@ -78,6 +82,7 @@ class Benchmark():
             data_dir: string naming full path source directories containing
                       MRI images
             saving_dir: name of directory where altered skeletons will be saved
+            mask_dir: name of directory where masks are stored
         """
         self.b_num = b_num
         self.side = side
@@ -87,17 +92,25 @@ class Benchmark():
         self.data_dir = data_dir
         self.saving_dir = saving_dir
         self.abnormality_test = []
-        self.bbmin, self.bbmax = compute_max_box(self.sulci_list, side,
+        self.voxel_size_out = (2, 2, 2,1)
+        if mask:
+            # Get mask and corresponding bounding_box
+            self.mask, self.bbmin, self.bbmax = compute_mask(self.sulci_list, side,
+                                                             mask_dir=mask_dir)
+        else:
+            self.bbmin, self.bbmax = compute_max_box(self.sulci_list, side,
                                 talairach_box=True, src_dir=bbox_dir)
         print(self.bbmin, self.bbmax)
         self.cpt_skel_1 = 't1mri/default_acquisition/default_analysis/segmentation'
         self.cpt_skel_2 = 'skeleton_'
         self.cpt_skel_3 = '.nii.gz'
 
+        print(self.mask, self.bbmin, self.bbmax)
+
     def get_simple_surfaces(self, sub):
         """Selects simple surfaces of one subject that satisfy following
            conditions: size >= given ss_size and completely included in the
-           bouding box
+           mask
 
         Args:
             sub: int giving the subject
@@ -114,16 +127,39 @@ class Benchmark():
             graph = aims.read(graph_file)
             self.skel = aims.read(skel_file)
 
+            g_to_icbm_template = aims.GraphManip.getICBM2009cTemplateTransform(graph)
+            voxel_size_in = graph['voxel_size'][:3]
+
             for v in graph.vertices():
                 if 'label' in v:
-                    bbmin_surface = v['Tal_boundingbox_min']
-                    bbmax_surface = v['Tal_boundingbox_max']
                     bck_map = v['aims_ss']
 
-                    if all([a >= b for (a, b) in zip(bbmin_surface, self.bbmin)]) and all([a <= b for (a, b) in zip(bbmax_surface, self.bbmax)]):
-                        for bucket in bck_map:
-                            if bucket.size() > self.ss_size: # In order to keep only large enough simple surfaces
-                                self.surfaces[len(self.surfaces)] = v
+                    # Creation of a volume in ICBM space where to write voxels
+                    # of the simple surface
+                    hdr = aims.StandardReferentials.icbm2009cTemplateHeader()
+                    resampling_ratio = np.array(hdr['voxel_size']) / self.voxel_size_out
+                    orig_dim = hdr['volume_dimension']
+                    new_dim = list((resampling_ratio * orig_dim).astype(int))
+
+                    vol = aims.Volume(new_dim, dtype='S16')
+                    vol.copyHeaderFrom(hdr)
+                    vol.header()['voxel_size'] = self.voxel_size_out
+                    arr = np.asarray(vol)
+                    # Transformation of SS voxels to ICBM space with voxel_size_out
+                    voxels_icbm = np.asarray(
+                        [g_to_icbm_template.transform(np.array(voxel) * voxel_size_in)
+                         for voxel in bck_map[0].keys()])
+                    voxels = np.round(np.array(voxels_icbm) / self.voxel_size_out[:3]).astype(int)
+                    # Writing of the voxels in the created volume
+                    for i,j,k in voxels:
+                        arr[i,j,k,0] = 1
+                    # Suppression of all voxels out of the mask
+                    arr[np.array(self.mask)<1]=0
+                    # Selection of the ss if a mininum of voxels remains
+                    if np.count_nonzero(arr>0)>self.ss_size:
+                        print(v['label'],bck_map[0].size())
+                        print(np.count_nonzero(arr == 1))
+                        self.surfaces[len(self.surfaces)] = v
 
             return self.surfaces
 
@@ -191,7 +227,7 @@ class Benchmark():
         Args:
             sub: int giving the subject
         """
-        fileout = os.path.join(self.saving_dir, 'output_skeleton_' + str(sub) + '.nii.gz')
+        fileout = os.path.join(self.saving_dir, 'modified_skeleton_' + str(sub) + '.nii.gz')
         print('writing altered skeleton to', fileout)
         aims.write(self.skel, fileout)
 
@@ -231,7 +267,7 @@ def get_sub_list(subjects_list):
         right_handed = pd.read_csv('/neurospin/dico/lguillon/hcp_info/right_handed.csv')
         subjects_list = list(right_handed['Subject'].astype(str))
         # Check whether subjects' files exist
-        hcp_sub = os.listdir('/neurospin/hcp/ANALYSIS/3T_morphologist/')
+        hcp_sub = os.listdir(_DEFAULT_DATA_DIR)
         subjects_list = [sub for sub in subjects_list if sub in hcp_sub]
 
         random.shuffle(subjects_list)
@@ -289,5 +325,5 @@ def generate(b_num, side, ss_size, sulci_list, mode='suppress', bench_size=150,
 ######################################################################
 
 if __name__ == '__main__':
-    generate(333, 'R', 1000, sulci_list=['S.T.s.ter.asc.post.', 'S.T.s.ter.asc.ant.'],
-         mode='suppress', bench_size=4)
+    generate(333, 'R', 1000, sulci_list=['S.C.'],
+         mode='suppress', bench_size=1)
