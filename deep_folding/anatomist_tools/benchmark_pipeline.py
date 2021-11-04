@@ -174,13 +174,19 @@ class BenchmarkPipe:
         """
         self.resampling = resampling
         self.mode = mode
-        self.sulcus_raw = sulcus
-        self.sulcus = complete_sulci_name(sulcus, side)
+        self.sulcus_raw = sulcus # -> 'S.C.'
+        self.side = side # -> original side
+        if self.mode == 'asymmetry':
+            self.ref_side = side
+            self.side='L' if self.side=='R' else 'R' # -> opposite side
+        print(self.side)
+
+        self.sulcus = complete_sulci_name(sulcus, self.side)
         self.ss_size = ss_size
         self.bench_size = bench_size
         self.bbox_dir = bbox_dir
         self.mask_dir = mask_dir
-        self.side = side
+        #self.side = side
         self.subjects_list = subjects_list
         self.b_num = len(next(os.walk(tgt_dir))[1]) + 1
         self.tgt_dir = os.path.join(tgt_dir, 'benchmark'+str(self.b_num))
@@ -250,9 +256,9 @@ class BenchmarkPipe:
         else:
             if self.mode == 'asymmetry':
                 # We compare other hemisphere box size
-                asym = 'R' if self.side=='L' else 'L'
+                #asym = 'R' if self.side=='L' else 'L'
                 # Bbox of crop on opposite hemisphere
-                bbox_asym = compute_max_box(complete_sulci_name(self.sulcus_raw, asym), asym, src_dir=self.bbox_dir)
+                """bbox_asym = compute_max_box(complete_sulci_name(self.sulcus_raw, asym), asym, src_dir=self.bbox_dir)
                 xmin_asym, ymin_asym, zmin_asym = bbox_asym[0][0], bbox_asym[0][1], bbox_asym[0][2]
                 xmax_asym, ymax_asym, zmax_asym = bbox_asym[1][0], bbox_asym[1][1], bbox_asym[1][2]
                 # Size of crop on opposite hemisphere
@@ -267,7 +273,7 @@ class BenchmarkPipe:
                 adapted_box = [self.xmax-self.xmin, self.ymax-self.ymin, self.zmax-self.zmin]
                 assert adapted_box==box_size_asym
                 #self.xmin, self.ymin, self.zmin = '52', '50', '12'
-                #self.xmax, self.ymax, self.zmax = '74', '86', '47'
+                #self.xmax, self.ymax, self.zmax = '74', '86', '47'"""
 
             cmd_bounding_box = ' -x ' + str(self.xmin) + ' -y ' + str(self.ymin) + ' -z ' + str(self.zmin) + ' -X '+ str(self.xmax) + ' -Y ' + str(self.ymax) + ' -Z ' + str(self.zmax)
             print(cmd_bounding_box)
@@ -331,13 +337,19 @@ class BenchmarkPipe:
         print(' ')
 
         print('=================== Selection and possible alteration of benchmark skeletons ===================')
+
         generate(self.b_num, self.side, self.ss_size, sulci_list=self.sulcus,
                  saving_dir=self.tgt_dir, mode=self.mode, bbox_dir=self.bbox_dir,
                  bench_size=self.bench_size, subjects_list=self.subjects_list
                 )
 
         #bbox = compute_max_box(self.sulcus, self.side, src_dir=self.bbox_dir)
+
+            #asym = 'R' if self.side=='L' else 'L'
         self.mask, self.bbmin, self.bbmax = compute_mask(self.sulcus, self.side,
+                                                         mask_dir=self.mask_dir)
+        if self.mode == 'asymmetry':
+            _, self.bbmin, self.bbmax = compute_mask(self.sulcus, self.ref_side,
                                                          mask_dir=self.mask_dir)
         print(self.bbmin)
         bbox = np.array([self.bbmin, self.bbmax])
