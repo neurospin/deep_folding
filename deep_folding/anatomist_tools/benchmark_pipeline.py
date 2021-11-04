@@ -42,16 +42,19 @@
 ######################################################################
 from pqdm.processes import pqdm
 from joblib import cpu_count
+import tempfile
 
 from benchmark_generation import *
 from deep_folding.anatomist_tools.utils.resample import resample
 from deep_folding.anatomist_tools.utils.sulcus_side import complete_sulci_name
+from deep_folding.anatomist_tools.utils import remove_hull
 
 import re
 import sys
 import argparse
 import json
 import math
+import scipy.ndimage
 
 
 def parse_args(argv):
@@ -102,6 +105,11 @@ def parse_args(argv):
              "bounding box coordinates have been stored. "
              "Default is : " + _BBOX_DIR_DEFAULT)
     parser.add_argument(
+        "-a", "--mask_dir", type=str, default=_MASK_DIR_DEFAULT,
+        help="Bounding box directory where json files containing "
+             "bounding box coordinates have been stored. "
+             "Default is : " + _BBOX_DIR_DEFAULT)
+    parser.add_argument(
         "-j", "--subjects_list", type=str, default=_SUBJECT_LIST_DEFAULT,
         help="Subjects list from which create benchmark "
              "Default is : " + str(_SUBJECT_LIST_DEFAULT))
@@ -115,21 +123,26 @@ def parse_args(argv):
     bench_size = args.benchmark_size
     resampling = args.resampling
     bbox_dir = args.bbox_dir
+    mask_dir = args.mask_dir
     subjects_list = args.subjects_list
 
-    return tgt_dir, sulcus, side, ss_size, mode, bench_size, resampling, bbox_dir, subjects_list
+    return tgt_dir, sulcus, side, ss_size, mode, bench_size, resampling, bbox_dir, mask_dir, subjects_list
 
 
 _SS_SIZE_DEFAULT = 1000
-_TGT_DIR_DEFAULT = '/neurospin/dico/lguillon/mic21/anomalies_set/dataset/'
+_TGT_DIR_DEFAULT = '/neurospin/dico/lguillon/ohbm_22/benchmarks/'
 _SULCUS_DEFAULT = ['S.T.s.ter.asc.ant.', 'S.T.s.ter.asc.post.']
 _SIDE_DEFAULT = 'R'
 _MODE_DEFAULT = 'suppress'
 _BENCH_SIZE = 150
 _RESAMPLING_DEFAULT = None
 _BBOX_DIR_DEFAULT = '/neurospin/dico/data/deep_folding/data/bbox'
+_MASK_DIR_DEFAULT = '/neurospin/dico/data/deep_folding/new_v1/mask/2mm'
+_DEFAULT_MORPHO_DIR = '/mnt/n4hhcp/hcp/ANALYSIS/3T_morphologist'
 _SUBJECT_LIST_DEFAULT = None
+cropping = 'mask'
 
+temp_dir = tempfile.mkdtemp()
 
 def define_njobs():
     """Returns number of cpus used by main loop
@@ -143,7 +156,8 @@ class BenchmarkPipe:
     """
 
     def __init__(self, tgt_dir, sulcus, side, ss_size, mode, bench_size,
-                 resampling, bbox_dir, subjects_list):
+                 resampling, bbox_dir, mask_dir, subjects_list,
+                 morpho_dir=_DEFAULT_MORPHO_DIR):
         """Inits with list of directory, side, list of sulci
 
         Args:
@@ -165,12 +179,14 @@ class BenchmarkPipe:
         self.ss_size = ss_size
         self.bench_size = bench_size
         self.bbox_dir = bbox_dir
+        self.mask_dir = mask_dir
         self.side = side
         self.subjects_list = subjects_list
         self.b_num = len(next(os.walk(tgt_dir))[1]) + 1
         self.tgt_dir = os.path.join(tgt_dir, 'benchmark'+str(self.b_num))
         if not os.path.isdir(self.tgt_dir):
             os.mkdir(self.tgt_dir)
+        self.morpho_dir = morpho_dir
         print(self.mode)
 
     def get_sub_list(self):
@@ -191,22 +207,34 @@ class BenchmarkPipe:
         Args:
             sub: string giving the subject ID
         """
-        dir_m = '/neurospin/dico/lguillon/skeleton/transfo_pre_process/natif_to_template_spm_' + sub +'.trm'
-        dir_r = '/neurospin/hcp/ANALYSIS/3T_morphologist/' + sub + '/t1mri/default_acquisition/normalized_SPM_' + sub +'.nii'
-        skel_prefix = 'output_skeleton_'
+        skel_prefix = 'modified_skeleton_'
+        dir_g = f"{self.morpho_dir}/{sub}/t1mri/default_acquisition/default_analysis/folds/3.1/default_session_auto/{self.side}{sub}_default_session_auto.arg"
+
+        # Creates transformation MNI template
+        graph = aims.read(dir_g)
+        g_to_icbm_template = aims.GraphManip.getICBM2009cTemplateTransform(graph)
+        g_to_icbm_template_file = os.path.join(temp_dir, f"file_g_to_icbm_{sub}.trm")
+        aims.write(g_to_icbm_template, g_to_icbm_template_file)
+
         file_skeleton = os.path.join(self.tgt_dir, skel_prefix + sub + '.nii.gz')
         file_cropped = os.path.join(self.tgt_dir, sub + '_normalized.nii.gz')
 
         if self.resampling:
             resampled = resample(file_skeleton, output_vs=(2, 2, 2),
-                                 transformation=dir_m)
+                                 transformation=g_to_icbm_template_file,
+                                 verbose=False)
 
             aims.write(resampled, file_cropped)
         else:
-            cmd_normalize = "AimsApplyTransform -i " + file_skeleton + \
-                            " -o " + file_cropped +" -m " + dir_m + " -r " + \
-                            dir_r + " -t nearest"
-            os.system(cmd_normalize)
+                cmd_normalize = 'AimsApplyTransform' + \
+                                ' -i ' + file_skeleton + \
+                                ' -o ' + file_cropped + \
+                                ' -m ' + g_to_icbm_template_file + \
+                                ' -r ' + self.ref_file + \
+                                ' -t ' + self.interp + \
+                                ' --bg ' + str(_EXTERNAL)
+
+                os.system(cmd_normalize)
 
         # Crop of the images
         if self.mode == 'random':
@@ -243,12 +271,54 @@ class BenchmarkPipe:
 
             cmd_bounding_box = ' -x ' + str(self.xmin) + ' -y ' + str(self.ymin) + ' -z ' + str(self.zmin) + ' -X '+ str(self.xmax) + ' -Y ' + str(self.ymax) + ' -Z ' + str(self.zmax)
             print(cmd_bounding_box)
-        cmd_crop = "AimsSubVolume -i " + file_cropped + " -o " + file_cropped + cmd_bounding_box
-        os.system(cmd_crop)
+
+        if cropping == 'mask':
+            self.crop_mask(file_cropped)
+        else:
+            cmd_crop = "AimsSubVolume -i " + file_cropped + " -o " + file_cropped + cmd_bounding_box
+            os.system(cmd_crop)
 
         if self.mode == 'asymmetry':
             cmd_flip = "AimsFlip -i " + file_cropped + " -o " + file_cropped + " -m XX"
             os.system(cmd_flip)
+
+    def filter_mask(self):
+        """Smooths the mask with Gaussian Filter
+        """
+        arr = np.asarray(self.mask)
+        arr_filter = scipy.ndimage.gaussian_filter(arr.astype(float), sigma=0.5,
+                             order=0, output=None, mode='reflect', truncate=4.0)
+        arr[:] = (arr_filter> 0.001).astype(int)
+
+    def crop_mask(self, file_cropped):
+        """Crops according to mask"""
+        vol = aims.read(file_cropped)
+
+        arr = np.asarray(vol)
+        remove_hull.remove_hull(arr)
+
+        #arr_mask = np.asarray(self.mask)
+        self.filter_mask()
+        arr_mask = np.asarray(self.mask)
+        arr[arr_mask == 0] = 0
+        arr[arr == 11] = 0
+
+        # Take the coordinates of the bounding box
+        bbmin = self.bbmin
+        bbmax = self.bbmax
+        xmin, ymin, zmin = str(bbmin[0]), str(bbmin[1]), str(bbmin[2])
+        xmax, ymax, zmax = str(bbmax[0]), str(bbmax[1]), str(bbmax[2])
+
+        aims.write(vol, file_cropped)
+
+        # Defines rop of the images based on bounding box
+        cmd_bounding_box = ' -x ' + xmin + ' -y ' + ymin + ' -z ' + zmin + \
+                        ' -X ' + xmax + ' -Y ' + ymax + ' -Z ' + zmax
+        cmd_crop = 'AimsSubVolume' + \
+                ' -i ' + file_cropped + \
+                ' -o ' + file_cropped + cmd_bounding_box
+
+        var_output = os.popen(cmd_crop).read()
 
     def launch_pipe(self):
         """Main API to create benchmark files
@@ -266,7 +336,11 @@ class BenchmarkPipe:
                  bench_size=self.bench_size, subjects_list=self.subjects_list
                 )
 
-        bbox = compute_max_box(self.sulcus, self.side, src_dir=self.bbox_dir)
+        #bbox = compute_max_box(self.sulcus, self.side, src_dir=self.bbox_dir)
+        self.mask, self.bbmin, self.bbmax = compute_mask(self.sulcus, self.side,
+                                                         mask_dir=self.mask_dir)
+        print(self.bbmin)
+        bbox = np.array([self.bbmin, self.bbmax])
         print(bbox)
 
         self.xmin, self.ymin, self.zmin = str(bbox[0][0]), str(bbox[0][1]), str(bbox[0][2])
@@ -277,6 +351,8 @@ class BenchmarkPipe:
         print('=================== Normalization and crop of skeletons ==================')
 
         list_subjects = self.get_sub_list()
+        #for sub in list_subjects:
+        #     self.crop_one_file(sub)
         pqdm(list_subjects, self.crop_one_file, n_jobs=define_njobs())
 
         input_dict = {'sulci_list': self.sulcus, 'simple_surface_min_size': self.ss_size,
@@ -293,10 +369,10 @@ def main(argv):
     Args:
         argv: a list containing command line arguments
     """
-    tgt_dir, sulcus, side, ss_size, mode, bench_size, resampling, bbox_dir, subjects_list = parse_args(argv)
+    tgt_dir, sulcus, side, ss_size, mode, bench_size, resampling, bbox_dir, mask_dir, subjects_list = parse_args(argv)
 
     benchmark = BenchmarkPipe(tgt_dir, sulcus, side, ss_size, mode, bench_size,
-                              resampling, bbox_dir, subjects_list)
+                              resampling, bbox_dir, mask_dir, subjects_list)
 
     benchmark.launch_pipe()
 
