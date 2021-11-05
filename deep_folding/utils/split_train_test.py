@@ -99,12 +99,12 @@ def split_train_test(src_dir, tgt_dir, nb_test_subjects):
     train_filename = f'{tgt_dir}/train.csv'
     with open(train_filename, 'w', newline='') as myfile:
         wr = csv.writer(myfile, quoting=csv.QUOTE_ALL)
-        wr.writerow(train_subjects)
+        wr.writerows(train_subjects)
 
     test_filename = f'{tgt_dir}/test.csv'
     with open(test_filename, 'w', newline='') as myfile:
         wr = csv.writer(myfile, quoting=csv.QUOTE_ALL)
-        wr.writerow(test_subjects)
+        wr.writerows(test_subjects)
 
 
 
