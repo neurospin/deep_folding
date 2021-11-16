@@ -182,7 +182,7 @@ class BoundingBoxMax:
         orig_dim = hdr['volume_dimension']
         new_dim = list((resampling_ratio * orig_dim).astype(int))
 
-        self.mask = aims.Volume(new_dim, dtype='S16')
+        self.mask = aims.Volume(new_dim, dtype='FLOAT')
         self.mask.copyHeaderFrom(hdr)
         self.mask.header()['voxel_size'] = self.voxel_size_out
 
@@ -321,7 +321,7 @@ class BoundingBoxMax:
         if not list_bbmin:
             raise ValueError('No sulcus named {self.sulcus} found '
                         'for the whole dataset. '
-                        'It is an error. You should check sulcus name.') 
+                        'It is an error. You should check sulcus name.')
 
         return list_bbmin, list_bbmax
 
@@ -340,8 +340,7 @@ class BoundingBoxMax:
             sulci_pattern = glob.glob(join(sub['dir'], graph_file))[0]
 
             self.increment_one_mask(sulci_pattern % sub)
-        arr = np.asarray(self.mask)
-        arr = arr / float(len(subjects))
+        self.mask /= float(len(subjects))
 
     def write_mask(self):
         """Writes mask on mask file"""
