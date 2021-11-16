@@ -97,6 +97,8 @@ _EXTERNAL = 11 # topological value meaning "outside the brain"
 # its name depends on the hemisphere side
 _SULCUS_DEFAULT = 'S.T.s.ter.asc.ant.'
 
+_DILATE_MASK = False
+
 # Input directories
 # -----------------
 
@@ -142,7 +144,8 @@ class DatasetCroppedSkeleton:
                  interp=_INTERP_DEFAULT,
                  resampling=_RESAMPLING_DEFAULT,
                  cropping=_CROPPING_DEFAULT,
-                 out_voxel_size=_OUT_VOXEL_SIZE):
+                 out_voxel_size=_OUT_VOXEL_SIZE,
+                 dilate_mask=_DILATE_MASK):
         """Inits with list of directories and list of sulci
 
         Args:
@@ -173,6 +176,7 @@ class DatasetCroppedSkeleton:
         self.resampling = resampling
         self.cropping = cropping
         self.out_voxel_size = out_voxel_size
+        self.dilate_mask = dilate_mask
 
         # Morphologist directory
         self.morphologist_dir = join(self.src_dir, self.morphologist_dir)
@@ -260,7 +264,10 @@ class DatasetCroppedSkeleton:
         remove_hull.remove_hull(arr)
 
         #arr_mask = np.asarray(self.mask)
-        self.filter_mask()
+        if self.dilate_mask:
+            arr = dilate_mask.dilate(arr)
+        else:
+            self.filter_mask()
         arr_mask = np.asarray(self.mask)
         arr[arr_mask == 0] = 0
         arr[arr == _EXTERNAL] = 0
@@ -506,6 +513,9 @@ def parse_args(argv):
         "-v", "--out_voxel_size", type=int, nargs='+', default=_OUT_VOXEL_SIZE,
         help='Voxel size of output images'
              'Default is : 1 1 1')
+    parser.add_argument(
+        "-d", "--dilate_mask", type=boolean, default=_DILATE_MASK,
+        help='Whether dilate mask or not')
 
     params = {}
 
@@ -521,6 +531,7 @@ def parse_args(argv):
     params['cropping'] = args.cropping
     params['out_voxel_size'] = tuple(args.out_voxel_size)
     params['morphologist_dir'] = args.morphologist_dir
+    params['dilate_mask'] = args.dilate_mask
 
     number_subjects = args.nb_subjects
 
@@ -551,7 +562,8 @@ def dataset_gen_pipe(src_dir=_SRC_DIR_DEFAULT,
                      interp=_INTERP_DEFAULT,
                      resampling=_RESAMPLING_DEFAULT,
                      cropping=_CROPPING_DEFAULT,
-                     out_voxel_size=_OUT_VOXEL_SIZE):
+                     out_voxel_size=_OUT_VOXEL_SIZE,
+                     dilate_mask=_DILATE_MASK):
     """Main program generating cropped files and corresponding pickle file
     """
 
@@ -565,7 +577,8 @@ def dataset_gen_pipe(src_dir=_SRC_DIR_DEFAULT,
                                      interp=interp,
                                      resampling=resampling,
                                      cropping=cropping,
-                                     out_voxel_size=out_voxel_size)
+                                     out_voxel_size=out_voxel_size,
+                                     dilate_mask=dilate_mask)
     dataset.dataset_gen_pipe(number_subjects=number_subjects)
 
 
@@ -593,7 +606,8 @@ def main(argv):
                          number_subjects=params['nb_subjects'],
                          resampling=params['resampling'],
                          cropping=params['cropping'],
-                         out_voxel_size=params['out_voxel_size'])
+                         out_voxel_size=params['out_voxel_size'],
+                         dilate_mask=params['dilate_mask'])
     except SystemExit as exc:
         if exc.code != 0:
             six.reraise(*sys.exc_info())
