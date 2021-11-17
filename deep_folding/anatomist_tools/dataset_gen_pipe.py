@@ -263,11 +263,6 @@ class DatasetCroppedSkeleton:
         arr = np.asarray(vol)
         remove_hull.remove_hull(arr)
 
-        #arr_mask = np.asarray(self.mask)
-        if self.dilate_mask:
-            arr = dilate_mask.dilate(arr)
-        else:
-            self.filter_mask()
         arr_mask = np.asarray(self.mask)
         arr[arr_mask == 0] = 0
         arr[arr == _EXTERNAL] = 0
@@ -426,6 +421,10 @@ class DatasetCroppedSkeleton:
                     compute_mask(sulci_list=self.list_sulci,
                                 side=self.side,
                                 mask_dir=self.mask_dir)
+                if self.dilate:
+                    self.mask = utils.dilate(self.mask)
+                else:
+                    self.filter_mask()
             else:
                 raise ValueError('Cropping must be either \'bbox\' or \'mask\'')
 
