@@ -42,28 +42,30 @@ a specified hemisphere.
 
 from os.path import join
 from soma import aims
+from soma.aimsalgo import MorphoGreyLevel_S16
 from scipy import ndimage
 import numpy as np
 import json
+import dilate_mask
 
 
-_MASK_DIR_DEFAULT = "/neurospin/dico/deep_folding_data/data/mask/"
+_MASK_DIR_DEFAULT = "/nfs/neurospin/dico/data/deep_folding/current/mask/2mm"
 
 
 def compute_bbox_mask(arr):
-    
+
     # Gets location of bounding box as slices
     loc = ndimage.find_objects(arr)[0]
     bbmin = []
     bbmax = []
-    
+
     for slicing in loc:
         bbmin.append(slicing.start)
         bbmax.append(slicing.stop)
 
     return np.array(bbmin), np.array(bbmax)
 
-def compute_mask(sulci_list, side, mask_dir=_MASK_DIR_DEFAULT):
+def compute_simple_mask(sulci_list, side, mask_dir=_MASK_DIR_DEFAULT):
     """Function returning mask combining mask over several sulci
 
     It reads mask files in the source mask directory and combines them.
@@ -82,32 +84,99 @@ def compute_mask(sulci_list, side, mask_dir=_MASK_DIR_DEFAULT):
 
     # Initializes and fills list of masks, each repreented as an aims volume
     list_masks = []
-    
+
     for sulcus in sulci_list:
         mask_file = join(mask_dir, side, sulcus + '.nii.gz')
         list_masks.append(aims.read(mask_file))
-    
+
     # Computes the mask being a combination of all masks
     mask_result = list_masks[0]
-    
+
     arr_result = np.asarray(mask_result).astype(bool)
     for mask in list_masks[1:]:
         arr = np.asarray(mask)
         arr_result += arr.astype(bool)
-        
+
     arr_result = arr_result.astype(int)
     np.asarray(mask_result)[:] = arr_result
-    
+
     # Computes the mask bounding box
     bbmin, bbmax = compute_bbox_mask(arr_result)
-        
+
+    return mask_result, bbmin, bbmax
+
+
+def compute_centered_mask(sulci_list, side, mask_dir=_MASK_DIR_DEFAULT):
+    """Function returning mask combining mask over several sulci
+
+    It reads mask files in the source mask directory and combines them.
+    They are listed in subdirectory 'L' or 'R' according the hemisphere
+
+    Args:
+        sulci_list: a list of sulci
+        side: a string corresponding to the hemisphere, whether 'L' or 'R'
+        mask_dir: path to source directory containing masks
+
+    Returns:
+        mask_result: AIMS volume containing combined mask
+        bbmin: an array of minimum coordinates of min box around the mask
+        bbmax: an array of maximum coordinates of max_box around the mask
+    """
+
+    # Initializes and fills list of 2 masks, each represented as an aims volume
+    list_masks = []
+    hdr = aims.StandardReferentials.icbm2009cTemplateHeader()
+
+    for sulcus in sulci_list:
+        mask_file = join(mask_dir, side, sulcus + '.nii.gz')
+        list_masks.append(aims.read(mask_file))
+
+    # Threshold and dilation of first mask
+    eligible_mask_1 = dilate_mask.dilate(list_masks[0])
+    aims.write(eligible_mask_1, '/tmp/eligible_mask_1.nii.gz')
+
+    # Threshold of other mask
+    eligible_mask_2 = np.asarray(list_masks[1])
+    eligible_mask_2[eligible_mask_2<10] = 0
+    eligible_mask_2[eligible_mask_2>=10] = 1
+    aims.write(list_masks[1], '/tmp/eligible_mask_2.nii.gz')
+
+    # Intersection of the two eligible masks
+    intersec_mask = aims.Volume(list_masks[0].shape, dtype='S16')
+    intersec_mask.copyHeaderFrom(hdr)
+    intersec_mask.header()['voxel_size'] = [2, 2, 2]
+    intersec_mask_arr = np.asarray(intersec_mask)
+    intersec_mask_arr[:] = eligible_mask_1 & eligible_mask_2
+    aims.write(intersec_mask, '/tmp/intersec_mask.nii.gz')
+
+    # Dilation of intersec_mask
+    morpho = MorphoGreyLevel_S16()
+    intersec_mask = morpho.doDilation(intersec_mask, 5.0)
+    aims.write(intersec_mask, '/tmp/intersec_mask_dilated.nii.gz')
+
+    # Intersection of intersec_mask, eligible_mask_1 and eligible_mask_2
+    mask_result = aims.Volume(list_masks[0].shape, dtype='S16')
+    mask_result.copyHeaderFrom(hdr)
+    mask_result.header()['voxel_size'] = [2, 2, 2]
+
+    mask_result_arr = np.asarray(mask_result)
+    intersec_mask_arr[np.asarray(eligible_mask_1)>0 and \
+                                           np.asarray(eligible_mask_2)>0] = 2
+    intersec_mask_arr[intersec_mask_arr==1] = 0
+    mask_result_arr[:] = intersec_mask_arr
+
+    aims.write(mask_result, '/tmp/mask_result.nii.gz')
+
+    # Computes the mask bounding box
+    bbmin, bbmax = compute_bbox_mask(mask_result_arr)
+
     return mask_result, bbmin, bbmax
 
 
 
 if __name__ == '__main__':
-    arr_mask, bbmin, bbmax = compute_mask(['S.T.s.ter.asc.ant._left',
-                                    'S.T.s.ter.asc.test._left'],
-                                    'L')
+    arr_mask, bbmin, bbmax = compute_centered_mask(['paracingular._right',
+                                    'F.C.M.ant._right'],
+                                    'R')
     print("bbmin = ", bbmin)
     print("bbmax = ", bbmax)
