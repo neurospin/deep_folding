@@ -97,7 +97,7 @@ _EXTERNAL = 11 # topological value meaning "outside the brain"
 # its name depends on the hemisphere side
 _SULCUS_DEFAULT = 'S.T.s.ter.asc.ant.'
 
-_DILATE_MASK = False
+_COMBINE_TYPE = False
 
 # Input directories
 # -----------------
@@ -145,7 +145,7 @@ class DatasetCroppedSkeleton:
                  resampling=_RESAMPLING_DEFAULT,
                  cropping=_CROPPING_DEFAULT,
                  out_voxel_size=_OUT_VOXEL_SIZE,
-                 dilate_mask=_DILATE_MASK):
+                 combine_type=_COMBINE_TYPE):
         """Inits with list of directories and list of sulci
 
         Args:
@@ -176,7 +176,7 @@ class DatasetCroppedSkeleton:
         self.resampling = resampling
         self.cropping = cropping
         self.out_voxel_size = out_voxel_size
-        self.dilate_mask = dilate_mask
+        self.combine_type = combine_type
 
         # Morphologist directory
         self.morphologist_dir = join(self.src_dir, self.morphologist_dir)
@@ -381,7 +381,8 @@ class DatasetCroppedSkeleton:
                            'tgt_dir': self.tgt_dir,
                            'cropped_dir': self.cropped_dir,
                            'resampling_type': 'sulcus-based' if self.resampling else 'AimsApplyTransform',
-                           'out_voxel_size': self.out_voxel_size
+                           'out_voxel_size': self.out_voxel_size,
+                           'combine_type': self.combine_type
                            }
             self.json.update(dict_to_add=dict_to_add)
 
@@ -417,14 +418,16 @@ class DatasetCroppedSkeleton:
                                                         talairach_box=False,
                                                         src_dir=self.bbox_dir)
             elif self.cropping == 'mask':
-                self.mask, self.bbmin, self.bbmax = \
-                    compute_simple_mask(sulci_list=self.list_sulci,
-                                side=self.side,
-                                mask_dir=self.mask_dir)
-                if self.dilate:
-                    self.mask = utils.dilate(self.mask)
+                if self.combine_type:
+                    self.mask, self.bbmin, self.bbmax = \
+                        compute_centered_mask(sulci_list=self.list_sulci,
+                                    side=self.side,
+                                    mask_dir=self.mask_dir)
                 else:
-                    self.filter_mask()
+                    self.mask, self.bbmin, self.bbmax = \
+                        compute_simple_mask(sulci_list=self.list_sulci,
+                                    side=self.side,
+                                    mask_dir=self.mask_dir)
             else:
                 raise ValueError('Cropping must be either \'bbox\' or \'mask\'')
 
@@ -513,8 +516,8 @@ def parse_args(argv):
         help='Voxel size of output images'
              'Default is : 1 1 1')
     parser.add_argument(
-        "-d", "--dilate_mask", type=boolean, default=_DILATE_MASK,
-        help='Whether dilate mask or not')
+        "-o", "--combine_type", type=boolean, default=_DILATE_MASK,
+        help='Whether use specific combination of masks or not')
 
     params = {}
 
@@ -530,7 +533,7 @@ def parse_args(argv):
     params['cropping'] = args.cropping
     params['out_voxel_size'] = tuple(args.out_voxel_size)
     params['morphologist_dir'] = args.morphologist_dir
-    params['dilate_mask'] = args.dilate_mask
+    params['combine_type'] = args.combine_type
 
     number_subjects = args.nb_subjects
 
@@ -562,7 +565,7 @@ def dataset_gen_pipe(src_dir=_SRC_DIR_DEFAULT,
                      resampling=_RESAMPLING_DEFAULT,
                      cropping=_CROPPING_DEFAULT,
                      out_voxel_size=_OUT_VOXEL_SIZE,
-                     dilate_mask=_DILATE_MASK):
+                     combine_type=_COMBINE_TYPE):
     """Main program generating cropped files and corresponding pickle file
     """
 
@@ -577,7 +580,7 @@ def dataset_gen_pipe(src_dir=_SRC_DIR_DEFAULT,
                                      resampling=resampling,
                                      cropping=cropping,
                                      out_voxel_size=out_voxel_size,
-                                     dilate_mask=dilate_mask)
+                                     combine_type=combine_type)
     dataset.dataset_gen_pipe(number_subjects=number_subjects)
 
 
@@ -606,7 +609,7 @@ def main(argv):
                          resampling=params['resampling'],
                          cropping=params['cropping'],
                          out_voxel_size=params['out_voxel_size'],
-                         dilate_mask=params['dilate_mask'])
+                         combine_type=params['combine_type'])
     except SystemExit as exc:
         if exc.code != 0:
             six.reraise(*sys.exc_info())
