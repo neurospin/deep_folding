@@ -46,9 +46,10 @@ from soma.aimsalgo import MorphoGreyLevel_S16
 from scipy import ndimage
 import numpy as np
 import json
-import utils.dilate_mask as dl
+import deep_folding.anatomist_tools.utils.dilate_mask as dl
 #import dilate_mask as dl
 
+_AIMS_BINARY_ONE = 32767
 
 _MASK_DIR_DEFAULT = "/neurospin/dico/data/deep_folding/current/mask/2mm"
 
@@ -152,15 +153,18 @@ def compute_centered_mask(sulci_list, side, mask_dir=_MASK_DIR_DEFAULT):
 
     # Dilation of intersec_mask
     morpho = MorphoGreyLevel_S16()
+    intersec_mask_arr[intersec_mask_arr>=1] = _AIMS_BINARY_ONE
     intersec_mask = morpho.doDilation(intersec_mask, 15.0)
+    intersec_mask_arr = np.asarray(intersec_mask)
+    intersec_mask_arr[intersec_mask_arr>=1] = 1
     aims.write(intersec_mask, '/tmp/intersec_mask_dilated.nii.gz')
 
     # Intersection of intersec_mask, eligible_mask_1 and eligible_mask_2
     mask_result = aims.Volume(list_masks[0].shape, dtype='S16')
     mask_result.copyHeaderFrom(hdr)
     mask_result.header()['voxel_size'] = [2, 2, 2]
-
     mask_result_arr = np.asarray(mask_result)
+    
     intersec_mask_arr = np.asarray(intersec_mask)
     intersec_1 = intersec_mask_arr.copy() & np.asarray(eligible_mask_1)
     intersec_2 = intersec_mask_arr & np.asarray(eligible_mask_2)

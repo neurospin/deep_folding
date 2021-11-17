@@ -39,6 +39,7 @@ from soma.aimsalgo import MorphoGreyLevel_S16
 #import anatomist.api as anatomist
 #from soma.qt_gui.qt_backend import Qt
 
+_AIMS_BINARY_ONE = 32767
 
 def dilate(mask, radius=10.):
     """
@@ -50,10 +51,12 @@ def dilate(mask, radius=10.):
     arr = np.asarray(mask)
     # Thresholding and binarization of mask
     arr[arr<10] = 0
-    arr[arr>=10] = 1
+    arr[arr>=10] = _AIMS_BINARY_ONE
     # Dilates initial volume of 10 mm
     morpho = MorphoGreyLevel_S16()
     dilate = morpho.doDilation(mask, radius)
+    arr_dilate = np.asarray(dilate)
+    arr_dilate[arr_dilate>=1] = 1
     return dilate
 
 
