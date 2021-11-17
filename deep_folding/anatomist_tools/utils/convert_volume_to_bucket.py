@@ -26,6 +26,19 @@
 # requirements in conditions enabling the security of their systems and/or
 # data to be ensured and,  more generally, to use and operate it in the
 
+"""
+This program converts volumes contained in a folder into buckets.
+It writes bucket files in the output folder
+"""
+
 from .remove_hull import convert_volume_to_bucket
+
+from soma import aims
+
+def read_convert_write(vol_filename, bucket_filename):
+    """Read volume, converts and writes back bucket"""
+    vol = aims.read(vol_filename)
+    bucket_map, _ = convert_volume_to_bucket(vol)
+    aims.write(bucket_map, bucket_filename)
 
 
