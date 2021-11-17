@@ -160,10 +160,11 @@ def compute_centered_mask(sulci_list, side, mask_dir=_MASK_DIR_DEFAULT):
     mask_result.header()['voxel_size'] = [2, 2, 2]
 
     mask_result_arr = np.asarray(mask_result)
-    intersec_mask_arr[np.asarray(eligible_mask_1)>0 and \
-                                           np.asarray(eligible_mask_2)>0] = 2
-    intersec_mask_arr[intersec_mask_arr==1] = 0
-    mask_result_arr[:] = intersec_mask_arr
+    intersec_1 = intersec_mask_arr & np.asarray(eligible_mask_1)
+    intersec_2 = intersec_mask_arr + np.asarray(eligible_mask_2)
+
+    mask_result_arr[:] = intersec_1 + intersec_2
+    mask_result_arr[mask_result_arr>1] = 1
 
     aims.write(mask_result, '/tmp/mask_result.nii.gz')
 
