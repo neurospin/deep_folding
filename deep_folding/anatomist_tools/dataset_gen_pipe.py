@@ -71,7 +71,7 @@ from joblib import cpu_count
 
 from deep_folding.anatomist_tools.utils.logs import LogJson
 from deep_folding.anatomist_tools.utils.bbox import compute_max_box
-from deep_folding.anatomist_tools.utils.mask import compute_simple_mask
+from deep_folding.anatomist_tools.utils.mask import compute_simple_mask, compute_centered_mask
 from deep_folding.anatomist_tools.utils.resample import resample
 from deep_folding.anatomist_tools.utils import remove_hull
 from deep_folding.anatomist_tools.utils.sulcus_side import complete_sulci_name
@@ -111,10 +111,10 @@ _MORPHOLOGIST_DIR_DEFAULT = 'ANALYSIS/3T_morphologist'
 
 # Directory containing bounding box json files
 # default corresponds to bounding boxes computed for voxels of 1mm
-_BBOX_DIR_DEFAULT = '/neurospin/dico/data/deep_folding/data/bbox'
+_BBOX_DIR_DEFAULT = '/neurospin/dico/data/deep_folding/current/bbox'
 
 # Directory containing mask files
-_MASK_DIR_DEFAULT = '/neurospin/dico/data/deep_folding/data/mask'
+_MASK_DIR_DEFAULT = '/neurospin/dico/data/deep_folding/current/mask'
 
 # Directory containing bounding box json files
 # default corresponds to bounding boxes computed for voxinput
@@ -516,7 +516,7 @@ def parse_args(argv):
         help='Voxel size of output images'
              'Default is : 1 1 1')
     parser.add_argument(
-        "-o", "--combine_type", type=boolean, default=_DILATE_MASK,
+        "-o", "--combine_type", type=bool, default=_COMBINE_TYPE,
         help='Whether use specific combination of masks or not')
 
     params = {}

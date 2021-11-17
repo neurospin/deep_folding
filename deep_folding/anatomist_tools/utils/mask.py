@@ -46,7 +46,7 @@ from soma.aimsalgo import MorphoGreyLevel_S16
 from scipy import ndimage
 import numpy as np
 import json
-import dilate_mask
+import utils.dilate_mask as dl
 
 
 _MASK_DIR_DEFAULT = "/nfs/neurospin/dico/data/deep_folding/current/mask/2mm"
@@ -132,7 +132,7 @@ def compute_centered_mask(sulci_list, side, mask_dir=_MASK_DIR_DEFAULT):
         list_masks.append(aims.read(mask_file))
 
     # Threshold and dilation of first mask
-    eligible_mask_1 = dilate_mask.dilate(list_masks[0])
+    eligible_mask_1 = dl.dilate(list_masks[0])
     aims.write(eligible_mask_1, '/tmp/eligible_mask_1.nii.gz')
 
     # Threshold of other mask
