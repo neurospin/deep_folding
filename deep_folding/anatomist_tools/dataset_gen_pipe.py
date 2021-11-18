@@ -302,7 +302,8 @@ class DatasetCroppedSkeleton:
             join(self.morphologist_dir, self.acquisition_dir % subject)
 
         # Skeleton file name
-        file_skeleton = join(subject_dir, self.skeleton_file % subject)
+        #file_skeleton = join(subject_dir, self.skeleton_file % subject)
+        file_skeleton = '/tmp/skel.nii.gz'
 
         # Creates transformation MNI template
         file_graph = join(subject_dir, self.graph_file % subject)
@@ -390,6 +391,7 @@ class DatasetCroppedSkeleton:
             self.define_referentials()
 
             # Performs cropping for each file in a parallelized way
+            list_subjects = ['299760']
             print(list_subjects)
 
             #for sub in list_subjects:
