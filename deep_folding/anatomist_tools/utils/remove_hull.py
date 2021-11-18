@@ -1,5 +1,5 @@
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# /usr/bin/env python3.6 + brainvisa compliant env
 #
 #  This software and supporting documentation are distributed by
 #      Institut Federatif de Recherche 49
@@ -137,6 +137,7 @@ def create_one_mesh(vol, padding=_DEFAULT_PADDING, ext=_DEFAULT_PADDING, thresho
     Args:
         vol: aims volume
     """
+    
     arr = np.asarray(vol)
 
     # Removes hull

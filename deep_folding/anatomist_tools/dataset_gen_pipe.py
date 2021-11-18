@@ -71,7 +71,7 @@ from joblib import cpu_count
 
 from deep_folding.anatomist_tools.utils.logs import LogJson
 from deep_folding.anatomist_tools.utils.bbox import compute_max_box
-from deep_folding.anatomist_tools.utils.mask import compute_mask
+from deep_folding.anatomist_tools.utils.mask import compute_simple_mask, compute_centered_mask
 from deep_folding.anatomist_tools.utils.resample import resample
 from deep_folding.anatomist_tools.utils import remove_hull
 from deep_folding.anatomist_tools.utils.sulcus_side import complete_sulci_name
@@ -97,6 +97,8 @@ _EXTERNAL = 11 # topological value meaning "outside the brain"
 # its name depends on the hemisphere side
 _SULCUS_DEFAULT = 'S.T.s.ter.asc.ant.'
 
+_COMBINE_TYPE = False
+
 # Input directories
 # -----------------
 
@@ -109,10 +111,10 @@ _MORPHOLOGIST_DIR_DEFAULT = 'ANALYSIS/3T_morphologist'
 
 # Directory containing bounding box json files
 # default corresponds to bounding boxes computed for voxels of 1mm
-_BBOX_DIR_DEFAULT = '/neurospin/dico/data/deep_folding/data/bbox'
+_BBOX_DIR_DEFAULT = '/neurospin/dico/data/deep_folding/current/bbox'
 
 # Directory containing mask files
-_MASK_DIR_DEFAULT = '/neurospin/dico/data/deep_folding/data/mask'
+_MASK_DIR_DEFAULT = '/neurospin/dico/data/deep_folding/current/mask'
 
 # Directory containing bounding box json files
 # default corresponds to bounding boxes computed for voxinput
@@ -142,7 +144,8 @@ class DatasetCroppedSkeleton:
                  interp=_INTERP_DEFAULT,
                  resampling=_RESAMPLING_DEFAULT,
                  cropping=_CROPPING_DEFAULT,
-                 out_voxel_size=_OUT_VOXEL_SIZE):
+                 out_voxel_size=_OUT_VOXEL_SIZE,
+                 combine_type=_COMBINE_TYPE):
         """Inits with list of directories and list of sulci
 
         Args:
@@ -173,6 +176,7 @@ class DatasetCroppedSkeleton:
         self.resampling = resampling
         self.cropping = cropping
         self.out_voxel_size = out_voxel_size
+        self.combine_type = combine_type
 
         # Morphologist directory
         self.morphologist_dir = join(self.src_dir, self.morphologist_dir)
@@ -259,8 +263,6 @@ class DatasetCroppedSkeleton:
         arr = np.asarray(vol)
         remove_hull.remove_hull(arr)
 
-        #arr_mask = np.asarray(self.mask)
-        self.filter_mask()
         arr_mask = np.asarray(self.mask)
         arr[arr_mask == 0] = 0
         arr[arr == _EXTERNAL] = 0
@@ -379,7 +381,8 @@ class DatasetCroppedSkeleton:
                            'tgt_dir': self.tgt_dir,
                            'cropped_dir': self.cropped_dir,
                            'resampling_type': 'sulcus-based' if self.resampling else 'AimsApplyTransform',
-                           'out_voxel_size': self.out_voxel_size
+                           'out_voxel_size': self.out_voxel_size,
+                           'combine_type': self.combine_type
                            }
             self.json.update(dict_to_add=dict_to_add)
 
@@ -415,10 +418,16 @@ class DatasetCroppedSkeleton:
                                                         talairach_box=False,
                                                         src_dir=self.bbox_dir)
             elif self.cropping == 'mask':
-                self.mask, self.bbmin, self.bbmax = \
-                    compute_mask(sulci_list=self.list_sulci,
-                                side=self.side,
-                                mask_dir=self.mask_dir)
+                if self.combine_type:
+                    self.mask, self.bbmin, self.bbmax = \
+                        compute_centered_mask(sulci_list=self.list_sulci,
+                                    side=self.side,
+                                    mask_dir=self.mask_dir)
+                else:
+                    self.mask, self.bbmin, self.bbmax = \
+                        compute_simple_mask(sulci_list=self.list_sulci,
+                                    side=self.side,
+                                    mask_dir=self.mask_dir)
             else:
                 raise ValueError('Cropping must be either \'bbox\' or \'mask\'')
 
@@ -506,6 +515,9 @@ def parse_args(argv):
         "-v", "--out_voxel_size", type=int, nargs='+', default=_OUT_VOXEL_SIZE,
         help='Voxel size of output images'
              'Default is : 1 1 1')
+    parser.add_argument(
+        "-o", "--combine_type", type=bool, default=_COMBINE_TYPE,
+        help='Whether use specific combination of masks or not')
 
     params = {}
 
@@ -521,6 +533,7 @@ def parse_args(argv):
     params['cropping'] = args.cropping
     params['out_voxel_size'] = tuple(args.out_voxel_size)
     params['morphologist_dir'] = args.morphologist_dir
+    params['combine_type'] = args.combine_type
 
     number_subjects = args.nb_subjects
 
@@ -551,7 +564,8 @@ def dataset_gen_pipe(src_dir=_SRC_DIR_DEFAULT,
                      interp=_INTERP_DEFAULT,
                      resampling=_RESAMPLING_DEFAULT,
                      cropping=_CROPPING_DEFAULT,
-                     out_voxel_size=_OUT_VOXEL_SIZE):
+                     out_voxel_size=_OUT_VOXEL_SIZE,
+                     combine_type=_COMBINE_TYPE):
     """Main program generating cropped files and corresponding pickle file
     """
 
@@ -565,7 +579,8 @@ def dataset_gen_pipe(src_dir=_SRC_DIR_DEFAULT,
                                      interp=interp,
                                      resampling=resampling,
                                      cropping=cropping,
-                                     out_voxel_size=out_voxel_size)
+                                     out_voxel_size=out_voxel_size,
+                                     combine_type=combine_type)
     dataset.dataset_gen_pipe(number_subjects=number_subjects)
 
 
@@ -593,7 +608,8 @@ def main(argv):
                          number_subjects=params['nb_subjects'],
                          resampling=params['resampling'],
                          cropping=params['cropping'],
-                         out_voxel_size=params['out_voxel_size'])
+                         out_voxel_size=params['out_voxel_size'],
+                         combine_type=params['combine_type'])
     except SystemExit as exc:
         if exc.code != 0:
             six.reraise(*sys.exc_info())
