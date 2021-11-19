@@ -261,7 +261,7 @@ class DatasetCroppedSkeleton:
         vol = aims.read(file_cropped)
 
         arr = np.asarray(vol)
-        remove_hull.remove_hull(arr)
+        #remove_hull.remove_hull(arr)
 
         arr_mask = np.asarray(self.mask)
         arr[arr_mask == 0] = 0
@@ -270,6 +270,7 @@ class DatasetCroppedSkeleton:
         # Take the coordinates of the bounding box
         bbmin = self.bbmin
         bbmax = self.bbmax
+        print(bbmin, bbmax)
         xmin, ymin, zmin = str(bbmin[0]), str(bbmin[1]), str(bbmin[2])
         xmax, ymax, zmax = str(bbmax[0]), str(bbmax[1]), str(bbmax[2])
 
@@ -302,8 +303,8 @@ class DatasetCroppedSkeleton:
             join(self.morphologist_dir, self.acquisition_dir % subject)
 
         # Skeleton file name
-        #file_skeleton = join(subject_dir, self.skeleton_file % subject)
-        file_skeleton = '/tmp/skel.nii.gz'
+        file_skeleton = join(subject_dir, self.skeleton_file % subject)
+        #file_skeleton = '/neurospin/dico/data/deep_folding/datasets/ACC_patterns/hcp_test/Rskeleton_R299760_default_session_auto.nii.gz'
 
         # Creates transformation MNI template
         file_graph = join(subject_dir, self.graph_file % subject)
