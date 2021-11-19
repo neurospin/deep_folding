@@ -75,7 +75,7 @@ def parse_args(argv):
 
     # Parse command line arguments
     parser = argparse.ArgumentParser(
-        prog='convert_volume_to_bucket.py',
+        prog='write_skeleton.py',
         description='Generates bucket files converted from volume files')
     parser.add_argument(
         "-s", "--src_dir", type=str, required=True,
@@ -99,18 +99,22 @@ class GraphConvert2Skeleton:
         self.src_dir = src_dir
         self.tgt_dir = tgt_dir
         self.side = side
-        self.graph_dir = "t1mri/default_acquisition/default_analysis/folds/3.1/default_session_auto/"
+        # self.graph_dir = "t1mri/default_acquisition/default_analysis/folds/3.1/default_session_auto/"
+        self.graph_dir = "t1mri/default_acquisition/default_analysis/folds/3.1/default_session_*"
 
     def write_skeleton(self, subject):
         """
         """
-        graph_file = f"{self.side}{subject}_default_session_auto.arg"
-        graph = aims.read(os.path.join(self.src_dir, f"{subject}/"+self.graph_dir, graph_file))
+        # graph_file = f"{self.side}{subject}*.arg"
+        graph_file = glob.glob(f"{self.src_dir}/{subject}*/{self.graph_dir}/{self.side}{subject}*.arg")[0]
+        graph = aims.read(graph_file)
 
         skeleton_filename = f"{self.tgt_dir}/{self.side}skeleton_{subject}_generated.nii.gz"
 
         voxel_size = graph['voxel_size'][:3]
+        # Adds 1 for each x,y,z dimension
         dimensions = [i+j for i, j in zip(graph['boundingbox_max'], [1,1,1,0])]
+
         vol = aims.Volume(dimensions, dtype='S16')
         vol.header()['voxel_size'] = voxel_size
         if 'transformations' in graph.keys():
@@ -146,8 +150,9 @@ class GraphConvert2Skeleton:
 
     def write_loop(self):
         filenames = glob.glob(f"{self.src_dir}/*/")
-        list_subjects = [re.search('([ae\d]{5,6})', filename).group(1) for filename in filenames]
+        list_subjects = [re.search('([ae\d]{5,6})', filename).group(0) for filename in filenames]
         pqdm(list_subjects, self.write_skeleton, n_jobs=define_njobs())
+        # self.write_skeleton(list_subjects[0])
 
 
 def main(argv):
@@ -162,4 +167,10 @@ def main(argv):
 if __name__ == '__main__':
     # This permits to call main also from another python program
     # without having to make system calls
+    # src_dir = "/neurospin/lnao/Panabase/lborne/data/ACCpatterns/tissier_2018/subjects"
+    # tgt_dir = "/neurospin/dico/data/deep_folding/datasets/ACC_patterns/tissier"
+    # args = "-i R -s " + src_dir + " -t " + tgt_dir
+    # argv = args.split(' ')
+    # main(argv=argv)
+
     main(argv=sys.argv[1:])
