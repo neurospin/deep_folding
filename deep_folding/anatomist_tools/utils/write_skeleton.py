@@ -51,14 +51,17 @@ import glob
 import os
 import re
 import argparse
-from tqdm import tqdm
+from pqdm.processes import pqdm
+from joblib import cpu_count
 from soma import aims
 import numpy as np
-import dico_toolbox as dtx
-from convert_volume_to_bucket import get_basename_without_extension
 
-_SIDE = 'R'
 
+def define_njobs():
+    """Returns number of cpus used by main loop
+    """
+    nb_cpus = cpu_count()
+    return max(nb_cpus-2, 1)
 
 def parse_args(argv):
     """Parses command-line arguments
@@ -80,72 +83,71 @@ def parse_args(argv):
     parser.add_argument(
         "-t", "--tgt_dir", type=str, required=True,
         help='Output directory where to put skeleton files.')
+    parser.add_argument(
+        "-i", "--side", type=str, required=True,
+        help='Hemisphere side (either L or R).')
 
     args = parser.parse_args(argv)
 
     return args
 
 
-def build_skeleton_filename(subject, tgt_dir):
-    """Returns bucket filename"""
-    subject = re.search('([ae\d]{5,6})', subject).group(1)
-    return f"{tgt_dir}/{_SIDE}skeleton_{subject}_generated.nii.gz"
-
-
-def loop_over_directory(src_dir, tgt_dir):
-    """Loops conversion over input directory
-    """
-    # Gets and creates all filenames
-    #TODO: graph_dir = 't1mri/default_acquisition/default_analysis/folds/3.1/default_session_manual'
-    graph_dir = 't1mri/default_acquisition/default_analysis/folds/3.1/default_session_auto'
-
-    filenames = glob.glob(f"{src_dir}/*/{graph_dir}/{_SIDE}*.arg")
-
-    subjects = [get_basename_without_extension(filename) for filename in filenames]
-    skeleton_filenames = [build_skeleton_filename(subject, tgt_dir) for subject in subjects]
-
-    for graph_filename, skeleton_filename in tqdm(zip(filenames, skeleton_filenames), total=len(filenames)):
-        write_skeleton(graph_filename, skeleton_filename)
-
-
-def write_skeleton(graph_filename, skeleton_filename):
+class GraphConvert2Skeleton:
     """
     """
-    graph = aims.read(graph_filename)
-    voxel_size = graph['voxel_size'][:3]
+    def __init__(self, src_dir, tgt_dir, side):
+        self.src_dir = src_dir
+        self.tgt_dir = tgt_dir
+        self.side = side
+        self.graph_dir = "t1mri/default_acquisition/default_analysis/folds/3.1/default_session_auto/"
 
-    dimensions = [i+j for i, j in zip(graph['boundingbox_max'], [1,1,1,0])]
-    vol = aims.Volume(dimensions, dtype='S16')
-    vol.header()['voxel_size'] = voxel_size
-    if 'transformations' in graph.keys():
-        vol.header()['transformations'] = graph['transformations']
-    if 'referentials' in graph.keys():
-        vol.header()['referentials'] = graph['referentials']
-    if 'referential' in graph.keys():
-        vol.header()['referential'] = graph['referential']
-    arr = np.asarray(vol)
+    def write_skeleton(self, subject):
+        """
+        """
+        graph_file = f"{self.side}{subject}_default_session_auto.arg"
+        graph = aims.read(os.path.join(self.src_dir, f"{subject}/"+self.graph_dir, graph_file))
 
-    for edge in graph.edges():
-        for bucket_name, value in {'aims_junction':110, 'aims_plidepassage':120}.items():
-            bucket = edge.get(bucket_name)
-            if bucket is not None:
-                voxels = np.array(bucket[0].keys())
-                if voxels.shape == (0,):
-                    continue
-                for i,j,k in voxels:
-                    arr[i,j,k] = value
+        skeleton_filename = f"{self.tgt_dir}/{self.side}skeleton_{subject}_generated.nii.gz"
 
-    for vertex in graph.vertices():
-        for bucket_name, value in {'aims_bottom': 30, 'aims_ss': 60, 'aims_other': 100}.items():
-            bucket = vertex.get(bucket_name)
-            if bucket is not None:
-                voxels = np.array(bucket[0].keys())
-                if voxels.shape == (0,):
-                    continue
-                for i,j,k in voxels:
-                    arr[i,j,k] = value
+        voxel_size = graph['voxel_size'][:3]
+        dimensions = [i+j for i, j in zip(graph['boundingbox_max'], [1,1,1,0])]
+        vol = aims.Volume(dimensions, dtype='S16')
+        vol.header()['voxel_size'] = voxel_size
+        if 'transformations' in graph.keys():
+            vol.header()['transformations'] = graph['transformations']
+        if 'referentials' in graph.keys():
+            vol.header()['referentials'] = graph['referentials']
+        if 'referential' in graph.keys():
+            vol.header()['referential'] = graph['referential']
+        arr = np.asarray(vol)
 
-    aims.write(vol, skeleton_filename)
+        for edge in graph.edges():
+            for bucket_name, value in {'aims_junction':110, 'aims_plidepassage':120}.items():
+                bucket = edge.get(bucket_name)
+                if bucket is not None:
+                    voxels = np.array(bucket[0].keys())
+                    if voxels.shape == (0,):
+                        continue
+                    for i,j,k in voxels:
+                        arr[i,j,k] = value
+
+        for vertex in graph.vertices():
+            for bucket_name, value in {'aims_bottom': 30, 'aims_ss': 60, 'aims_other': 100}.items():
+                bucket = vertex.get(bucket_name)
+                if bucket is not None:
+                    voxels = np.array(bucket[0].keys())
+                    if voxels.shape == (0,):
+                        continue
+                    for i,j,k in voxels:
+                        arr[i,j,k] = value
+
+        aims.write(vol, skeleton_filename)
+
+
+    def write_loop(self):
+        filenames = glob.glob(f"{self.src_dir}/*/")
+        list_subjects = [re.search('([ae\d]{5,6})', filename).group(1) for filename in filenames]
+        pqdm(list_subjects, self.write_skeleton, n_jobs=define_njobs())
 
 
 def main(argv):
@@ -153,7 +155,8 @@ def main(argv):
     """
     # Parsing arguments
     args = parse_args(argv)
-    loop_over_directory(args.src_dir, args.tgt_dir)
+    conversion = GraphConvert2Skeleton(args.src_dir, args.tgt_dir, args.side)
+    conversion.write_loop()
 
 
 if __name__ == '__main__':
