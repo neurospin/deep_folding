@@ -49,6 +49,7 @@
 import sys
 import glob
 import os
+import re
 import argparse
 from tqdm import tqdm
 from soma import aims
@@ -57,7 +58,7 @@ import dico_toolbox as dtx
 from convert_volume_to_bucket import get_basename_without_extension
 
 _SIDE = 'R'
-test_mode = True
+
 
 def parse_args(argv):
     """Parses command-line arguments
@@ -87,28 +88,22 @@ def parse_args(argv):
 
 def build_skeleton_filename(subject, tgt_dir):
     """Returns bucket filename"""
-    return f"{tgt_dir}/{_SIDE}skeleton_{subject}.nii.gz"
+    subject = re.search('([ae\d]{5,6})', subject).group(1)
+    return f"{tgt_dir}/{_SIDE}skeleton_{subject}_generated.nii.gz"
 
 
-def loop_over_directory(src_dir, tgt_dir, test_mode=test_mode):
+def loop_over_directory(src_dir, tgt_dir):
     """Loops conversion over input directory
     """
     # Gets and creates all filenames
-    if test_mode:
-        src_dir = '/mnt/n4hhcp/hcp/ANALYSIS/3T_morphologist'
-        graph_dir = 't1mri/default_acquisition/default_analysis/folds/3.1/default_session_auto'
-    else :
-        graph_dir = 't1mri/default_acquisition/default_analysis/folds/3.1/default_session_manual'
+    #TODO: graph_dir = 't1mri/default_acquisition/default_analysis/folds/3.1/default_session_manual'
+    graph_dir = 't1mri/default_acquisition/default_analysis/folds/3.1/default_session_auto'
 
-    #filenames = glob.glob(f"{src_dir}/*/{graph_dir}/{_SIDE}*.arg")
-    #print(filenames)
-    filenames = ['/mnt/n4hhcp/hcp/ANALYSIS/3T_morphologist/299760/t1mri/default_acquisition/default_analysis/folds/3.1/default_session_auto/R299760_default_session_auto.arg',
-                 '/mnt/n4hhcp/hcp/ANALYSIS/3T_morphologist/100307/t1mri/default_acquisition/default_analysis/folds/3.1/default_session_auto/R100307_default_session_auto.arg']
+    filenames = glob.glob(f"{src_dir}/*/{graph_dir}/{_SIDE}*.arg")[:1]
 
     subjects = [get_basename_without_extension(filename) for filename in filenames]
-    #subjects = ['299760', '100206', '100307']
     skeleton_filenames = [build_skeleton_filename(subject, tgt_dir) for subject in subjects]
-    print(skeleton_filenames)
+
     for graph_filename, skeleton_filename in tqdm(zip(filenames, skeleton_filenames), total=len(filenames)):
         write_skeleton(graph_filename, skeleton_filename)
 
@@ -138,7 +133,6 @@ def write_skeleton(graph_filename, skeleton_filename):
                 if voxels.shape == (0,):
                     continue
                 for i,j,k in voxels:
-                    cnt += 1
                     arr[i,j,k] = value
 
     for vertex in graph.vertices():
