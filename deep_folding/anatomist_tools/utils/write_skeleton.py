@@ -99,7 +99,7 @@ def loop_over_directory(src_dir, tgt_dir):
     #TODO: graph_dir = 't1mri/default_acquisition/default_analysis/folds/3.1/default_session_manual'
     graph_dir = 't1mri/default_acquisition/default_analysis/folds/3.1/default_session_auto'
 
-    filenames = glob.glob(f"{src_dir}/*/{graph_dir}/{_SIDE}*.arg")[:1]
+    filenames = glob.glob(f"{src_dir}/*/{graph_dir}/{_SIDE}*.arg")
 
     subjects = [get_basename_without_extension(filename) for filename in filenames]
     skeleton_filenames = [build_skeleton_filename(subject, tgt_dir) for subject in subjects]

@@ -167,7 +167,7 @@ class DatasetCroppedSkeleton:
         self.list_sulci = ([list_sulci] if isinstance(list_sulci, str)
                            else list_sulci)
         self.list_sulci = complete_sulci_name(self.list_sulci, self.side)
-
+deep_folding/anatomist_tools/utils/write_skeleton.py
         self.tgt_dir = tgt_dir
         self.bbox_dir = bbox_dir
         self.mask_dir=mask_dir
@@ -190,6 +190,8 @@ class DatasetCroppedSkeleton:
         # Files from morphologist pipeline
         self.skeleton_file = 'default_analysis/segmentation/' \
                             '%(side)sskeleton_%(subject)s.nii.gz'
+        self.skeleton_file = '/neurospin/dico/data/deep_folding/datasets/hcp/' \
+                                    '%(side)sskeleton_%(subject)s_generated.nii.gz'
         self.graph_file = 'default_analysis/folds/3.1/default_session_auto/' \
                              '%(side)s%(subject)s_default_session_auto.arg'
 
