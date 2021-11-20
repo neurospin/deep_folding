@@ -167,7 +167,6 @@ class DatasetCroppedSkeleton:
         self.list_sulci = ([list_sulci] if isinstance(list_sulci, str)
                            else list_sulci)
         self.list_sulci = complete_sulci_name(self.list_sulci, self.side)
-deep_folding/anatomist_tools/utils/write_skeleton.py
         self.tgt_dir = tgt_dir
         self.bbox_dir = bbox_dir
         self.mask_dir=mask_dir
@@ -188,8 +187,8 @@ deep_folding/anatomist_tools/utils/write_skeleton.py
 
         # Names of files in function of dictionary: keys -> 'subject' and 'side'
         # Files from morphologist pipeline
-        self.skeleton_file = 'default_analysis/segmentation/' \
-                            '%(side)sskeleton_%(subject)s.nii.gz'
+        # self.skeleton_file = 'default_analysis/segmentation/' \
+        #                     '%(side)sskeleton_%(subject)s.nii.gz'
         self.skeleton_file = '/neurospin/dico/data/deep_folding/datasets/hcp/' \
                                     '%(side)sskeleton_%(subject)s_generated.nii.gz'
         self.graph_file = 'default_analysis/folds/3.1/default_session_auto/' \
@@ -306,7 +305,6 @@ deep_folding/anatomist_tools/utils/write_skeleton.py
 
         # Skeleton file name
         file_skeleton = join(subject_dir, self.skeleton_file % subject)
-        #file_skeleton = '/neurospin/dico/data/deep_folding/datasets/ACC_patterns/hcp_test/Rskeleton_R299760_default_session_auto.nii.gz'
 
         # Creates transformation MNI template
         file_graph = join(subject_dir, self.graph_file % subject)
@@ -394,7 +392,6 @@ deep_folding/anatomist_tools/utils/write_skeleton.py
             self.define_referentials()
 
             # Performs cropping for each file in a parallelized way
-            list_subjects = ['299760']
             print(list_subjects)
 
             #for sub in list_subjects:
