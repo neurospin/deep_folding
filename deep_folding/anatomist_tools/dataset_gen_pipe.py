@@ -58,6 +58,7 @@ import os
 from os import listdir
 from os.path import join
 import tempfile
+import re
 
 import numpy as np
 import scipy.ndimage
@@ -167,7 +168,6 @@ class DatasetCroppedSkeleton:
         self.list_sulci = ([list_sulci] if isinstance(list_sulci, str)
                            else list_sulci)
         self.list_sulci = complete_sulci_name(self.list_sulci, self.side)
-
         self.tgt_dir = tgt_dir
         self.bbox_dir = bbox_dir
         self.mask_dir=mask_dir
@@ -180,6 +180,8 @@ class DatasetCroppedSkeleton:
 
         # Morphologist directory
         self.morphologist_dir = join(self.src_dir, self.morphologist_dir)
+        ## for Tissier
+        self.morphologist_dir = join(self.src_dir)
         # default acquisition subdirectory
         self.acquisition_dir = "%(subject)s/t1mri/default_acquisition"
 
@@ -188,10 +190,19 @@ class DatasetCroppedSkeleton:
 
         # Names of files in function of dictionary: keys -> 'subject' and 'side'
         # Files from morphologist pipeline
-        self.skeleton_file = 'default_analysis/segmentation/' \
-                            '%(side)sskeleton_%(subject)s.nii.gz'
-        self.graph_file = 'default_analysis/folds/3.1/default_session_auto/' \
-                             '%(side)s%(subject)s_default_session_auto.arg'
+        # self.skeleton_file = 'default_analysis/segmentation/' \
+        #                     '%(side)sskeleton_%(subject)s.nii.gz'
+        ## FOR HCP dataset
+        #self.skeleton_file = '/neurospin/dico/data/deep_folding/datasets/hcp/' \
+        #                            '%(side)sskeleton_%(subject)s_generated.nii.gz'
+        ## FOR TISSIER dataset
+        self.skeleton_file = '/neurospin/dico/data/deep_folding/datasets/ACC_patterns/tissier/' \
+                                    '%(side)sskeleton_%(subject)s_generated.nii.gz'
+        #self.graph_file = 'default_analysis/folds/3.1/default_session_auto/' \
+        #                     '%(side)s%(subject)s_default_session_auto.arg'
+        ## FOR TISSIER dataset
+        self.graph_file = 'default_analysis/folds/3.1/default_session_manual/' \
+                             '%(side)s%(subject)s_default_session_manual.arg'
 
         # Names of files in function of dictionary: keys -> 'subject' and 'side'
         self.cropped_file = '%(subject)s_normalized.nii.gz'
@@ -261,7 +272,7 @@ class DatasetCroppedSkeleton:
         vol = aims.read(file_cropped)
 
         arr = np.asarray(vol)
-        remove_hull.remove_hull(arr)
+        #remove_hull.remove_hull(arr)
 
         arr_mask = np.asarray(self.mask)
         arr[arr_mask == 0] = 0
@@ -296,13 +307,15 @@ class DatasetCroppedSkeleton:
 
         # Identifies 'subject' in a mapping (for file and directory namings)
         subject = {'subject': subject_id, 'side': self.side}
+        ## FOR TISSIER
+        subject_id = re.search('([ae\d]{5,6})', subject_id).group(0)
 
         # Names directory where subject analysis files are stored
         subject_dir = \
             join(self.morphologist_dir, self.acquisition_dir % subject)
 
         # Skeleton file name
-        file_skeleton = join(subject_dir, self.skeleton_file % subject)
+        file_skeleton = join(subject_dir, self.skeleton_file % {'subject': subject_id, 'side': self.side})
 
         # Creates transformation MNI template
         file_graph = join(subject_dir, self.graph_file % subject)
@@ -313,7 +326,7 @@ class DatasetCroppedSkeleton:
 
         if os.path.exists(file_skeleton):
             # Creates output (cropped) file name
-            file_cropped = join(self.cropped_dir, self.cropped_file % subject)
+            file_cropped = join(self.cropped_dir, self.cropped_file % {'subject': subject_id, 'side': self.side})
 
             # Normalization and resampling of skeleton images
             if self.resampling:
