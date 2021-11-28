@@ -48,7 +48,7 @@ def fetch_data(cropped_dir, tgt_dir=None, side=None):
         if is_file_nii(file_nii):
             aimsvol = aims.read(file_nii)
             sample = np.asarray(aimsvol)
-            subject = re.search('(\d{4,12})', file_nii).group(1)
+            subject = re.search('([ae\d]{5,6})', file_nii).group(1)
             data_dict[subject] = [sample]
 
     dataframe = pd.DataFrame.from_dict(data_dict)
@@ -59,6 +59,6 @@ def fetch_data(cropped_dir, tgt_dir=None, side=None):
 
 
 if __name__ == '__main__':
-    fetch_data(cropped_dir='/neurospin/dico/data/deep_folding/data/crops/SC/sulcus_based/2mm/Rcrops',
-               tgt_dir='/neurospin/dico/data/deep_folding/data/crops/SC/sulcus_based/2mm',
+    fetch_data(cropped_dir='/neurospin/dico/data/deep_folding/current/crops/CINGULATE/mask/sulcus_based/2mm/centered_combined/tissier_2018/Rcrops/',
+               tgt_dir='/neurospin/dico/data/deep_folding/current/crops/CINGULATE/mask/sulcus_based/2mm/centered_combined/tissier_2018/',
                side='R')
