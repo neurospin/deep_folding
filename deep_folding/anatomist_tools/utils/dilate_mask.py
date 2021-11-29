@@ -51,8 +51,8 @@ def dilate(mask, radius=10.):
     #vol.copyHeaderFrom(hdr)
     arr = np.asarray(mask)
     # Thresholding and binarization of mask
-    arr[arr<2] = 0
-    arr[arr>=2] = _AIMS_BINARY_ONE
+    arr[arr<3] = 0
+    arr[arr>=3] = _AIMS_BINARY_ONE
     print(np.unique(mask))
     # Dilates initial volume of 10 mm
     morpho = MorphoGreyLevel_S16()

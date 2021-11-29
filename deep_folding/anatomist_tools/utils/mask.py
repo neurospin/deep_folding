@@ -139,8 +139,8 @@ def compute_centered_mask(sulci_list, side, mask_dir=_MASK_DIR_DEFAULT):
 
     # Threshold of other mask
     eligible_mask_2 = np.asarray(list_masks[1])
-    eligible_mask_2[eligible_mask_2<10] = 0
-    eligible_mask_2[eligible_mask_2>=10] = 1
+    eligible_mask_2[eligible_mask_2<3] = 0
+    eligible_mask_2[eligible_mask_2>=3] = 1
     aims.write(list_masks[1], '/tmp/eligible_mask_2.nii.gz')
 
     # Intersection of the two eligible masks
@@ -164,7 +164,7 @@ def compute_centered_mask(sulci_list, side, mask_dir=_MASK_DIR_DEFAULT):
     mask_result.copyHeaderFrom(hdr)
     mask_result.header()['voxel_size'] = [2, 2, 2]
     mask_result_arr = np.asarray(mask_result)
-    
+
     intersec_mask_arr = np.asarray(intersec_mask)
     intersec_1 = intersec_mask_arr.copy() & np.asarray(eligible_mask_1)
     intersec_2 = intersec_mask_arr & np.asarray(eligible_mask_2)
