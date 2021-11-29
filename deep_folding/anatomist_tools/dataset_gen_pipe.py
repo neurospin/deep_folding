@@ -181,7 +181,7 @@ class DatasetCroppedSkeleton:
         # Morphologist directory
         self.morphologist_dir = join(self.src_dir, self.morphologist_dir)
         ## for Tissier
-        self.morphologist_dir = join(self.src_dir)
+        #self.morphologist_dir = join(self.src_dir)
         # default acquisition subdirectory
         self.acquisition_dir = "%(subject)s/t1mri/default_acquisition"
 
@@ -190,19 +190,19 @@ class DatasetCroppedSkeleton:
 
         # Names of files in function of dictionary: keys -> 'subject' and 'side'
         # Files from morphologist pipeline
-        # self.skeleton_file = 'default_analysis/segmentation/' \
+        #self.skeleton_file = 'default_analysis/segmentation/' \
         #                     '%(side)sskeleton_%(subject)s.nii.gz'
         ## FOR HCP dataset
-        #self.skeleton_file = '/neurospin/dico/data/deep_folding/datasets/hcp/' \
-        #                            '%(side)sskeleton_%(subject)s_generated.nii.gz'
-        ## FOR TISSIER dataset
-        self.skeleton_file = '/neurospin/dico/data/deep_folding/datasets/ACC_patterns/tissier/' \
+        self.skeleton_file = '/neurospin/dico/data/deep_folding/datasets/hcp/' \
                                     '%(side)sskeleton_%(subject)s_generated.nii.gz'
-        #self.graph_file = 'default_analysis/folds/3.1/default_session_auto/' \
-        #                     '%(side)s%(subject)s_default_session_auto.arg'
         ## FOR TISSIER dataset
-        self.graph_file = 'default_analysis/folds/3.1/default_session_manual/' \
-                             '%(side)s%(subject)s_default_session_manual.arg'
+        #self.skeleton_file = '/neurospin/dico/data/deep_folding/datasets/ACC_patterns/tissier/' \
+        #                            '%(side)sskeleton_%(subject)s_generated.nii.gz'
+        self.graph_file = 'default_analysis/folds/3.1/default_session_auto/' \
+                             '%(side)s%(subject)s_default_session_auto.arg'
+        ## FOR TISSIER dataset
+        #self.graph_file = 'default_analysis/folds/3.1/default_session_manual/' \
+        #                     '%(side)s%(subject)s_default_session_manual.arg'
 
         # Names of files in function of dictionary: keys -> 'subject' and 'side'
         self.cropped_file = '%(subject)s_normalized.nii.gz'
@@ -405,9 +405,9 @@ class DatasetCroppedSkeleton:
             # Performs cropping for each file in a parallelized way
             print(list_subjects)
 
-            #for sub in list_subjects:
-            #     self.crop_one_file(sub)
-            pqdm(list_subjects, self.crop_one_file, n_jobs=define_njobs())
+            for sub in list_subjects:
+                 self.crop_one_file(sub)
+            #pqdm(list_subjects, self.crop_one_file, n_jobs=define_njobs())
 
 
     def dataset_gen_pipe(self, number_subjects=_ALL_SUBJECTS):
