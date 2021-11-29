@@ -49,7 +49,7 @@ import six
 _SRC_DIR_DEFAULT = "/host/tgcc/hcp/ANALYSIS/3T_morphologist"
 _TGT_DIR_DEFAULT = "."
 _NB_TEST_SUBJECTS_DEFAULT = 150
-_SEED = 1
+_SEED = 2
 
 def parse_args(argv):
     """Function parsing command-line arguments
@@ -64,7 +64,7 @@ def parse_args(argv):
     # Parse command line arguments
     parser = argparse.ArgumentParser(
         prog='split_train_test.py',
-        description='SPlits subject IDs in train and test csv files')
+        description='Splits subject IDs in train and test csv files')
     parser.add_argument(
         "-s", "--src_dir", type=str, default=_SRC_DIR_DEFAULT,
         help='Source directory where the subjects lie as subdirectory. '
@@ -99,12 +99,14 @@ def split_train_test(src_dir, tgt_dir, nb_test_subjects):
     train_filename = f'{tgt_dir}/train.csv'
     with open(train_filename, 'w', newline='') as myfile:
         wr = csv.writer(myfile, quoting=csv.QUOTE_ALL)
-        wr.writerows(train_subjects)
+        for subject in train_subjects:
+            wr.writerow([subject])
 
     test_filename = f'{tgt_dir}/test.csv'
     with open(test_filename, 'w', newline='') as myfile:
         wr = csv.writer(myfile, quoting=csv.QUOTE_ALL)
-        wr.writerows(test_subjects)
+        for subject in test_subjects:
+            wr.writerow([subject])
 
 
 
