@@ -64,8 +64,6 @@ import numpy as np
 import scipy.ndimage
 
 import six
-import contextlib
-
 from soma import aims
 
 from pqdm.processes import pqdm
@@ -180,9 +178,9 @@ class DatasetCroppedSkeleton:
         self.combine_type = combine_type
 
         # Morphologist directory
-        self.morphologist_dir = join(self.src_dir, self.morphologist_dir)
+        # self.morphologist_dir = join(self.src_dir, self.morphologist_dir)
         ## for Tissier
-        #self.morphologist_dir = join(self.src_dir)
+        self.morphologist_dir = join(self.src_dir)
         # default acquisition subdirectory
         self.acquisition_dir = "%(subject)s/t1mri/default_acquisition"
 
@@ -194,16 +192,16 @@ class DatasetCroppedSkeleton:
         #self.skeleton_file = 'default_analysis/segmentation/' \
         #                     '%(side)sskeleton_%(subject)s.nii.gz'
         ## FOR HCP dataset
-        self.skeleton_file = '/neurospin/dico/data/deep_folding/datasets/hcp/' \
-                                    '%(side)sskeleton_%(subject)s_generated.nii.gz'
+        # self.skeleton_file = '/neurospin/dico/data/deep_folding/datasets/hcp/' \
+        #                             '%(side)sskeleton_%(subject)s_generated.nii.gz'
         ## FOR TISSIER dataset
-        #self.skeleton_file = '/neurospin/dico/data/deep_folding/datasets/ACC_patterns/tissier/' \
-        #                            '%(side)sskeleton_%(subject)s_generated.nii.gz'
-        self.graph_file = 'default_analysis/folds/3.1/default_session_auto/' \
-                             '%(side)s%(subject)s_default_session_auto.arg'
+        self.skeleton_file = '/neurospin/dico/data/deep_folding/datasets/ACC_patterns/tissier/' \
+                                   '%(side)sskeleton_%(subject)s_generated.nii.gz'
+        # self.graph_file = 'default_analysis/folds/3.1/default_session_auto/' \
+        #                      '%(side)s%(subject)s_default_session_auto.arg'
         ## FOR TISSIER dataset
-        #self.graph_file = 'default_analysis/folds/3.1/default_session_manual/' \
-        #                     '%(side)s%(subject)s_default_session_manual.arg'
+        self.graph_file = 'default_analysis/folds/3.1/default_session_manual/' \
+                            '%(side)s%(subject)s_default_session_manual.arg'
 
         # Names of files in function of dictionary: keys -> 'subject' and 'side'
         self.cropped_file = '%(subject)s_normalized.nii.gz'
@@ -331,11 +329,10 @@ class DatasetCroppedSkeleton:
 
             # Normalization and resampling of skeleton images
             if self.resampling:
-                with contextlib.redirect_stdout(None):
-                    resampled = resample(input_image=file_skeleton,
-                                        output_vs=self.out_voxel_size,
-                                        transformation=g_to_icbm_template_file,
-                                        verbose=False)
+                resampled = resample(input_image=file_skeleton,
+                                    output_vs=self.out_voxel_size,
+                                    transformation=g_to_icbm_template_file,
+                                    verbose=False)
                 aims.write(resampled, file_cropped)
             else :
                 cmd_normalize = 'AimsApplyTransform' + \
