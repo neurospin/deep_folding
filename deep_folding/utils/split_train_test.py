@@ -99,14 +99,14 @@ def split_train_test(src_dir, tgt_dir, nb_test_subjects):
     train_filename = f'{tgt_dir}/train.csv'
     with open(train_filename, 'w', newline='') as myfile:
         wr = csv.writer(myfile, quoting=csv.QUOTE_ALL)
-        wr.writerows(train_subjects)
+        for sub in train_subjects:
+            wr.writerow([sub])
 
     test_filename = f'{tgt_dir}/test.csv'
     with open(test_filename, 'w', newline='') as myfile:
         wr = csv.writer(myfile, quoting=csv.QUOTE_ALL)
-        wr.writerows(test_subjects)
-
-
+        for sub in train_subjects:
+            wr.writerow([sub])
 
 def main(argv):
     """Reads argument line and creates cropped files and pickle file
