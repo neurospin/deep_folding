@@ -129,7 +129,7 @@ def define_njobs():
     """Returns number of cpus used by main loop
     """
     nb_cpus = cpu_count()
-    return max(nb_cpus-2, 1)
+    return max(nb_cpus-4, 1)
 
 class DatasetCroppedSkeleton:
     """Generates cropped skeleton files and corresponding pickle file
@@ -307,6 +307,7 @@ class DatasetCroppedSkeleton:
 
         # Identifies 'subject' in a mapping (for file and directory namings)
         subject = {'subject': subject_id, 'side': self.side}
+        print(subject_id)
         ## FOR TISSIER
         subject_id = re.search('([ae\d]{5,6})', subject_id).group(0)
 
@@ -366,6 +367,7 @@ class DatasetCroppedSkeleton:
         if number_subjects:
 
             # subjects are detected as the directory names under src_dir
+            print(self.morphologist_dir)
             list_all_subjects = [dI for dI in os.listdir(self.morphologist_dir)\
              if os.path.isdir(os.path.join(self.morphologist_dir,dI))]
 
@@ -404,10 +406,11 @@ class DatasetCroppedSkeleton:
 
             # Performs cropping for each file in a parallelized way
             print(list_subjects)
+            list_subjects = ['110007']
 
-            #for sub in list_subjects:
-            #     self.crop_one_file(sub)
-            pqdm(list_subjects, self.crop_one_file, n_jobs=define_njobs())
+            for sub in list_subjects:
+                 self.crop_one_file(sub)
+            #pqdm(list_subjects, self.crop_one_file, n_jobs=define_njobs())
 
 
     def dataset_gen_pipe(self, number_subjects=_ALL_SUBJECTS):

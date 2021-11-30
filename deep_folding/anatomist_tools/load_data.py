@@ -59,6 +59,6 @@ def fetch_data(cropped_dir, tgt_dir=None, side=None):
 
 
 if __name__ == '__main__':
-    fetch_data(cropped_dir='/neurospin/dico/data/deep_folding/current/crops/CINGULATE/mask/sulcus_based/2mm/centered_combined/tissier_2018/Rcrops/',
-               tgt_dir='/neurospin/dico/data/deep_folding/current/crops/CINGULATE/mask/sulcus_based/2mm/centered_combined/tissier_2018/',
+    fetch_data(cropped_dir='/neurospin/dico/data/deep_folding/current/crops/CINGULATE/mask/sulcus_based/1mm/centered_combined/hcp/test/Rcrops/',
+               tgt_dir='/neurospin/dico/data/deep_folding/current/crops/CINGULATE/mask/sulcus_based/1mm/centered_combined/hcp/test/',
                side='R')
