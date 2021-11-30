@@ -64,6 +64,7 @@ import numpy as np
 import scipy.ndimage
 
 import six
+import contextlib
 
 from soma import aims
 
@@ -307,7 +308,6 @@ class DatasetCroppedSkeleton:
 
         # Identifies 'subject' in a mapping (for file and directory namings)
         subject = {'subject': subject_id, 'side': self.side}
-        print(subject_id)
         ## FOR TISSIER
         subject_id = re.search('([ae\d]{5,6})', subject_id).group(0)
 
@@ -331,10 +331,11 @@ class DatasetCroppedSkeleton:
 
             # Normalization and resampling of skeleton images
             if self.resampling:
-                resampled = resample(input_image=file_skeleton,
-                                     output_vs=self.out_voxel_size,
-                                     transformation=g_to_icbm_template_file,
-                                     verbose=False)
+                with contextlib.redirect_stdout(None):
+                    resampled = resample(input_image=file_skeleton,
+                                        output_vs=self.out_voxel_size,
+                                        transformation=g_to_icbm_template_file,
+                                        verbose=False)
                 aims.write(resampled, file_cropped)
             else :
                 cmd_normalize = 'AimsApplyTransform' + \
@@ -406,11 +407,10 @@ class DatasetCroppedSkeleton:
 
             # Performs cropping for each file in a parallelized way
             print(list_subjects)
-            list_subjects = ['110007']
 
-            for sub in list_subjects:
-                 self.crop_one_file(sub)
-            #pqdm(list_subjects, self.crop_one_file, n_jobs=define_njobs())
+            # for sub in list_subjects:
+            #      self.crop_one_file(sub)
+            pqdm(list_subjects, self.crop_one_file, n_jobs=define_njobs())
 
 
     def dataset_gen_pipe(self, number_subjects=_ALL_SUBJECTS):
