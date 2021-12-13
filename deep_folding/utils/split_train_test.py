@@ -105,7 +105,7 @@ def split_train_test(src_dir, tgt_dir, nb_test_subjects):
     test_filename = f'{tgt_dir}/test.csv'
     with open(test_filename, 'w', newline='') as myfile:
         wr = csv.writer(myfile, quoting=csv.QUOTE_ALL)
-        for sub in train_subjects:
+        for sub in test_subjects:
             wr.writerow([sub])
 
 def main(argv):
