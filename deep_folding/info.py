@@ -41,7 +41,8 @@ AUTHOR = "Louise Guillon and Joel Chavas"
 AUTHOR_EMAIL = ""
 PLATFORMS = "OS Independent"
 PROVIDES = ["deep_folding"]
-REQUIRES = ['six', 'numpy', 'pytest', 'GitPython', 'typing', 'joblib', 'pqdm']
+REQUIRES = ['six', 'numpy', 'pytest', 'GitPython', 'typing', 'joblib',
+            'tqdm>=4.36', 'pqdm']  # , 'moving_averages']
 EXTRA_REQUIRES = {
     "plotting": ["matplotlib"],
     "doc": ["sphinx>=" + SPHINX_MIN_VERSION]}
