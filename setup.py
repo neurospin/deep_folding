@@ -14,7 +14,7 @@ setup(
     description=release_info['DESCRIPTION'],
     long_description=open('README.rst').read(),
     install_requires=release_info["REQUIRES"],
-    url=release_info['DOWNLOAD_URL'],
+    url=release_info['URL'],
     author=release_info['AUTHOR'],
     author_email=release_info['AUTHOR_EMAIL']
 )
