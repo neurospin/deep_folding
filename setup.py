@@ -1,14 +1,20 @@
 from setuptools import setup, find_packages
 
+release_info = {}
+python_dir = os.path.dirname(__file__)
+with open(os.path.join(python_dir, "deep_folding", "info.py")) as f:
+    code = f.read()
+    exec(code, release_info)
+
 setup(
-    name='deep_folding',
-    version='0.0.1',
+    name=release_info['NAME'],
+    version=release_info['__version__'],
     packages=find_packages(exclude=['tests*', 'notebooks*']),
-    license='CeCILL license version 2',
-    description='Deep learning utilities to characterize sulcus patterns',
+    license=release_info['LICENSE'],
+    description=release_info['DESCRIPTION'],
     long_description=open('README.rst').read(),
-    install_requires=['six', 'numpy', 'pytest', 'GitPython', 'typing', 'joblib', 'pqdm'],
-    url='https://github.com/neurospin/deep_folding',
-    author='Louise Guillon and Joel Chavas',
-    author_email=''
+    install_requires=release_info["REQUIRES"],
+    url=release_info['URL'],
+    author=release_info['AUTHOR'],
+    author_email=release_info['AUTHOR_EMAIL']
 )
