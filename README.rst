@@ -38,9 +38,9 @@ If you want to install the package:
 
 .. code-block:: shell
 
-    python setup.py install
+    python3 setup.py install
 
-Notebooks are in the repertory notebooks, access using:
+Notebooks are in the folder notebooks, access using:
 
 .. code-block:: shell
 
@@ -54,6 +54,7 @@ If you want to build the documentation and pushes it to the web:
 
     bv bash # to enter brainvisa environnment
     . venv/bin/activate
+    pip3 install -e .[doc]
     cd docs
     ./make_docs.sh
 
