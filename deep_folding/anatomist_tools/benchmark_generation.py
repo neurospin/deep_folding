@@ -53,7 +53,7 @@ from glob import glob
 import random
 import pandas as pd
 import os
-from deep_folding.anatomist_tools.utils.load_bbox import compute_max_box
+from deep_folding.anatomist_tools.utils.bbox import compute_max_box
 from deep_folding.anatomist_tools.utils.sulcus_side import complete_sulci_name
 
 
