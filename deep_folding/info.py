@@ -42,7 +42,8 @@ AUTHOR_EMAIL = ""
 PLATFORMS = "OS Independent"
 PROVIDES = ["deep_folding"]
 REQUIRES = ['six', 'numpy', 'pytest', 'GitPython', 'typing', 'joblib',
-            'tqdm>=4.36', 'pqdm']  # , 'moving_averages']
+            'tqdm>=4.36', 'pqdm', 'sphinx',
+            'sphinx-rtd-theme']  # , 'moving_averages']
 EXTRA_REQUIRES = {
     "plotting": ["matplotlib"],
     "doc": ["sphinx>=" + SPHINX_MIN_VERSION]}
