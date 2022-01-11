@@ -1,3 +1,2 @@
-To install the docs properly, you may need to install sphinx in the virtual environment:
-
-pip3 install -U sphinx
+In a brainvisa environment, after having installed deep_folding, launch:
+./make_docs.sh
