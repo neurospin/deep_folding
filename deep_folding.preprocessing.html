@@ -59,6 +59,8 @@
 <li class="toctree-l3"><a class="reference internal" href="deep_folding.utils.html">deep_folding.utils package</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="deep_folding.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="deep_folding.html#module-deep_folding.info">deep_folding.info module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="deep_folding.html#module-deep_folding">Module contents</a></li>
 </ul>
 </li>
@@ -178,7 +180,7 @@ IN: subject_list: list of subjects to put in loader, csv file</p>
 <p>Tools in order to create pytorch dataloaders</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="deep_folding.preprocessing.datasets.AugDatasetTransformer">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">deep_folding.preprocessing.datasets.</span></span><span class="sig-name descname"><span class="pre">AugDatasetTransformer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">base_dataset</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.preprocessing.datasets.AugDatasetTransformer" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">deep_folding.preprocessing.datasets.</span></span><span class="sig-name descname"><span class="pre">AugDatasetTransformer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">base_dataset</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.preprocessing.datasets.AugDatasetTransformer" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">torch.utils.data.dataset.Dataset</span></code></p>
 <p>Custom dataset that applies data augmentation on a dataset processed
 through TensorDataset or Skeleton Dataset classes.
@@ -187,7 +189,7 @@ Transformations are performed on CPU.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="deep_folding.preprocessing.datasets.SkeletonDataset">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">deep_folding.preprocessing.datasets.</span></span><span class="sig-name descname"><span class="pre">SkeletonDataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataframe</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filenames</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.preprocessing.datasets.SkeletonDataset" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">deep_folding.preprocessing.datasets.</span></span><span class="sig-name descname"><span class="pre">SkeletonDataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataframe</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filenames</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.preprocessing.datasets.SkeletonDataset" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Custom dataset for skeleton images that includes image file paths.
 dataframe: dataframe containing training and testing arrays
@@ -197,7 +199,7 @@ Works on CPUs</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="deep_folding.preprocessing.datasets.TensorDataset">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">deep_folding.preprocessing.datasets.</span></span><span class="sig-name descname"><span class="pre">TensorDataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filenames</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skeleton</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.preprocessing.datasets.TensorDataset" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">deep_folding.preprocessing.datasets.</span></span><span class="sig-name descname"><span class="pre">TensorDataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filenames</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skeleton</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.preprocessing.datasets.TensorDataset" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Custom dataset that includes image file paths.
 Applies different transformations to data depending on the type of input.
@@ -216,28 +218,28 @@ skeleton: boolean, whether input is skeleton images or not</p>
 is loaded.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="deep_folding.preprocessing.pynet_transforms.Downsample">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">deep_folding.preprocessing.pynet_transforms.</span></span><span class="sig-name descname"><span class="pre">Downsample</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scale</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">with_channels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.preprocessing.pynet_transforms.Downsample" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">deep_folding.preprocessing.pynet_transforms.</span></span><span class="sig-name descname"><span class="pre">Downsample</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scale</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">with_channels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.preprocessing.pynet_transforms.Downsample" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>A class to downsample an array.</p>
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="deep_folding.preprocessing.pynet_transforms.DownsampleTensor">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">deep_folding.preprocessing.pynet_transforms.</span></span><span class="sig-name descname"><span class="pre">DownsampleTensor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scale</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">with_channels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.preprocessing.pynet_transforms.DownsampleTensor" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">deep_folding.preprocessing.pynet_transforms.</span></span><span class="sig-name descname"><span class="pre">DownsampleTensor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scale</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">with_channels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.preprocessing.pynet_transforms.DownsampleTensor" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>A class to downsample a tensor.</p>
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="deep_folding.preprocessing.pynet_transforms.NormalizeHisto">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">deep_folding.preprocessing.pynet_transforms.</span></span><span class="sig-name descname"><span class="pre">NormalizeHisto</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arr</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.preprocessing.pynet_transforms.NormalizeHisto" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">deep_folding.preprocessing.pynet_transforms.</span></span><span class="sig-name descname"><span class="pre">NormalizeHisto</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arr</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.preprocessing.pynet_transforms.NormalizeHisto" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Class to normalize voxels’ intensity values to interval</p>
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="deep_folding.preprocessing.pynet_transforms.NormalizeSkeleton">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">deep_folding.preprocessing.pynet_transforms.</span></span><span class="sig-name descname"><span class="pre">NormalizeSkeleton</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nb_cls</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.preprocessing.pynet_transforms.NormalizeSkeleton" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">deep_folding.preprocessing.pynet_transforms.</span></span><span class="sig-name descname"><span class="pre">NormalizeSkeleton</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nb_cls</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.preprocessing.pynet_transforms.NormalizeSkeleton" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Class to normalize skeleton objects,
 black voxels: 0
@@ -246,14 +248,14 @@ grey and white voxels: 1</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="deep_folding.preprocessing.pynet_transforms.Padding">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">deep_folding.preprocessing.pynet_transforms.</span></span><span class="sig-name descname"><span class="pre">Padding</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">shape</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_channels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fill_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.preprocessing.pynet_transforms.Padding" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">deep_folding.preprocessing.pynet_transforms.</span></span><span class="sig-name descname"><span class="pre">Padding</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">shape</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_channels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fill_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.preprocessing.pynet_transforms.Padding" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>A class to pad an image.</p>
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="deep_folding.preprocessing.pynet_transforms.PaddingTensor">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">deep_folding.preprocessing.pynet_transforms.</span></span><span class="sig-name descname"><span class="pre">PaddingTensor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">shape</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_channels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fill_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.preprocessing.pynet_transforms.PaddingTensor" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">deep_folding.preprocessing.pynet_transforms.</span></span><span class="sig-name descname"><span class="pre">PaddingTensor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">shape</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_channels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fill_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.preprocessing.pynet_transforms.PaddingTensor" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>A class to pad a tensor</p>
 </dd></dl>

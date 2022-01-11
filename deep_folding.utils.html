@@ -52,11 +52,14 @@
 <li class="toctree-l4"><a class="reference internal" href="#submodules">Submodules</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-deep_folding.utils.pytorchtools">deep_folding.utils.pytorchtools module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-deep_folding.utils.save_results">deep_folding.utils.save_results module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-deep_folding.utils.split_train_test">deep_folding.utils.split_train_test module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-deep_folding.utils">Module contents</a></li>
 </ul>
 </li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="deep_folding.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="deep_folding.html#module-deep_folding.info">deep_folding.info module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="deep_folding.html#module-deep_folding">Module contents</a></li>
 </ul>
 </li>
@@ -97,7 +100,7 @@
 <p>From <a class="reference external" href="https://github.com/Bjarten/early-stopping-pytorch/blob/master/pytorchtools.py">https://github.com/Bjarten/early-stopping-pytorch/blob/master/pytorchtools.py</a></p>
 <dl class="py class">
 <dt class="sig sig-object py" id="deep_folding.utils.pytorchtools.EarlyStopping">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">deep_folding.utils.pytorchtools.</span></span><span class="sig-name descname"><span class="pre">EarlyStopping</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">root_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">patience</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">7</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.utils.pytorchtools.EarlyStopping" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">deep_folding.utils.pytorchtools.</span></span><span class="sig-name descname"><span class="pre">EarlyStopping</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">root_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">patience</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">7</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.utils.pytorchtools.EarlyStopping" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Early stops the training if validation loss doesn’t improve after a given patience.</p>
 <dl class="py method">
@@ -131,6 +134,46 @@ input_type:’jeff crops or normalized crops’,
 skeleton: ‘True or False’},
 output: {loss_train:’‘, loss_test:’‘}}</p>
 </div></blockquote>
+</dd></dl>
+
+</div>
+<div class="section" id="module-deep_folding.utils.split_train_test">
+<span id="deep-folding-utils-split-train-test-module"></span><h2>deep_folding.utils.split_train_test module<a class="headerlink" href="#module-deep_folding.utils.split_train_test" title="Permalink to this headline"></a></h2>
+<p>Splits the subjects IDs in a train set and a test set.</p>
+<p>Each set is represented as a csv file (train.csv and test.csv).
+The first column on each row is the subject ID.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="deep_folding.utils.split_train_test.main">
+<span class="sig-prename descclassname"><span class="pre">deep_folding.utils.split_train_test.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">argv</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.utils.split_train_test.main" title="Permalink to this definition"></a></dt>
+<dd><p>Reads argument line and creates cropped files and pickle file</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>argv</strong> – a list containing command line arguments</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="deep_folding.utils.split_train_test.parse_args">
+<span class="sig-prename descclassname"><span class="pre">deep_folding.utils.split_train_test.</span></span><span class="sig-name descname"><span class="pre">parse_args</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">argv</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.utils.split_train_test.parse_args" title="Permalink to this definition"></a></dt>
+<dd><p>Function parsing command-line arguments</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>argv</strong> – a list containing command line arguments</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Namespace</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>args</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="deep_folding.utils.split_train_test.split_train_test">
+<span class="sig-prename descclassname"><span class="pre">deep_folding.utils.split_train_test.</span></span><span class="sig-name descname"><span class="pre">split_train_test</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">src_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tgt_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_test_subjects</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.utils.split_train_test.split_train_test" title="Permalink to this definition"></a></dt>
+<dd><p>Splits the subject IDs in train and test</p>
 </dd></dl>
 
 </div>

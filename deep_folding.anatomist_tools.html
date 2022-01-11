@@ -51,12 +51,12 @@
 <li class="toctree-l4"><a class="reference internal" href="#subpackages">Subpackages</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#submodules">Submodules</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-deep_folding.anatomist_tools.benchmark_generation">deep_folding.anatomist_tools.benchmark_generation module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#deep-folding-anatomist-tools-benchmark-pipeline-module">deep_folding.anatomist_tools.benchmark_pipeline module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#module-deep_folding.anatomist_tools.bounding_box">deep_folding.anatomist_tools.bounding_box module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-deep_folding.anatomist_tools.benchmark_pipeline">deep_folding.anatomist_tools.benchmark_pipeline module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-deep_folding.anatomist_tools.crop_definition">deep_folding.anatomist_tools.crop_definition module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-deep_folding.anatomist_tools.dataset_gen_pipe">deep_folding.anatomist_tools.dataset_gen_pipe module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-deep_folding.anatomist_tools.display">deep_folding.anatomist_tools.display module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-deep_folding.anatomist_tools.load_data">deep_folding.anatomist_tools.load_data module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#module-deep_folding.anatomist_tools.transform">deep_folding.anatomist_tools.transform module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-deep_folding.anatomist_tools.mask_qc">deep_folding.anatomist_tools.mask_qc module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-deep_folding.anatomist_tools">Module contents</a></li>
 </ul>
 </li>
@@ -64,6 +64,8 @@
 <li class="toctree-l3"><a class="reference internal" href="deep_folding.utils.html">deep_folding.utils package</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="deep_folding.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="deep_folding.html#module-deep_folding.info">deep_folding.info module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="deep_folding.html#module-deep_folding">Module contents</a></li>
 </ul>
 </li>
@@ -102,10 +104,18 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="deep_folding.anatomist_tools.utils.html">deep_folding.anatomist_tools.utils package</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="deep_folding.anatomist_tools.utils.html#submodules">Submodules</a></li>
-<li class="toctree-l2"><a class="reference internal" href="deep_folding.anatomist_tools.utils.html#module-deep_folding.anatomist_tools.utils.load_bbox">deep_folding.anatomist_tools.utils.load_bbox module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="deep_folding.anatomist_tools.utils.html#module-deep_folding.anatomist_tools.utils.bbox">deep_folding.anatomist_tools.utils.bbox module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="deep_folding.anatomist_tools.utils.html#module-deep_folding.anatomist_tools.utils.convert_volume_to_bucket">deep_folding.anatomist_tools.utils.convert_volume_to_bucket module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="deep_folding.anatomist_tools.utils.html#module-deep_folding.anatomist_tools.utils.dilate_mask">deep_folding.anatomist_tools.utils.dilate_mask module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="deep_folding.anatomist_tools.utils.html#module-deep_folding.anatomist_tools.utils.logs">deep_folding.anatomist_tools.utils.logs module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="deep_folding.anatomist_tools.utils.html#module-deep_folding.anatomist_tools.utils.mask">deep_folding.anatomist_tools.utils.mask module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="deep_folding.anatomist_tools.utils.html#module-deep_folding.anatomist_tools.utils.remove_hull">deep_folding.anatomist_tools.utils.remove_hull module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="deep_folding.anatomist_tools.utils.html#module-deep_folding.anatomist_tools.utils.resample">deep_folding.anatomist_tools.utils.resample module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="deep_folding.anatomist_tools.utils.html#module-deep_folding.anatomist_tools.utils.sulcus_side">deep_folding.anatomist_tools.utils.sulcus_side module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="deep_folding.anatomist_tools.utils.html#module-deep_folding.anatomist_tools.utils.write_skeleton">deep_folding.anatomist_tools.utils.write_skeleton module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="deep_folding.anatomist_tools.utils.html#typical-usage">Typical usage</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="deep_folding.anatomist_tools.utils.html#module-deep_folding.anatomist_tools.utils">Module contents</a></li>
 </ul>
 </li>
@@ -125,7 +135,7 @@ include a minimum number of voxels (in order that the anomaly is big enough to
 be considered as abnormal).</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="deep_folding.anatomist_tools.benchmark_generation.Benchmark">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">deep_folding.anatomist_tools.benchmark_generation.</span></span><span class="sig-name descname"><span class="pre">Benchmark</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">b_num</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">side</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ss_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sulci_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">saving_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'/neurospin/hcp/ANALYSIS/3T_morphologist/'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bbox_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'/neurospin/dico/data/deep_folding/data/bbox/'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.benchmark_generation.Benchmark" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">deep_folding.anatomist_tools.benchmark_generation.</span></span><span class="sig-name descname"><span class="pre">Benchmark</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">b_num</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">side</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ss_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sulci_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">saving_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'/neurospin/hcp/ANALYSIS/3T_morphologist/'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bbox_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'/neurospin/dico/data/deep_folding/data/bbox/'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.benchmark_generation.Benchmark" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Generates benchmark of altered skeletons</p>
 <dl class="py method">
@@ -227,25 +237,93 @@ Only right handed HCP subjects</p>
 </dd></dl>
 
 </div>
-<div class="section" id="deep-folding-anatomist-tools-benchmark-pipeline-module">
-<h2>deep_folding.anatomist_tools.benchmark_pipeline module<a class="headerlink" href="#deep-folding-anatomist-tools-benchmark-pipeline-module" title="Permalink to this headline"></a></h2>
+<div class="section" id="module-deep_folding.anatomist_tools.benchmark_pipeline">
+<span id="deep-folding-anatomist-tools-benchmark-pipeline-module"></span><h2>deep_folding.anatomist_tools.benchmark_pipeline module<a class="headerlink" href="#module-deep_folding.anatomist_tools.benchmark_pipeline" title="Permalink to this headline"></a></h2>
+<p>Full pipeline to create a benchmark of abnormalities.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="deep_folding.anatomist_tools.benchmark_pipeline.BenchmarkPipe">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">deep_folding.anatomist_tools.benchmark_pipeline.</span></span><span class="sig-name descname"><span class="pre">BenchmarkPipe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tgt_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sulcus</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">side</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ss_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bench_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resampling</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bbox_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subjects_list</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.benchmark_pipeline.BenchmarkPipe" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Generates benchmark files of a given mode</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="deep_folding.anatomist_tools.benchmark_pipeline.BenchmarkPipe.crop_one_file">
+<span class="sig-name descname"><span class="pre">crop_one_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sub</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.benchmark_pipeline.BenchmarkPipe.crop_one_file" title="Permalink to this definition"></a></dt>
+<dd><p>Normalizes, crops and flips if necessary, one file</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>sub</strong> – string giving the subject ID</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="deep_folding.anatomist_tools.benchmark_pipeline.BenchmarkPipe.get_sub_list">
+<span class="sig-name descname"><span class="pre">get_sub_list</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.benchmark_pipeline.BenchmarkPipe.get_sub_list" title="Permalink to this definition"></a></dt>
+<dd><p>Get IDs of subjects to normalize, crop</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="deep_folding.anatomist_tools.benchmark_pipeline.BenchmarkPipe.launch_pipe">
+<span class="sig-name descname"><span class="pre">launch_pipe</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.benchmark_pipeline.BenchmarkPipe.launch_pipe" title="Permalink to this definition"></a></dt>
+<dd><p>Main API to create benchmark files</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="deep_folding.anatomist_tools.benchmark_pipeline.define_njobs">
+<span class="sig-prename descclassname"><span class="pre">deep_folding.anatomist_tools.benchmark_pipeline.</span></span><span class="sig-name descname"><span class="pre">define_njobs</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.benchmark_pipeline.define_njobs" title="Permalink to this definition"></a></dt>
+<dd><p>Returns number of cpus used by main loop</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="deep_folding.anatomist_tools.benchmark_pipeline.main">
+<span class="sig-prename descclassname"><span class="pre">deep_folding.anatomist_tools.benchmark_pipeline.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">argv</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.benchmark_pipeline.main" title="Permalink to this definition"></a></dt>
+<dd><p>Reads argument line and creates benchmark files</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>argv</strong> – a list containing command line arguments</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="deep_folding.anatomist_tools.benchmark_pipeline.parse_args">
+<span class="sig-prename descclassname"><span class="pre">deep_folding.anatomist_tools.benchmark_pipeline.</span></span><span class="sig-name descname"><span class="pre">parse_args</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">argv</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.benchmark_pipeline.parse_args" title="Permalink to this definition"></a></dt>
+<dd><p>Function parsing command-line arguments</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>argv</strong> – a list containing command line arguments</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>a list with source directory names, full path
+sulcus: a string containing the sulcus to analyze
+number_subjects: number of subjects to analyze</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>src_dir</p>
+</dd>
+</dl>
+</dd></dl>
+
 </div>
-<div class="section" id="module-deep_folding.anatomist_tools.bounding_box">
-<span id="deep-folding-anatomist-tools-bounding-box-module"></span><h2>deep_folding.anatomist_tools.bounding_box module<a class="headerlink" href="#module-deep_folding.anatomist_tools.bounding_box" title="Permalink to this headline"></a></h2>
+<div class="section" id="module-deep_folding.anatomist_tools.crop_definition">
+<span id="deep-folding-anatomist-tools-crop-definition-module"></span><h2>deep_folding.anatomist_tools.crop_definition module<a class="headerlink" href="#module-deep_folding.anatomist_tools.crop_definition" title="Permalink to this headline"></a></h2>
 <p>The aim of this script is to output bounding box got given sulci
 based on a manually labelled dataset</p>
 <p>Bounding box corresponds to the biggest box that encompasses the given sulci
 on all subjects of the manually labelled dataset. It measures the bounding box
-in the normalized SPM space</p>
+in the MNI152  space</p>
 <dl class="py class">
-<dt class="sig sig-object py" id="deep_folding.anatomist_tools.bounding_box.BoundingBoxMax">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">deep_folding.anatomist_tools.bounding_box.</span></span><span class="sig-name descname"><span class="pre">BoundingBoxMax</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">src_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'/neurospin/lnao/PClean/database_learnclean/all/'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path_to_graph</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'t1mri/t1/default_analysis/folds/3.3/base2018_manual'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tgt_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'/neurospin/dico/data/deep_folding/test/bbox'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sulcus</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'S.T.s.ter.asc.ant.'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">side</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'L'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">image_normalized_spm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'/neurospin/hcp/ANALYSIS/3T_morphologist/100206/t1mri/default_acquisition/normalized_SPM_100206.nii'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_voxel_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.bounding_box.BoundingBoxMax" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="deep_folding.anatomist_tools.crop_definition.BoundingBoxMax">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">deep_folding.anatomist_tools.crop_definition.</span></span><span class="sig-name descname"><span class="pre">BoundingBoxMax</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">src_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'/neurospin/dico/data/bv_databases/human/pclean/all'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path_to_graph</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'t1mri/t1/default_analysis/folds/3.3/base2018_manual'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bbox_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'/neurospin/dico/data/deep_folding/test/bbox'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'/neurospin/dico/data/deep_folding/test/mask'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sulcus</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'S.T.s.ter.asc.ant.'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">side</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'L'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_voxel_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.crop_definition.BoundingBoxMax" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Determines the maximum Bounding Box around given sulci</p>
-<p>It is determined in the normalized SPM referential</p>
+<p>It is determined in the  MNI ICBM152 nonlinear 2009c asymmetrical template
+<a class="reference external" href="http://www.bic.mni.mcgill.ca/~vfonov/icbm/2009/mni_icbm152_nlin_asym_09b_nifti.zip">http://www.bic.mni.mcgill.ca/~vfonov/icbm/2009/mni_icbm152_nlin_asym_09b_nifti.zip</a></p>
 <dl class="py method">
-<dt class="sig sig-object py" id="deep_folding.anatomist_tools.bounding_box.BoundingBoxMax.compute_bounding_box">
-<span class="sig-name descname"><span class="pre">compute_bounding_box</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">number_subjects</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.bounding_box.BoundingBoxMax.compute_bounding_box" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="deep_folding.anatomist_tools.crop_definition.BoundingBoxMax.compute_bounding_box">
+<span class="sig-name descname"><span class="pre">compute_bounding_box</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">number_subjects</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.crop_definition.BoundingBoxMax.compute_bounding_box" title="Permalink to this definition"></a></dt>
 <dd><p>Main class program to compute the bounding box</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -255,19 +333,17 @@ in the normalized SPM space</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="deep_folding.anatomist_tools.bounding_box.BoundingBoxMax.compute_box_voxel">
-<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">compute_box_voxel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bbmin_tal</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bbmax_tal</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tal_to_normalized_spm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">voxel_size</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.bounding_box.BoundingBoxMax.compute_box_voxel" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="deep_folding.anatomist_tools.crop_definition.BoundingBoxMax.compute_box_voxel">
+<span class="sig-name descname"><span class="pre">compute_box_voxel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bbmin_mni152</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bbmax_mni152</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.crop_definition.BoundingBoxMax.compute_box_voxel" title="Permalink to this definition"></a></dt>
 <dd><p>Returns the coordinates of the box as voxels</p>
 <p>Coordinates of the box in voxels are determined in the MNI referential</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>bbmin_tal</strong> – numpy array with the coordinates of the upper right corner
-of the box (AIMS Talairach space)</p></li>
-<li><p><strong>bbmax_tal</strong> – numpy array with the coordinates of the lower left corner
-of the box (AIMS Talairach space)</p></li>
-<li><p><strong>tal_to_normalized_spm</strong> – transformation used from Talairach space
-to normalized SPM</p></li>
+<li><p><strong>bbmin_mni152</strong> – numpy array with the coordinates of the upper right corner
+of the box (MNI152 space)</p></li>
+<li><p><strong>bbmax_mni152</strong> – numpy array with the coordinates of the lower left corner
+of the box (MNI152 space)</p></li>
 <li><p><strong>voxel_size</strong> – voxel size (in MNI referential or HCP normalized SPM space)</p></li>
 </ul>
 </dd>
@@ -275,7 +351,7 @@ to normalized SPM</p></li>
 <dd class="field-even"><p><dl class="simple">
 <dt>numpy array with the coordinates of the upper right corner</dt><dd><p>of the box (voxels in MNI space)</p>
 </dd>
-<dt>bblax_vox: numpy array with the coordinates of the lower left corner</dt><dd><p>of the box (voxels in MNI space)</p>
+<dt>bbmax_vox: numpy array with the coordinates of the lower left corner</dt><dd><p>of the box (voxels in MNI space)</p>
 </dd>
 </dl>
 </p>
@@ -287,40 +363,20 @@ to normalized SPM</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="deep_folding.anatomist_tools.bounding_box.BoundingBoxMax.compute_max_box">
-<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">compute_max_box</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">list_bbmin</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">list_bbmax</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.bounding_box.BoundingBoxMax.compute_max_box" title="Permalink to this definition"></a></dt>
-<dd><p>Returns the coordinates of the box encompassing all input boxes</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>list_bbmin</strong> – list containing the upper right vertex of the box</p></li>
-<li><p><strong>list_bbmax</strong> – list containing the lower left vertex of the box</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><dl class="simple">
-<dt>numpy array with the x,y,z coordinates</dt><dd><p>of the upper right corner of the box</p>
-</dd>
-<dt>bblax: numpy array with the x,y,z coordinates</dt><dd><p>of the lower left corner of the box</p>
-</dd>
-</dl>
-</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>bbmin</p>
-</dd>
-</dl>
+<dt class="sig sig-object py" id="deep_folding.anatomist_tools.crop_definition.BoundingBoxMax.create_mask">
+<span class="sig-name descname"><span class="pre">create_mask</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.crop_definition.BoundingBoxMax.create_mask" title="Permalink to this definition"></a></dt>
+<dd><p>Creates aims volume in MNI ICBM152 nonlinear 2009c asymmetrical template
+<a class="reference external" href="http://www.bic.mni.mcgill.ca/~vfonov/icbm/2009/mni_icbm152_nlin_asym_09b_nifti.zip">http://www.bic.mni.mcgill.ca/~vfonov/icbm/2009/mni_icbm152_nlin_asym_09b_nifti.zip</a></p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="deep_folding.anatomist_tools.bounding_box.BoundingBoxMax.get_bounding_boxes">
-<span class="sig-name descname"><span class="pre">get_bounding_boxes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">subjects</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.bounding_box.BoundingBoxMax.get_bounding_boxes" title="Permalink to this definition"></a></dt>
-<dd><p>get bounding boxes of the chosen sulcus for all subjects</p>
+<dt class="sig sig-object py" id="deep_folding.anatomist_tools.crop_definition.BoundingBoxMax.get_bounding_boxes">
+<span class="sig-name descname"><span class="pre">get_bounding_boxes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">subjects</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.crop_definition.BoundingBoxMax.get_bounding_boxes" title="Permalink to this definition"></a></dt>
+<dd><p>get bounding boxes of the chosen sulcus for all subjects.</p>
 <p>Function that outputs the bounding box for the listed sulci on a manually
 labeled dataset.
 Bounding box corresponds to the biggest box encountered in the manually
-labeled subjects in the AIMS Talairach space, different from the MNI
-Talairach template.
+labeled subjects in the MNI1 152 space.
 The bounding box is the smallest rectangular box that
 encompasses the sulcus.</p>
 <dl class="field-list simple">
@@ -329,9 +385,9 @@ encompasses the sulcus.</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p><dl class="simple">
-<dt>list containing the upper right vertex of the box</dt><dd><p>in the Talairach space</p>
+<dt>list containing the upper right vertex of the box</dt><dd><p>in the MNI 152 space</p>
 </dd>
-<dt>list_bbmax: list containing the lower left vertex of the box</dt><dd><p>in the Talairach space</p>
+<dt>list_bbmax: list containing the lower left vertex of the box</dt><dd><p>in the MNI 152 space</p>
 </dd>
 </dl>
 </p>
@@ -343,14 +399,13 @@ encompasses the sulcus.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="deep_folding.anatomist_tools.bounding_box.BoundingBoxMax.get_one_bounding_box">
-<span class="sig-name descname"><span class="pre">get_one_bounding_box</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">graph_filename</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.bounding_box.BoundingBoxMax.get_one_bounding_box" title="Permalink to this definition"></a></dt>
-<dd><p>get bounding box of the chosen sulcus for one data graph</p>
+<dt class="sig sig-object py" id="deep_folding.anatomist_tools.crop_definition.BoundingBoxMax.get_one_bounding_box">
+<span class="sig-name descname"><span class="pre">get_one_bounding_box</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">graph_filename</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.crop_definition.BoundingBoxMax.get_one_bounding_box" title="Permalink to this definition"></a></dt>
+<dd><p>get bounding box of the chosen sulcus for one data graph in MNI 152</p>
 <p>Function that outputs the bounding box for the listed sulci
 for this datagraph. The bounding box is the smallest rectangular box
 that encompasses the chosen sulcus.
-It is given in the AIMS Talairch referential, different from the MNI
-Talairach referential.</p>
+It is given in the MNI 152 referential.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>graph_filename</strong> – string being the name of graph file .arg to analyze:
@@ -358,9 +413,9 @@ for example: ‘Lammon_base2018_manual.arg’</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p><dl class="simple">
-<dt>numpy array giving the upper right vertex coordinates</dt><dd><p>of the box in the Talairach space</p>
+<dt>numpy array giving the upper right vertex coordinates</dt><dd><p>of the box in the MNI 152 referential</p>
 </dd>
-<dt>bbox_max: numpy array fiving the lower left vertex coordinates</dt><dd><p>of the box in the Talairach space</p>
+<dt>bbox_max: numpy array fiving the lower left vertex coordinates</dt><dd><p>of the box in the MNI 152 referential</p>
 </dd>
 </dl>
 </p>
@@ -372,8 +427,31 @@ for example: ‘Lammon_base2018_manual.arg’</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="deep_folding.anatomist_tools.bounding_box.BoundingBoxMax.list_all_subjects">
-<span class="sig-name descname"><span class="pre">list_all_subjects</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.bounding_box.BoundingBoxMax.list_all_subjects" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="deep_folding.anatomist_tools.crop_definition.BoundingBoxMax.increment_mask">
+<span class="sig-name descname"><span class="pre">increment_mask</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">subjects</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.crop_definition.BoundingBoxMax.increment_mask" title="Permalink to this definition"></a></dt>
+<dd><p>increment mask for the chosen sulcus for all subjects</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>subjects</strong> – list containing all subjects to be analyzed</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="deep_folding.anatomist_tools.crop_definition.BoundingBoxMax.increment_one_mask">
+<span class="sig-name descname"><span class="pre">increment_one_mask</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">graph_filename</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.crop_definition.BoundingBoxMax.increment_one_mask" title="Permalink to this definition"></a></dt>
+<dd><p>Increments self.mask of 1 where there is the sulcus</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>graph_filename</strong> – string being the name of graph file .arg to analyze:
+for example: ‘Lammon_base2018_manual.arg’</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="deep_folding.anatomist_tools.crop_definition.BoundingBoxMax.list_all_subjects">
+<span class="sig-name descname"><span class="pre">list_all_subjects</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.crop_definition.BoundingBoxMax.list_all_subjects" title="Permalink to this definition"></a></dt>
 <dd><p>List all subjects from the clean database (directory src_dir).</p>
 <p>Subjects are the names of the subdirectories of the root directory.</p>
 <p>Parameters:</p>
@@ -388,34 +466,22 @@ for example: ‘Lammon_base2018_manual.arg’</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="deep_folding.anatomist_tools.bounding_box.BoundingBoxMax.tal_to_normalized_spm">
-<span class="sig-name descname"><span class="pre">tal_to_normalized_spm</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.bounding_box.BoundingBoxMax.tal_to_normalized_spm" title="Permalink to this definition"></a></dt>
-<dd><p>Returns the transformation from AIMS Talairach to normalized SPM</p>
-<p>Computes the transformation from AIMS Talairach space to normalized SPM
-space, MNI space, passing through SPM template.
-Empirically, this was done because some Deep learning results were better
-with SPM template.
-The transform from MNI to SPM template is taken from HCP database</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p><dl class="simple">
-<dt>transformation from AIMS Talairach space to</dt><dd><p>normalized SPM</p>
-</dd>
-</dl>
-<p>voxel_size: voxel size (in MNI referential or HCP normalized SPM space)</p>
-</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>tal_to_normalized_spm</p>
-</dd>
-</dl>
+<dt class="sig sig-object py" id="deep_folding.anatomist_tools.crop_definition.BoundingBoxMax.transform_to_aims_talairach">
+<span class="sig-name descname"><span class="pre">transform_to_aims_talairach</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bbmin_mni152</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bbmax_mni152</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.crop_definition.BoundingBoxMax.transform_to_aims_talairach" title="Permalink to this definition"></a></dt>
+<dd><p>Transform bbox coordinates from MNI152 to AIMS talairach referential</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="deep_folding.anatomist_tools.crop_definition.BoundingBoxMax.write_mask">
+<span class="sig-name descname"><span class="pre">write_mask</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.crop_definition.BoundingBoxMax.write_mask" title="Permalink to this definition"></a></dt>
+<dd><p>Writes mask on mask file</p>
 </dd></dl>
 
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="deep_folding.anatomist_tools.bounding_box.bounding_box">
-<span class="sig-prename descclassname"><span class="pre">deep_folding.anatomist_tools.bounding_box.</span></span><span class="sig-name descname"><span class="pre">bounding_box</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">src_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'/neurospin/lnao/PClean/database_learnclean/all/'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tgt_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'/neurospin/dico/data/deep_folding/test/bbox'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path_to_graph</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'t1mri/t1/default_analysis/folds/3.3/base2018_manual'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sulcus</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'S.T.s.ter.asc.ant.'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">side</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'L'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">number_subjects</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">image_normalized_spm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'/neurospin/hcp/ANALYSIS/3T_morphologist/100206/t1mri/default_acquisition/normalized_SPM_100206.nii'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_voxel_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.bounding_box.bounding_box" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="deep_folding.anatomist_tools.crop_definition.bounding_box">
+<span class="sig-prename descclassname"><span class="pre">deep_folding.anatomist_tools.crop_definition.</span></span><span class="sig-name descname"><span class="pre">bounding_box</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">src_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'/neurospin/dico/data/bv_databases/human/pclean/all'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bbox_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'/neurospin/dico/data/deep_folding/test/bbox'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'/neurospin/dico/data/deep_folding/test/mask'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path_to_graph</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'t1mri/t1/default_analysis/folds/3.3/base2018_manual'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sulcus</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'S.T.s.ter.asc.ant.'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">side</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'L'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">number_subjects</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_voxel_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.crop_definition.bounding_box" title="Permalink to this definition"></a></dt>
 <dd><p>Main program computing the box encompassing the sulcus in all subjects</p>
 <p>The programm loops over all subjects
 and computes in MNI space the voxel coordinates of the box encompassing
@@ -424,22 +490,22 @@ the sulci for all subjects</p>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>src_dir</strong> – list of strings -&gt; directories of the supervised databases</p></li>
-<li><p><strong>tgt_dir</strong> – string giving target directory path</p></li>
+<li><p><strong>bbox_dir</strong> – string giving target bbox directory path</p></li>
+<li><p><strong>mask_dir</strong> – string giving target mask directory path</p></li>
 <li><p><strong>path_to_graph</strong> – string giving relative path to manually labelled graph</p></li>
 <li><p><strong>side</strong> – hemisphere side (either ‘L’ for left, or ‘R’ for right)</p></li>
 <li><p><strong>sulcus</strong> – string giving the sulcus to analyze</p></li>
 <li><p><strong>number_subjects</strong> – integer giving the number of subjects to analyze,
-by default it is set to _ALL_SUBJECTS (-1).</p></li>
-<li><p><strong>image_normalized_spm</strong> – string giving file name (with path) of normalized
-SPM file out of which is extracted the voxel size</p></li>
+by default it is set to _ALL_SUBJECTS (-1)</p></li>
+<li><p><strong>skeleton_file</strong> – skeleton file of the reference subject</p></li>
 </ul>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="deep_folding.anatomist_tools.bounding_box.main">
-<span class="sig-prename descclassname"><span class="pre">deep_folding.anatomist_tools.bounding_box.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">argv</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.bounding_box.main" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="deep_folding.anatomist_tools.crop_definition.main">
+<span class="sig-prename descclassname"><span class="pre">deep_folding.anatomist_tools.crop_definition.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">argv</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.crop_definition.main" title="Permalink to this definition"></a></dt>
 <dd><p>Reads argument line and determines the max bounding box</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -449,8 +515,8 @@ SPM file out of which is extracted the voxel size</p></li>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="deep_folding.anatomist_tools.bounding_box.parse_args">
-<span class="sig-prename descclassname"><span class="pre">deep_folding.anatomist_tools.bounding_box.</span></span><span class="sig-name descname"><span class="pre">parse_args</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">argv</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.bounding_box.parse_args" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="deep_folding.anatomist_tools.crop_definition.parse_args">
+<span class="sig-prename descclassname"><span class="pre">deep_folding.anatomist_tools.crop_definition.</span></span><span class="sig-name descname"><span class="pre">parse_args</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">argv</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.crop_definition.parse_args" title="Permalink to this definition"></a></dt>
 <dd><p>Function parsing command-line arguments</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -483,9 +549,15 @@ from the terminal:
 </div></blockquote>
 <dl class="py class">
 <dt class="sig sig-object py" id="deep_folding.anatomist_tools.dataset_gen_pipe.DatasetCroppedSkeleton">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">deep_folding.anatomist_tools.dataset_gen_pipe.</span></span><span class="sig-name descname"><span class="pre">DatasetCroppedSkeleton</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">src_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'/neurospin/hcp'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tgt_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'/neurospin/dico/data/deep_folding/test'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transform_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'/neurospin/dico/data/deep_folding/data/transform'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bbox_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'/neurospin/dico/data/deep_folding/data/bbox'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">morphologist_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ANALYSIS/3T_morphologist'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">list_sulci</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'S.T.s.ter.asc.ant.'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">side</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'L'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'nearest'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resampling</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_voxel_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(1,</span> <span class="pre">1,</span> <span class="pre">1)</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.dataset_gen_pipe.DatasetCroppedSkeleton" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">deep_folding.anatomist_tools.dataset_gen_pipe.</span></span><span class="sig-name descname"><span class="pre">DatasetCroppedSkeleton</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">src_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'/neurospin/hcp'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tgt_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'/neurospin/dico/data/deep_folding/test'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bbox_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'/neurospin/dico/data/deep_folding/current/bbox'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'/neurospin/dico/data/deep_folding/current/mask'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">morphologist_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ANALYSIS/3T_morphologist'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">list_sulci</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'S.T.s.ter.asc.ant.'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">side</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'L'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'nearest'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resampling</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cropping</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'bbox'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_voxel_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(1,</span> <span class="pre">1,</span> <span class="pre">1)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">combine_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.dataset_gen_pipe.DatasetCroppedSkeleton" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Generates cropped skeleton files and corresponding pickle file</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="deep_folding.anatomist_tools.dataset_gen_pipe.DatasetCroppedSkeleton.crop_bbox">
+<span class="sig-name descname"><span class="pre">crop_bbox</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_cropped</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.dataset_gen_pipe.DatasetCroppedSkeleton.crop_bbox" title="Permalink to this definition"></a></dt>
+<dd><p>Crops according to bounding box</p>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="deep_folding.anatomist_tools.dataset_gen_pipe.DatasetCroppedSkeleton.crop_files">
 <span class="sig-name descname"><span class="pre">crop_files</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">number_subjects</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.dataset_gen_pipe.DatasetCroppedSkeleton.crop_files" title="Permalink to this definition"></a></dt>
@@ -500,8 +572,14 @@ by default it is set to _ALL_SUBJECTS (-1).</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="deep_folding.anatomist_tools.dataset_gen_pipe.DatasetCroppedSkeleton.crop_mask">
+<span class="sig-name descname"><span class="pre">crop_mask</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_cropped</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.dataset_gen_pipe.DatasetCroppedSkeleton.crop_mask" title="Permalink to this definition"></a></dt>
+<dd><p>Crops according to mask</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="deep_folding.anatomist_tools.dataset_gen_pipe.DatasetCroppedSkeleton.crop_one_file">
-<span class="sig-name descname"><span class="pre">crop_one_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">subject_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.dataset_gen_pipe.DatasetCroppedSkeleton.crop_one_file" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">crop_one_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">subject_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.dataset_gen_pipe.DatasetCroppedSkeleton.crop_one_file" title="Permalink to this definition"></a></dt>
 <dd><p>Crops one file</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -527,11 +605,24 @@ by default it is set to _ALL_SUBJECTS (-1).</p>
 </dl>
 </dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="deep_folding.anatomist_tools.dataset_gen_pipe.DatasetCroppedSkeleton.define_referentials">
+<span class="sig-name descname"><span class="pre">define_referentials</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.dataset_gen_pipe.DatasetCroppedSkeleton.define_referentials" title="Permalink to this definition"></a></dt>
+<dd><p>Writes MNI 2009 reference file with output voxel size</p>
+<p>It will be used by AimsApplyTransform</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="deep_folding.anatomist_tools.dataset_gen_pipe.DatasetCroppedSkeleton.filter_mask">
+<span class="sig-name descname"><span class="pre">filter_mask</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.dataset_gen_pipe.DatasetCroppedSkeleton.filter_mask" title="Permalink to this definition"></a></dt>
+<dd><p>Smooths the mask with Gaussian Filter</p>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="deep_folding.anatomist_tools.dataset_gen_pipe.dataset_gen_pipe">
-<span class="sig-prename descclassname"><span class="pre">deep_folding.anatomist_tools.dataset_gen_pipe.</span></span><span class="sig-name descname"><span class="pre">dataset_gen_pipe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">src_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'/neurospin/hcp'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tgt_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'/neurospin/dico/data/deep_folding/test'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transform_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'/neurospin/dico/data/deep_folding/data/transform'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bbox_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'/neurospin/dico/data/deep_folding/data/bbox'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">morphologist_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ANALYSIS/3T_morphologist'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">side</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'L'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">list_sulci</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'S.T.s.ter.asc.ant.'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">number_subjects</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'nearest'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resampling</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_voxel_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(1,</span> <span class="pre">1,</span> <span class="pre">1)</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.dataset_gen_pipe.dataset_gen_pipe" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">deep_folding.anatomist_tools.dataset_gen_pipe.</span></span><span class="sig-name descname"><span class="pre">dataset_gen_pipe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">src_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'/neurospin/hcp'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tgt_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'/neurospin/dico/data/deep_folding/test'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bbox_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'/neurospin/dico/data/deep_folding/current/bbox'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'/neurospin/dico/data/deep_folding/current/mask'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">morphologist_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ANALYSIS/3T_morphologist'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">side</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'L'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">list_sulci</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'S.T.s.ter.asc.ant.'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">number_subjects</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'nearest'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resampling</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cropping</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'bbox'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_voxel_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(1,</span> <span class="pre">1,</span> <span class="pre">1)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">combine_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.dataset_gen_pipe.dataset_gen_pipe" title="Permalink to this definition"></a></dt>
 <dd><p>Main program generating cropped files and corresponding pickle file</p>
 </dd></dl>
 
@@ -632,75 +723,18 @@ directory</p>
 </dd></dl>
 
 </div>
-<div class="section" id="module-deep_folding.anatomist_tools.transform">
-<span id="deep-folding-anatomist-tools-transform-module"></span><h2>deep_folding.anatomist_tools.transform module<a class="headerlink" href="#module-deep_folding.anatomist_tools.transform" title="Permalink to this headline"></a></h2>
-<p>The aim of this script is to compute transformation files from native MRI space
-to normalized SPM space</p>
-<p>It scans all subjects from src_dir and looks for morphologist analysis folder,
-then produces the transformation file from native space to normalized SPM space,
-saves the results (one transformation file per subject) into directory tgt_dir</p>
-<p class="rubric">Examples</p>
-<p>Specifies the source directory where the MRI data lies, the target directory
-where to put the transform, and the number of subjects to analyse
-(all by default)</p>
-<blockquote>
-<div><p>$ python transform.py -s /neurospin/hcp -t /path/to/transfo_dir -n all
-$ python transform.py –help</p>
-</div></blockquote>
-<dl class="py class">
-<dt class="sig sig-object py" id="deep_folding.anatomist_tools.transform.TransformToSPM">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">deep_folding.anatomist_tools.transform.</span></span><span class="sig-name descname"><span class="pre">TransformToSPM</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">src_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'/neurospin/hcp'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tgt_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'/neurospin/dico/data/deep_folding/test/transform'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.transform.TransformToSPM" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>Computes transformation from native to normalized SPM space</p>
-<dl class="py attribute">
-<dt class="sig sig-object py" id="deep_folding.anatomist_tools.transform.TransformToSPM.src_dir">
-<span class="sig-name descname"><span class="pre">src_dir</span></span><a class="headerlink" href="#deep_folding.anatomist_tools.transform.TransformToSPM.src_dir" title="Permalink to this definition"></a></dt>
-<dd><p>A string giving the name of the source data directory.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="deep_folding.anatomist_tools.transform.TransformToSPM.tgt_dir">
-<span class="sig-name descname"><span class="pre">tgt_dir</span></span><a class="headerlink" href="#deep_folding.anatomist_tools.transform.TransformToSPM.tgt_dir" title="Permalink to this definition"></a></dt>
-<dd><p>A string giving the name of the target directory
-in which the transformations are saved.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="deep_folding.anatomist_tools.transform.TransformToSPM.calculate_one_transform">
-<span class="sig-name descname"><span class="pre">calculate_one_transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">subject_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.transform.TransformToSPM.calculate_one_transform" title="Permalink to this definition"></a></dt>
-<dd><p>Calculates the transformation file of a given subject.</p>
-<p>This transformation enables to go from native space (= MRI space) to
-normalized SPM space. The normalized SPM space  is
-a translation + an axis inversion of the Talairach MNI space.
-The transformation is directly written to the file</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>subject_id</strong> – id of subject whose transformation file is computed</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="deep_folding.anatomist_tools.transform.TransformToSPM.calculate_transforms">
-<span class="sig-name descname"><span class="pre">calculate_transforms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">number_subjects</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.transform.TransformToSPM.calculate_transforms" title="Permalink to this definition"></a></dt>
-<dd><p>Calculates transformation file for all subjects.</p>
-<p>This transformation enables to go from native space
-(= MRI subject space) to normalized SPM space.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>number_subjects</strong> – integer giving the number of subjects to analyze,
-by default it is set to _ALL_SUBJECTS (-1).</p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
+<div class="section" id="module-deep_folding.anatomist_tools.mask_qc">
+<span id="deep-folding-anatomist-tools-mask-qc-module"></span><h2>deep_folding.anatomist_tools.mask_qc module<a class="headerlink" href="#module-deep_folding.anatomist_tools.mask_qc" title="Permalink to this headline"></a></h2>
+<p>Quality check of generated masks</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="deep_folding.anatomist_tools.mask_qc.check">
+<span class="sig-prename descclassname"><span class="pre">deep_folding.anatomist_tools.mask_qc.</span></span><span class="sig-name descname"><span class="pre">check</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">side</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'R'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sulcus</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'S.C.'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_voxel_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(2,</span> <span class="pre">2,</span> <span class="pre">2)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_subjects</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.mask_qc.check" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="deep_folding.anatomist_tools.transform.main">
-<span class="sig-prename descclassname"><span class="pre">deep_folding.anatomist_tools.transform.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">argv</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.transform.main" title="Permalink to this definition"></a></dt>
-<dd><p>Reads argument line and creates transformation files</p>
-<p>These are transformations from native to normalize SPM space</p>
+<dt class="sig sig-object py" id="deep_folding.anatomist_tools.mask_qc.main">
+<span class="sig-prename descclassname"><span class="pre">deep_folding.anatomist_tools.mask_qc.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">argv</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.mask_qc.main" title="Permalink to this definition"></a></dt>
+<dd><p>Reads argument line and creates cropped files and pickle file</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>argv</strong> – a list containing command line arguments</p>
@@ -709,35 +743,18 @@ by default it is set to _ALL_SUBJECTS (-1).</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="deep_folding.anatomist_tools.transform.parse_args">
-<span class="sig-prename descclassname"><span class="pre">deep_folding.anatomist_tools.transform.</span></span><span class="sig-name descname"><span class="pre">parse_args</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">argv</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.transform.parse_args" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="deep_folding.anatomist_tools.mask_qc.parse_args">
+<span class="sig-prename descclassname"><span class="pre">deep_folding.anatomist_tools.mask_qc.</span></span><span class="sig-name descname"><span class="pre">parse_args</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">argv</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.mask_qc.parse_args" title="Permalink to this definition"></a></dt>
 <dd><p>Function parsing command-line arguments</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>argv</strong> – a list containing command line arguments</p>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>source directory name, full path
-tgt_dir: target directory where to save the transformations, full path
-number_subjects: number of subjects to analyze</p>
+<dd class="field-even"><p>dictionary with keys: src_dir, tgt_dir, nb_subjects, list_sulci</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>src_dir</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="deep_folding.anatomist_tools.transform.transform_to_spm">
-<span class="sig-prename descclassname"><span class="pre">deep_folding.anatomist_tools.transform.</span></span><span class="sig-name descname"><span class="pre">transform_to_spm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">src_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'/neurospin/hcp'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tgt_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'/neurospin/dico/data/deep_folding/test/transform'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">number_subjects</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.transform.transform_to_spm" title="Permalink to this definition"></a></dt>
-<dd><p>High-level API function performing the transform</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>src_dir</strong> – source directory name, full path</p></li>
-<li><p><strong>tgt_dir</strong> – target directory where to save the transformations, full path</p></li>
-<li><p><strong>number_subjects</strong> – number of subjects to analyze (all=-1 by default)</p></li>
-</ul>
+<dd class="field-odd"><p>params</p>
 </dd>
 </dl>
 </dd></dl>
