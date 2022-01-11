@@ -1,17 +1,25 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html4" lang="en" >
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Deep folding &mdash; deep_folding 0.0.1 documentation</title>
-      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  <title>Deep folding &mdash; deep_folding 0.0.1 documentation</title><link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+      <script>
+          var DOCUMENTATION_OPTIONS = {
+              URL_ROOT:'./',
+              VERSION:'0.0.1',
+              LANGUAGE:'None',
+              COLLAPSE_INDEX:false,
+              FILE_SUFFIX:'.html',
+              HAS_SOURCE:  true,
+              SOURCELINK_SUFFIX: '.txt'
+          };
+      </script>
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
@@ -37,13 +45,13 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">README:</span></p>
+              <p class="caption"><span class="caption-text">README:</span></p>
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Deep folding</a></li>
 <li class="toctree-l1"><a class="reference internal" href="#prerequisites">Prerequisites</a></li>
 <li class="toctree-l1"><a class="reference internal" href="#development">Development</a></li>
 </ul>
-<p class="caption" role="heading"><span class="caption-text">API documentation</span></p>
+<p class="caption"><span class="caption-text">API documentation</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="deep_folding.html">deep_folding package</a></li>
 </ul>
@@ -73,19 +81,19 @@
            <div itemprop="articleBody">
              
   <div class="section" id="deep-folding">
-<h1>Deep folding<a class="headerlink" href="#deep-folding" title="Permalink to this headline"></a></h1>
+<h1>Deep folding<a class="headerlink" href="#deep-folding" title="Permalink to this headline">¶</a></h1>
 <p>The project aims to study cortical folding patterns thanks to deep learning tools.
 MRIs are processed through BrainVISA/Morphologist tools.</p>
 </div>
 <div class="section" id="prerequisites">
-<h1>Prerequisites<a class="headerlink" href="#prerequisites" title="Permalink to this headline"></a></h1>
+<h1>Prerequisites<a class="headerlink" href="#prerequisites" title="Permalink to this headline">¶</a></h1>
 <p>Anatomist parts (anatomist_tools) must run with brainvisa installed and python2</p>
 <p>Deep learning part (preprocessing and utils) must run with python3 and works with pytorch.</p>
 <p>Package documentation can be found at <a class="reference external" href="https://neurospin.github.io/deep_folding/index.html">https://neurospin.github.io/deep_folding/index.html</a>.</p>
 </div>
 <div class="section" id="development">
-<h1>Development<a class="headerlink" href="#development" title="Permalink to this headline"></a></h1>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>git clone https://github.com/neurospin/deep_folding.git
+<h1>Development<a class="headerlink" href="#development" title="Permalink to this headline">¶</a></h1>
+<div class="highlight-shell"><div class="highlight"><pre><span></span>git clone https://github.com/neurospin/deep_folding.git
 
 <span class="c1"># Install for development</span>
 bv bash
@@ -99,24 +107,24 @@ python3 -m pytest  <span class="c1"># run tests</span>
 </pre></div>
 </div>
 <p>If you want to install the package:</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python setup.py install
+<div class="highlight-shell"><div class="highlight"><pre><span></span>python setup.py install
 </pre></div>
 </div>
 <p>Notebooks are in the repertory notebooks, access using:</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>bv bash <span class="c1"># to enter brainvisa environnment</span>
+<div class="highlight-shell"><div class="highlight"><pre><span></span>bv bash <span class="c1"># to enter brainvisa environnment</span>
 . venv/bin/activate
 jupyter notebook <span class="c1"># then click on file to open a notebook</span>
 </pre></div>
 </div>
 <p>If you want to build the documentation and pushes it to the web:</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>bv bash <span class="c1"># to enter brainvisa environnment</span>
+<div class="highlight-shell"><div class="highlight"><pre><span></span>bv bash <span class="c1"># to enter brainvisa environnment</span>
 . venv/bin/activate
 <span class="nb">cd</span> docs
 ./make_docs.sh
 </pre></div>
 </div>
 <p>If you want to clean the documentation:</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> docs/source
+<div class="highlight-shell"><div class="highlight"><pre><span></span><span class="nb">cd</span> docs/source
 make clean
 </pre></div>
 </div>
