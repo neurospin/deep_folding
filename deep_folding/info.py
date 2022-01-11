@@ -42,7 +42,13 @@ AUTHOR_EMAIL = ""
 PLATFORMS = "OS Independent"
 PROVIDES = ["deep_folding"]
 REQUIRES = ['six', 'numpy', 'pytest', 'GitPython', 'typing', 'joblib',
-            'tqdm>=4.36', 'pqdm']  # , 'moving_averages']
+            'tqdm>=4.36', 'pqdm',
+            'dico_toolbox @ \
+                git+https://git@github.com/neurospin/dico_toolbox#egg=dico_toolbox',
+            'colorado @ \
+                git+https://git@github.com/neurospin/colorado#egg=colorado',
+            'moving_averages @ \
+                git+https://git@github.com/neurospin/point-colud-pattern-mining.git@change_setup#egg=moving_averages']
 EXTRA_REQUIRES = {
     "plotting": ["matplotlib"],
     "doc": ["sphinx>=" + SPHINX_MIN_VERSION, 'sphinx-rtd-theme']}
