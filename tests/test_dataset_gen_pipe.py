@@ -44,8 +44,6 @@ def test_dataset_gen_pipe_linear():
 	ref_dir = os.path.join(os.getcwd(), 'data/reference/data/linear')
 	ref_dir = os.path.abspath(ref_dir)
 	print("ref_dir = " + ref_dir)
-	transform_dir = os.path.join(os.getcwd(), 'data/reference/transform')
-	transform_dir = os.path.abspath(transform_dir)
 	bbox_dir = os.path.join(os.getcwd(), 'data/reference/bbox')
 	bbox_dir = os.path.abspath(bbox_dir)
 
@@ -61,12 +59,11 @@ def test_dataset_gen_pipe_linear():
 	dataset_gen_pipe.dataset_gen_pipe(
 		src_dir=src_dir,
 		tgt_dir=tgt_dir,
-		transform_dir=transform_dir,
 		bbox_dir=bbox_dir,
 		list_sulci=sulcus,
 		side=side,
 		interp='linear',
-		number_subjects=_ALL_SUBJECTS)
+		number_subjects=1)
 
 	# Gets target crop as numpy array
 	cropped_target_dir = os.path.join(tgt_dir, side+'crops')
@@ -99,8 +96,6 @@ def test_dataset_gen_pipe_nearest():
 	ref_dir = os.path.join(os.getcwd(), 'data/reference/data/nearest')
 	ref_dir = os.path.abspath(ref_dir)
 	print("ref_dir = " + ref_dir)
-	transform_dir = os.path.join(os.getcwd(), 'data/reference/transform')
-	transform_dir = os.path.abspath(transform_dir)
 	bbox_dir = os.path.join(os.getcwd(), 'data/reference/bbox')
 	bbox_dir = os.path.abspath(bbox_dir)
 
@@ -116,26 +111,27 @@ def test_dataset_gen_pipe_nearest():
 	dataset_gen_pipe.dataset_gen_pipe(
 		src_dir=src_dir,
 		tgt_dir=tgt_dir,
-		transform_dir=transform_dir,
 		bbox_dir=bbox_dir,
 		list_sulci=sulcus,
 		side=side,
 		interp='nearest',
-		number_subjects=_ALL_SUBJECTS)
+		number_subjects=1)
 
 	# Gets target crop as numpy array
 	cropped_target_dir = os.path.join(tgt_dir, side+'crops')
 	vol_target_file = glob.glob(cropped_target_dir + '/' + '*.nii.gz')
+	print("vol_target_file =", vol_target_file)
 	vol_target = aims.read(vol_target_file[0])
 	arr_target = vol_target.arraydata()
 
 	# Gets reference crop as numpy array
 	cropped_ref_dir = os.path.join(ref_dir, side+'crops')
 	vol_ref_file = glob.glob(cropped_ref_dir + '/' + '*.nii.gz')
+	print("vol_ref_file =", vol_ref_file)
 	vol_ref = aims.read(vol_ref_file[0])
 	arr_ref = vol_ref.arraydata()
 
 	# Test fails if arrays differ strictly of more than 1 on more than 2 pixels
-	equal_arrays, number_different_pixels = \
+	equal_arrays, _ = \
 		are_arrays_almost_equal(arr_ref, arr_target, 1, 2)
 	assert equal_arrays

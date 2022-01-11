@@ -2,8 +2,9 @@ import os
 import glob
 import json
 
-from deep_folding.anatomist_tools import bounding_box
+from deep_folding.anatomist_tools import crop_definition
 
+_ALL_SUBJECTS = crop_definition._ALL_SUBJECTS
 
 def test_bounding_box():
 	"""Tests if the bounding box one one subject gives the expected result.
@@ -21,8 +22,8 @@ def test_bounding_box():
 	print("ref_dir = " + ref_dir)
 
 	# Defines the target directory
-	tgt_dir = os.path.join(os.getcwd(), 'data/target/bbox')
-	tgt_dir = os.path.abspath(tgt_dir)
+	bbox_dir = os.path.join(os.getcwd(), 'data/target/bbox')
+	bbox_dir = os.path.abspath(bbox_dir)
 
 	# Gets relative path to graph file name
 	path_to_graph = ["t1mri/t1/default_analysis/folds/3.3/base2018_manual"]
@@ -37,13 +38,16 @@ def test_bounding_box():
 	# Gets sulcus name
 	sulcus = 'S.T.s.ter.asc.ant.'
 	side = 'L'
+	out_voxel_size = 1
 
 	# Determines the bounding box around the sulcus
-	bounding_box.bounding_box(src_dir=src_dir, tgt_dir=tgt_dir,
+	crop_definition.bounding_box(src_dir=src_dir,
+							  bbox_dir=bbox_dir,
 							  path_to_graph=path_to_graph,
-							  sulcus=sulcus, side=side,
-							  number_subjects=bounding_box._ALL_SUBJECTS,
-							  image_normalized_spm=image_normalized_spm)
+							  sulcus=sulcus,
+							  side=side,
+							  number_subjects=_ALL_SUBJECTS,
+							  out_voxel_size=out_voxel_size)
 
 	# Selected keys to test
 	selected_keys = ['bbmin_voxel', 'bbmax_voxel',
@@ -59,7 +63,7 @@ def test_bounding_box():
 		box_ref = {k: data_ref[k] for k in selected_keys}
 
 	# Gets and reads the first target json file
-	tgt_dir_side = os.path.join(tgt_dir, side)
+	tgt_dir_side = os.path.join(bbox_dir, side)
 	tgt_file = glob.glob(tgt_dir_side + '/*.json')[0]
 	print("tgt_file = ", tgt_file, '\n')
 	with open(os.path.join(tgt_dir_side, tgt_file), 'r') as f:
