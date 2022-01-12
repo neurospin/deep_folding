@@ -316,10 +316,10 @@ class BoundingBoxMax:
                 list_bbmin.append([bbox_min[0], bbox_min[1], bbox_min[2]])
                 list_bbmax.append([bbox_max[0], bbox_max[1], bbox_max[2]])
             else:
-                print(f'No sulcus found for {sub}; it can be OK.')
+                print(f"No sulcus {self.sulcus} found for {sub}; it can be OK.")
 
         if not list_bbmin:
-            raise ValueError('No sulcus named {self.sulcus} found '
+            raise ValueError(f"No sulcus named {self.sulcus} found "
                         'for the whole dataset. '
                         'It is an error. You should check sulcus name.')
 
