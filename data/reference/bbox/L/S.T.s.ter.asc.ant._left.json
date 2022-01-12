@@ -1,34 +1,45 @@
 {
-    "git_sha": "b78f71123166d5b0224cbce8f2b432603b801f7d", 
     "bbmax_AIMS_Talairach": [
-        60.54534580957505, 
-        79.8109225368388, 
-        -5.382205677639462
-    ], 
-    "bbmin_AIMS_Talairach": [
-        34.22425249281275, 
-        58.9042680902665, 
-        -53.46315080433615
-    ], 
-    "timestamp": 1618559920.21693, 
-    "tgt_dir": "/home/jc225751/Program/deep_folding/data/target/bounding_box", 
+        60.66335687670315,
+        75.71952983264742,
+        -4.598121985840422
+    ],
+    "bbmax_MNI152": [
+        154.77748948253384,
+        168.99963329321318,
+        107.75398867525428
+    ],
     "bbmax_voxel": [
-        137, 
-        153, 
-        78
-    ], 
+        155,
+        169,
+        108
+    ],
+    "bbmin_AIMS_Talairach": [
+        34.063088432523074,
+        61.7344393738619,
+        -54.79035146878189
+    ],
+    "bbmin_MNI152": [
+        129.86412144733617,
+        151.3616518724251,
+        60.714083900903006
+    ],
     "bbmin_voxel": [
-        112, 
-        129, 
-        33
-    ], 
-    "is_git": true, 
-    "repo_working_dir": "/home/jc225751/Program/deep_folding", 
-    "nb_subjects": 1, 
-    "date": "2021-04-16 09:58:40", 
+        130,
+        151,
+        61
+    ],
+    "bbox_dir": "/host/volatile/jc225751/Runs/30_clean_deep_folding/Program/deep_folding/data/target/bbox",
+    "date": "2022-01-12 11:11:54",
+    "git_sha": "d6adf051fa8eab17cc2be3942ad05e4e15341cb8",
+    "is_git": true,
+    "nb_subjects": 1,
+    "out_voxel_size": 1,
+    "repo_working_dir": "/host/volatile/jc225751/Runs/30_clean_deep_folding/Program/deep_folding",
+    "side": "L",
     "src_dir": [
-        "/home/jc225751/Program/deep_folding/data/source/supervised"
-    ], 
-    "sulcus": "S.T.s.ter.asc.ant._left", 
-    "side": "L"
+        "/host/volatile/jc225751/Runs/30_clean_deep_folding/Program/deep_folding/data/source/supervised"
+    ],
+    "sulcus": "S.T.s.ter.asc.ant._left",
+    "timestamp": 1641982314.3755722
 }
