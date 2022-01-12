@@ -10,6 +10,9 @@ dist
 notebooks/.ipynb_checkpoints
 notebooks/.vscode
 data/target
+notebooks/COPYING
+notebooks/mni_icbm152_nlin_asym_09c
+
 
 # Files #
 ################
