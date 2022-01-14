@@ -515,7 +515,7 @@ def parse_args(argv):
 
     # Parse command line arguments
     parser = argparse.ArgumentParser(
-        prog='mask.py',
+        prog='crop_definition.py',
         description='Computes mask and bounding box around the named sulcus')
     parser.add_argument(
         "-s", "--src_dir", type=str, default=_SRC_DIR_DEFAULT, nargs='+',

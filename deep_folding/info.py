@@ -50,7 +50,7 @@ REQUIRES = ['six', 'numpy', 'pytest', 'GitPython', 'typing', 'joblib',
             'moving_averages @ \
                 git+https://git@github.com/neurospin/point-colud-pattern-mining.git@change_setup#egg=moving_averages']
 EXTRA_REQUIRES = {
-    "plotting": ["matplotlib"],
+    "plotting": ["matplotlib", "seaborn"],
     "doc": ["sphinx>=" + SPHINX_MIN_VERSION, 'sphinx-rtd-theme']}
 
 brainvisa_build_model = 'pure_python'
