@@ -10,12 +10,17 @@ dist
 notebooks/.ipynb_checkpoints
 notebooks/.vscode
 data/target
+notebooks/mni_icbm152_nlin_asym_09c
+.vscode
 
 # Files #
 ################
 contest.py
 *.swp
 README.rst.*
+notebooks/COPYING
+notebooks/*.mesh
+notebooks/*.mesh.minf
 
 # pycharm and virtualenv folders #
 ##################################

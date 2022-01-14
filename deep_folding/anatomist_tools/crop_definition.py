@@ -316,10 +316,10 @@ class BoundingBoxMax:
                 list_bbmin.append([bbox_min[0], bbox_min[1], bbox_min[2]])
                 list_bbmax.append([bbox_max[0], bbox_max[1], bbox_max[2]])
             else:
-                print(f'No sulcus found for {sub}; it can be OK.')
+                print(f"No sulcus {self.sulcus} found for {sub}; it can be OK.")
 
         if not list_bbmin:
-            raise ValueError('No sulcus named {self.sulcus} found '
+            raise ValueError(f"No sulcus named {self.sulcus} found "
                         'for the whole dataset. '
                         'It is an error. You should check sulcus name.')
 
@@ -467,7 +467,8 @@ class BoundingBoxMax:
         return bbmin_vox, bbmax_vox
 
 
-def bounding_box(src_dir=_SRC_DIR_DEFAULT, bbox_dir=_bbox_dir_DEFAULT,
+def bounding_box(src_dir=_SRC_DIR_DEFAULT,
+                 bbox_dir=_bbox_dir_DEFAULT,
                  mask_dir=_MASK_DIR_DEFAULT,
                  path_to_graph=_PATH_TO_GRAPH_DEFAULT,
                  sulcus=_SULCUS_DEFAULT, side=_SIDE_DEFAULT,
@@ -514,7 +515,7 @@ def parse_args(argv):
 
     # Parse command line arguments
     parser = argparse.ArgumentParser(
-        prog='mask.py',
+        prog='crop_definition.py',
         description='Computes mask and bounding box around the named sulcus')
     parser.add_argument(
         "-s", "--src_dir", type=str, default=_SRC_DIR_DEFAULT, nargs='+',

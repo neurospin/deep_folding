@@ -4,7 +4,6 @@ from glob import glob
 import random
 import pandas as pd
 import os
-import deep_folding.anatomist_tools.utils.load_bbox
 from deep_folding.anatomist_tools.benchmark_generation import Benchmark
 
 

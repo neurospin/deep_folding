@@ -8,6 +8,8 @@ cwd_dir = os.path.join(os.getcwd(), "../")
 src_dir = os.path.join(cwd_dir, "data/source/archi/t1-1mm-1/025/t1mri/default_acquisition")
 skeleton = os.path.join(src_dir, "default_analysis/segmentation/Lskeleton_025.nii.gz")
 tgt_dir = os.path.join(cwd_dir, "data/target/resampling")
+if not os.path.exists(tgt_dir):
+    os.makedirs(tgt_dir)
 rs_skeleton = os.path.join(tgt_dir, "resampled_Lskeleton_025.nii.gz")
 ors_skeleton = os.path.join(tgt_dir, "ordered_resampled_Lskeleton_025.nii.gz")
 

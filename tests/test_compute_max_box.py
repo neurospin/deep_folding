@@ -1,5 +1,5 @@
 
-from deep_folding.anatomist_tools.bounding_box import BoundingBoxMax
+from deep_folding.anatomist_tools.utils.bbox import compute_max
 
 def test_compute_max_box():
     """Tests the function compte_max_box
@@ -17,7 +17,7 @@ def test_compute_max_box():
     expected_bbmax = [20, 110, 10]
 
     # Performs the comparison
-    bbmin, bbmax = BoundingBoxMax.compute_max_box(list_bbmin, list_bbmax)
+    bbmin, bbmax = compute_max(list_bbmin, list_bbmax)
     bbmin = bbmin.tolist()
     bbmax = bbmax.tolist()
 
