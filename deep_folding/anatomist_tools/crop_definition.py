@@ -182,7 +182,7 @@ class BoundingBoxMax:
         orig_dim = hdr['volume_dimension']
         new_dim = list((resampling_ratio * orig_dim).astype(int))
 
-        self.mask = aims.Volume(new_dim, dtype='FLOAT')
+        self.mask = aims.Volume(new_dim, dtype='S16')
         self.mask.copyHeaderFrom(hdr)
         self.mask.header()['voxel_size'] = self.voxel_size_out
 
@@ -340,7 +340,7 @@ class BoundingBoxMax:
             sulci_pattern = glob.glob(join(sub['dir'], graph_file))[0]
 
             self.increment_one_mask(sulci_pattern % sub)
-        self.mask /= float(len(subjects))
+        # self.mask /= float(len(subjects))
 
     def write_mask(self):
         """Writes mask on mask file"""

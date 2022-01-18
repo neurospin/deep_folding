@@ -54,4 +54,3 @@ EXTRA_REQUIRES = {
     "doc": ["sphinx>=" + SPHINX_MIN_VERSION, 'sphinx-rtd-theme']}
 
 brainvisa_build_model = 'pure_python'
-
