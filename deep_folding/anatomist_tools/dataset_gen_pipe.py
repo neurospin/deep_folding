@@ -181,7 +181,7 @@ class DatasetCroppedSkeleton:
         # Morphologist directory
         self.morphologist_dir = join(self.src_dir, self.morphologist_dir)
         ## for Tissier
-        self.morphologist_dir = join(self.src_dir)
+        # self.morphologist_dir = join(self.src_dir)
         # default acquisition subdirectory
         self.acquisition_dir = "%(subject)s/t1mri/default_acquisition"
 
@@ -193,16 +193,16 @@ class DatasetCroppedSkeleton:
         # self.skeleton_file = 'default_analysis/segmentation/' \
         #                     '%(side)sskeleton_%(subject)s.nii.gz'
         ## FOR HCP dataset
-        #self.skeleton_file = '/neurospin/dico/data/deep_folding/datasets/hcp/' \
-        #                            '%(side)sskeleton_%(subject)s_generated.nii.gz'
+        self.skeleton_file = '/neurospin/dico/data/deep_folding/datasets/hcp/' \
+                                   '%(side)sskeleton_%(subject)s_generated.nii.gz'
         ## FOR TISSIER dataset
-        self.skeleton_file = '/neurospin/dico/data/deep_folding/datasets/ACC_patterns/tissier/' \
-                                    '%(side)sskeleton_%(subject)s_generated.nii.gz'
-        #self.graph_file = 'default_analysis/folds/3.1/default_session_auto/' \
-        #                     '%(side)s%(subject)s_default_session_auto.arg'
+        # self.skeleton_file = '/neurospin/dico/data/deep_folding/datasets/ACC_patterns/tissier/' \
+        #                             '%(side)sskeleton_%(subject)s_generated.nii.gz'
+        self.graph_file = 'default_analysis/folds/3.1/default_session_auto/' \
+                            '%(side)s%(subject)s_default_session_auto.arg'
         ## FOR TISSIER dataset
-        self.graph_file = 'default_analysis/folds/3.1/default_session_manual/' \
-                             '%(side)s%(subject)s_default_session_manual.arg'
+        # self.graph_file = 'default_analysis/folds/3.1/default_session_manual/' \
+        #                      '%(side)s%(subject)s_default_session_manual.arg'
 
         # Names of files in function of dictionary: keys -> 'subject' and 'side'
         self.cropped_file = '%(subject)s_normalized.nii.gz'
@@ -308,7 +308,7 @@ class DatasetCroppedSkeleton:
         # Identifies 'subject' in a mapping (for file and directory namings)
         subject = {'subject': subject_id, 'side': self.side}
         ## FOR TISSIER
-        subject_id = re.search('([ae\d]{5,6})', subject_id).group(0)
+        # subject_id = re.search('([ae\d]{5,6})', subject_id).group(0)
 
         # Names directory where subject analysis files are stored
         subject_dir = \
