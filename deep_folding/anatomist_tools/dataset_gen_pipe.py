@@ -64,7 +64,6 @@ import numpy as np
 import scipy.ndimage
 
 import six
-
 from soma import aims
 
 from pqdm.processes import pqdm
@@ -129,7 +128,7 @@ def define_njobs():
     """Returns number of cpus used by main loop
     """
     nb_cpus = cpu_count()
-    return max(nb_cpus-2, 1)
+    return max(nb_cpus-4, 1)
 
 class DatasetCroppedSkeleton:
     """Generates cropped skeleton files and corresponding pickle file
@@ -179,7 +178,7 @@ class DatasetCroppedSkeleton:
         self.combine_type = combine_type
 
         # Morphologist directory
-        self.morphologist_dir = join(self.src_dir, self.morphologist_dir)
+        # self.morphologist_dir = join(self.src_dir, self.morphologist_dir)
         ## for Tissier
         #self.morphologist_dir = join(self.src_dir)
         # default acquisition subdirectory
@@ -331,9 +330,9 @@ class DatasetCroppedSkeleton:
             # Normalization and resampling of skeleton images
             if self.resampling:
                 resampled = resample(input_image=file_skeleton,
-                                     output_vs=self.out_voxel_size,
-                                     transformation=g_to_icbm_template_file,
-                                     verbose=False)
+                                    output_vs=self.out_voxel_size,
+                                    transformation=g_to_icbm_template_file,
+                                    verbose=False)
                 aims.write(resampled, file_cropped)
             else :
                 cmd_normalize = 'AimsApplyTransform' + \
@@ -366,6 +365,7 @@ class DatasetCroppedSkeleton:
         if number_subjects:
 
             # subjects are detected as the directory names under src_dir
+            print(self.morphologist_dir)
             list_all_subjects = [dI for dI in os.listdir(self.morphologist_dir)\
              if os.path.isdir(os.path.join(self.morphologist_dir,dI))]
 
@@ -405,8 +405,8 @@ class DatasetCroppedSkeleton:
             # Performs cropping for each file in a parallelized way
             print(list_subjects)
 
-            #for sub in list_subjects:
-            #     self.crop_one_file(sub)
+            # for sub in list_subjects:
+            #      self.crop_one_file(sub)
             pqdm(list_subjects, self.crop_one_file, n_jobs=define_njobs())
 
 
