@@ -87,14 +87,17 @@ def parse_args(argv):
         "-i", "--side", type=str, required=True,
         help='Hemisphere side (either L or R).')
     parser.add_argument(
-        "-v", "--verbose", type=boolean, required=False,
+        "-n", "--nb_subjects", type=int, required=True,
+        help='Number of subjects')
+    parser.add_argument(
+        "-v", "--verbose", type=bool, required=False,
         help='If verbose is true, no parallelism.')
 
     args = parser.parse_args(argv)
 
     return args
 
-def create_volume_from_graph(graph, dimensions):
+def create_volume_from_graph(graph):
     """Creates empty volume with graph header"""
 
     voxel_size = graph['voxel_size'][:3]
@@ -129,12 +132,11 @@ class GraphConvert2Skeleton:
         graph = aims.read(graph_file)
 
         skeleton_filename = f"{self.tgt_dir}/skeleton/{self.side}/{self.side}skeleton_generated_{subject}.nii.gz"
-        foldlabel_filename = f"{self.tgt_dir}/foldlabel/{self.side}/{self.side}foldlabel_{subject}.nii.gz"
-
         vol_skel = create_volume_from_graph(graph)
-        vol_label = create_volume_from_graph(graph)
-
         arr_skel = np.asarray(vol_skel)
+
+        foldlabel_filename = f"{self.tgt_dir}/foldlabel/{self.side}/{self.side}foldlabel_{subject}.nii.gz"
+        vol_label = create_volume_from_graph(graph)
         arr_label = np.asarray(vol_label)
 
         label = {'aims_ss':0,
@@ -171,15 +173,15 @@ class GraphConvert2Skeleton:
         aims.write(vol_label, foldlabel_filename)
 
 
-    def write_loop(self, verbose=False):
+    def write_loop(self, nb_subjects, verbose=False):
         filenames = glob.glob(f"{self.src_dir}/*/")
         list_subjects = [re.search('([ae\d]{5,6})', filename).group(0) for filename in filenames]
-        if verbose:
-            for sub in list_subjects:
-            self.write_skeleton(sub)
+        if verbose==True:
+            pqdm(list_subjects, self.write_skeleton, n_jobs=define_njobs())
         else:
-        pqdm(list_subjects, self.write_skeleton, n_jobs=define_njobs())
-
+            for sub in list_subjects[:nb_subjects]:
+                self.write_skeleton(sub)
+            
 
 def main(argv):
     """
@@ -187,16 +189,17 @@ def main(argv):
     # Parsing arguments
     args = parse_args(argv)
     conversion = GraphConvert2Skeleton(args.src_dir, args.tgt_dir, args.side)
-    conversion.write_loop(verbose=args.verbose)
+    conversion.write_loop(nb_subjects=args.nb_subjects,
+                          verbose=args.verbose)
 
 
 if __name__ == '__main__':
     # This permits to call main also from another python program
     # without having to make system calls
-    # src_dir = "/neurospin/lnao/Panabase/lborne/data/ACCpatterns/tissier_2018/subjects"
-    # tgt_dir = "/neurospin/dico/data/deep_folding/datasets/ACC_patterns/tissier"
-    # args = "-i R -s " + src_dir + " -t " + tgt_dir
-    # argv = args.split(' ')
-    # main(argv=argv)
+    src_dir = "/tgcc/hcp/ANALYSIS/3T_morphologist"
+    tgt_dir = "/neurospin/dico/data/deep_folding/datasets/hcp"
+    args = "-i R -v False -n 5 -s " + src_dir + " -t " + tgt_dir
+    argv = args.split(' ')
+    main(argv=argv)
 
-    main(argv=sys.argv[1:])
+    # main(argv=sys.argv[1:])

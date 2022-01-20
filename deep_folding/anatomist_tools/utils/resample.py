@@ -8,7 +8,7 @@ from time import time
 
 log = logging.getLogger(__name__)
 
-def resample(input_image, transformation, output_vs=None, background=11,
+def resample(input_image, transformation, output_vs=None, background=0,
              values=None, verbose=True):
     """
         Transform and resample a volume that as discret values

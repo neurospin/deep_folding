@@ -99,8 +99,11 @@ _COMBINE_TYPE = False
 # Input directories
 # -----------------
 
+# Input directory contaning the skeletons and labels
+_SRC_DIR_DEFAULT = '/neurospin/dico/data/deep_folding/datasets/hcp'
+
 # Input directory contaning the morphologist analysis of the HCP database
-_SRC_DIR_DEFAULT = '/neurospin/hcp'
+_GRAPH_DIR_DEFAULT = '/neurospin/hcp'
 
 # Directory where subjects to be processed are stored.
 # Default is for HCP dataset
@@ -131,7 +134,9 @@ class DatasetCroppedSkeleton:
     """Generates cropped skeleton files and corresponding pickle file
     """
 
-    def __init__(self, src_dir=_SRC_DIR_DEFAULT,
+    def __init__(self, 
+                 graph_dir=_GRAPH_DIR_DEFAULT,
+                 src_dir=_SRC_DIR_DEFAULT,
                  tgt_dir=_TGT_DIR_DEFAULT,
                  bbox_dir=_BBOX_DIR_DEFAULT,
                  mask_dir=_MASK_DIR_DEFAULT,
@@ -144,8 +149,9 @@ class DatasetCroppedSkeleton:
         """Inits with list of directories and list of sulci
 
         Args:
-            src_dir: list of strings naming full path source directories,
-                    containing MRI images
+            graph_dir: list of strings naming full path source directories,
+                    containing MRI and graph images
+            src_dir: folder containing generated skeletons and labels
             tgt_dir: name of target (output) directory with full path
             transform_dir: directory containing transformation files
                     (generated using transform.py)
@@ -155,6 +161,7 @@ class DatasetCroppedSkeleton:
             side: hemisphere side (either L for left, or R for right hemisphere)
         """
 
+        self.graph_dir = graph_dir
         self.src_dir = src_dir
         self.side = side
         # Transforms sulcus in a list of sulci
@@ -170,24 +177,30 @@ class DatasetCroppedSkeleton:
         self.combine_type = combine_type
 
         # Morphologist directory
-        self.morphologist_dir = join(self.src_dir, self.morphologist_dir)
+        self.morphologist_dir = join(self.graph_dir, self.morphologist_dir)
 
         # default acquisition subdirectory
         self.acquisition_dir = "%(subject)s/t1mri/default_acquisition"
 
-        # Directory where to store cropped files
-        self.cropped_dir = join(self.tgt_dir, self.side + 'crops')
+        # Directory where to store cropped skeleton files
+        self.cropped_skeleton_dir = join(self.tgt_dir, self.side + 'crops')
+
+        # Directory where to store cropped label files
+        self.cropped_label_dir = join(self.tgt_dir, self.side + 'labels')
 
         # Names of files in function of dictionary: keys -> 'subject' and 'side'
         # Generated skeleton from folding graphs
-        self.skeleton_file = '/neurospin/dico/data/deep_folding/datasets/hcp/' \
-                                    '%(side)sskeleton_%(subject)s_generated.nii.gz'
+        self.skeleton_file = join(self.src_dir, 'skeleton', self.side,
+                                  '%(side)sskeleton_generated_%(subject)s.nii.gz')
+        self.foldlabel_file = join(self.src_dir, 'foldlabel', self.side,
+                                  '%(side)sfoldlabel_%(subject)s.nii.gz')
 
         self.graph_file = 'default_analysis/folds/3.1/default_session_auto/' \
                             '%(side)s%(subject)s_default_session_auto.arg'
 
         # Names of files in function of dictionary: keys -> 'subject' and 'side'
-        self.cropped_file = '%(subject)s_normalized.nii.gz'
+        self.cropped_skeleton_file = '%(subject)s_cropped_skeleton.nii.gz'
+        self.cropped_label_file = '%(subject)s_cropped_label.nii.gz'
 
         # Initialization of bounding box coordinates
         self.bbmin = np.zeros(3)
@@ -297,7 +310,9 @@ class DatasetCroppedSkeleton:
             join(self.morphologist_dir, self.acquisition_dir % subject)
 
         # Skeleton file name
-        file_skeleton = join(subject_dir, self.skeleton_file % {'subject': subject_id, 'side': self.side})
+        file_skeleton = self.skeleton_file % {'subject': subject_id, 'side': self.side}
+        # Foldlabel file name
+        file_foldlabel = self.foldlabel_file % {'subject': subject_id, 'side': self.side}
 
         # Creates transformation MNI template
         file_graph = join(subject_dir, self.graph_file % subject)
@@ -308,20 +323,40 @@ class DatasetCroppedSkeleton:
 
         if os.path.exists(file_skeleton):
             # Creates output (cropped) file name
-            file_cropped = join(self.cropped_dir, self.cropped_file % {'subject': subject_id, 'side': self.side})
+            file_cropped_skeleton = join(self.cropped_skeleton_dir,
+                                         self.cropped_skeleton_file % {'subject': subject_id, 'side': self.side})
 
+            print(file_cropped_skeleton)
             # Normalization and resampling of skeleton images
             resampled = resample(input_image=file_skeleton,
                                  output_vs=self.out_voxel_size,
                                  transformation=g_to_icbm_template_file,
                                  verbose=False)
-            aims.write(resampled, file_cropped)
+            aims.write(resampled, file_cropped_skeleton)
 
             # Cropping of skeleton image
             if self.cropping == 'bbox':
-                self.crop_bbox(file_cropped, verbose)
+                self.crop_bbox(file_cropped_skeleton, verbose)
             else:
-                self.crop_mask(file_cropped, verbose)
+                self.crop_mask(file_cropped_skeleton, verbose)
+
+        if os.path.exists(file_foldlabel):
+            # Creates output (cropped) file name
+            file_cropped_label = join(self.cropped_label_dir,
+                                      self.cropped_label_file % {'subject': subject_id, 'side': self.side})
+
+            # Normalization and resampling of skeleton images
+            resampled = resample(input_image=file_foldlabel,
+                                 output_vs=self.out_voxel_size,
+                                 transformation=g_to_icbm_template_file,
+                                 verbose=False)
+            aims.write(resampled, file_cropped_label)
+
+            # Cropping of skeleton image
+            if self.cropping == 'bbox':
+                self.crop_bbox(file_cropped_label, verbose)
+            else:
+                self.crop_mask(file_cropped_label, verbose)
 
 
 
@@ -337,7 +372,7 @@ class DatasetCroppedSkeleton:
 
         if number_subjects:
 
-            # subjects are detected as the directory names under src_dir
+            # subjects are detected as the directory names under graph_dir
             list_all_subjects = [dI for dI in os.listdir(self.morphologist_dir)\
              if os.path.isdir(os.path.join(self.morphologist_dir,dI))]
 
@@ -350,11 +385,14 @@ class DatasetCroppedSkeleton:
             # Creates target and cropped directory
             if not os.path.exists(self.tgt_dir):
                 os.makedirs(self.tgt_dir)
-            if not os.path.exists(self.cropped_dir):
-                os.makedirs(self.cropped_dir)
+            if not os.path.exists(self.cropped_skeleton_dir):
+                os.makedirs(self.cropped_skeleton_dir)
+            if not os.path.exists(self.cropped_label_dir):
+                os.makedirs(self.cropped_label_dir)
 
             # Writes number of subjects and directory names to json file
             dict_to_add = {'nb_subjects': len(list_subjects),
+                           'graph_dir': self.graph_dir,
                            'src_dir': self.src_dir,
                            'bbox_dir': self.bbox_dir,
                            'mask_dir': self.mask_dir,
@@ -363,7 +401,8 @@ class DatasetCroppedSkeleton:
                            'bbmin': self.bbmin.tolist(),
                            'bbmax': self.bbmax.tolist(),
                            'tgt_dir': self.tgt_dir,
-                           'cropped_dir': self.cropped_dir,
+                           'cropped_skeleton_dir': self.cropped_skeleton_dir,
+                           'cropped_label_dir': self.cropped_label_dir,
                            'resampling_type': 'sulcus-based',
                            'out_voxel_size': self.out_voxel_size,
                            'combine_type': self.combine_type
@@ -376,9 +415,9 @@ class DatasetCroppedSkeleton:
             # Performs cropping for each file in a parallelized way
             print("list_subjects = ", list_subjects)
 
-            # for sub in list_subjects:
-            #     self.crop_one_file(sub)
-            pqdm(list_subjects, self.crop_one_file, n_jobs=define_njobs())
+            for sub in list_subjects:
+                self.crop_one_file(sub)
+            # pqdm(list_subjects, self.crop_one_file, n_jobs=define_njobs())
 
 
     def dataset_gen_pipe(self, number_subjects=_ALL_SUBJECTS):
@@ -420,7 +459,7 @@ class DatasetCroppedSkeleton:
 
         # Creation of .pickle file for all subjects
         if number_subjects:
-            fetch_data(cropped_dir=self.cropped_dir,
+            fetch_data(cropped_dir=self.cropped_skeleton_dir,
                        tgt_dir=self.tgt_dir,
                        side=self.side)
 
@@ -440,8 +479,12 @@ def parse_args(argv):
         prog='dataset_gen_pipe.py',
         description='Generates cropped and pickle files')
     parser.add_argument(
+        "-g", "--graph_dir", type=str, default=_GRAPH_DIR_DEFAULT,
+        help='Source directory where the graph lies. '
+             'Default is : ' + _GRAPH_DIR_DEFAULT)
+    parser.add_argument(
         "-s", "--src_dir", type=str, default=_SRC_DIR_DEFAULT,
-        help='Source directory where the MRI data lies. '
+        help='Source directory where skeletons and labels lie. '
              'Default is : ' + _SRC_DIR_DEFAULT)
     parser.add_argument(
         "-t", "--tgt_dir", type=str, default=_TGT_DIR_DEFAULT,
@@ -492,6 +535,7 @@ def parse_args(argv):
 
     args = parser.parse_args(argv)
     params['src_dir'] = args.src_dir
+    params['graph_dir'] = args.graph_dir
     params['tgt_dir'] = args.tgt_dir
     params['bbox_dir'] = args.bbox_dir
     params['mask_dir'] = args.mask_dir
@@ -520,7 +564,8 @@ def parse_args(argv):
     return params
 
 
-def dataset_gen_pipe(src_dir=_SRC_DIR_DEFAULT,
+def dataset_gen_pipe(graph_dir=_GRAPH_DIR_DEFAULT,
+                     src_dir=_SRC_DIR_DEFAULT,
                      tgt_dir=_TGT_DIR_DEFAULT,
                      bbox_dir=_BBOX_DIR_DEFAULT,
                      mask_dir=_MASK_DIR_DEFAULT,
@@ -534,7 +579,8 @@ def dataset_gen_pipe(src_dir=_SRC_DIR_DEFAULT,
     """Main program generating cropped files and corresponding pickle file
     """
 
-    dataset = DatasetCroppedSkeleton(src_dir=src_dir,
+    dataset = DatasetCroppedSkeleton(graph_dir=graph_dir,
+                                     src_dir=src_dir,
                                      tgt_dir=tgt_dir,
                                      bbox_dir=bbox_dir,
                                      mask_dir=mask_dir,
@@ -560,7 +606,8 @@ def main(argv):
         # Parsing arguments
         params = parse_args(argv)
         # Actual API
-        dataset_gen_pipe(src_dir=params['src_dir'],
+        dataset_gen_pipe(graph_dir=params['graph_dir'],
+                         src_dir=params['src_dir'],
                          tgt_dir=params['tgt_dir'],
                          bbox_dir=params['bbox_dir'],
                          mask_dir=params['mask_dir'],
