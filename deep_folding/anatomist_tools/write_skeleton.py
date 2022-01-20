@@ -86,11 +86,30 @@ def parse_args(argv):
     parser.add_argument(
         "-i", "--side", type=str, required=True,
         help='Hemisphere side (either L or R).')
+    parser.add_argument(
+        "-v", "--verbose", type=boolean, required=False,
+        help='If verbose is true, no parallelism.')
 
     args = parser.parse_args(argv)
 
     return args
 
+def create_volume_from_graph(graph, dimensions):
+    """Creates empty volume with graph header"""
+
+    voxel_size = graph['voxel_size'][:3]
+    # Adds 1 for each x,y,z dimension
+    dimensions = [i+j for i, j in zip(graph['boundingbox_max'], [1,1,1,0])]
+
+    vol = aims.Volume(dimensions, dtype='S16')
+    vol.header()['voxel_size'] = voxel_size
+    if 'transformations' in graph.keys():
+        vol.header()['transformations'] = graph['transformations']
+    if 'referentials' in graph.keys():
+        vol.header()['referentials'] = graph['referentials']
+    if 'referential' in graph.keys():
+        vol.header()['referential'] = graph['referential']
+    return vol
 
 class GraphConvert2Skeleton:
     """
@@ -109,50 +128,57 @@ class GraphConvert2Skeleton:
         graph_file = glob.glob(f"{self.src_dir}/{subject}*/{self.graph_dir}/{self.side}{subject}*.arg")[0]
         graph = aims.read(graph_file)
 
-        skeleton_filename = f"{self.tgt_dir}/{self.side}skeleton_{subject}_generated.nii.gz"
+        skeleton_filename = f"{self.tgt_dir}/skeleton/{self.side}/{self.side}skeleton_generated_{subject}.nii.gz"
+        foldlabel_filename = f"{self.tgt_dir}/foldlabel/{self.side}/{self.side}foldlabel_{subject}.nii.gz"
 
-        voxel_size = graph['voxel_size'][:3]
-        # Adds 1 for each x,y,z dimension
-        dimensions = [i+j for i, j in zip(graph['boundingbox_max'], [1,1,1,0])]
+        vol_skel = create_volume_from_graph(graph)
+        vol_label = create_volume_from_graph(graph)
 
-        vol = aims.Volume(dimensions, dtype='S16')
-        vol.header()['voxel_size'] = voxel_size
-        if 'transformations' in graph.keys():
-            vol.header()['transformations'] = graph['transformations']
-        if 'referentials' in graph.keys():
-            vol.header()['referentials'] = graph['referentials']
-        if 'referential' in graph.keys():
-            vol.header()['referential'] = graph['referential']
-        arr = np.asarray(vol)
+        arr_skel = np.asarray(vol_skel)
+        arr_label = np.asarray(vol_label)
+
+        label = {'aims_ss':0,
+                 'aims_bottom': 1000,
+                 'aims_other': 2000,
+                 'aims_junction': 3000,
+                 'aims_plidepassage': 4000}
 
         for edge in graph.edges():
             for bucket_name, value in {'aims_junction':110, 'aims_plidepassage':120}.items():
                 bucket = edge.get(bucket_name)
+                label[bucket_name] += 1
                 if bucket is not None:
                     voxels = np.array(bucket[0].keys())
                     if voxels.shape == (0,):
                         continue
                     for i,j,k in voxels:
-                        arr[i,j,k] = value
+                        arr_skel[i,j,k] = value
+                        arr_label[i,j,k] = label[bucket_name]
 
         for vertex in graph.vertices():
             for bucket_name, value in {'aims_bottom': 30, 'aims_ss': 60, 'aims_other': 100}.items():
                 bucket = vertex.get(bucket_name)
+                label[bucket_name] += 1
                 if bucket is not None:
                     voxels = np.array(bucket[0].keys())
                     if voxels.shape == (0,):
                         continue
                     for i,j,k in voxels:
-                        arr[i,j,k] = value
+                        arr_skel[i,j,k] = value
+                        arr_label[i,j,k] = label[bucket_name]
 
-        aims.write(vol, skeleton_filename)
+        aims.write(vol_skel, skeleton_filename)
+        aims.write(vol_label, foldlabel_filename)
 
 
-    def write_loop(self):
+    def write_loop(self, verbose=False):
         filenames = glob.glob(f"{self.src_dir}/*/")
         list_subjects = [re.search('([ae\d]{5,6})', filename).group(0) for filename in filenames]
+        if verbose:
+            for sub in list_subjects:
+            self.write_skeleton(sub)
+        else:
         pqdm(list_subjects, self.write_skeleton, n_jobs=define_njobs())
-        # self.write_skeleton(list_subjects[0])
 
 
 def main(argv):
@@ -161,7 +187,7 @@ def main(argv):
     # Parsing arguments
     args = parse_args(argv)
     conversion = GraphConvert2Skeleton(args.src_dir, args.tgt_dir, args.side)
-    conversion.write_loop()
+    conversion.write_loop(verbose=args.verbose)
 
 
 if __name__ == '__main__':
