@@ -84,7 +84,7 @@ _ALL_SUBJECTS = -1
 
 _SIDE_DEFAULT = 'L'  # hemisphere 'L' or 'R'
 
-_CROPPING_DEFAULT = 'bbox' # crops over a bounding box by default
+_CROPPING_DEFAULT = 'mask' # crops according to a mask by default
 
 _OUT_VOXEL_SIZE = (1, 1, 1) # default output voxel size
 
@@ -479,7 +479,7 @@ def parse_args(argv):
              'Type of cropping: '
              'bbox: for bounding box cropping'
              'mask: selection based on a mask'
-             'Default is : bbox')
+             'Default is : mask')
     parser.add_argument(
         "-v", "--out_voxel_size", type=int, nargs='+', default=_OUT_VOXEL_SIZE,
         help='Voxel size of output images'
