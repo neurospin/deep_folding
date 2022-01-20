@@ -180,8 +180,7 @@ class DatasetCroppedSkeleton:
 
         # Morphologist directory
         self.morphologist_dir = join(self.src_dir, self.morphologist_dir)
-        ## for Tissier
-        # self.morphologist_dir = join(self.src_dir)
+
         # default acquisition subdirectory
         self.acquisition_dir = "%(subject)s/t1mri/default_acquisition"
 
@@ -189,20 +188,12 @@ class DatasetCroppedSkeleton:
         self.cropped_dir = join(self.tgt_dir, self.side + 'crops')
 
         # Names of files in function of dictionary: keys -> 'subject' and 'side'
-        # Files from morphologist pipeline
-        self.skeleton_file = 'default_analysis/segmentation/' \
-                            '%(side)sskeleton_%(subject)s.nii.gz'
-        ## FOR HCP dataset
-        # self.skeleton_file = '/neurospin/dico/data/deep_folding/datasets/hcp/' \
-        #                            '%(side)sskeleton_%(subject)s_generated.nii.gz'
-        ## FOR TISSIER dataset
-        # self.skeleton_file = '/neurospin/dico/data/deep_folding/datasets/ACC_patterns/tissier/' \
-        #                             '%(side)sskeleton_%(subject)s_generated.nii.gz'
+        # Generated skeleton from folding graphs
+        self.skeleton_file = '/neurospin/dico/data/deep_folding/datasets/hcp/' \
+                                    '%(side)sskeleton_%(subject)s_generated.nii.gz'
+
         self.graph_file = 'default_analysis/folds/3.1/default_session_auto/' \
                             '%(side)s%(subject)s_default_session_auto.arg'
-        ## FOR TISSIER dataset
-        # self.graph_file = 'default_analysis/folds/3.1/default_session_manual/' \
-        #                      '%(side)s%(subject)s_default_session_manual.arg'
 
         # Names of files in function of dictionary: keys -> 'subject' and 'side'
         self.cropped_file = '%(subject)s_normalized.nii.gz'
