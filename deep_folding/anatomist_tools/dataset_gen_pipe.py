@@ -84,10 +84,6 @@ _ALL_SUBJECTS = -1
 
 _SIDE_DEFAULT = 'L'  # hemisphere 'L' or 'R'
 
-_INTERP_DEFAULT = 'nearest'  # default interpolation for ApplyAimsTransform
-
-_RESAMPLING_DEFAULT = None # if None, resampling method is AimsApplyTransform
-
 _CROPPING_DEFAULT = 'bbox' # crops over a bounding box by default
 
 _OUT_VOXEL_SIZE = (1, 1, 1) # default output voxel size
@@ -142,8 +138,6 @@ class DatasetCroppedSkeleton:
                  morphologist_dir=_MORPHOLOGIST_DIR_DEFAULT,
                  list_sulci=_SULCUS_DEFAULT,
                  side=_SIDE_DEFAULT,
-                 interp=_INTERP_DEFAULT,
-                 resampling=_RESAMPLING_DEFAULT,
                  cropping=_CROPPING_DEFAULT,
                  out_voxel_size=_OUT_VOXEL_SIZE,
                  combine_type=_COMBINE_TYPE):
@@ -159,7 +153,6 @@ class DatasetCroppedSkeleton:
                     (generated using bounding_box.py)
             list_sulci: list of sulcus names
             side: hemisphere side (either L for left, or R for right hemisphere)
-            interp: string giving interpolation for AimsApplyTransform
         """
 
         self.src_dir = src_dir
@@ -172,8 +165,6 @@ class DatasetCroppedSkeleton:
         self.bbox_dir = bbox_dir
         self.mask_dir=mask_dir
         self.morphologist_dir = morphologist_dir
-        self.interp = interp
-        self.resampling = resampling
         self.cropping = cropping
         self.out_voxel_size = out_voxel_size
         self.combine_type = combine_type
@@ -320,21 +311,11 @@ class DatasetCroppedSkeleton:
             file_cropped = join(self.cropped_dir, self.cropped_file % {'subject': subject_id, 'side': self.side})
 
             # Normalization and resampling of skeleton images
-            if self.resampling:
-                resampled = resample(input_image=file_skeleton,
-                                     output_vs=self.out_voxel_size,
-                                     transformation=g_to_icbm_template_file,
-                                     verbose=False)
-                aims.write(resampled, file_cropped)
-            else :
-                cmd_normalize = 'AimsApplyTransform' + \
-                                ' -i ' + file_skeleton + \
-                                ' -o ' + file_cropped + \
-                                ' -m ' + g_to_icbm_template_file + \
-                                ' -r ' + self.ref_file + \
-                                ' -t ' + self.interp + \
-                                ' --bg ' + str(_EXTERNAL)
-                os.system(cmd_normalize)
+            resampled = resample(input_image=file_skeleton,
+                                 output_vs=self.out_voxel_size,
+                                 transformation=g_to_icbm_template_file,
+                                 verbose=False)
+            aims.write(resampled, file_cropped)
 
             # Cropping of skeleton image
             if self.cropping == 'bbox':
@@ -378,13 +359,12 @@ class DatasetCroppedSkeleton:
                            'bbox_dir': self.bbox_dir,
                            'mask_dir': self.mask_dir,
                            'side': self.side,
-                           'interp': self.interp,
                            'list_sulci': self.list_sulci,
                            'bbmin': self.bbmin.tolist(),
                            'bbmax': self.bbmax.tolist(),
                            'tgt_dir': self.tgt_dir,
                            'cropped_dir': self.cropped_dir,
-                           'resampling_type': 'sulcus-based' if self.resampling else 'AimsApplyTransform',
+                           'resampling_type': 'sulcus-based',
                            'out_voxel_size': self.out_voxel_size,
                            'combine_type': self.combine_type
                            }
@@ -494,21 +474,6 @@ def parse_args(argv):
              '0 subject is allowed, for debug purpose.'
              'Default is : all')
     parser.add_argument(
-        "-e", "--interp", type=str, default=_INTERP_DEFAULT,
-        help="Same interpolation type as for AimsApplyTransform. "
-             "Type of interpolation used for Volumes: "
-             "n[earest], l[inear], q[uadratic], c[cubic], quartic, "
-             "quintic, six[thorder], seven[thorder]. "
-             "Modes may also be specified as order number: "
-             "0=nearest, 1=linear...")
-    parser.add_argument(
-        "-p", "--resampling", type=str, default=None,
-        help='Method of resampling to perform. '
-             'Type of resampling: '
-             's[ulcus] for sulcus-based method'
-             'If None, AimsApplyTransform is used.'
-             'Default is : None')
-    parser.add_argument(
         "-c", "--cropping", type=str, default=None,
         help='Method of to select and crop the image. '
              'Type of cropping: '
@@ -532,8 +497,6 @@ def parse_args(argv):
     params['mask_dir'] = args.mask_dir
     params['list_sulci'] = args.sulcus  # a list of sulci
     params['side'] = args.side
-    params['interp'] = args.interp
-    params['resampling'] = args.resampling
     params['cropping'] = args.cropping
     params['out_voxel_size'] = tuple(args.out_voxel_size)
     params['morphologist_dir'] = args.morphologist_dir
@@ -565,8 +528,6 @@ def dataset_gen_pipe(src_dir=_SRC_DIR_DEFAULT,
                      side=_SIDE_DEFAULT,
                      list_sulci=_SULCUS_DEFAULT,
                      number_subjects=_ALL_SUBJECTS,
-                     interp=_INTERP_DEFAULT,
-                     resampling=_RESAMPLING_DEFAULT,
                      cropping=_CROPPING_DEFAULT,
                      out_voxel_size=_OUT_VOXEL_SIZE,
                      combine_type=_COMBINE_TYPE):
@@ -580,8 +541,6 @@ def dataset_gen_pipe(src_dir=_SRC_DIR_DEFAULT,
                                      morphologist_dir=morphologist_dir,
                                      side=side,
                                      list_sulci=list_sulci,
-                                     interp=interp,
-                                     resampling=resampling,
                                      cropping=cropping,
                                      out_voxel_size=out_voxel_size,
                                      combine_type=combine_type)
@@ -608,9 +567,7 @@ def main(argv):
                          morphologist_dir=params['morphologist_dir'],
                          side=params['side'],
                          list_sulci=params['list_sulci'],
-                         interp=params['interp'],
                          number_subjects=params['nb_subjects'],
-                         resampling=params['resampling'],
                          cropping=params['cropping'],
                          out_voxel_size=params['out_voxel_size'],
                          combine_type=params['combine_type'])
