@@ -134,7 +134,7 @@ class DatasetCroppedSkeleton:
     """Generates cropped skeleton files and corresponding pickle file
     """
 
-    def __init__(self, 
+    def __init__(self,
                  graph_dir=_GRAPH_DIR_DEFAULT,
                  src_dir=_SRC_DIR_DEFAULT,
                  tgt_dir=_TGT_DIR_DEFAULT,
@@ -415,9 +415,9 @@ class DatasetCroppedSkeleton:
             # Performs cropping for each file in a parallelized way
             print("list_subjects = ", list_subjects)
 
-            for sub in list_subjects:
-                self.crop_one_file(sub)
-            # pqdm(list_subjects, self.crop_one_file, n_jobs=define_njobs())
+            # for sub in list_subjects:
+            #     self.crop_one_file(sub)
+            pqdm(list_subjects, self.crop_one_file, n_jobs=define_njobs())
 
 
     def dataset_gen_pipe(self, number_subjects=_ALL_SUBJECTS):
@@ -517,14 +517,14 @@ def parse_args(argv):
              '0 subject is allowed, for debug purpose.'
              'Default is : all')
     parser.add_argument(
-        "-c", "--cropping", type=str, default=None,
+        "-c", "--cropping", type=str, default=_CROPPING_DEFAULT,
         help='Method of to select and crop the image. '
              'Type of cropping: '
              'bbox: for bounding box cropping'
              'mask: selection based on a mask'
              'Default is : mask')
     parser.add_argument(
-        "-v", "--out_voxel_size", type=int, nargs='+', default=_OUT_VOXEL_SIZE,
+        "-v", "--out_voxel_size", type=float, nargs='+', default=_OUT_VOXEL_SIZE,
         help='Voxel size of output images'
              'Default is : 1 1 1')
     parser.add_argument(
