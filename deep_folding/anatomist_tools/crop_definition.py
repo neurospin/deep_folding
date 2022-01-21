@@ -549,7 +549,7 @@ def parse_args(argv):
              '0 subject is allowed, for debug purpose. '
              'Default is : all')
     parser.add_argument(
-        "-v", "--out_voxel_size", type=int, default=None,
+        "-v", "--out_voxel_size", type=float, default=None,
         help='Voxel size of of bounding box. '
              'Default is : None')
 
