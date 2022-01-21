@@ -87,7 +87,7 @@ def parse_args(argv):
         "-i", "--side", type=str, required=True,
         help='Hemisphere side (either L or R).')
     parser.add_argument(
-        "-n", "--nb_subjects", type=int, required=True,
+        "-n", "--nb_subjects", type=int, required=False, default=5,
         help='Number of subjects')
     parser.add_argument(
         "-v", "--verbose", type=bool, required=False,
