@@ -176,12 +176,12 @@ class GraphConvert2Skeleton:
     def write_loop(self, nb_subjects, verbose=False):
         filenames = glob.glob(f"{self.src_dir}/*/")
         list_subjects = [re.search('([ae\d]{5,6})', filename).group(0) for filename in filenames]
-        if verbose==True:
-            pqdm(list_subjects, self.write_skeleton, n_jobs=define_njobs())
-        else:
+        if verbose:
             for sub in list_subjects[:nb_subjects]:
                 self.write_skeleton(sub)
-            
+        else:
+            pqdm(list_subjects, self.write_skeleton, n_jobs=define_njobs())
+
 
 def main(argv):
     """
@@ -196,9 +196,9 @@ def main(argv):
 if __name__ == '__main__':
     # This permits to call main also from another python program
     # without having to make system calls
-    src_dir = "/tgcc/hcp/ANALYSIS/3T_morphologist"
+    src_dir = "/mnt/n4hhcp/hcp/ANALYSIS/3T_morphologist"
     tgt_dir = "/neurospin/dico/data/deep_folding/datasets/hcp"
-    args = "-i R -v False -n 5 -s " + src_dir + " -t " + tgt_dir
+    args = "-i R -v True -n 5 -s " + src_dir + " -t " + tgt_dir
     argv = args.split(' ')
     main(argv=argv)
 
