@@ -326,7 +326,7 @@ class DatasetCroppedSkeleton:
             file_cropped_skeleton = join(self.cropped_skeleton_dir,
                                          self.cropped_skeleton_file % {'subject': subject_id, 'side': self.side})
 
-            print(file_cropped_skeleton)
+            
             # Normalization and resampling of skeleton images
             resampled = resample(input_image=file_skeleton,
                                  output_vs=self.out_voxel_size,
