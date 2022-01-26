@@ -56,6 +56,9 @@ from joblib import cpu_count
 from soma import aims
 import numpy as np
 
+from deep_folding.anatomist_tools.utils.list_manipulation import get_sublist
+
+_ALL_SUBJECTS = -1
 
 def define_njobs():
     """Returns number of cpus used by main loop
@@ -87,8 +90,10 @@ def parse_args(argv):
         "-i", "--side", type=str, required=True,
         help='Hemisphere side (either L or R).')
     parser.add_argument(
-        "-n", "--nb_subjects", type=int, required=False, default=5,
-        help='Number of subjects')
+        "-n", "--nb_subjects", type=str, default="all",
+        help='Number of subjects to take into account, or \'all\'. '
+             '0 subject is allowed, for debug purpose.'
+             'Default is : all')
     parser.add_argument(
         "-v", "--verbose", type=bool, required=False,
         help='If verbose is true, no parallelism.')
@@ -117,10 +122,11 @@ def create_volume_from_graph(graph):
 class GraphConvert2Skeleton:
     """
     """
-    def __init__(self, src_dir, tgt_dir, side):
+    def __init__(self, src_dir, tgt_dir, nb_subjects, side):
         self.src_dir = src_dir
         self.tgt_dir = tgt_dir
         self.side = side
+        self.nb_subjects = nb_subjects
         self.graph_subdir = "t1mri/default_acquisition/default_analysis/folds/3.1/default_session_*"
 
     def write_skeleton(self, subject):
@@ -189,8 +195,9 @@ class GraphConvert2Skeleton:
     def write_loop(self, nb_subjects, verbose=False):
         filenames = glob.glob(f"{self.src_dir}/*/")
         list_subjects = [re.search('([ae\d]{5,6})', filename).group(0) for filename in filenames]
+        list_subjects = get_sublist(list_subjects, nb_subjects)
         if verbose:
-            for sub in list_subjects[:nb_subjects]:
+            for sub in list_subjects:
                 self.write_skeleton(sub)
         else:
             pqdm(list_subjects, self.write_skeleton, n_jobs=define_njobs())
@@ -201,7 +208,7 @@ def main(argv):
     """
     # Parsing arguments
     args = parse_args(argv)
-    conversion = GraphConvert2Skeleton(args.src_dir, args.tgt_dir, args.side)
+    conversion = GraphConvert2Skeleton(args.src_dir, args.tgt_dir, args.nb_subjects, args.side)
     conversion.write_loop(nb_subjects=args.nb_subjects,
                           verbose=args.verbose)
 
