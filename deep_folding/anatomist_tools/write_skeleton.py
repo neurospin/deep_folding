@@ -76,13 +76,13 @@ def parse_args(argv):
     # Parse command line arguments
     parser = argparse.ArgumentParser(
         prog='write_skeleton.py',
-        description='Generates bucket files converted from volume files')
+        description='Generates skeleton and foldlabel files from graphs')
     parser.add_argument(
         "-s", "--src_dir", type=str, required=True,
         help='Source directory where the graph data lies.')
     parser.add_argument(
         "-t", "--tgt_dir", type=str, required=True,
-        help='Output directory where to put skeleton files.')
+        help='Output directory where to put skeleton and fold label files.')
     parser.add_argument(
         "-i", "--side", type=str, required=True,
         help='Hemisphere side (either L or R).')
@@ -121,14 +121,13 @@ class GraphConvert2Skeleton:
         self.src_dir = src_dir
         self.tgt_dir = tgt_dir
         self.side = side
-        # self.graph_dir = "t1mri/default_acquisition/default_analysis/folds/3.1/default_session_auto/"
-        self.graph_dir = "t1mri/default_acquisition/default_analysis/folds/3.1/default_session_*"
+         self.graph_subdir = "t1mri/default_acquisition/default_analysis/folds/3.1/default_session_*"
 
     def write_skeleton(self, subject):
         """
         """
         # graph_file = f"{self.side}{subject}*.arg"
-        graph_file = glob.glob(f"{self.src_dir}/{subject}*/{self.graph_dir}/{self.side}{subject}*.arg")[0]
+        graph_file = glob.glob(f"{self.src_dir}/{subject}*/{self.graph_subdir}/{self.side}{subject}*.arg")[0]
         graph = aims.read(graph_file)
 
         skeleton_filename = f"{self.tgt_dir}/skeleton/{self.side}/{self.side}skeleton_generated_{subject}.nii.gz"
