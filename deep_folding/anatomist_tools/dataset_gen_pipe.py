@@ -326,11 +326,16 @@ class DatasetCroppedSkeleton:
             file_cropped_skeleton = join(self.cropped_skeleton_dir,
                                          self.cropped_skeleton_file % {'subject': subject_id, 'side': self.side})
 
-            
+            # We give values with descendent priority
+            # The more important is the inversion in the priority 
+            # for the bottom value (30) and the simple surface value (60)
+            # with respect to the natural order
+            values = np.array([0, 11, 60, 30, 10, 20, 40, 50, 70, 80, 90])
             # Normalization and resampling of skeleton images
             resampled = resample(input_image=file_skeleton,
                                  output_vs=self.out_voxel_size,
                                  transformation=g_to_icbm_template_file,
+                                 values=values,
                                  verbose=False)
             aims.write(resampled, file_cropped_skeleton)
 

@@ -121,7 +121,7 @@ class GraphConvert2Skeleton:
         self.src_dir = src_dir
         self.tgt_dir = tgt_dir
         self.side = side
-         self.graph_subdir = "t1mri/default_acquisition/default_analysis/folds/3.1/default_session_*"
+        self.graph_subdir = "t1mri/default_acquisition/default_analysis/folds/3.1/default_session_*"
 
     def write_skeleton(self, subject):
         """
@@ -138,11 +138,25 @@ class GraphConvert2Skeleton:
         vol_label = create_volume_from_graph(graph)
         arr_label = np.asarray(vol_label)
 
-        label = {'aims_ss':0,
-                 'aims_bottom': 1000,
-                 'aims_other': 2000,
-                 'aims_junction': 3000,
-                 'aims_plidepassage': 4000}
+        # label = {'aims_ss':0,
+        #          'aims_bottom': 1000,
+        #          'aims_other': 2000,
+        #          'aims_junction': 3000,
+        #          'aims_plidepassage': 4000}
+
+        # Sorted in ascendent priority
+        # label = {'aims_other':0,
+        #          'aims_ss': 1000,
+        #          'aims_bottom': 2000,
+        #          'aims_junction': 3000,
+        #          'aims_plidepassage': 4000}
+
+        # Sorted in descendent priority
+        label = {'aims_other': 4000,
+                 'aims_ss': 3000,
+                 'aims_bottom': 2000,
+                 'aims_junction': 2000,
+                 'aims_plidepassage': 0}
 
         for edge in graph.edges():
             for bucket_name, value in {'aims_junction':110, 'aims_plidepassage':120}.items():
@@ -193,12 +207,12 @@ def main(argv):
 
 
 if __name__ == '__main__':
-    # This permits to call main also from another python program
-    # without having to make system calls
     src_dir = "/mnt/n4hhcp/hcp/ANALYSIS/3T_morphologist"
     tgt_dir = "/neurospin/dico/data/deep_folding/datasets/hcp"
     args = "-i R -v True -n 5 -s " + src_dir + " -t " + tgt_dir
     argv = args.split(' ')
     main(argv=argv)
 
+    # This permits to call main also from another python program
+    # without having to make system calls
     # main(argv=sys.argv[1:])
