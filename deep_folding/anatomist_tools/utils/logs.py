@@ -44,9 +44,11 @@ import os
 import sys
 import errno
 import time
+from venv import create
 import git
 from datetime import datetime
 from argparse import Namespace
+from .folder_manipulation import create_folder
 
 logging.basicConfig(level = logging.INFO)
 
@@ -154,6 +156,7 @@ def log_command_line(args: Namespace, prog_name: str, tgt_dir: str) -> None:
     log.info(cmd_line)
 
     # Name of command line file, which is a bash script file
+    create_folder(tgt_dir)
     cmd_line_file = f"{tgt_dir}/command_line.sh"
 
     # Save a reference to the original standard output
