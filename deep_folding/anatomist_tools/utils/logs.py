@@ -35,16 +35,22 @@
 
 """
 The aim of this script is to put together useful classes and functions
-used by brainvisa-dependent preprocessing
+used by brainvisa-dependent preprocessing for logging
 """
 
 import json
+import logging
 import os
+import sys
 import errno
 import time
 import git
 from datetime import datetime
+from argparse import Namespace
 
+logging.basicConfig(level = logging.INFO)
+
+log = logging.getLogger(os.path.basename(__file__))
 
 class LogJson:
     """Handles json file lifecycle
@@ -78,7 +84,7 @@ class LogJson:
             with open(self.json_file, "w") as json_file:
                 json_file.write(json.dumps({}))
         except IOError:
-            print("File " + self.json_file + " cannot be overwritten")
+            log.info("File " + self.json_file + " cannot be overwritten")
 
     def update(self, dict_to_add):
         """Updates json file with new dictionary entry
@@ -91,7 +97,7 @@ class LogJson:
             with open(self.json_file, "r") as json_file:
                 data = json.load(json_file)
         except IOError:
-            print("File %s is not readable through json.load", self.json_file)
+            log.info("File %s is not readable through json.load", self.json_file)
 
         data.update(dict_to_add)
 
@@ -99,7 +105,7 @@ class LogJson:
             with open(self.json_file, "w") as json_file:
                 json_file.write(json.dumps(data, sort_keys=True, indent=4))
         except IOError:
-            print("File %s is not writable", self.json_file)
+            log.info("File %s is not writable", self.json_file)
 
     def write_general_info(self):
         """Writes general information on json
@@ -125,3 +131,40 @@ class LogJson:
 
         # Updates json file with new dictionary by reading and writing the file
         self.update(dict_to_add=dict_to_add)
+
+
+def log_command_line(args: Namespace, prog_name: str, tgt_dir: str) -> None:
+    """Logs command on file command_line.sh in target directory
+    
+    The command file gives thus the exact command line
+    the should be given to reproduce the results"""
+
+    # Builds the effective command line
+    log.info(type(args))
+    log.info(f"args = {args}")
+    cmd_line = f"python3 {prog_name}"
+    args_dict = vars(args)
+    log.info(f"args_dict = {args_dict}")
+    for key in args_dict:
+        if type(args_dict[key]) is bool:
+            if args_dict[key]:
+                cmd_line += " --" + key
+        else:
+            cmd_line += " --" + key + " " + args_dict[key]
+    log.info(cmd_line)
+
+    # Name of command line file, which is a bash script file
+    cmd_line_file = f"{tgt_dir}/command_line.sh"
+
+    # Save a reference to the original standard output
+    original_stdout = sys.stdout 
+
+    # This writes the command line into the command line script file
+    with open(cmd_line_file, 'w') as f:
+        # Change the standard output to the file we created.
+        sys.stdout = f 
+        print("#!/bin/sh")
+        print(cmd_line)
+
+        # Reset the standard output to its original value
+        sys.stdout = original_stdout 

@@ -8,28 +8,31 @@ from time import time
 
 log = logging.getLogger(__name__)
 
-def resample(input_image, transformation, output_vs=None, background=0,
-             values=None, verbose=True):
+def resample(input_image: str,
+             transformation: str,
+             output_vs=None,
+             background=0,
+             values=None, verbose=True) -> aims.Volume:
     """
         Transform and resample a volume that as discret values
 
         Parameters
         ----------
-        input_image: file
+        input_image: path to file
             Path to the input volume (.nii or .nii.gz file)
-        transformation: file
+        transformation: path to file
             Linear transformation file (.trm file)
         output_vs: tuple
             Output voxel size (default: None, no resampling)
         background: int
             Background value (default: 11)
         values: []
-            Array of unique values ordered by descendent priority. If not given,
+            Array of unique values ordered by ascendent priority without background. If not given,
             priority is set by ascendent values
 
         Return
         ------
-        resampled_vol:
+        resampled:
             Transformed and resampled volume
     """
     
@@ -83,13 +86,13 @@ def resample(input_image, transformation, output_vs=None, background=0,
 
     if values is None:
         values = sorted(np.unique(vol_dt[vol_dt != background]))
-    else:
-        # Reverse order as value are passed by descendent priority
-        values = values[::-1]
+
+    # if values is not None, values are given in ascending order
+    # Note also that background shall not be given in values
 
     # Create one bucket by value (except background)
     # FIXME: Create several buckets because I didn't understood how to add
-    #  several bucket to a BucketMap
+    # several bucket to a BucketMap
     for i, v in enumerate(values):
         toc = time()
         bck = aims.BucketMap_VOID()

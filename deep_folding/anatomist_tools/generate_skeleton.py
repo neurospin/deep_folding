@@ -41,22 +41,30 @@
   (here brainvisa 5.0.0 installed with singurity) and launching the script
   from the terminal:
   >>> bv bash
-  >>> python write_skeleton.py
+  >>> python generate_skeleton.py
 
 
 """
 
 import sys
 import glob
-import os
 import re
 import argparse
+import logging
+import numpy as np
 from pqdm.processes import pqdm
 from joblib import cpu_count
+from os.path import abspath
+from os.path import basename
 from soma import aims
-import numpy as np
 
 from deep_folding.anatomist_tools.utils.list_manipulation import get_sublist
+from deep_folding.anatomist_tools.utils.folder_manipulation import create_folder
+from deep_folding.anatomist_tools.utils.logs import log_command_line
+
+logging.basicConfig(level = logging.INFO)
+
+log = logging.getLogger(basename(__file__))
 
 _ALL_SUBJECTS = -1
 
@@ -78,7 +86,7 @@ def parse_args(argv):
 
     # Parse command line arguments
     parser = argparse.ArgumentParser(
-        prog='write_skeleton.py',
+        prog='generate_skeleton.py',
         description='Generates skeleton and foldlabel files from graphs')
     parser.add_argument(
         "-s", "--src_dir", type=str, required=True,
@@ -95,10 +103,14 @@ def parse_args(argv):
              '0 subject is allowed, for debug purpose.'
              'Default is : all')
     parser.add_argument(
-        "-v", "--verbose", type=bool, required=False,
+        "-v", "--verbose",
+        default=False,
+        action='store_true',
         help='If verbose is true, no parallelism.')
 
     args = parser.parse_args(argv)
+    args.src_dir = abspath(args.src_dir)
+    args.tgt_dir = abspath(args.tgt_dir)
 
     return args
 
@@ -128,44 +140,54 @@ class GraphConvert2Skeleton:
         self.side = side
         self.nb_subjects = nb_subjects
         self.graph_subdir = "t1mri/default_acquisition/default_analysis/folds/3.1/default_session_*"
+        self.skeleton_dir = f"{self.tgt_dir}/skeleton/{self.side}"
+        self.foldlabel_dir = f"{self.tgt_dir}/foldlabel/{self.side}"
 
-    def write_skeleton(self, subject):
+        create_folder(abspath(self.skeleton_dir))
+        create_folder(abspath(self.foldlabel_dir))
+
+    def generate_skeleton(self, subject):
         """
         """
         # graph_file = f"{self.side}{subject}*.arg"
         graph_file = glob.glob(f"{self.src_dir}/{subject}*/{self.graph_subdir}/{self.side}{subject}*.arg")[0]
         graph = aims.read(graph_file)
 
-        skeleton_filename = f"{self.tgt_dir}/skeleton/{self.side}/{self.side}skeleton_generated_{subject}.nii.gz"
+        skeleton_filename = f"{self.skeleton_dir}/{self.side}skeleton_generated_{subject}.nii.gz"
         vol_skel = create_volume_from_graph(graph)
         arr_skel = np.asarray(vol_skel)
 
-        foldlabel_filename = f"{self.tgt_dir}/foldlabel/{self.side}/{self.side}foldlabel_{subject}.nii.gz"
+        foldlabel_filename = f"{self.foldlabel_dir}/{self.side}foldlabel_{subject}.nii.gz"
         vol_label = create_volume_from_graph(graph)
         arr_label = np.asarray(vol_label)
 
-        # label = {'aims_ss':0,
-        #          'aims_bottom': 1000,
-        #          'aims_other': 2000,
-        #          'aims_junction': 3000,
-        #          'aims_plidepassage': 4000}
-
         # Sorted in ascendent priority
-        # label = {'aims_other':0,
-        #          'aims_ss': 1000,
-        #          'aims_bottom': 2000,
-        #          'aims_junction': 3000,
-        #          'aims_plidepassage': 4000}
-
-        # Sorted in descendent priority
-        label = {'aims_other': 4000,
-                 'aims_ss': 3000,
+        label = {'aims_other':1,
+                 'aims_ss': 1000,
                  'aims_bottom': 2000,
-                 'aims_junction': 2000,
-                 'aims_plidepassage': 0}
+                 'aims_junction': 3000,
+                 'aims_plidepassage': 4000}
+
+        cnt_duplicate = 0
+        cnt_total = 0
+
+        for vertex in graph.vertices():
+            for bucket_name, value in {'aims_other': 100, 'aims_ss': 60, 'aims_bottom': 30}.items():
+                bucket = vertex.get(bucket_name)
+                label[bucket_name] += 1
+                if bucket is not None:
+                    voxels = np.array(bucket[0].keys())
+                    if voxels.shape == (0,):
+                        continue
+                    for i,j,k in voxels:
+                        cnt_total += 1
+                        if arr_skel[i,j,k] != 0:
+                            cnt_duplicate += 1
+                        arr_skel[i,j,k] = value
+                        arr_label[i,j,k] = label[bucket_name]
 
         for edge in graph.edges():
-            for bucket_name, value in {'aims_junction':110, 'aims_plidepassage':120}.items():
+            for bucket_name, value in {'aims_junction':110}.items():
                 bucket = edge.get(bucket_name)
                 label[bucket_name] += 1
                 if bucket is not None:
@@ -176,9 +198,9 @@ class GraphConvert2Skeleton:
                         arr_skel[i,j,k] = value
                         arr_label[i,j,k] = label[bucket_name]
 
-        for vertex in graph.vertices():
-            for bucket_name, value in {'aims_bottom': 30, 'aims_ss': 60, 'aims_other': 100}.items():
-                bucket = vertex.get(bucket_name)
+        for edge in graph.edges():
+            for bucket_name, value in {'aims_plidepassage':120}.items():
+                bucket = edge.get(bucket_name)
                 label[bucket_name] += 1
                 if bucket is not None:
                     voxels = np.array(bucket[0].keys())
@@ -192,15 +214,16 @@ class GraphConvert2Skeleton:
         aims.write(vol_label, foldlabel_filename)
 
 
-    def write_loop(self, nb_subjects, verbose=False):
+    def loop(self, nb_subjects, verbose=False):
         filenames = glob.glob(f"{self.src_dir}/*/")
         list_subjects = [re.search('([ae\d]{5,6})', filename).group(0) for filename in filenames]
         list_subjects = get_sublist(list_subjects, nb_subjects)
         if verbose:
+            log.info("VERBOSE MODE: subjects are scanned serially, without parallelism")
             for sub in list_subjects:
-                self.write_skeleton(sub)
+                self.generate_skeleton(sub)
         else:
-            pqdm(list_subjects, self.write_skeleton, n_jobs=define_njobs())
+            pqdm(list_subjects, self.generate_skeleton, n_jobs=define_njobs())
 
 
 def main(argv):
@@ -208,18 +231,21 @@ def main(argv):
     """
     # Parsing arguments
     args = parse_args(argv)
+    log_command_line(args, "generate_skeleton.py", args.tgt_dir)
+
     conversion = GraphConvert2Skeleton(args.src_dir, args.tgt_dir, args.nb_subjects, args.side)
-    conversion.write_loop(nb_subjects=args.nb_subjects,
+    conversion.loop(nb_subjects=args.nb_subjects,
                           verbose=args.verbose)
 
 
 if __name__ == '__main__':
-    src_dir = "/mnt/n4hhcp/hcp/ANALYSIS/3T_morphologist"
-    tgt_dir = "/neurospin/dico/data/deep_folding/datasets/hcp"
-    args = "-i R -v True -n 5 -s " + src_dir + " -t " + tgt_dir
-    argv = args.split(' ')
-    main(argv=argv)
+    # src_dir = "/mnt/n4hhcp/hcp/ANALYSIS/3T_morphologist"
+    # tgt_dir = "/neurospin/dico/data/deep_folding/datasets/hcp"
+    # args = "-i R -v True -n 5 -s " + src_dir + " -t " + tgt_dir
+    # argv = args.split(' ')
+    # main(argv=argv)
 
     # This permits to call main also from another python program
     # without having to make system calls
-    # main(argv=sys.argv[1:])
+    print(sys.argv)
+    main(argv=sys.argv[1:])

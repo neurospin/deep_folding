@@ -33,27 +33,10 @@
 # The fact that you are presently reading this means that you have had
 # knowledge of the CeCILL license version 2 and that you accept its terms.
 
-_ALL_SUBJECTS = -1
+import os
 
-def get_sublist(orig_list: list, nb_subjects: str) -> list:
-    """Returns a sublist of nb_subjects elements
+def create_folder(folder: str) -> None:
+    """Creates folder if it doesn't exist"""
+    if not os.path.exists(folder):
+        os.makedirs(folder)
 
-    if nb_subjects == "all", it returns the original list
-    """
-    try:
-        if nb_subjects == "all":
-            number_subjects = _ALL_SUBJECTS
-        else:
-            number_subjects = int(nb_subjects)
-            if number_subjects < 0:
-                raise ValueError
-    except ValueError:
-        raise ValueError(
-            "number_subjects must be either the string \"all\" or an integer")
-
-    sublist = (
-        orig_list
-        if number_subjects == _ALL_SUBJECTS
-        else orig_list[:number_subjects])
-
-    return sublist
