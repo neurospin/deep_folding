@@ -45,10 +45,10 @@ Several steps are required: normalization, crop and .pickle generation
   (here brainvisa 5.0.0 installed with singurity) and launching the script
   from the terminal:
   >>> bv bash
-  >>> python dataset_gen_pipe.py
+  >>> python resample_skeleton.py
 
   Alternatively, you can launch the script in the interactive terminal ipython:
-  >>> %run dataset_gen_pipe.py
+  >>> %run resample_skeleton.py
 
 """
 
@@ -73,9 +73,7 @@ from joblib import cpu_count
 
 from deep_folding.anatomist_tools.utils.logs import LogJson
 from deep_folding.anatomist_tools.utils.bbox import compute_max_box
-from deep_folding.anatomist_tools.utils.mask import compute_simple_mask, compute_centered_mask
 from deep_folding.anatomist_tools.utils.resample import resample
-from deep_folding.anatomist_tools.utils import remove_hull
 from deep_folding.anatomist_tools.utils.sulcus_side import complete_sulci_name
 from deep_folding.anatomist_tools.load_data import fetch_data
 from deep_folding.anatomist_tools.utils.logs import log_command_line
@@ -86,8 +84,6 @@ _ALL_SUBJECTS = -1
 
 _SIDE_DEFAULT = 'L'  # hemisphere 'L' or 'R'
 
-_CROPPING_DEFAULT = 'mask' # crops according to a mask by default
-
 _OUT_VOXEL_SIZE = (1, 1, 1) # default output voxel size
 
 _EXTERNAL = 11 # topological value meaning "outside the brain"
@@ -95,8 +91,6 @@ _EXTERNAL = 11 # topological value meaning "outside the brain"
 # sulcus to encompass:
 # its name depends on the hemisphere side
 _SULCUS_DEFAULT = 'S.T.s.ter.asc.ant.'
-
-_COMBINE_TYPE = False
 
 # Input directories
 # -----------------
@@ -110,13 +104,6 @@ _GRAPH_DIR_DEFAULT = '/neurospin/hcp'
 # Directory where subjects to be processed are stored.
 # Default is for HCP dataset
 _MORPHOLOGIST_DIR_DEFAULT = 'ANALYSIS/3T_morphologist'
-
-# Directory containing bounding box json files
-# default corresponds to bounding boxes computed for voxels of 1mm
-_BBOX_DIR_DEFAULT = '/neurospin/dico/data/deep_folding/current/bbox'
-
-# Directory containing mask files
-_MASK_DIR_DEFAULT = '/neurospin/dico/data/deep_folding/current/mask'
 
 # Directory containing bounding box json files
 # default corresponds to bounding boxes computed for voxinput
@@ -134,6 +121,71 @@ def define_njobs():
     nb_cpus = cpu_count()
     return max(nb_cpus-2, 1)
 
+def resample_one_skeleton(input_skeleton,
+                          out_voxel_size,
+                          transformation,
+                          verbose=False):
+    """Resamples one skeleton
+    
+    Args
+    ----
+        input_skeleton: either string or aims.Volume
+            either path to skeleton or skeleton aims Volume 
+        out_voxel_size: tuple
+            Output voxel size (default: None, no resampling)
+        transformation: string or aims.Volume
+            either path to transformation file or transformation itself
+        verbose: boolean
+
+    Returns:
+        resampled: aims.Volume
+            Transformed or resampled volume
+    """
+
+    # We give values with ascendent priority
+    # The more important is the inversion in the priority 
+    # for the bottom value (30) and the simple surface value (60)
+    # with respect to the natural order
+    # We don't give background, which is the interior 0
+    values = np.array([11, 60, 30, 10, 20, 40, 50, 70, 80, 90])
+
+    # Normalization and resampling of skeleton images
+    resampled = resample(input_image=input_skeleton,
+                         output_vs=out_voxel_size,
+                         transformation=transformation,
+                         values=values,
+                         verbose=verbose)
+    return resampled
+
+
+def resample_one_foldlabel(input_foldlabel,
+                           out_voxel_size,
+                           transformation,
+                           verbose=False):
+    """Resamples one foldlabel
+    
+    Args
+    ----
+        input_foldlabel: either string or aims.Volume
+            either path to foldlabel or foldlabel aims Volume 
+        out_voxel_size: tuple
+            Output voxel size (default: None, no resampling)
+        transformation: string or aims.Volume
+            either path to transformation file or transformation itself
+        verbose: boolean
+
+    Returns:
+        resampled: aims.Volume
+            Transformed or resampled foldlabel
+    """
+
+    # Normalization and resampling of foldlabel images
+    resampled = resample(input_image=input_foldlabel,
+                         output_vs=out_voxel_size,
+                         transformation=transformation,
+                         verbose=verbose)
+    return resampled
+
 class DatasetCroppedSkeleton:
     """Generates cropped skeleton files and corresponding pickle file
     """
@@ -142,14 +194,10 @@ class DatasetCroppedSkeleton:
                  graph_dir=_GRAPH_DIR_DEFAULT,
                  src_dir=_SRC_DIR_DEFAULT,
                  tgt_dir=_TGT_DIR_DEFAULT,
-                 bbox_dir=_BBOX_DIR_DEFAULT,
-                 mask_dir=_MASK_DIR_DEFAULT,
                  morphologist_dir=_MORPHOLOGIST_DIR_DEFAULT,
                  list_sulci=_SULCUS_DEFAULT,
                  side=_SIDE_DEFAULT,
-                 cropping=_CROPPING_DEFAULT,
                  out_voxel_size=_OUT_VOXEL_SIZE,
-                 combine_type=_COMBINE_TYPE,
                  verbose=_VERBOSE_DEFAULT):
         """Inits with list of directories and list of sulci
 
@@ -158,10 +206,6 @@ class DatasetCroppedSkeleton:
                     containing MRI and graph images
             src_dir: folder containing generated skeletons and labels
             tgt_dir: name of target (output) directory with full path
-            transform_dir: directory containing transformation files
-                    (generated using transform.py)
-            bbox_dir: directory containing bbox json files
-                    (generated using bounding_box.py)
             list_sulci: list of sulcus names
             side: hemisphere side (either L for left, or R for right hemisphere)
         """
@@ -174,12 +218,8 @@ class DatasetCroppedSkeleton:
                            else list_sulci)
         self.list_sulci = complete_sulci_name(self.list_sulci, self.side)
         self.tgt_dir = tgt_dir
-        self.bbox_dir = bbox_dir
-        self.mask_dir=mask_dir
         self.morphologist_dir = morphologist_dir
-        self.cropping = cropping
         self.out_voxel_size = out_voxel_size
-        self.combine_type = combine_type
         self.verbose = verbose
 
         # Morphologist directory
@@ -218,7 +258,7 @@ class DatasetCroppedSkeleton:
         json_file = join(self.tgt_dir, self.side + 'dataset.json')
         self.json = LogJson(json_file)
 
-        # reference file in MNI template with corrct voxel size
+        # reference file in MNI template with correct voxel size
         self.ref_file = f"{temp_dir}/file_ref.nii.gz"
         self.g_to_icbm_template_file = join(temp_dir, 'file_g_to_icbm_%(subject)s.trm')
 
@@ -238,68 +278,6 @@ class DatasetCroppedSkeleton:
         vol.copyHeaderFrom(hdr)
         vol.header()['voxel_size'] = voxel_size
         aims.write(vol, self.ref_file)
-
-    def crop_bbox(self, file_cropped, verbose):
-        """Crops according to bounding box"""
-        # Take the coordinates of the bounding box
-        bbmin = self.bbmin
-        bbmax = self.bbmax
-        xmin, ymin, zmin = str(bbmin[0]), str(bbmin[1]), str(bbmin[2])
-        xmax, ymax, zmax = str(bbmax[0]), str(bbmax[1]), str(bbmax[2])
-
-        # Crop of the images based on bounding box
-        cmd_bounding_box = ' -x ' + xmin + ' -y ' + ymin + ' -z ' + zmin + \
-                        ' -X ' + xmax + ' -Y ' + ymax + ' -Z ' + zmax
-        cmd_crop = 'AimsSubVolume' + \
-                ' -i ' + file_cropped + \
-                ' -o ' + file_cropped + cmd_bounding_box
-
-        # Sts output from AimsSubVolume is recorded in var_output
-        # Put following command to get the output
-        # os.popen(cmd_crop).read()
-        if verbose:
-            os.popen(cmd_crop).read()
-        else:
-            var_output = os.popen(cmd_crop).read()
-
-    def filter_mask(self):
-        """Smooths the mask with Gaussian Filter
-        """
-        arr = np.asarray(self.mask)
-        arr_filter = scipy.ndimage.gaussian_filter(arr.astype(float), sigma=0.5,
-                             order=0, output=None, mode='reflect', truncate=4.0)
-        arr[:] = (arr_filter> 0.001).astype(int)
-
-    def crop_mask(self, file_cropped, verbose):
-        """Crops according to mask"""
-        vol = aims.read(file_cropped)
-
-        arr = np.asarray(vol)
-        #remove_hull.remove_hull(arr)
-
-        arr_mask = np.asarray(self.mask)
-        arr[arr_mask == 0] = 0
-        arr[arr == _EXTERNAL] = 0
-
-        # Take the coordinates of the bounding box
-        bbmin = self.bbmin
-        bbmax = self.bbmax
-        xmin, ymin, zmin = str(bbmin[0]), str(bbmin[1]), str(bbmin[2])
-        xmax, ymax, zmax = str(bbmax[0]), str(bbmax[1]), str(bbmax[2])
-
-        aims.write(vol, file_cropped)
-
-        # Defines rop of the images based on bounding box
-        cmd_bounding_box = ' -x ' + xmin + ' -y ' + ymin + ' -z ' + zmin + \
-                        ' -X ' + xmax + ' -Y ' + ymax + ' -Z ' + zmax
-        cmd_crop = 'AimsSubVolume' + \
-                ' -i ' + file_cropped + \
-                ' -o ' + file_cropped + cmd_bounding_box
-
-        if verbose:
-            os.popen(cmd_crop).read()
-        else:
-            var_output = os.popen(cmd_crop).read()
 
     def crop_one_file(self, subject_id, verbose=False):
         """Crops one file
