@@ -5,22 +5,23 @@ import numpy as np
 import logging
 from soma import aims, aimsalgo
 from time import time
+from typing import Union
 
 logging.basicConfig(level=logging.WARNING)
 log = logging.getLogger(__name__)
 
-def resample(input_image: str,
-             transformation: str,
+def resample(input_image: Union[str, aims.Volume],
+             transformation: Union[str, aims.AffineTransformation3d],
              output_vs: tuple=None,
              background: int=0,
              values: np.array=None,
              verbose: bool=True) -> aims.Volume:
     """
-        Transform and resample a volume that as discret values
+        Transforms and resamples a volume that has discret values
 
         Parameters
         ----------
-        input_image: path to file
+        input_image: path to nifti file or aims volume
             Path to the input volume (.nii or .nii.gz file)
         transformation: path to file
             Linear transformation file (.trm file)
@@ -38,18 +39,26 @@ def resample(input_image: str,
             Transformed and resampled volume
     """
     
+    # Handling of verbosity
     if verbose:
         log.setLevel(level=logging.INFO)
     else:
         log.setLevel(level=logging.WARNING)
     tic = time()
 
-    # Read inputs
-    vol = aims.read(input_image)
+    # Reads input image (either path to file or aims volume)
+    if type(input_image) is str:
+        vol = aims.read(input_image)
+    else:
+        vol = input_image
     vol_dt = vol.__array__()
 
+    # Reads transformation if present (either path to file or aims Volume)
     if transformation:
-        trm = aims.read(transformation)
+        if type(transformation) is str:
+            trm = aims.read(transformation)
+        else:
+            trm = transformation
     else:
         trm = aims.AffineTransformation3d(np.eye(4))
     inv_trm = trm.inverse()

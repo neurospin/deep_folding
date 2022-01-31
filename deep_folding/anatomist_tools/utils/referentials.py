@@ -32,3 +32,33 @@
 #
 # The fact that you are presently reading this means that you have had
 # knowledge of the CeCILL license version 2 and that you accept its terms.
+
+import numpy as np
+from soma import aims
+
+def define_ref_volume_MNI_2009(out_voxel_size: tuple) -> aims.Volume:
+    """Defines MNI 2009 reference aims volume with output voxel size
+
+    Parameters
+    ----------
+    output_voxel_size: tuple
+        Output voxel size (default: None, no resampling)
+
+    Return
+    ------
+    vol:
+        volume (aims.Volume_S16) filled with 0 in MNI2009 referential
+        and with requested voxel_size
+    """
+    hdr = aims.StandardReferentials.icbm2009cTemplateHeader()
+    voxel_size = np.concatenate((out_voxel_size, [1]))
+    resampling_ratio = np.array(hdr['voxel_size']) / voxel_size
+
+    orig_dim = hdr['volume_dimension']
+    new_dim = list((resampling_ratio * orig_dim).astype(int))
+
+    vol = aims.Volume(new_dim, dtype='S16')
+    vol.copyHeaderFrom(hdr)
+    vol.header()['voxel_size'] = voxel_size
+
+    return vol

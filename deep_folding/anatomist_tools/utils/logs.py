@@ -48,7 +48,7 @@ from venv import create
 import git
 from datetime import datetime
 from argparse import Namespace
-from .folder_manipulation import create_folder
+from .folder import create_folder
 
 logging.basicConfig(level = logging.INFO)
 
