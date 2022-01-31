@@ -6,6 +6,7 @@ import logging
 from soma import aims, aimsalgo
 from time import time
 
+logging.basicConfig(level=logging.WARNING)
 log = logging.getLogger(__name__)
 
 def resample(input_image: str,
@@ -38,9 +39,9 @@ def resample(input_image: str,
     """
     
     if verbose:
-        logging.basicConfig(level=logging.INFO)
+        log.setLevel(level=logging.INFO)
     else:
-        log.basicConfig(level=logging.WARNING)
+        log.setLevel(level=logging.WARNING)
     tic = time()
 
     # Read inputs
