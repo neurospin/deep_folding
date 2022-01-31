@@ -133,6 +133,11 @@ def create_volume_from_graph(graph: aims.Graph) -> aims.Volume:
 
 def generate_skeleton_thin_junction(graph: aims.Graph) -> Tuple[aims.Volume, aims.Volume]:
     """Converts an aims graph into skeleton and foldlabel volumes
+
+    It should produce thin junctions as vertices (aims_ss, aims_bottom)
+    are written after edges (junction, plidepassage). 
+    Thus, when voxels are present in both, simple and bottom surfaces override
+    junctions
     """
     vol_skel = create_volume_from_graph(graph)
     arr_skel = np.asarray(vol_skel)
@@ -194,6 +199,11 @@ def generate_skeleton_thin_junction(graph: aims.Graph) -> Tuple[aims.Volume, aim
 
 def generate_skeleton_wide_junction(graph: aims.Graph) -> Tuple[aims.Volume, aims.Volume]:
     """Converts an aims graph into skeleton and foldlabel volumes
+
+    It should produce wide junctions as edges (junction, plidepassage)
+    are written after vertices (aims_ss, aims_bottom). 
+    Thus, when voxels are present in both, junction voxels override 
+    simple surface and bottom voxels
     """
     vol_skel = create_volume_from_graph(graph)
     arr_skel = np.asarray(vol_skel)

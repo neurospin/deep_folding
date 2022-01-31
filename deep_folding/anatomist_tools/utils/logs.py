@@ -151,6 +151,9 @@ def log_command_line(args: Namespace, prog_name: str, tgt_dir: str) -> None:
         if type(args_dict[key]) is bool:
             if args_dict[key]:
                 cmd_line += " --" + key
+        elif type(args_dict[key]) is list:
+            cmd_line += " --" + key + " " \
+                        + ' '.join([str(e) for e in args_dict[key]])
         else:
             cmd_line += " --" + key + " " + args_dict[key]
     log.info(cmd_line)

@@ -10,9 +10,10 @@ log = logging.getLogger(__name__)
 
 def resample(input_image: str,
              transformation: str,
-             output_vs=None,
-             background=0,
-             values=None, verbose=True) -> aims.Volume:
+             output_vs: tuple=None,
+             background: int=0,
+             values: np.array=None,
+             verbose: bool=True) -> aims.Volume:
     """
         Transform and resample a volume that as discret values
 
@@ -38,6 +39,8 @@ def resample(input_image: str,
     
     if verbose:
         logging.basicConfig(level=logging.INFO)
+    else:
+        log.basicConfig(level=logging.WARNING)
     tic = time()
 
     # Read inputs

@@ -54,6 +54,7 @@ Several steps are required: normalization, crop and .pickle generation
 
 import argparse
 import sys
+import glob
 import os
 from os import listdir
 from os.path import join
@@ -77,6 +78,7 @@ from deep_folding.anatomist_tools.utils.resample import resample
 from deep_folding.anatomist_tools.utils import remove_hull
 from deep_folding.anatomist_tools.utils.sulcus_side import complete_sulci_name
 from deep_folding.anatomist_tools.load_data import fetch_data
+from deep_folding.anatomist_tools.utils.logs import log_command_line
 
 from tqdm import tqdm
 
@@ -121,6 +123,8 @@ _MASK_DIR_DEFAULT = '/neurospin/dico/data/deep_folding/current/mask'
 # -------------------------
 _TGT_DIR_DEFAULT = '/neurospin/dico/data/deep_folding/test'
 
+_VERBOSE_DEFAULT = False
+
 # temporary directory
 temp_dir = tempfile.mkdtemp()
 
@@ -145,7 +149,8 @@ class DatasetCroppedSkeleton:
                  side=_SIDE_DEFAULT,
                  cropping=_CROPPING_DEFAULT,
                  out_voxel_size=_OUT_VOXEL_SIZE,
-                 combine_type=_COMBINE_TYPE):
+                 combine_type=_COMBINE_TYPE,
+                 verbose=_VERBOSE_DEFAULT):
         """Inits with list of directories and list of sulci
 
         Args:
@@ -175,6 +180,7 @@ class DatasetCroppedSkeleton:
         self.cropping = cropping
         self.out_voxel_size = out_voxel_size
         self.combine_type = combine_type
+        self.verbose = verbose
 
         # Morphologist directory
         self.morphologist_dir = join(self.graph_dir, self.morphologist_dir)
@@ -190,9 +196,11 @@ class DatasetCroppedSkeleton:
 
         # Names of files in function of dictionary: keys -> 'subject' and 'side'
         # Generated skeleton from folding graphs
-        self.skeleton_file = join(self.src_dir, 'skeleton', self.side,
+        self.skeleton_dir  = join(self.src_dir, 'skeleton', self.side)
+        self.skeleton_file = join(self.skeleton_dir,
                                   '%(side)sskeleton_generated_%(subject)s.nii.gz')
-        self.foldlabel_file = join(self.src_dir, 'foldlabel', self.side,
+        self.foldlabel_dir  = join(self.src_dir, 'foldlabel', self.side)
+        self.foldlabel_file = join(self.foldlabel_dir,
                                   '%(side)sfoldlabel_%(subject)s.nii.gz')
 
         self.graph_file = 'default_analysis/folds/3.1/default_session_auto/' \
@@ -331,7 +339,7 @@ class DatasetCroppedSkeleton:
             # for the bottom value (30) and the simple surface value (60)
             # with respect to the natural order
             # values = np.array([0, 11, 60, 30, 10, 20, 40, 50, 70, 80, 90])
-            values = np.array([0, 11, 60, 30, 10, 20, 40, 50, 70, 80, 90])
+            values = np.array([11, 60, 30, 10, 20, 40, 50, 70, 80, 90])
 
             # We give values with ascendent priority
             # The more important is the inversion in the priority 
@@ -353,6 +361,8 @@ class DatasetCroppedSkeleton:
                 self.crop_bbox(file_cropped_skeleton, verbose)
             else:
                 self.crop_mask(file_cropped_skeleton, verbose)
+        else:
+            raise FileNotFoundError(f"{file_skeleton} not found")
 
         if os.path.exists(file_foldlabel):
             # Creates output (cropped) file name
@@ -371,7 +381,8 @@ class DatasetCroppedSkeleton:
                 self.crop_bbox(file_cropped_label, verbose)
             else:
                 self.crop_mask(file_cropped_label, verbose)
-
+        else:
+            raise FileNotFoundError(f"{file_foldlabel} not found")
 
 
     def crop_files(self, number_subjects=_ALL_SUBJECTS):
@@ -386,9 +397,13 @@ class DatasetCroppedSkeleton:
 
         if number_subjects:
 
-            # subjects are detected as the directory names under graph_dir
-            list_all_subjects = [dI for dI in os.listdir(self.morphologist_dir)\
-             if os.path.isdir(os.path.join(self.morphologist_dir,dI))]
+            # subjects are detected as the nifti file names under src_dir
+            expr = '^.skeleton_generated_([0-9a-zA-Z]*).nii.gz$'
+            if os.path.isdir(self.skeleton_dir):
+                list_all_subjects = [re.search(expr, os.path.basename(dI))[1] 
+                                    for dI in glob.glob(f"{self.skeleton_dir}/*.nii.gz")]
+            else:
+                raise NotADirectoryError(f"{self.sksleton_dir} doesn't exist or is not a directory")
 
             # Gives the possibility to list only the first number_subjects
             list_subjects = (
@@ -429,9 +444,12 @@ class DatasetCroppedSkeleton:
             # Performs cropping for each file in a parallelized way
             print("list_subjects = ", list_subjects)
 
-            # for sub in list_subjects:
-            #     self.crop_one_file(sub)
-            pqdm(list_subjects, self.crop_one_file, n_jobs=define_njobs())
+            if self.verbose:
+                for sub in list_subjects:
+                    self.crop_one_file(sub)
+                print("VERBOSE MODE: subjects are scanned serially, without parallelism")
+            else:
+                pqdm(list_subjects, self.crop_one_file, n_jobs=define_njobs())
 
 
     def dataset_gen_pipe(self, number_subjects=_ALL_SUBJECTS):
@@ -538,9 +556,14 @@ def parse_args(argv):
              'mask: selection based on a mask'
              'Default is : mask')
     parser.add_argument(
-        "-v", "--out_voxel_size", type=float, nargs='+', default=_OUT_VOXEL_SIZE,
+        "-x", "--out_voxel_size", type=float, nargs='+', default=_OUT_VOXEL_SIZE,
         help='Voxel size of output images'
              'Default is : 1 1 1')
+    parser.add_argument(
+        "-v", "--verbose",
+        default=False,
+        action='store_true',
+        help='If verbose is true, no parallelism.')
     parser.add_argument(
         "-o", "--combine_type", type=bool, default=_COMBINE_TYPE,
         help='Whether use specific combination of masks or not')
@@ -548,6 +571,10 @@ def parse_args(argv):
     params = {}
 
     args = parser.parse_args(argv)
+
+    # Writes command line argument to target dir for logging
+    log_command_line(args, "dataset_gen_pipe.py", args.tgt_dir)
+
     params['src_dir'] = args.src_dir
     params['graph_dir'] = args.graph_dir
     params['tgt_dir'] = args.tgt_dir
@@ -559,6 +586,7 @@ def parse_args(argv):
     params['out_voxel_size'] = tuple(args.out_voxel_size)
     params['morphologist_dir'] = args.morphologist_dir
     params['combine_type'] = args.combine_type
+    params['verbose'] = args.verbose
 
     number_subjects = args.nb_subjects
 
@@ -589,9 +617,8 @@ def dataset_gen_pipe(graph_dir=_GRAPH_DIR_DEFAULT,
                      number_subjects=_ALL_SUBJECTS,
                      cropping=_CROPPING_DEFAULT,
                      out_voxel_size=_OUT_VOXEL_SIZE,
-                     combine_type=_COMBINE_TYPE):
-    """Main program generating cropped files and corresponding pickle file
-    """
+                     combine_type=_COMBINE_TYPE,
+                     verbose=_VERBOSE_DEFAULT):
 
     dataset = DatasetCroppedSkeleton(graph_dir=graph_dir,
                                      src_dir=src_dir,
@@ -603,7 +630,8 @@ def dataset_gen_pipe(graph_dir=_GRAPH_DIR_DEFAULT,
                                      list_sulci=list_sulci,
                                      cropping=cropping,
                                      out_voxel_size=out_voxel_size,
-                                     combine_type=combine_type)
+                                     combine_type=combine_type,
+                                     verbose=verbose)
     dataset.dataset_gen_pipe(number_subjects=number_subjects)
 
 
@@ -619,6 +647,7 @@ def main(argv):
     try:
         # Parsing arguments
         params = parse_args(argv)
+
         # Actual API
         dataset_gen_pipe(graph_dir=params['graph_dir'],
                          src_dir=params['src_dir'],
@@ -631,7 +660,8 @@ def main(argv):
                          number_subjects=params['nb_subjects'],
                          cropping=params['cropping'],
                          out_voxel_size=params['out_voxel_size'],
-                         combine_type=params['combine_type'])
+                         combine_type=params['combine_type'],
+                         verbose = params['verbose'])
     except SystemExit as exc:
         if exc.code != 0:
             six.reraise(*sys.exc_info())
