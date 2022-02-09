@@ -44,11 +44,11 @@ PROVIDES = ["deep_folding"]
 REQUIRES = ['six', 'numpy', 'pytest', 'GitPython', 'typing', 'joblib',
             'tqdm>=4.36', 'pqdm',
             'dico_toolbox @ \
-                git+https://git@github.com/neurospin/dico_toolbox#egg=dico_toolbox',
+                git+https://git@github.com/neurospin/dico_toolbox@2022_midl#egg=dico_toolbox',
             'colorado @ \
-                git+https://git@github.com/neurospin/colorado#egg=colorado',
+                git+https://git@github.com/neurospin/colorado@2022_midl#egg=colorado',
             'moving_averages @ \
-                git+https://git@github.com/neurospin/point-cloud-pattern-mining.git@dev#egg=moving_averages']
+                git+https://git@github.com/neurospin/point-cloud-pattern-mining.git@2022_midl#egg=moving_averages']
 EXTRA_REQUIRES = {
     "plotting": ["matplotlib", "seaborn"],
     "doc": ["sphinx>=" + SPHINX_MIN_VERSION, 'sphinx-rtd-theme']}
