@@ -350,6 +350,7 @@ class DatasetCroppedSkeleton:
                                 ' -i ' + target_file + \
                                 ' -o ' + file_cropped + \
                                 ' -m ' + g_to_icbm_template_file + \
+                                ' -r ' + self.ref_file + \
                                 ' -t ' + self.interp
                 os.system(cmd_normalize)
                 print(cmd_normalize)
