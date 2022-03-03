@@ -53,8 +53,8 @@ from glob import glob
 import random
 import pandas as pd
 import os
-from deep_folding.anatomist_tools.utils.bbox import compute_max_box
-from deep_folding.anatomist_tools.utils.sulcus_side import complete_sulci_name
+from deep_folding.brainvisa.utils.bbox import compute_max_box
+from deep_folding.brainvisa.utils.sulcus_side import complete_sulci_name
 
 
 _DEFAULT_DATA_DIR = '/neurospin/hcp/ANALYSIS/3T_morphologist/'
