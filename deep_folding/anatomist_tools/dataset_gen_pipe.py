@@ -100,6 +100,8 @@ _SULCUS_DEFAULT = 'S.T.s.ter.asc.ant.'
 
 _COMBINE_TYPE = False
 
+_DIST_MAP_DEFAULT = False
+
 # Input directories
 # -----------------
 
@@ -146,7 +148,8 @@ class DatasetCroppedSkeleton:
                  resampling=_RESAMPLING_DEFAULT,
                  cropping=_CROPPING_DEFAULT,
                  out_voxel_size=_OUT_VOXEL_SIZE,
-                 combine_type=_COMBINE_TYPE):
+                 combine_type=_COMBINE_TYPE,
+                 dist_map=_DIST_MAP_DEFAULT):
         """Inits with list of directories and list of sulci
 
         Args:
@@ -177,6 +180,7 @@ class DatasetCroppedSkeleton:
         self.cropping = cropping
         self.out_voxel_size = out_voxel_size
         self.combine_type = combine_type
+        self.dist_map = dist_map
 
         # Morphologist directory
         self.morphologist_dir = join(self.src_dir, self.morphologist_dir)
@@ -190,11 +194,13 @@ class DatasetCroppedSkeleton:
 
         # Names of files in function of dictionary: keys -> 'subject' and 'side'
         # Files from morphologist pipeline
-        self.skeleton_file = 'default_analysis/segmentation/' \
-                            '%(side)sskeleton_%(subject)s.nii.gz'
+        #self.skeleton_file = 'default_analysis/segmentation/' \
+        #                    '%(side)sskeleton_%(subject)s.nii.gz'
         ## FOR HCP dataset
         # self.skeleton_file = '/neurospin/dico/data/deep_folding/datasets/hcp/' \
         #                            '%(side)sskeleton_%(subject)s_generated.nii.gz'
+        self.distMap_file = '/neurospin/dico/data/deep_folding/datasets/hcp/distance_map/R/' \
+                                   'distance_map_%(subject)s.nii.gz'
         ## FOR TISSIER dataset
         # self.skeleton_file = '/neurospin/dico/data/deep_folding/datasets/ACC_patterns/tissier/' \
         #                             '%(side)sskeleton_%(subject)s_generated.nii.gz'
@@ -314,8 +320,12 @@ class DatasetCroppedSkeleton:
         subject_dir = \
             join(self.morphologist_dir, self.acquisition_dir % subject)
 
-        # Skeleton file name
-        file_skeleton = join(subject_dir, self.skeleton_file % {'subject': subject_id, 'side': self.side})
+        if self.dist_map:
+            target_file = join(subject_dir, self.distMap_file % {'subject': subject_id})
+            print(target_file)
+        else:
+            # Skeleton file name
+            target_file = join(subject_dir, self.skeleton_file % {'subject': subject_id, 'side': self.side})
 
         # Creates transformation MNI template
         file_graph = join(subject_dir, self.graph_file % subject)
@@ -324,26 +334,26 @@ class DatasetCroppedSkeleton:
         g_to_icbm_template_file = self.g_to_icbm_template_file % subject
         aims.write(g_to_icbm_template, g_to_icbm_template_file)
 
-        if os.path.exists(file_skeleton):
+        if os.path.exists(target_file):
             # Creates output (cropped) file name
             file_cropped = join(self.cropped_dir, self.cropped_file % {'subject': subject_id, 'side': self.side})
 
             # Normalization and resampling of skeleton images
             if self.resampling:
-                resampled = resample(input_image=file_skeleton,
+                resampled = resample(input_image=target_file,
                                      output_vs=self.out_voxel_size,
                                      transformation=g_to_icbm_template_file,
                                      verbose=False)
                 aims.write(resampled, file_cropped)
             else :
                 cmd_normalize = 'AimsApplyTransform' + \
-                                ' -i ' + file_skeleton + \
+                                ' -i ' + target_file + \
                                 ' -o ' + file_cropped + \
                                 ' -m ' + g_to_icbm_template_file + \
                                 ' -r ' + self.ref_file + \
-                                ' -t ' + self.interp + \
-                                ' --bg ' + str(_EXTERNAL)
+                                ' -t ' + self.interp
                 os.system(cmd_normalize)
+                print(cmd_normalize)
 
             # Cropping of skeleton image
             if self.cropping == 'bbox':
@@ -395,7 +405,8 @@ class DatasetCroppedSkeleton:
                            'cropped_dir': self.cropped_dir,
                            'resampling_type': 'sulcus-based' if self.resampling else 'AimsApplyTransform',
                            'out_voxel_size': self.out_voxel_size,
-                           'combine_type': self.combine_type
+                           'combine_type': self.combine_type,
+                           'dist_map': self.dist_map
                            }
             self.json.update(dict_to_add=dict_to_add)
 
@@ -405,9 +416,9 @@ class DatasetCroppedSkeleton:
             # Performs cropping for each file in a parallelized way
             print("list_subjects = ", list_subjects)
 
-            # for sub in list_subjects:
-            #     self.crop_one_file(sub)
-            pqdm(list_subjects, self.crop_one_file, n_jobs=define_njobs())
+            for sub in list_subjects:
+                 self.crop_one_file(sub)
+            #pqdm(list_subjects, self.crop_one_file, n_jobs=define_njobs())
 
 
     def dataset_gen_pipe(self, number_subjects=_ALL_SUBJECTS):
@@ -531,6 +542,9 @@ def parse_args(argv):
     parser.add_argument(
         "-o", "--combine_type", type=bool, default=_COMBINE_TYPE,
         help='Whether use specific combination of masks or not')
+    parser.add_argument(
+        "-d", "--dist_map", type=bool, default=_DIST_MAP_DEFAULT,
+        help='Whether crop and normalize distance map instead of skeleton')
 
     params = {}
 
@@ -547,6 +561,7 @@ def parse_args(argv):
     params['out_voxel_size'] = tuple(args.out_voxel_size)
     params['morphologist_dir'] = args.morphologist_dir
     params['combine_type'] = args.combine_type
+    params['dist_map'] = args.dist_map
 
     number_subjects = args.nb_subjects
 
@@ -578,7 +593,8 @@ def dataset_gen_pipe(src_dir=_SRC_DIR_DEFAULT,
                      resampling=_RESAMPLING_DEFAULT,
                      cropping=_CROPPING_DEFAULT,
                      out_voxel_size=_OUT_VOXEL_SIZE,
-                     combine_type=_COMBINE_TYPE):
+                     combine_type=_COMBINE_TYPE,
+                     dist_map=_DIST_MAP_DEFAULT):
     """Main program generating cropped files and corresponding pickle file
     """
 
@@ -593,7 +609,8 @@ def dataset_gen_pipe(src_dir=_SRC_DIR_DEFAULT,
                                      resampling=resampling,
                                      cropping=cropping,
                                      out_voxel_size=out_voxel_size,
-                                     combine_type=combine_type)
+                                     combine_type=combine_type,
+                                     dist_map=dist_map)
     dataset.dataset_gen_pipe(number_subjects=number_subjects)
 
 
@@ -622,7 +639,8 @@ def main(argv):
                          resampling=params['resampling'],
                          cropping=params['cropping'],
                          out_voxel_size=params['out_voxel_size'],
-                         combine_type=params['combine_type'])
+                         combine_type=params['combine_type'],
+                         dist_map=params['dist_map'])
     except SystemExit as exc:
         if exc.code != 0:
             six.reraise(*sys.exc_info())
