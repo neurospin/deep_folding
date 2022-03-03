@@ -46,7 +46,7 @@ from soma.aimsalgo import MorphoGreyLevel_S16
 from scipy import ndimage
 import numpy as np
 import json
-import deep_folding.anatomist_tools.utils.dilate_mask as dl
+import deep_folding.brainvisa.utils.dilate_mask as dl
 #import dilate_mask as dl
 
 _AIMS_BINARY_ONE = 32767

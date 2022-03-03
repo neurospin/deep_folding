@@ -5,7 +5,7 @@ import numpy as np
 
 from soma import aims
 
-from deep_folding.anatomist_tools import dataset_gen_pipe
+from deep_folding.brainvisa import dataset_gen_pipe
 
 _ALL_SUBJECTS = -1
 

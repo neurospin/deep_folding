@@ -72,14 +72,14 @@ from soma import aims
 from pqdm.processes import pqdm
 from joblib import cpu_count
 
-from deep_folding.anatomist_tools.utils.logs import LogJson
-from deep_folding.anatomist_tools.utils.bbox import compute_max_box
-from deep_folding.anatomist_tools.utils.mask import compute_simple_mask, compute_centered_mask
-from deep_folding.anatomist_tools.utils.resample import resample
-from deep_folding.anatomist_tools.utils import remove_hull
-from deep_folding.anatomist_tools.utils.sulcus_side import complete_sulci_name
-from deep_folding.anatomist_tools.load_data import fetch_data
-from deep_folding.anatomist_tools.utils.logs import log_command_line
+from deep_folding.brainvisa.utils.logs import LogJson
+from deep_folding.brainvisa.utils.bbox import compute_max_box
+from deep_folding.brainvisa.utils.mask import compute_simple_mask, compute_centered_mask
+from deep_folding.brainvisa.utils.resample import resample
+from deep_folding.brainvisa.utils import remove_hull
+from deep_folding.brainvisa.utils.sulcus_side import complete_sulci_name
+from deep_folding.brainvisa.load_data import fetch_data
+from deep_folding.brainvisa.utils.logs import log_command_line
 
 from tqdm import tqdm
 

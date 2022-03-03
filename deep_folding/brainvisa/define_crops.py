@@ -57,11 +57,11 @@ import numpy as np
 import scipy.ndimage
 
 from soma import aims
-from deep_folding.anatomist_tools.utils.logs import LogJson
-from deep_folding.anatomist_tools.utils.resample import resample
-from deep_folding.anatomist_tools.utils.bbox import compute_max
-from deep_folding.anatomist_tools.utils.sulcus_side import complete_sulci_name
-from deep_folding.anatomist_tools.utils.logs import log_command_line
+from deep_folding.brainvisa.utils.logs import LogJson
+from deep_folding.brainvisa.utils.resample import resample
+from deep_folding.brainvisa.utils.bbox import compute_max
+from deep_folding.brainvisa.utils.sulcus_side import complete_sulci_name
+from deep_folding.brainvisa.utils.logs import log_command_line
 
 _ALL_SUBJECTS = -1
 

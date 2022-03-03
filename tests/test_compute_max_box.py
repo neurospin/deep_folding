@@ -1,5 +1,5 @@
 
-from deep_folding.anatomist_tools.utils.bbox import compute_max
+from deep_folding.brainvisa.utils.bbox import compute_max
 
 def test_compute_max_box():
     """Tests the function compte_max_box

@@ -58,10 +58,10 @@ from os.path import basename
 from soma import aims
 from typing import Tuple
 
-from deep_folding.anatomist_tools.utils.list import get_sublist
-from deep_folding.anatomist_tools.utils.folder import create_folder
-from deep_folding.anatomist_tools.utils.logs import log_command_line
-from deep_folding.anatomist_tools.utils.parallel import define_njobs
+from deep_folding.brainvisa.utils.list import get_sublist
+from deep_folding.brainvisa.utils.folder import create_folder
+from deep_folding.brainvisa.utils.logs import log_command_line
+from deep_folding.brainvisa.utils.parallel import define_njobs
 
 logging.basicConfig(level = logging.INFO)
 

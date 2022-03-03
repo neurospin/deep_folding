@@ -37,7 +37,7 @@ import os
 import argparse
 from tqdm import tqdm
 from soma import aims
-from deep_folding.anatomist_tools.utils.remove_hull import convert_volume_to_bucket
+from deep_folding.brainvisa.utils.remove_hull import convert_volume_to_bucket
 
 def read_convert_write(vol_filename, bucket_filename):
     """Reads volume, converts and writes back bucket.

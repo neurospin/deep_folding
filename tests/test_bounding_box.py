@@ -2,7 +2,7 @@ import os
 import glob
 import json
 
-from deep_folding.anatomist_tools import define_crops
+from deep_folding.brainvisa import define_crops
 
 _ALL_SUBJECTS = define_crops._ALL_SUBJECTS
 

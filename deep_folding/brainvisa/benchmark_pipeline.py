@@ -43,9 +43,9 @@
 from pqdm.processes import pqdm
 from joblib import cpu_count
 
-from deep_folding.anatomist_tools.benchmark_generation import *
-from deep_folding.anatomist_tools.utils.resample import resample
-from deep_folding.anatomist_tools.utils.sulcus_side import complete_sulci_name
+from deep_folding.brainvisa.benchmark_generation import *
+from deep_folding.brainvisa.utils.resample import resample
+from deep_folding.brainvisa.utils.sulcus_side import complete_sulci_name
 
 import re
 import sys
