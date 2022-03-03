@@ -3,11 +3,23 @@ Anatomist Tools
 
 This folder contains scripts that work with BrainVISA/Anatomist.
 
+.. image:: ../../docs/general_scheme.png
+  :width: 400
+
+
+
+Step-by-step tutorial: generate a dataset
+=========================================
+
+
+
+
+
 Description of modules
 ======================
 
 mask.py
-------------------
+-------
 Outputs the bounding box of a specific sulcus based on a manually labeled dataset.
 Boundig boxes ared defined in the normalized SPM space
 
@@ -28,8 +40,5 @@ Creates altered skeletons (with some simple surfaces lacking) benchmark.
 benchmark_pipeline.py
 ---------------------
 Normalizes, resamples and crops the altered skeletons.
-
-Tutorial: generate a dataset
-============================
 
 
