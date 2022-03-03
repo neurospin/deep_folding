@@ -37,7 +37,8 @@
 
 The aim of this script is to create dataset of cropped skeletons from MRIs
 saved in a .pickle file.
-Several steps are required: normalization, crop and .pickle generation
+We read resampled skeleton files
+Several steps are required: crop and .pickle generation
 
   Typical usage
   -------------
@@ -45,10 +46,10 @@ Several steps are required: normalization, crop and .pickle generation
   (here brainvisa 5.0.0 installed with singurity) and launching the script
   from the terminal:
   >>> bv bash
-  >>> python dataset_gen_pipe.py
+  >>> python3 generate_crops.py
 
   Alternatively, you can launch the script in the interactive terminal ipython:
-  >>> %run dataset_gen_pipe.py
+  >>> %run generate_crops.py
 
 """
 

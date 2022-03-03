@@ -61,6 +61,7 @@ from deep_folding.anatomist_tools.utils.logs import LogJson
 from deep_folding.anatomist_tools.utils.resample import resample
 from deep_folding.anatomist_tools.utils.bbox import compute_max
 from deep_folding.anatomist_tools.utils.sulcus_side import complete_sulci_name
+from deep_folding.anatomist_tools.utils.logs import log_command_line
 
 _ALL_SUBJECTS = -1
 
@@ -515,7 +516,7 @@ def parse_args(argv):
 
     # Parse command line arguments
     parser = argparse.ArgumentParser(
-        prog='crop_definition.py',
+        prog='define_crops.py',
         description='Computes mask and bounding box around the named sulcus')
     parser.add_argument(
         "-s", "--src_dir", type=str, default=_SRC_DIR_DEFAULT, nargs='+',
@@ -556,6 +557,10 @@ def parse_args(argv):
     params = {}
 
     args = parser.parse_args(argv)
+
+    # Writes command line argument to target dir for logging
+    log_command_line(args, "generate_skeleton.py", args.tgt_dir)
+
     params['src_dir'] = args.src_dir  # src_dir is a list
     params['path_to_graph'] = args.path_to_graph
     params['bbox_dir']= args.bbox_dir # bbox_dir is a string, only one directory
