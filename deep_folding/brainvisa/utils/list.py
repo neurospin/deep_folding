@@ -35,6 +35,7 @@
 
 _ALL_SUBJECTS = -1
 
+
 def get_sublist(orig_list: list, nb_subjects: str) -> list:
     """Returns a sublist of nb_subjects elements
 

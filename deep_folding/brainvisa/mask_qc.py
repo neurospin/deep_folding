@@ -54,17 +54,21 @@ _INPUT_DIR_DEFAULT = "/neurospin/dico/data/deep_folding/new_v1/mask"
 _OUTPUT_DIR_DEFAULT = "/neurospin/dico/data/deep_folding/new_v1/QC_skeleton"
 
 
-def check(side=_SIDE_DEFAULT, sulcus=_SULCUS_DEFAULT, out_voxel_size=_OUT_VOXEL_SIZE, nb_subjects=1):
+def check(
+        side=_SIDE_DEFAULT,
+        sulcus=_SULCUS_DEFAULT,
+        out_voxel_size=_OUT_VOXEL_SIZE,
+        nb_subjects=1):
     """
     """
     morpho_dir = "/mnt/n4hhcp/hcp/ANALYSIS/3T_morphologist"
     vs = out_voxel_size[0]
-    side = 'right' if side=='R' else 'left'
+    side = 'right' if side == 'R' else 'left'
 
     list_sub = os.listdir(morpho_dir)
     subject_list = random.sample(list_sub, nb_subjects)
-    subject_list=['146533', '334635', '304727', '665254', '585256',
-                  '303119', '299760', '877269', '194140', '552544']
+    subject_list = ['146533', '334635', '304727', '665254', '585256',
+                    '303119', '299760', '877269', '194140', '552544']
 
     for subject in subject_list:
         # Loading of subject graph
@@ -75,14 +79,17 @@ def check(side=_SIDE_DEFAULT, sulcus=_SULCUS_DEFAULT, out_voxel_size=_OUT_VOXEL_
         skeleton_dir = f"{morpho_dir}/{subject}/t1mri/default_acquisition/default_analysis/segmentation/Rskeleton_{subject}.nii.gz"
         skeleton = aims.read(skeleton_dir)
 
-        masked_resampled = aims.Volume(skeleton.header()['volume_dimension'][:3], dtype=skeleton.__array__().dtype)
-        masked_resampled.header()['voxel_size'] = skeleton.header()['voxel_size'][:3]
+        masked_resampled = aims.Volume(
+            skeleton.header()['volume_dimension'][:3], dtype=skeleton.__array__().dtype)
+        masked_resampled.header()['voxel_size'] = skeleton.header()[
+            'voxel_size'][:3]
 
         g_to_icbm = aims.GraphManip.getICBM2009cTemplateTransform(graph)
 
         g_to_rw = g_to_icbm.inverse()
 
-        mask = aims.read(f"{_INPUT_DIR_DEFAULT}/{vs}mm/R/{sulcus}_{side}.nii.gz")
+        mask = aims.read(
+            f"{_INPUT_DIR_DEFAULT}/{vs}mm/R/{sulcus}_{side}.nii.gz")
 
         resampler = ago.ResamplerFactory(mask).getResampler(0)
         resampler.setDefaultValue(0)
@@ -90,14 +97,22 @@ def check(side=_SIDE_DEFAULT, sulcus=_SULCUS_DEFAULT, out_voxel_size=_OUT_VOXEL_
         resampler.resample(mask, g_to_rw, 0, masked_resampled)
 
         arr = np.asarray(masked_resampled)
-        arr_filter = scipy.ndimage.gaussian_filter(arr.astype(float), sigma=0.5,
-                             order=0, output=None, mode='reflect', truncate=4.0)
-        arr[:] = (arr_filter> 0.001).astype(int)
+        arr_filter = scipy.ndimage.gaussian_filter(
+            arr.astype(float),
+            sigma=0.5,
+            order=0,
+            output=None,
+            mode='reflect',
+            truncate=4.0)
+        arr[:] = (arr_filter > 0.001).astype(int)
 
         masked_resampled_f = aims.Volume(arr)
-        masked_resampled_f.header()['voxel_size'] = skeleton.header()['voxel_size'][:3]
+        masked_resampled_f.header()['voxel_size'] = skeleton.header()[
+            'voxel_size'][:3]
 
-        aims.write(masked_resampled_f, f"{_OUTPUT_DIR_DEFAULT}/{vs}mm/mask_resampled_{subject}_{sulcus}_{side}.nii.gz")
+        aims.write(
+            masked_resampled_f,
+            f"{_OUTPUT_DIR_DEFAULT}/{vs}mm/mask_resampled_{subject}_{sulcus}_{side}.nii.gz")
 
 
 def parse_args(argv):
@@ -159,6 +174,7 @@ def main(argv):
 ######################################################################
 # Main program
 ######################################################################
+
 
 if __name__ == '__main__':
     # This permits to call main also from another python program

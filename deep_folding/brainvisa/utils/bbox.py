@@ -47,6 +47,7 @@ import json
 
 _BOX_DIR_DEFAULT = "/neurospin/dico/deep_folding_data/data/bbox/"
 
+
 def compute_max(list_bbmin, list_bbmax):
     """Returns the coordinates of the box encompassing all input boxes
 
@@ -73,7 +74,12 @@ def compute_max(list_bbmin, list_bbmax):
 
     return bbmin, bbmax
 
-def compute_max_box(sulci_list, side, talairach_box=False, src_dir=_BOX_DIR_DEFAULT):
+
+def compute_max_box(
+        sulci_list,
+        side,
+        talairach_box=False,
+        src_dir=_BOX_DIR_DEFAULT):
     """Function returning maximal bounding box of a given list of sulci
 
     It reads json files contained in the source directory.
@@ -101,8 +107,8 @@ def compute_max_box(sulci_list, side, talairach_box=False, src_dir=_BOX_DIR_DEFA
         with open(join(src_dir, side, sulcus + '.json')) as json_file:
             sulcus = json.load(json_file)
 
-            list_bbmin.append(sulcus['bbmin_'+rad])
-            list_bbmax.append(sulcus['bbmax_'+rad])
+            list_bbmin.append(sulcus['bbmin_' + rad])
+            list_bbmax.append(sulcus['bbmax_' + rad])
 
     bbmin_npy, bbmax_npy = compute_max(list_bbmin=list_bbmin,
                                        list_bbmax=list_bbmax)
@@ -113,6 +119,6 @@ def compute_max_box(sulci_list, side, talairach_box=False, src_dir=_BOX_DIR_DEFA
 if __name__ == '__main__':
     bbmin, bbmax = compute_max_box(['S.T.s.ter.asc.ant._left',
                                     'S.T.s.ter.asc.test._left'],
-                        'L')
+                                   'L')
     print("bbmin = ", bbmin)
     print("bbmax = ", bbmax)

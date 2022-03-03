@@ -50,9 +50,10 @@ from datetime import datetime
 from argparse import Namespace
 from .folder import create_folder
 
-logging.basicConfig(level = logging.INFO)
+logging.basicConfig(level=logging.INFO)
 
 log = logging.getLogger(os.path.basename(__file__))
+
 
 class LogJson:
     """Handles json file lifecycle
@@ -99,7 +100,9 @@ class LogJson:
             with open(self.json_file, "r") as json_file:
                 data = json.load(json_file)
         except IOError:
-            log.info("File %s is not readable through json.load", self.json_file)
+            log.info(
+                "File %s is not readable through json.load",
+                self.json_file)
 
         data.update(dict_to_add)
 
@@ -137,7 +140,7 @@ class LogJson:
 
 def log_command_line(args: Namespace, prog_name: str, tgt_dir: str) -> None:
     """Logs command on file command_line.sh in target directory
-    
+
     The command file gives thus the exact command line
     the should be given to reproduce the results"""
 
@@ -148,10 +151,10 @@ def log_command_line(args: Namespace, prog_name: str, tgt_dir: str) -> None:
     args_dict = vars(args)
     log.info(f"args_dict = {args_dict}")
     for key in args_dict:
-        if type(args_dict[key]) is bool:
+        if isinstance(args_dict[key], bool):
             if args_dict[key]:
                 cmd_line += " --" + key
-        elif type(args_dict[key]) is list:
+        elif isinstance(args_dict[key], list):
             cmd_line += " --" + key + " " \
                         + ' '.join([str(e) for e in args_dict[key]])
         else:
@@ -163,14 +166,14 @@ def log_command_line(args: Namespace, prog_name: str, tgt_dir: str) -> None:
     cmd_line_file = f"{tgt_dir}/command_line.sh"
 
     # Save a reference to the original standard output
-    original_stdout = sys.stdout 
+    original_stdout = sys.stdout
 
     # This writes the command line into the command line script file
     with open(cmd_line_file, 'w') as f:
         # Change the standard output to the file we created.
-        sys.stdout = f 
+        sys.stdout = f
         print("#!/bin/sh")
         print(cmd_line)
 
         # Reset the standard output to its original value
-        sys.stdout = original_stdout 
+        sys.stdout = original_stdout

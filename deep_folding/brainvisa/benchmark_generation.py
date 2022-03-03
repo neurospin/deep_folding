@@ -87,8 +87,8 @@ class Benchmark():
         self.data_dir = data_dir
         self.saving_dir = saving_dir
         self.abnormality_test = []
-        self.bbmin, self.bbmax = compute_max_box(self.sulci_list, side,
-                                talairach_box=True, src_dir=bbox_dir)
+        self.bbmin, self.bbmax = compute_max_box(
+            self.sulci_list, side, talairach_box=True, src_dir=bbox_dir)
         print(self.bbmin, self.bbmax)
         self.cpt_skel_1 = 't1mri/default_acquisition/default_analysis/segmentation'
         self.cpt_skel_2 = 'skeleton_'
@@ -109,8 +109,14 @@ class Benchmark():
             self.surfaces = dict()
             graph_file = os.path.join(self.data_dir, str(sub), cpt_arg_1,
                                       self.side + str(sub) + cpt_arg_2)
-            skel_file = os.path.join(self.data_dir, str(sub), self.cpt_skel_1,
-                                     self.side + self.cpt_skel_2 + str(sub) + self.cpt_skel_3)
+            skel_file = os.path.join(
+                self.data_dir,
+                str(sub),
+                self.cpt_skel_1,
+                self.side +
+                self.cpt_skel_2 +
+                str(sub) +
+                self.cpt_skel_3)
             graph = aims.read(graph_file)
             self.skel = aims.read(skel_file)
 
@@ -120,9 +126,10 @@ class Benchmark():
                     bbmax_surface = v['Tal_boundingbox_max']
                     bck_map = v['aims_ss']
 
-                    if all([a >= b for (a, b) in zip(bbmin_surface, self.bbmin)]) and all([a <= b for (a, b) in zip(bbmax_surface, self.bbmax)]):
+                    if all([a >= b for (a, b) in zip(bbmin_surface, self.bbmin)]) and all(
+                            [a <= b for (a, b) in zip(bbmax_surface, self.bbmax)]):
                         for bucket in bck_map:
-                            if bucket.size() > self.ss_size: # In order to keep only large enough simple surfaces
+                            if bucket.size() > self.ss_size:  # In order to keep only large enough simple surfaces
                                 self.surfaces[len(self.surfaces)] = v
 
             return self.surfaces
@@ -135,7 +142,7 @@ class Benchmark():
         """
         # Suppression of one random simple surface (satisfying both criteria)
         random.seed(42)
-        surface = random.randint(0, len(self.surfaces)-1)
+        surface = random.randint(0, len(self.surfaces) - 1)
         print(self.surfaces[surface]['label'])
 
         bck_map = self.surfaces[surface]['aims_ss']
@@ -156,22 +163,28 @@ class Benchmark():
             subjects_list: list of subjects
             i: int giving the current subject
         """
-        sub_added = subjects_list[i+1]
-        #random.seed(42)
-        surface = random.randint(0, len(self.surfaces)-1)
+        sub_added = subjects_list[i + 1]
+        # random.seed(42)
+        surface = random.randint(0, len(self.surfaces) - 1)
 
         if os.path.isdir(self.data_dir + str(sub_added)):
-            skel_file = os.path.join(self.data_dir, str(sub_added), self.cpt_skel_1,
-                                     self.side + self.cpt_skel_2 + str(sub_added) + self.cpt_skel_3)
+            skel_file = os.path.join(
+                self.data_dir,
+                str(sub_added),
+                self.cpt_skel_1,
+                self.side +
+                self.cpt_skel_2 +
+                str(sub_added) +
+                self.cpt_skel_3)
             self.skel = aims.read(skel_file)
             bck_map = self.surfaces[surface]['aims_ss']
             for voxel in bck_map[0].keys():
-                if self.skel.value(voxel[0], voxel[1], voxel[2])!=11:
+                if self.skel.value(voxel[0], voxel[1], voxel[2]) != 11:
                     self.skel.setValue(60, voxel[0], voxel[1], voxel[2])
 
             bck_map_bottom = self.surfaces[surface]['aims_bottom']
             for voxel in bck_map_bottom[0].keys():
-                if self.skel.value(voxel[0], voxel[1], voxel[2])!=11:
+                if self.skel.value(voxel[0], voxel[1], voxel[2]) != 11:
                     self.skel.setValue(60, voxel[0], voxel[1], voxel[2])
 
         save_subject = sub_added
@@ -181,8 +194,14 @@ class Benchmark():
         """
         """
         if os.path.isdir(self.data_dir + str(sub)):
-            skel_file = os.path.join(self.data_dir, str(sub), self.cpt_skel_1,
-                                     self.side + self.cpt_skel_2 + str(sub) + self.cpt_skel_3)
+            skel_file = os.path.join(
+                self.data_dir,
+                str(sub),
+                self.cpt_skel_1,
+                self.side +
+                self.cpt_skel_2 +
+                str(sub) +
+                self.cpt_skel_3)
             self.skel = aims.read(skel_file)
 
     def save_file(self, sub):
@@ -191,7 +210,11 @@ class Benchmark():
         Args:
             sub: int giving the subject
         """
-        fileout = os.path.join(self.saving_dir, 'output_skeleton_' + str(sub) + '.nii.gz')
+        fileout = os.path.join(
+            self.saving_dir,
+            'output_skeleton_' +
+            str(sub) +
+            '.nii.gz')
         print('writing altered skeleton to', fileout)
         aims.write(self.skel, fileout)
 
@@ -213,7 +236,10 @@ class Benchmark():
         df_train.to_csv(os.path.join(self.saving_dir, 'train.csv'))
 
         df_abnor_test = pd.DataFrame(abnormality_test)
-        df_abnor_test.to_csv(os.path.join(self.saving_dir, 'abnormality_test.csv'))
+        df_abnor_test.to_csv(
+            os.path.join(
+                self.saving_dir,
+                'abnormality_test.csv'))
 
         df_givers = pd.DataFrame(givers)
         df_givers.to_csv(os.path.join(self.saving_dir, 'givers.csv'))
@@ -228,7 +254,8 @@ def get_sub_list(subjects_list):
         subjects_list = list(subjects_list['0'])
     else:
         # Selection of right handed subjects only
-        right_handed = pd.read_csv('/neurospin/dico/lguillon/hcp_info/right_handed.csv')
+        right_handed = pd.read_csv(
+            '/neurospin/dico/lguillon/hcp_info/right_handed.csv')
         subjects_list = list(right_handed['Subject'].astype(str))
         # Check whether subjects' files exist
         hcp_sub = os.listdir('/neurospin/hcp/ANALYSIS/3T_morphologist/')
@@ -264,10 +291,11 @@ def generate(b_num, side, ss_size, sulci_list, mode='suppress', bench_size=150,
         if mode in ['suppress', 'add', 'mix']:
             benchmark.get_simple_surfaces(sub)
             if benchmark.surfaces and len(benchmark.surfaces.keys()) > 0:
-                if mode == 'suppress' or (mode=='mix' and i<bench_size/2):
+                if mode == 'suppress' or (
+                        mode == 'mix' and i < bench_size / 2):
                     # Suppression of simple surfaces
                     save_sub = benchmark.delete_ss(sub)
-                elif mode == 'add' or (mode=='mix' and i>=bench_size/2):
+                elif mode == 'add' or (mode == 'mix' and i >= bench_size / 2):
                     # Addition of simple surfaces
                     save_sub = benchmark.add_ss(subjects_list, i)
                     givers.append(sub)
@@ -289,5 +317,12 @@ def generate(b_num, side, ss_size, sulci_list, mode='suppress', bench_size=150,
 ######################################################################
 
 if __name__ == '__main__':
-    generate(333, 'R', 1000, sulci_list=['S.T.s.ter.asc.post.', 'S.T.s.ter.asc.ant.'],
-         mode='suppress', bench_size=4)
+    generate(
+        333,
+        'R',
+        1000,
+        sulci_list=[
+            'S.T.s.ter.asc.post.',
+            'S.T.s.ter.asc.ant.'],
+        mode='suppress',
+        bench_size=4)

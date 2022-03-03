@@ -58,11 +58,11 @@ from pqdm.processes import pqdm
 from joblib import cpu_count
 
 _AIMS_BINARY_ONE = 32767
-_EXTERNAL = 11 # Value of external part
-_INTERNAL = 0 # Value of the internal part of the brain
+_EXTERNAL = 11  # Value of external part
+_INTERNAL = 0  # Value of the internal part of the brain
 
-_DEFAULT_PADDING = 1 # local window in which to look for external valye
-_DEFAULT_THRESHOLD = 12 # Looks for skeleton values equal or above to _DEFAULT_THRESHOLD
+_DEFAULT_PADDING = 1  # local window in which to look for external valye
+_DEFAULT_THRESHOLD = 12  # Looks for skeleton values equal or above to _DEFAULT_THRESHOLD
 
 _ALL_SUBJECTS = -1
 
@@ -76,11 +76,12 @@ _TGT_DIR_DEFAULT = '/nfs/neurospin/dico/data/deep_folding/data/crops/SC/sulcus_b
 
 _SIDE_DEFAULT = 'R'
 
+
 def define_njobs():
     """Returns number of cpus used by main loop
     """
     nb_cpus = cpu_count()
-    return max(nb_cpus-2, 1)
+    return max(nb_cpus - 2, 1)
 
 
 def remove_hull(arr, padding=_DEFAULT_PADDING, ext=_DEFAULT_PADDING):
@@ -94,50 +95,63 @@ def remove_hull(arr, padding=_DEFAULT_PADDING, ext=_DEFAULT_PADDING):
         padding: padding of the image, equal to the extension ext
         ext: local array extension in which to look for external and internal pixels
     """
-    arr_pad = np.pad(arr,
-                    ((padding,padding), (padding,padding), (padding,padding),
-                    (0,0)),
-                    'constant',
-                    constant_values=0)
+    arr_pad = np.pad(arr, ((padding, padding), (padding, padding),
+                     (padding, padding), (0, 0)), 'constant', constant_values=0)
 
-    l = 0 # last t dimension
+    l = 0  # last t dimension
     coords = np.argwhere(arr_pad > _EXTERNAL)
 
-    for i,j,k,l in coords:
-        if arr_pad[i,j,k,l] != _EXTERNAL and arr_pad[i,j,k,l] != _INTERNAL:
-            local_array = arr_pad[i-ext:i+ext+1,j-ext:j+ext+1,k-ext:k+ext+1,l]
-            if np.any(local_array == _INTERNAL) and np.any(local_array == _EXTERNAL):
-                arr[i-padding,j-padding,k-padding,l] = 0
+    for i, j, k, l in coords:
+        if arr_pad[i,
+                   j,
+                   k,
+                   l] != _EXTERNAL and arr_pad[i,
+                                               j,
+                                               k,
+                                               l] != _INTERNAL:
+            local_array = arr_pad[i - ext:i + ext + 1,
+                                  j - ext:j + ext + 1, k - ext:k + ext + 1, l]
+            if np.any(
+                    local_array == _INTERNAL) and np.any(
+                    local_array == _EXTERNAL):
+                arr[i - padding, j - padding, k - padding, l] = 0
 
 
 def threshold_and_binarize(arr, threshold=_DEFAULT_THRESHOLD):
     """Threshold images
-    
+
     Args:
         arr: numpy array
     """
-    arr[np.where(arr < threshold)]= 0
-    arr[np.where(arr >= threshold)]= _AIMS_BINARY_ONE
+    arr[np.where(arr < threshold)] = 0
+    arr[np.where(arr >= threshold)] = _AIMS_BINARY_ONE
+
 
 def convert_volume_to_bucket(vol):
     """Converts volume to bucket
-    
+
     Args:
         arr: numpy array
     """
     c = aims.Converter_rc_ptr_Volume_S16_BucketMap_VOID()
     bucket_map = c(vol)
     bucket = bucket_map[0]
-    bucket = np.array([bucket.keys()[k].list() for k in range(len(bucket.keys()))])
+    bucket = np.array([bucket.keys()[k].list()
+                      for k in range(len(bucket.keys()))])
     return bucket_map, bucket
 
-def create_one_mesh(vol, padding=_DEFAULT_PADDING, ext=_DEFAULT_PADDING, threshold=_DEFAULT_THRESHOLD):
+
+def create_one_mesh(
+        vol,
+        padding=_DEFAULT_PADDING,
+        ext=_DEFAULT_PADDING,
+        threshold=_DEFAULT_THRESHOLD):
     """Creates
-    
+
     Args:
         vol: aims volume
     """
-    
+
     arr = np.asarray(vol)
 
     # Removes hull
@@ -153,7 +167,6 @@ def create_one_mesh(vol, padding=_DEFAULT_PADDING, ext=_DEFAULT_PADDING, thresho
     mesh = dtx._aims_tools.bucket_to_mesh(bucket_map[0])
 
     return bucket_map, bucket, mesh
-
 
 
 class DatasetHullRemoved:
@@ -179,7 +192,7 @@ class DatasetHullRemoved:
         self.tgt_dir = tgt_dir
 
         if list_subjects:
-             self.list_subjects = list_subjects
+            self.list_subjects = list_subjects
 
         elif file_subjects:
             self.list_subjects = pd.read_csv(file_subjects)
@@ -187,8 +200,8 @@ class DatasetHullRemoved:
         else:
             if number_subjects:
                 # subjects are detected as the directory names under src_dir
-                list_all_subjects = [dI[:6] for dI in os.listdir(self.src_dir)\
-                 if os.path.isdir(self.src_dir) and 'minf' not in dI]
+                list_all_subjects = [dI[:6] for dI in os.listdir(
+                    self.src_dir) if os.path.isdir(self.src_dir) and 'minf' not in dI]
 
                 # Gives the possibility to list only the first number_subjects
                 self.list_subjects = (
@@ -205,7 +218,7 @@ class DatasetHullRemoved:
 
         # Constant definition
         padding = _DEFAULT_PADDING
-        ext = _DEFAULT_PADDING # extent (equal to padding)
+        ext = _DEFAULT_PADDING  # extent (equal to padding)
         threshold = _DEFAULT_THRESHOLD
 
         # Names directory where subject analysis files are stored
@@ -246,13 +259,17 @@ class DatasetHullRemoved:
             os.makedirs(self.tgt_dir)
 
         # Parallelization of mesh generation
-        result = pqdm(self.list_subjects, self.create_one_mesh, n_jobs=define_njobs())
+        result = pqdm(
+            self.list_subjects,
+            self.create_one_mesh,
+            n_jobs=define_njobs())
         # result = []
         # for sub in self.list_subjects:
         #     bucket = self.create_one_mesh(sub)
         #     result.append(bucket)
         buckets = dict(zip(self.list_subjects, result))
         return buckets
+
 
 def parse_args(argv):
     """Function parsing command-line arguments

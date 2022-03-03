@@ -87,11 +87,11 @@ _ALL_SUBJECTS = -1
 
 _SIDE_DEFAULT = 'L'  # hemisphere 'L' or 'R'
 
-_CROPPING_DEFAULT = 'mask' # crops according to a mask by default
+_CROPPING_DEFAULT = 'mask'  # crops according to a mask by default
 
-_OUT_VOXEL_SIZE = (1, 1, 1) # default output voxel size
+_OUT_VOXEL_SIZE = (1, 1, 1)  # default output voxel size
 
-_EXTERNAL = 11 # topological value meaning "outside the brain"
+_EXTERNAL = 11  # topological value meaning "outside the brain"
 
 # sulcus to encompass:
 # its name depends on the hemisphere side
@@ -129,11 +129,13 @@ _VERBOSE_DEFAULT = False
 # temporary directory
 temp_dir = tempfile.mkdtemp()
 
+
 def define_njobs():
     """Returns number of cpus used by main loop
     """
     nb_cpus = cpu_count()
-    return max(nb_cpus-2, 1)
+    return max(nb_cpus - 2, 1)
+
 
 class DatasetCroppedSkeleton:
     """Generates cropped skeleton files and corresponding pickle file
@@ -176,7 +178,7 @@ class DatasetCroppedSkeleton:
         self.list_sulci = complete_sulci_name(self.list_sulci, self.side)
         self.tgt_dir = tgt_dir
         self.bbox_dir = bbox_dir
-        self.mask_dir=mask_dir
+        self.mask_dir = mask_dir
         self.morphologist_dir = morphologist_dir
         self.cropping = cropping
         self.out_voxel_size = out_voxel_size
@@ -197,17 +199,19 @@ class DatasetCroppedSkeleton:
 
         # Names of files in function of dictionary: keys -> 'subject' and 'side'
         # Generated skeleton from folding graphs
-        self.skeleton_dir  = join(self.src_dir, 'skeleton', self.side)
-        self.skeleton_file = join(self.skeleton_dir,
-                                  '%(side)sskeleton_generated_%(subject)s.nii.gz')
-        self.foldlabel_dir  = join(self.src_dir, 'foldlabel', self.side)
+        self.skeleton_dir = join(self.src_dir, 'skeleton', self.side)
+        self.skeleton_file = join(
+            self.skeleton_dir,
+            '%(side)sskeleton_generated_%(subject)s.nii.gz')
+        self.foldlabel_dir = join(self.src_dir, 'foldlabel', self.side)
         self.foldlabel_file = join(self.foldlabel_dir,
-                                  '%(side)sfoldlabel_%(subject)s.nii.gz')
+                                   '%(side)sfoldlabel_%(subject)s.nii.gz')
 
         self.graph_file = 'default_analysis/folds/3.1/default_session_auto/' \
-                            '%(side)s%(subject)s_default_session_auto.arg'
+            '%(side)s%(subject)s_default_session_auto.arg'
 
-        # Names of files in function of dictionary: keys -> 'subject' and 'side'
+        # Names of files in function of dictionary: keys -> 'subject' and
+        # 'side'
         self.cropped_skeleton_file = '%(subject)s_cropped_skeleton.nii.gz'
         self.cropped_label_file = '%(subject)s_cropped_label.nii.gz'
 
@@ -221,7 +225,8 @@ class DatasetCroppedSkeleton:
 
         # reference file in MNI template with corrct voxel size
         self.ref_file = f"{temp_dir}/file_ref.nii.gz"
-        self.g_to_icbm_template_file = join(temp_dir, 'file_g_to_icbm_%(subject)s.trm')
+        self.g_to_icbm_template_file = join(
+            temp_dir, 'file_g_to_icbm_%(subject)s.trm')
 
     def define_referentials(self):
         """Writes MNI 2009 reference file with output voxel size
@@ -250,10 +255,10 @@ class DatasetCroppedSkeleton:
 
         # Crop of the images based on bounding box
         cmd_bounding_box = ' -x ' + xmin + ' -y ' + ymin + ' -z ' + zmin + \
-                        ' -X ' + xmax + ' -Y ' + ymax + ' -Z ' + zmax
+            ' -X ' + xmax + ' -Y ' + ymax + ' -Z ' + zmax
         cmd_crop = 'AimsSubVolume' + \
-                ' -i ' + file_cropped + \
-                ' -o ' + file_cropped + cmd_bounding_box
+            ' -i ' + file_cropped + \
+            ' -o ' + file_cropped + cmd_bounding_box
 
         # Sts output from AimsSubVolume is recorded in var_output
         # Put following command to get the output
@@ -267,16 +272,21 @@ class DatasetCroppedSkeleton:
         """Smooths the mask with Gaussian Filter
         """
         arr = np.asarray(self.mask)
-        arr_filter = scipy.ndimage.gaussian_filter(arr.astype(float), sigma=0.5,
-                             order=0, output=None, mode='reflect', truncate=4.0)
-        arr[:] = (arr_filter> 0.001).astype(int)
+        arr_filter = scipy.ndimage.gaussian_filter(
+            arr.astype(float),
+            sigma=0.5,
+            order=0,
+            output=None,
+            mode='reflect',
+            truncate=4.0)
+        arr[:] = (arr_filter > 0.001).astype(int)
 
     def crop_mask(self, file_cropped, verbose):
         """Crops according to mask"""
         vol = aims.read(file_cropped)
 
         arr = np.asarray(vol)
-        #remove_hull.remove_hull(arr)
+        # remove_hull.remove_hull(arr)
 
         arr_mask = np.asarray(self.mask)
         arr[arr_mask == 0] = 0
@@ -292,10 +302,10 @@ class DatasetCroppedSkeleton:
 
         # Defines rop of the images based on bounding box
         cmd_bounding_box = ' -x ' + xmin + ' -y ' + ymin + ' -z ' + zmin + \
-                        ' -X ' + xmax + ' -Y ' + ymax + ' -Z ' + zmax
+            ' -X ' + xmax + ' -Y ' + ymax + ' -Z ' + zmax
         cmd_crop = 'AimsSubVolume' + \
-                ' -i ' + file_cropped + \
-                ' -o ' + file_cropped + cmd_bounding_box
+            ' -i ' + file_cropped + \
+            ' -o ' + file_cropped + cmd_bounding_box
 
         if verbose:
             os.popen(cmd_crop).read()
@@ -311,7 +321,7 @@ class DatasetCroppedSkeleton:
 
         # Identifies 'subject' in a mapping (for file and directory namings)
         subject = {'subject': subject_id, 'side': self.side}
-        ## FOR TISSIER
+        # FOR TISSIER
         # subject_id = re.search('([ae\d]{5,6})', subject_id).group(0)
 
         # Names directory where subject analysis files are stored
@@ -319,24 +329,30 @@ class DatasetCroppedSkeleton:
             join(self.morphologist_dir, self.acquisition_dir % subject)
 
         # Skeleton file name
-        file_skeleton = self.skeleton_file % {'subject': subject_id, 'side': self.side}
+        file_skeleton = self.skeleton_file % {
+            'subject': subject_id, 'side': self.side}
         # Foldlabel file name
-        file_foldlabel = self.foldlabel_file % {'subject': subject_id, 'side': self.side}
+        file_foldlabel = self.foldlabel_file % {
+            'subject': subject_id, 'side': self.side}
 
         # Creates transformation MNI template
         file_graph = join(subject_dir, self.graph_file % subject)
         graph = aims.read(file_graph)
-        g_to_icbm_template = aims.GraphManip.getICBM2009cTemplateTransform(graph)
+        g_to_icbm_template = aims.GraphManip.getICBM2009cTemplateTransform(
+            graph)
         g_to_icbm_template_file = self.g_to_icbm_template_file % subject
         aims.write(g_to_icbm_template, g_to_icbm_template_file)
 
         if os.path.exists(file_skeleton):
             # Creates output (cropped) file name
-            file_cropped_skeleton = join(self.cropped_skeleton_dir,
-                                         self.cropped_skeleton_file % {'subject': subject_id, 'side': self.side})
-                                         
+            file_cropped_skeleton = join(
+                self.cropped_skeleton_dir,
+                self.cropped_skeleton_file % {
+                    'subject': subject_id,
+                    'side': self.side})
+
             # We give values with ascendent priority
-            # The more important is the inversion in the priority 
+            # The more important is the inversion in the priority
             # for the bottom value (30) and the simple surface value (60)
             # with respect to the natural order
             # We don't give background
@@ -360,8 +376,11 @@ class DatasetCroppedSkeleton:
 
         if os.path.exists(file_foldlabel):
             # Creates output (cropped) file name
-            file_cropped_label = join(self.cropped_label_dir,
-                                      self.cropped_label_file % {'subject': subject_id, 'side': self.side})
+            file_cropped_label = join(
+                self.cropped_label_dir,
+                self.cropped_label_file % {
+                    'subject': subject_id,
+                    'side': self.side})
 
             # Normalization and resampling of skeleton images
             resampled = resample(input_image=file_foldlabel,
@@ -378,7 +397,6 @@ class DatasetCroppedSkeleton:
         else:
             raise FileNotFoundError(f"{file_foldlabel} not found")
 
-
     def crop_files(self, number_subjects=_ALL_SUBJECTS):
         """Crop nii files
 
@@ -394,10 +412,11 @@ class DatasetCroppedSkeleton:
             # subjects are detected as the nifti file names under src_dir
             expr = '^.skeleton_generated_([0-9a-zA-Z]*).nii.gz$'
             if os.path.isdir(self.skeleton_dir):
-                list_all_subjects = [re.search(expr, os.path.basename(dI))[1] 
-                                    for dI in glob.glob(f"{self.skeleton_dir}/*.nii.gz")]
+                list_all_subjects = [re.search(expr, os.path.basename(dI))[1]
+                                     for dI in glob.glob(f"{self.skeleton_dir}/*.nii.gz")]
             else:
-                raise NotADirectoryError(f"{self.sksleton_dir} doesn't exist or is not a directory")
+                raise NotADirectoryError(
+                    f"{self.sksleton_dir} doesn't exist or is not a directory")
 
             # Gives the possibility to list only the first number_subjects
             list_subjects = (
@@ -445,7 +464,6 @@ class DatasetCroppedSkeleton:
             else:
                 pqdm(list_subjects, self.crop_one_file, n_jobs=define_njobs())
 
-
     def dataset_gen_pipe(self, number_subjects=_ALL_SUBJECTS):
         """Main API to create pickle files
 
@@ -463,22 +481,23 @@ class DatasetCroppedSkeleton:
         if number_subjects:
             if self.cropping == 'bbox':
                 self.bbmin, self.bbmax = compute_max_box(sulci_list=self.list_sulci,
-                                                        side=self.side,
-                                                        talairach_box=False,
-                                                        src_dir=self.bbox_dir)
+                                                         side=self.side,
+                                                         talairach_box=False,
+                                                         src_dir=self.bbox_dir)
             elif self.cropping == 'mask':
                 if self.combine_type:
                     self.mask, self.bbmin, self.bbmax = \
                         compute_centered_mask(sulci_list=self.list_sulci,
-                                    side=self.side,
-                                    mask_dir=self.mask_dir)
+                                              side=self.side,
+                                              mask_dir=self.mask_dir)
                 else:
                     self.mask, self.bbmin, self.bbmax = \
                         compute_simple_mask(sulci_list=self.list_sulci,
-                                    side=self.side,
-                                    mask_dir=self.mask_dir)
+                                            side=self.side,
+                                            mask_dir=self.mask_dir)
             else:
-                raise ValueError('Cropping must be either \'bbox\' or \'mask\'')
+                raise ValueError(
+                    'Cropping must be either \'bbox\' or \'mask\'')
 
         # Generate cropped files
         self.crop_files(number_subjects=number_subjects)
@@ -526,7 +545,10 @@ def parse_args(argv):
              'bounding box coordinates have been stored. '
              'Default is : ' + _BBOX_DIR_DEFAULT)
     parser.add_argument(
-        "-m", "--morphologist_dir", type=str, default=_MORPHOLOGIST_DIR_DEFAULT,
+        "-m",
+        "--morphologist_dir",
+        type=str,
+        default=_MORPHOLOGIST_DIR_DEFAULT,
         help='Directory where subjects to be processed are stored')
     parser.add_argument(
         "-u", "--sulcus", type=str, default=_SULCUS_DEFAULT, nargs='+',
@@ -550,9 +572,13 @@ def parse_args(argv):
              'mask: selection based on a mask'
              'Default is : mask')
     parser.add_argument(
-        "-x", "--out_voxel_size", type=float, nargs='+', default=_OUT_VOXEL_SIZE,
+        "-x",
+        "--out_voxel_size",
+        type=float,
+        nargs='+',
+        default=_OUT_VOXEL_SIZE,
         help='Voxel size of output images'
-             'Default is : 1 1 1')
+        'Default is : 1 1 1')
     parser.add_argument(
         "-v", "--verbose",
         default=False,
@@ -655,7 +681,7 @@ def main(argv):
                          cropping=params['cropping'],
                          out_voxel_size=params['out_voxel_size'],
                          combine_type=params['combine_type'],
-                         verbose = params['verbose'])
+                         verbose=params['verbose'])
     except SystemExit as exc:
         if exc.code != 0:
             six.reraise(*sys.exc_info())

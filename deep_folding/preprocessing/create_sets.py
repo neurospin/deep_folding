@@ -56,7 +56,7 @@ def create_hcp_benchmark(side, benchmark, directory, batch_size, handedness=1):
     """
     Creates datasets from HCP data and depending on dataset split of benchmark
     generation (cf anatomist_tools.benchmark_generation module)
-    /!\ ONLY DIFFERENCE FROM create_hcp_sets function is only that it creates
+    /!\\ ONLY DIFFERENCE FROM create_hcp_sets function is only that it creates
     sets from benchmark split.
     IN: side: str, 'right' or 'left'
         handedness: int, 1 if right handed, 2 if left handed
@@ -70,21 +70,26 @@ def create_hcp_benchmark(side, benchmark, directory, batch_size, handedness=1):
     date_exp = date.today().strftime("%d%m%y")
 
     #train_list = pd.read_csv('/neurospin/dico/lguillon/mic21/anomalies_set/dataset/benchmark' + str(benchmark) + '/0_Rside/train.csv')
-    train_list = pd.read_csv('/neurospin/dico/lguillon/benchmark/sc/benchmark' + str(benchmark) + '/train.csv')
-    train_list = train_list.rename(columns={"0":"Subject"})
+    train_list = pd.read_csv(
+        '/neurospin/dico/lguillon/benchmark/sc/benchmark' +
+        str(benchmark) +
+        '/train.csv')
+    train_list = train_list.rename(columns={"0": "Subject"})
 
     loss_type = 'CrossEnt'
-    root_dir = directory + side + '_hemi_skeleton_' + date_exp + '_' +loss_type + '_' + str(handedness) + '_3classes/'
+    root_dir = directory + side + '_hemi_skeleton_' + date_exp + \
+        '_' + loss_type + '_' + str(handedness) + '_3classes/'
     print(root_dir)
     save_results.create_folder(root_dir)
 
     #data_dir = '/neurospin/dico/lguillon/skeleton/sts_crop/'
     data_dir = '/neurospin/dico/data/deep_folding/data/crops/SC/sulcus_based/2mm/'
     input_data = 'Rskeleton'
-    tmp = pd.read_pickle(data_dir + input_data +'.pkl')
+    tmp = pd.read_pickle(data_dir + input_data + '.pkl')
     tmp = tmp.T
-    tmp = tmp.rename(columns={0:'ID'})
-    train = pd.merge(tmp, train_list.Subject.astype(str), left_on = tmp.index, right_on='Subject')
+    tmp = tmp.rename(columns={0: 'ID'})
+    train = pd.merge(tmp, train_list.Subject.astype(
+        str), left_on=tmp.index, right_on='Subject')
     train = train.reset_index(drop=True)
     filenames = list(train.Subject)
 
@@ -96,9 +101,9 @@ def create_hcp_benchmark(side, benchmark, directory, batch_size, handedness=1):
     random_seed = 42
     torch.manual_seed(random_seed)
 
-    print([round(i*(len(hcp_dataset_train))) for i in partition])
-    train_set, val_set, test_set = torch.utils.data.random_split(hcp_dataset_train,
-                         [round(i*(len(hcp_dataset_train))) for i in partition])
+    print([round(i * (len(hcp_dataset_train))) for i in partition])
+    train_set, val_set, test_set = torch.utils.data.random_split(
+        hcp_dataset_train, [round(i * (len(hcp_dataset_train))) for i in partition])
 
     # Data Augmentation application
     train_set = AugDatasetTransformer(train_set)
@@ -114,11 +119,12 @@ def create_benchmark_test(benchmark, side, handedness=1):
         handedness: int, 1 if right handed, 2 if left handed
     OUT: dataset_test_abnor_loader
     """
-    data_dir = '/neurospin/dico/lguillon/benchmark/sc/benchmark' + str(benchmark) + '/'
+    data_dir = '/neurospin/dico/lguillon/benchmark/sc/benchmark' + \
+        str(benchmark) + '/'
 
     input_data = 'abnormal_skeleton_' + side
     print(input_data)
-    tmp = pd.read_pickle(data_dir + input_data +'.pkl')
+    tmp = pd.read_pickle(data_dir + input_data + '.pkl')
     filenames = list(tmp.columns)
     tmp = tmp.T
 
@@ -142,14 +148,16 @@ def create_hcp_sets(skeleton, side, directory, batch_size, handedness=0):
     """
     print(torch.cuda.current_device())
     date_exp = date.today().strftime("%d%m%y")
-    if skeleton == True:
+    if skeleton:
         skel = 'skeleton'
         loss_type = 'CrossEnt'
-        root_dir = directory + side + '_hemi_' + skel + '_' + date_exp + '_' +loss_type + '_' + str(handedness) + '_2classes/'
+        root_dir = directory + side + '_hemi_' + skel + '_' + date_exp + \
+            '_' + loss_type + '_' + str(handedness) + '_2classes/'
     else:
         skel = 'norm_spm'
         loss_type = 'L2'
-        root_dir = directory + side + '_hemi_' + skel + '_' + date_exp + '_' +loss_type + '_' + str(handedness) +'/'
+        root_dir = directory + side + '_hemi_' + skel + '_' + \
+            date_exp + '_' + loss_type + '_' + str(handedness) + '/'
 
     #print("Parameters : skeleton: {}, side: {}, weights: {}, loss_type: {}".format(skeleton, side, weights, loss_type))
     print(root_dir)
@@ -160,38 +168,42 @@ def create_hcp_sets(skeleton, side, directory, batch_size, handedness=0):
         #data_dir = '/home_local/lg261972/data/'
         if handedness == 0:
             input_data = 'sts_crop_skeleton_' + side
-            tmp = pd.read_pickle(data_dir + input_data +'.pkl')
+            tmp = pd.read_pickle(data_dir + input_data + '.pkl')
             filenames = list(tmp.columns)
-            tmp = torch.from_numpy(np.array([tmp.loc[0].values[k] for k in range(len(tmp))]))
+            tmp = torch.from_numpy(
+                np.array([tmp.loc[0].values[k] for k in range(len(tmp))]))
         else:
             if handedness == 1:
                 input_data = side + '_hemi_rightH_sts_crop_skeleton'
             else:
                 input_data = side + '_hemi_leftH_sts_crop_skeleton'
             print(input_data)
-            tmp = pd.read_pickle(data_dir + input_data +'.pkl')
+            tmp = pd.read_pickle(data_dir + input_data + '.pkl')
             filenames = tmp.Subject.values
             print(len(filenames))
-            tmp = torch.from_numpy(np.array([tmp.loc[k].values[0] for k in range(len(tmp))]))
+            tmp = torch.from_numpy(
+                np.array([tmp.loc[k].values[0] for k in range(len(tmp))]))
 
     else:
-        data_dir = '/neurospin/dico/lguillon/hcp_cs_crop/sts_crop/'+ side + '_hemi/'
+        data_dir = '/neurospin/dico/lguillon/hcp_cs_crop/sts_crop/' + side + '_hemi/'
         data_dir = '/home_local/lg261972/data/'
         if handedness == 0:
             input_data = 'sts_crop_' + side
-            tmp = pd.read_pickle(data_dir + input_data +'.pkl')
+            tmp = pd.read_pickle(data_dir + input_data + '.pkl')
             filenames = list(tmp.columns)
-            tmp = torch.from_numpy(np.array([tmp.loc[0].values[k] for k in range(len(tmp))]))
+            tmp = torch.from_numpy(
+                np.array([tmp.loc[0].values[k] for k in range(len(tmp))]))
         else:
             if handedness == 1:
                 input_data = side + '_hemi_rightH_sts_crop'
             else:
                 input_data = side + '_hemi_leftH_sts_crop'
             print(input_data)
-            tmp = pd.read_pickle(data_dir + input_data +'.pkl')
+            tmp = pd.read_pickle(data_dir + input_data + '.pkl')
             filenames = tmp.Subject.values
             print(len(filenames))
-            tmp = torch.from_numpy(np.array([tmp.loc[k].values[0] for k in range(len(tmp))]))
+            tmp = torch.from_numpy(
+                np.array([tmp.loc[k].values[0] for k in range(len(tmp))]))
 
     tmp = tmp.to('cuda')
 
@@ -199,22 +211,24 @@ def create_hcp_sets(skeleton, side, directory, batch_size, handedness=0):
                                 skeleton=skeleton, vae=False)
     # Split training set into train, val and test
     partition = [0.7, 0.2, 0.1]
-    print([round(i*(len(hcp_dataset))) for i in partition])
-    train_set, val_set, test_set = torch.utils.data.random_split(hcp_dataset,
-                            [round(i*(len(hcp_dataset))) for i in partition])
+    print([round(i * (len(hcp_dataset))) for i in partition])
+    train_set, val_set, test_set = torch.utils.data.random_split(
+        hcp_dataset, [round(i * (len(hcp_dataset))) for i in partition])
 
     #train_set = AugDatasetTransformer(train_set)
     #val_set = AugDatasetTransformer(val_set)
     #test_set  = AugDatasetTransformer(test_set)
 
-    dataset_train_loader = torch.utils.data.DataLoader(train_set, batch_size=batch_size,
-                                                shuffle=True, num_workers=0)
+    dataset_train_loader = torch.utils.data.DataLoader(
+        train_set, batch_size=batch_size, shuffle=True, num_workers=0)
     dataset_val_loader = torch.utils.data.DataLoader(val_set, shuffle=True,
-                                                          num_workers=0)
+                                                     num_workers=0)
     dataset_test_loader = torch.utils.data.DataLoader(test_set, shuffle=True,
-                                                          num_workers=0)
+                                                      num_workers=0)
 
-    print("Dataset generated \n Size of training dataset :", len(dataset_train_loader))
+    print(
+        "Dataset generated \n Size of training dataset :",
+        len(dataset_train_loader))
 
     return root_dir, dataset_train_loader, dataset_val_loader, dataset_test_loader
 
@@ -234,20 +248,22 @@ def create_left_handed_set(skeleton, side):
         #hcp_leftH = pd.read_pickle('/home_local/lg261972/data/data_handedness/{}_hemi/controls_qc_{}_{}H.pkl'.format(side, side, hand))
         input_data = side + '_hemi_leftH_sts_crop_skeleton'
         print(input_data)
-        tmp = pd.read_pickle(data_dir + input_data +'.pkl')
+        tmp = pd.read_pickle(data_dir + input_data + '.pkl')
         filenames = tmp.Subject.values
         print(len(filenames))
-        tmp = torch.from_numpy(np.array([tmp.loc[k].values[0] for k in range(len(tmp))]))
+        tmp = torch.from_numpy(
+            np.array([tmp.loc[k].values[0] for k in range(len(tmp))]))
     else:
-        hcp_leftH = pd.read_pickle('/neurospin/dico/lguillon/aims_detection/aims_crop/{}_hemi/controls_qc_{}_{}H.pkl'.format(side, side, hand))
+        hcp_leftH = pd.read_pickle(
+            '/neurospin/dico/lguillon/aims_detection/aims_crop/{}_hemi/controls_qc_{}_{}H.pkl'.format(side, side, hand))
 
     tmp = tmp.to('cuda')
 
     leftH_hcp_dataset = TensorDataset(filenames=filenames, data_tensor=tmp,
-                                    skeleton=skeleton, vae=False)
+                                      skeleton=skeleton, vae=False)
 
     leftH_loader = torch.utils.data.DataLoader(leftH_hcp_dataset, batch_size=1,
-                                                    shuffle=True, num_workers=0)
+                                               shuffle=True, num_workers=0)
 
     return leftH_loader
 
@@ -264,16 +280,21 @@ def create_loader_from_csv(subject_list, side):
 
     data_dir = '/neurospin/dico/lguillon/skeleton/sts_crop/'
     input_data = side + '_hemi_rightH_sts_crop_skeleton'
-    tmp = pd.read_pickle(data_dir + input_data +'.pkl')
+    tmp = pd.read_pickle(data_dir + input_data + '.pkl')
 
-    subject_dataset = pd.merge(tmp, subject_list.subjects.astype(str), left_on='Subject',
-                     right_on='subjects')
+    subject_dataset = pd.merge(
+        tmp,
+        subject_list.subjects.astype(str),
+        left_on='Subject',
+        right_on='subjects')
     subject_dataset = subject_dataset.reset_index(drop=True)
     filenames = list(subject_dataset.Subject)
 
-    subject_dataset = SkeletonDataset(dataframe=subject_dataset, filenames=filenames)
+    subject_dataset = SkeletonDataset(
+        dataframe=subject_dataset,
+        filenames=filenames)
 
     subject_loader = torch.utils.data.DataLoader(subject_dataset, batch_size=1,
-                                                    shuffle=True, num_workers=0)
+                                                 shuffle=True, num_workers=0)
 
     return subject_loader

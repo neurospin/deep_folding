@@ -10,12 +10,13 @@ from typing import Union
 logging.basicConfig(level=logging.WARNING)
 log = logging.getLogger(__name__)
 
+
 def resample(input_image: Union[str, aims.Volume],
              transformation: Union[str, aims.AffineTransformation3d],
-             output_vs: tuple=None,
-             background: int=0,
-             values: np.array=None,
-             verbose: bool=True) -> aims.Volume:
+             output_vs: tuple = None,
+             background: int = 0,
+             values: np.array = None,
+             verbose: bool = True) -> aims.Volume:
     """
         Transforms and resamples a volume that has discret values
 
@@ -38,7 +39,7 @@ def resample(input_image: Union[str, aims.Volume],
         resampled:
             Transformed and resampled volume
     """
-    
+
     # Handling of verbosity
     if verbose:
         log.setLevel(level=logging.INFO)
@@ -47,7 +48,7 @@ def resample(input_image: Union[str, aims.Volume],
     tic = time()
 
     # Reads input image (either path to file or aims volume)
-    if type(input_image) is str:
+    if isinstance(input_image, str):
         vol = aims.read(input_image)
     else:
         vol = input_image
@@ -55,7 +56,7 @@ def resample(input_image: Union[str, aims.Volume],
 
     # Reads transformation if present (either path to file or aims Volume)
     if transformation:
-        if type(transformation) is str:
+        if isinstance(transformation, str):
             trm = aims.read(transformation)
         else:
             trm = transformation
@@ -78,7 +79,7 @@ def resample(input_image: Union[str, aims.Volume],
         output_vs = vol.header()['voxel_size'][:3]
         new_dim = vol.header()['volume_dimension'][:3]
 
-    log.info("Time before resampling: {}s".format(time()-tic))
+    log.info("Time before resampling: {}s".format(time() - tic))
     tic = time()
 
     # Transform the background
@@ -94,7 +95,7 @@ def resample(input_image: Union[str, aims.Volume],
     resampler.resample_inv(vol, inv_trm, 0, resampled)
     resampled_dt = np.asarray(resampled)
 
-    log.info("Background resampling: {}s".format(time()-tic))
+    log.info("Background resampling: {}s".format(time() - tic))
     tic = time()
 
     if values is None:
@@ -132,7 +133,7 @@ def resample(input_image: Union[str, aims.Volume],
         log.info("Time for value {} ({} voxels): {}s".format(
             v, np.sum(np.where(vol_dt == v)), time() - tic))
         log.info("\t{}s to create the bucket\n\t{}s to resample bucket\n"
-              "\t{}s to assign values".format(t_bck, t_rs, time()-toc))
+                 "\t{}s to assign values".format(t_bck, t_rs, time() - toc))
         tic = time()
 
     return resampled

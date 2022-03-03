@@ -63,11 +63,12 @@ from deep_folding.brainvisa.utils.folder import create_folder
 from deep_folding.brainvisa.utils.logs import log_command_line
 from deep_folding.brainvisa.utils.parallel import define_njobs
 
-logging.basicConfig(level = logging.INFO)
+logging.basicConfig(level=logging.INFO)
 
 log = logging.getLogger(basename(__file__))
 
 _ALL_SUBJECTS = -1
+
 
 def parse_args(argv):
     """Parses command-line arguments
@@ -118,7 +119,8 @@ def create_volume_from_graph(graph: aims.Graph) -> aims.Volume:
 
     voxel_size = graph['voxel_size'][:3]
     # Adds 1 for each x,y,z dimension
-    dimensions = [i+j for i, j in zip(graph['boundingbox_max'], [1,1,1,0])]
+    dimensions = [i + j for i,
+                  j in zip(graph['boundingbox_max'], [1, 1, 1, 0])]
 
     vol = aims.Volume(dimensions, dtype='S16')
     vol.header()['voxel_size'] = voxel_size
@@ -131,11 +133,12 @@ def create_volume_from_graph(graph: aims.Graph) -> aims.Volume:
     return vol
 
 
-def generate_skeleton_thin_junction(graph: aims.Graph) -> Tuple[aims.Volume, aims.Volume]:
+def generate_skeleton_thin_junction(
+        graph: aims.Graph) -> Tuple[aims.Volume, aims.Volume]:
     """Converts an aims graph into skeleton and foldlabel volumes
 
     It should produce thin junctions as vertices (aims_ss, aims_bottom)
-    are written after edges (junction, plidepassage). 
+    are written after edges (junction, plidepassage).
     Thus, when voxels are present in both, simple and bottom surfaces override
     junctions
     """
@@ -146,7 +149,7 @@ def generate_skeleton_thin_junction(graph: aims.Graph) -> Tuple[aims.Volume, aim
     arr_label = np.asarray(vol_label)
 
     # Sorted in ascendent priority
-    label = {'aims_other':1,
+    label = {'aims_other': 1,
              'aims_ss': 1000,
              'aims_bottom': 2000,
              'aims_junction': 3000,
@@ -156,53 +159,55 @@ def generate_skeleton_thin_junction(graph: aims.Graph) -> Tuple[aims.Volume, aim
     cnt_total = 0
 
     for edge in graph.edges():
-        for bucket_name, value in {'aims_junction':110}.items():
+        for bucket_name, value in {'aims_junction': 110}.items():
             bucket = edge.get(bucket_name)
             label[bucket_name] += 1
             if bucket is not None:
                 voxels = np.array(bucket[0].keys())
                 if voxels.shape == (0,):
                     continue
-                for i,j,k in voxels:
-                    arr_skel[i,j,k] = value
-                    arr_label[i,j,k] = label[bucket_name]
+                for i, j, k in voxels:
+                    arr_skel[i, j, k] = value
+                    arr_label[i, j, k] = label[bucket_name]
 
     for edge in graph.edges():
-        for bucket_name, value in {'aims_plidepassage':120}.items():
+        for bucket_name, value in {'aims_plidepassage': 120}.items():
             bucket = edge.get(bucket_name)
             label[bucket_name] += 1
             if bucket is not None:
                 voxels = np.array(bucket[0].keys())
                 if voxels.shape == (0,):
                     continue
-                for i,j,k in voxels:
-                    arr_skel[i,j,k] = value
-                    arr_label[i,j,k] = label[bucket_name]
+                for i, j, k in voxels:
+                    arr_skel[i, j, k] = value
+                    arr_label[i, j, k] = label[bucket_name]
 
     for vertex in graph.vertices():
-        for bucket_name, value in {'aims_other': 100, 'aims_ss': 60, 'aims_bottom': 30}.items():
+        for bucket_name, value in {'aims_other': 100,
+                                   'aims_ss': 60, 'aims_bottom': 30}.items():
             bucket = vertex.get(bucket_name)
             label[bucket_name] += 1
             if bucket is not None:
                 voxels = np.array(bucket[0].keys())
                 if voxels.shape == (0,):
                     continue
-                for i,j,k in voxels:
+                for i, j, k in voxels:
                     cnt_total += 1
-                    if arr_skel[i,j,k] != 0:
+                    if arr_skel[i, j, k] != 0:
                         cnt_duplicate += 1
-                    arr_skel[i,j,k] = value
-                    arr_label[i,j,k] = label[bucket_name]
+                    arr_skel[i, j, k] = value
+                    arr_label[i, j, k] = label[bucket_name]
 
     return vol_skel, vol_label
 
 
-def generate_skeleton_wide_junction(graph: aims.Graph) -> Tuple[aims.Volume, aims.Volume]:
+def generate_skeleton_wide_junction(
+        graph: aims.Graph) -> Tuple[aims.Volume, aims.Volume]:
     """Converts an aims graph into skeleton and foldlabel volumes
 
     It should produce wide junctions as edges (junction, plidepassage)
-    are written after vertices (aims_ss, aims_bottom). 
-    Thus, when voxels are present in both, junction voxels override 
+    are written after vertices (aims_ss, aims_bottom).
+    Thus, when voxels are present in both, junction voxels override
     simple surface and bottom voxels
     """
     vol_skel = create_volume_from_graph(graph)
@@ -212,7 +217,7 @@ def generate_skeleton_wide_junction(graph: aims.Graph) -> Tuple[aims.Volume, aim
     arr_label = np.asarray(vol_label)
 
     # Sorted in ascendent priority
-    label = {'aims_other':1,
+    label = {'aims_other': 1,
              'aims_ss': 1000,
              'aims_bottom': 2000,
              'aims_junction': 3000,
@@ -222,43 +227,44 @@ def generate_skeleton_wide_junction(graph: aims.Graph) -> Tuple[aims.Volume, aim
     cnt_total = 0
 
     for vertex in graph.vertices():
-        for bucket_name, value in {'aims_other': 100, 'aims_ss': 60, 'aims_bottom': 30}.items():
+        for bucket_name, value in {'aims_other': 100,
+                                   'aims_ss': 60, 'aims_bottom': 30}.items():
             bucket = vertex.get(bucket_name)
             label[bucket_name] += 1
             if bucket is not None:
                 voxels = np.array(bucket[0].keys())
                 if voxels.shape == (0,):
                     continue
-                for i,j,k in voxels:
+                for i, j, k in voxels:
                     cnt_total += 1
-                    if arr_skel[i,j,k] != 0:
+                    if arr_skel[i, j, k] != 0:
                         cnt_duplicate += 1
-                    arr_skel[i,j,k] = value
-                    arr_label[i,j,k] = label[bucket_name]
+                    arr_skel[i, j, k] = value
+                    arr_label[i, j, k] = label[bucket_name]
 
     for edge in graph.edges():
-        for bucket_name, value in {'aims_junction':110}.items():
+        for bucket_name, value in {'aims_junction': 110}.items():
             bucket = edge.get(bucket_name)
             label[bucket_name] += 1
             if bucket is not None:
                 voxels = np.array(bucket[0].keys())
                 if voxels.shape == (0,):
                     continue
-                for i,j,k in voxels:
-                    arr_skel[i,j,k] = value
-                    arr_label[i,j,k] = label[bucket_name]
+                for i, j, k in voxels:
+                    arr_skel[i, j, k] = value
+                    arr_label[i, j, k] = label[bucket_name]
 
     for edge in graph.edges():
-        for bucket_name, value in {'aims_plidepassage':120}.items():
+        for bucket_name, value in {'aims_plidepassage': 120}.items():
             bucket = edge.get(bucket_name)
             label[bucket_name] += 1
             if bucket is not None:
                 voxels = np.array(bucket[0].keys())
                 if voxels.shape == (0,):
                     continue
-                for i,j,k in voxels:
-                    arr_skel[i,j,k] = value
-                    arr_label[i,j,k] = label[bucket_name]
+                for i, j, k in voxels:
+                    arr_skel[i, j, k] = value
+                    arr_label[i, j, k] = label[bucket_name]
 
     return vol_skel, vol_label
 
@@ -269,6 +275,7 @@ class GraphConvert2Skeleton:
     It contains all information to scan a dataset for graphs
     and writes skeletons and foldlabels into target directory
     """
+
     def __init__(self, src_dir, tgt_dir, nb_subjects, side, junction):
         self.src_dir = src_dir
         self.tgt_dir = tgt_dir
@@ -285,7 +292,8 @@ class GraphConvert2Skeleton:
     def generate_skeleton(self, subject: str):
         """Generates and writes skeleton for one subject.
         """
-        graph_file = glob.glob(f"{self.src_dir}/{subject}*/{self.graph_subdir}/{self.side}{subject}*.arg")[0]
+        graph_file = glob.glob(
+            f"{self.src_dir}/{subject}*/{self.graph_subdir}/{self.side}{subject}*.arg")[0]
         graph = aims.read(graph_file)
 
         if self.junction == 'wide':
@@ -299,15 +307,18 @@ class GraphConvert2Skeleton:
         aims.write(vol_skel, skeleton_filename)
         aims.write(vol_label, foldlabel_filename)
 
-
     def loop(self, nb_subjects, verbose=False):
         """Loops over subjects and converts graphs into skeletons.
         """
         filenames = glob.glob(f"{self.src_dir}/*/")
-        list_subjects = [re.search('([ae\d]{5,6})', filename).group(0) for filename in filenames]
+        list_subjects = [
+            re.search(
+                '([ae\\d]{5,6})',
+                filename).group(0) for filename in filenames]
         list_subjects = get_sublist(list_subjects, nb_subjects)
         if verbose:
-            log.info("VERBOSE MODE: subjects are scanned serially, without parallelism")
+            log.info(
+                "VERBOSE MODE: subjects are scanned serially, without parallelism")
             for sub in list_subjects:
                 self.generate_skeleton(sub)
         else:

@@ -35,8 +35,8 @@
 
 import os
 
+
 def create_folder(folder: str) -> None:
     """Creates folder if it doesn't exist"""
     if not os.path.exists(folder):
         os.makedirs(folder)
-

@@ -31,7 +31,8 @@
 # same conditions as regards security.
 #
 # The fact that you are presently reading this means that you have had
-# knowledge of the CeCILL license version 2 and that you accept its terms.""" Dilating a given mask"""from soma import aims
+# knowledge of the CeCILL license version 2 and that you accept its
+# terms.""" Dilating a given mask"""from soma import aims
 
 
 import numpy as np
@@ -41,29 +42,32 @@ from soma.aimsalgo import MorphoGreyLevel_S16
 
 _AIMS_BINARY_ONE = 32767
 
+
 def dilate(mask, radius=10.):
     """
     """
     # Creates volume
     #hdr = aims.StandardReferentials.icbm2009cTemplateHeader()
     #vol = aims.Volume(hdr['volume_dimension'], dtype='S16')
-    #vol.copyHeaderFrom(hdr)
+    # vol.copyHeaderFrom(hdr)
     arr = np.asarray(mask)
     # Thresholding and binarization of mask
-    arr[arr<10] = 0
-    arr[arr>=10] = _AIMS_BINARY_ONE
+    arr[arr < 10] = 0
+    arr[arr >= 10] = _AIMS_BINARY_ONE
     # Dilates initial volume of 10 mm
     morpho = MorphoGreyLevel_S16()
     dilate = morpho.doDilation(mask, radius)
     arr_dilate = np.asarray(dilate)
-    arr_dilate[arr_dilate>=1] = 1
+    arr_dilate[arr_dilate >= 1] = 1
     return dilate
 
 
 def main():
-    mask = aims.read('/neurospin/dico/data/deep_folding/current/mask/2mm/R/paracingular._right.nii.gz')
+    mask = aims.read(
+        '/neurospin/dico/data/deep_folding/current/mask/2mm/R/paracingular._right.nii.gz')
     mask_dilated = dilate(mask)
     aims.write(mask_dilated, '/tmp/mask_dil.nii.gz')
+
 
 if __name__ == '__main__':
     main()

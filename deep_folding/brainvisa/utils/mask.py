@@ -67,6 +67,7 @@ def compute_bbox_mask(arr):
 
     return np.array(bbmin), np.array(bbmax)
 
+
 def compute_simple_mask(sulci_list, side, mask_dir=_MASK_DIR_DEFAULT):
     """Function returning mask combining mask over several sulci
 
@@ -139,8 +140,8 @@ def compute_centered_mask(sulci_list, side, mask_dir=_MASK_DIR_DEFAULT):
 
     # Threshold of other mask
     eligible_mask_2 = np.asarray(list_masks[1])
-    eligible_mask_2[eligible_mask_2<10] = 0
-    eligible_mask_2[eligible_mask_2>=10] = 1
+    eligible_mask_2[eligible_mask_2 < 10] = 0
+    eligible_mask_2[eligible_mask_2 >= 10] = 1
     aims.write(list_masks[1], '/tmp/eligible_mask_2.nii.gz')
 
     # Intersection of the two eligible masks
@@ -153,10 +154,10 @@ def compute_centered_mask(sulci_list, side, mask_dir=_MASK_DIR_DEFAULT):
 
     # Dilation of intersec_mask
     morpho = MorphoGreyLevel_S16()
-    intersec_mask_arr[intersec_mask_arr>=1] = _AIMS_BINARY_ONE
+    intersec_mask_arr[intersec_mask_arr >= 1] = _AIMS_BINARY_ONE
     intersec_mask = morpho.doDilation(intersec_mask, 15.0)
     intersec_mask_arr = np.asarray(intersec_mask)
-    intersec_mask_arr[intersec_mask_arr>=1] = 1
+    intersec_mask_arr[intersec_mask_arr >= 1] = 1
     aims.write(intersec_mask, '/tmp/intersec_mask_dilated.nii.gz')
 
     # Intersection of intersec_mask, eligible_mask_1 and eligible_mask_2
@@ -164,13 +165,13 @@ def compute_centered_mask(sulci_list, side, mask_dir=_MASK_DIR_DEFAULT):
     mask_result.copyHeaderFrom(hdr)
     mask_result.header()['voxel_size'] = [2, 2, 2]
     mask_result_arr = np.asarray(mask_result)
-    
+
     intersec_mask_arr = np.asarray(intersec_mask)
     intersec_1 = intersec_mask_arr.copy() & np.asarray(eligible_mask_1)
     intersec_2 = intersec_mask_arr & np.asarray(eligible_mask_2)
 
     mask_result_arr[:] = intersec_1 + intersec_2
-    mask_result_arr[mask_result_arr>1] = 1
+    mask_result_arr[mask_result_arr > 1] = 1
 
     aims.write(mask_result, '/tmp/mask_result.nii.gz')
 
@@ -180,10 +181,9 @@ def compute_centered_mask(sulci_list, side, mask_dir=_MASK_DIR_DEFAULT):
     return mask_result, bbmin, bbmax
 
 
-
 if __name__ == '__main__':
     arr_mask, bbmin, bbmax = compute_centered_mask(['paracingular._right',
-                                    'F.C.M.ant._right'],
-                                    'R')
+                                                    'F.C.M.ant._right'],
+                                                   'R')
     print("bbmin = ", bbmin)
     print("bbmax = ", bbmax)

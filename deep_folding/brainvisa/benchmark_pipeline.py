@@ -135,7 +135,7 @@ def define_njobs():
     """Returns number of cpus used by main loop
     """
     nb_cpus = cpu_count()
-    return max(nb_cpus-2, 1)
+    return max(nb_cpus - 2, 1)
 
 
 class BenchmarkPipe:
@@ -168,7 +168,7 @@ class BenchmarkPipe:
         self.side = side
         self.subjects_list = subjects_list
         self.b_num = len(next(os.walk(tgt_dir))[1]) + 1
-        self.tgt_dir = os.path.join(tgt_dir, 'benchmark'+str(self.b_num))
+        self.tgt_dir = os.path.join(tgt_dir, 'benchmark' + str(self.b_num))
         if not os.path.isdir(self.tgt_dir):
             os.mkdir(self.tgt_dir)
         print(self.mode)
@@ -180,10 +180,9 @@ class BenchmarkPipe:
         list_subjects = []
         for img in os.listdir(self.tgt_dir):
             if '.nii.gz' in img and 'minf' not in img:
-                sub = re.search('_(\d{6})', img).group(1)
+                sub = re.search('_(\\d{6})', img).group(1)
                 list_subjects.append(sub)
         return list_subjects
-
 
     def crop_one_file(self, sub):
         """Normalizes, crops and flips if necessary, one file
@@ -191,10 +190,12 @@ class BenchmarkPipe:
         Args:
             sub: string giving the subject ID
         """
-        dir_m = '/neurospin/dico/lguillon/skeleton/transfo_pre_process/natif_to_template_spm_' + sub +'.trm'
-        dir_r = '/neurospin/hcp/ANALYSIS/3T_morphologist/' + sub + '/t1mri/default_acquisition/normalized_SPM_' + sub +'.nii'
+        dir_m = '/neurospin/dico/lguillon/skeleton/transfo_pre_process/natif_to_template_spm_' + sub + '.trm'
+        dir_r = '/neurospin/hcp/ANALYSIS/3T_morphologist/' + sub + \
+            '/t1mri/default_acquisition/normalized_SPM_' + sub + '.nii'
         skel_prefix = 'output_skeleton_'
-        file_skeleton = os.path.join(self.tgt_dir, skel_prefix + sub + '.nii.gz')
+        file_skeleton = os.path.join(
+            self.tgt_dir, skel_prefix + sub + '.nii.gz')
         file_cropped = os.path.join(self.tgt_dir, sub + '_normalized.nii.gz')
 
         if self.resampling:
@@ -204,7 +205,7 @@ class BenchmarkPipe:
             aims.write(resampled, file_cropped)
         else:
             cmd_normalize = "AimsApplyTransform -i " + file_skeleton + \
-                            " -o " + file_cropped +" -m " + dir_m + " -r " + \
+                            " -o " + file_cropped + " -m " + dir_m + " -r " + \
                             dir_r + " -t nearest"
             os.system(cmd_normalize)
 
@@ -212,38 +213,54 @@ class BenchmarkPipe:
         if self.mode == 'random':
             # 42 instead of 0 in order to avoid crops with only black voxels
             # Int 108 and 91 depend on downsampling and normalization
-            random_x = random.randint(0, 42-self.box_size[0]-1)
-            random_y = random.randint(0, 108-self.box_size[1]-1)
-            random_z = random.randint(0, 91-self.box_size[2]-1)
-            xmax, ymax, zmax = random_x + self.box_size[0], random_y + self.box_size[1], random_z + self.box_size[2]
-            cmd_bounding_box = ' -x ' + str(random_x) + ' -y ' + str(random_y) + \
-                               ' -z ' + str(random_z) + ' -X '+ str(xmax) + ' -Y ' + str(ymax) + ' -Z ' + str(zmax)
+            random_x = random.randint(0, 42 - self.box_size[0] - 1)
+            random_y = random.randint(0, 108 - self.box_size[1] - 1)
+            random_z = random.randint(0, 91 - self.box_size[2] - 1)
+            xmax, ymax, zmax = random_x + \
+                self.box_size[0], random_y + self.box_size[1], random_z + self.box_size[2]
+            cmd_bounding_box = ' -x ' + str(random_x) + ' -y ' + str(random_y) + ' -z ' + str(
+                random_z) + ' -X ' + str(xmax) + ' -Y ' + str(ymax) + ' -Z ' + str(zmax)
 
         else:
             if self.mode == 'asymmetry':
                 # We compare other hemisphere box size
-                asym = 'R' if self.side=='L' else 'L'
+                asym = 'R' if self.side == 'L' else 'L'
                 # Bbox of crop on opposite hemisphere
-                bbox_asym = compute_max_box(complete_sulci_name(self.sulcus_raw, asym), asym, src_dir=self.bbox_dir)
+                bbox_asym = compute_max_box(
+                    complete_sulci_name(
+                        self.sulcus_raw,
+                        asym),
+                    asym,
+                    src_dir=self.bbox_dir)
                 xmin_asym, ymin_asym, zmin_asym = bbox_asym[0][0], bbox_asym[0][1], bbox_asym[0][2]
                 xmax_asym, ymax_asym, zmax_asym = bbox_asym[1][0], bbox_asym[1][1], bbox_asym[1][2]
                 # Size of crop on opposite hemisphere
-                box_size_asym = [xmax_asym-xmin_asym, ymax_asym-ymin_asym, zmax_asym-zmin_asym]
+                box_size_asym = [
+                    xmax_asym - xmin_asym,
+                    ymax_asym - ymin_asym,
+                    zmax_asym - zmin_asym]
                 # Difference (in voxel for each dimension) between crop in the hemisphere considered, self.side
                 # and opposite hemisphere crop
-                diff = [x-y for x, y in zip(box_size_asym, self.box_size)]
+                diff = [x - y for x, y in zip(box_size_asym, self.box_size)]
 
                 # Adaptation of considered crop based on asymmetrical crop
-                self.xmin, self.ymin, self.zmin = int(self.xmin)-math.floor(diff[0]/2), int(self.ymin)-math.floor(diff[1]/2), int(self.zmin)-math.floor(diff[2]/2)
-                self.xmax, self.ymax, self.zmax = int(self.xmax) + math.ceil(diff[0]/2), int(self.ymax) + math.ceil(diff[1]/2), int(self.zmax) + math.ceil(diff[2]/2)
-                adapted_box = [self.xmax-self.xmin, self.ymax-self.ymin, self.zmax-self.zmin]
-                assert adapted_box==box_size_asym
+                self.xmin, self.ymin, self.zmin = int(self.xmin) - math.floor(diff[0] / 2), int(
+                    self.ymin) - math.floor(diff[1] / 2), int(self.zmin) - math.floor(diff[2] / 2)
+                self.xmax, self.ymax, self.zmax = int(self.xmax) + math.ceil(diff[0] / 2), int(
+                    self.ymax) + math.ceil(diff[1] / 2), int(self.zmax) + math.ceil(diff[2] / 2)
+                adapted_box = [
+                    self.xmax - self.xmin,
+                    self.ymax - self.ymin,
+                    self.zmax - self.zmin]
+                assert adapted_box == box_size_asym
                 #self.xmin, self.ymin, self.zmin = '52', '50', '12'
                 #self.xmax, self.ymax, self.zmax = '74', '86', '47'
 
-            cmd_bounding_box = ' -x ' + str(self.xmin) + ' -y ' + str(self.ymin) + ' -z ' + str(self.zmin) + ' -X '+ str(self.xmax) + ' -Y ' + str(self.ymax) + ' -Z ' + str(self.zmax)
+            cmd_bounding_box = ' -x ' + str(self.xmin) + ' -y ' + str(self.ymin) + ' -z ' + str(
+                self.zmin) + ' -X ' + str(self.xmax) + ' -Y ' + str(self.ymax) + ' -Z ' + str(self.zmax)
             print(cmd_bounding_box)
-        cmd_crop = "AimsSubVolume -i " + file_cropped + " -o " + file_cropped + cmd_bounding_box
+        cmd_crop = "AimsSubVolume -i " + file_cropped + \
+            " -o " + file_cropped + cmd_bounding_box
         os.system(cmd_crop)
 
         if self.mode == 'asymmetry':
@@ -261,17 +278,32 @@ class BenchmarkPipe:
         print(' ')
 
         print('=================== Selection and possible alteration of benchmark skeletons ===================')
-        generate(self.b_num, self.side, self.ss_size, sulci_list=self.sulcus,
-                 saving_dir=self.tgt_dir, mode=self.mode, bbox_dir=self.bbox_dir,
-                 bench_size=self.bench_size, subjects_list=self.subjects_list
-                )
+        generate(
+            self.b_num,
+            self.side,
+            self.ss_size,
+            sulci_list=self.sulcus,
+            saving_dir=self.tgt_dir,
+            mode=self.mode,
+            bbox_dir=self.bbox_dir,
+            bench_size=self.bench_size,
+            subjects_list=self.subjects_list)
 
         bbox = compute_max_box(self.sulcus, self.side, src_dir=self.bbox_dir)
         print(bbox)
 
-        self.xmin, self.ymin, self.zmin = str(bbox[0][0]), str(bbox[0][1]), str(bbox[0][2])
-        self.xmax, self.ymax, self.zmax = str(bbox[1][0]), str(bbox[1][1]), str(bbox[1][2])
-        self.box_size = [int(self.xmax)-int(self.xmin), int(self.ymax)-int(self.ymin), int(self.zmax)-int(self.zmin)]
+        self.xmin, self.ymin, self.zmin = str(
+            bbox[0][0]), str(
+            bbox[0][1]), str(
+            bbox[0][2])
+        self.xmax, self.ymax, self.zmax = str(
+            bbox[1][0]), str(
+            bbox[1][1]), str(
+            bbox[1][2])
+        self.box_size = [int(self.xmax) -
+                         int(self.xmin), int(self.ymax) -
+                         int(self.ymin), int(self.zmax) -
+                         int(self.zmin)]
 
         print(' ')
         print('=================== Normalization and crop of skeletons ==================')
@@ -279,12 +311,14 @@ class BenchmarkPipe:
         list_subjects = self.get_sub_list()
         pqdm(list_subjects, self.crop_one_file, n_jobs=define_njobs())
 
-        input_dict = {'sulci_list': self.sulcus, 'simple_surface_min_size': self.ss_size,
-                      'side': self.side, 'mode': self.mode}
+        input_dict = {
+            'sulci_list': self.sulcus,
+            'simple_surface_min_size': self.ss_size,
+            'side': self.side,
+            'mode': self.mode}
         log_file = open(self.tgt_dir + "/logs.json", "a+")
         log_file.write(json.dumps(input_dict))
         log_file.close()
-
 
 
 def main(argv):
@@ -293,13 +327,13 @@ def main(argv):
     Args:
         argv: a list containing command line arguments
     """
-    tgt_dir, sulcus, side, ss_size, mode, bench_size, resampling, bbox_dir, subjects_list = parse_args(argv)
+    tgt_dir, sulcus, side, ss_size, mode, bench_size, resampling, bbox_dir, subjects_list = parse_args(
+        argv)
 
     benchmark = BenchmarkPipe(tgt_dir, sulcus, side, ss_size, mode, bench_size,
                               resampling, bbox_dir, subjects_list)
 
     benchmark.launch_pipe()
-
 
 
 if __name__ == '__main__':

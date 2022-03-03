@@ -22,8 +22,8 @@ def is_file_nii(filename):
         is_file_nii: boolean stating if file is nii file
     """
     is_file_nii = os.path.isfile(filename)\
-                  and '.nii' in filename \
-                  and '.minf' not in filename
+        and '.nii' in filename \
+        and '.minf' not in filename
     return is_file_nii
 
 
@@ -47,7 +47,7 @@ def fetch_data(cropped_dir, tgt_dir=None, side=None):
         if is_file_nii(file_nii):
             aimsvol = aims.read(file_nii)
             sample = np.asarray(aimsvol)
-            subject = re.search('([ae\d]{5,6})', file_nii).group(1)
+            subject = re.search('([ae\\d]{5,6})', file_nii).group(1)
             data_dict[subject] = [sample]
 
     dataframe = pd.DataFrame.from_dict(data_dict)
@@ -58,6 +58,7 @@ def fetch_data(cropped_dir, tgt_dir=None, side=None):
 
 
 if __name__ == '__main__':
-    fetch_data(cropped_dir='/neurospin/dico/data/deep_folding/current/crops/SC/mask/sulcus_based/2mm/Rlabels/',
-               tgt_dir='/neurospin/dico/data/deep_folding/current/crops/SC/mask/sulcus_based/2mm/',
-               side='R')
+    fetch_data(
+        cropped_dir='/neurospin/dico/data/deep_folding/current/crops/SC/mask/sulcus_based/2mm/Rlabels/',
+        tgt_dir='/neurospin/dico/data/deep_folding/current/crops/SC/mask/sulcus_based/2mm/',
+        side='R')

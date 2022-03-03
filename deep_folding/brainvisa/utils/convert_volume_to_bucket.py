@@ -39,9 +39,10 @@ from tqdm import tqdm
 from soma import aims
 from deep_folding.brainvisa.utils.remove_hull import convert_volume_to_bucket
 
+
 def read_convert_write(vol_filename, bucket_filename):
     """Reads volume, converts and writes back bucket.
-    
+
     Args:
         vol_filename [str]: path to input volume file
         bucket_filename [str]: path to output bucket file
@@ -76,31 +77,40 @@ def parse_args(argv):
 
     return args
 
+
 def get_basename_without_extension(filename):
     "Returns file basename without extension"
     basename = os.path.basename(filename)
     without_extension = basename.split('.')[0]
     return without_extension
 
+
 def build_bucket_filename(subject, tgt_dir):
     """Returns bucket filename"""
     return f"{tgt_dir}/{subject}.bck"
+
 
 def loop_over_directory(src_dir, tgt_dir):
     """Loops conversion over input directory
     """
     # Gets and creates all filenames
     filenames = glob.glob(f"{src_dir}/*.nii.gz")
-    subjects = [get_basename_without_extension(filename) for filename in filenames]
-    bucket_filenames = [build_bucket_filename(subject, tgt_dir) for subject in subjects]
+    subjects = [get_basename_without_extension(
+        filename) for filename in filenames]
+    bucket_filenames = [
+        build_bucket_filename(
+            subject,
+            tgt_dir) for subject in subjects]
 
     # Creates target d    # python3 convert_volume_to_bucket.py \
     # -s /neurospin/dico/data/deep_folding/current/crops/CINGULATE/mask/sulcus_based/2mm/simple_combined/Rcrops \
     # -t /neurospin/di
     # Makes the actual conversion
-    for vol_filename, bucket_filename in tqdm(zip(filenames, bucket_filenames), total=len(filenames)):
+    for vol_filename, bucket_filename in tqdm(
+            zip(filenames, bucket_filenames), total=len(filenames)):
         read_convert_write(vol_filename=vol_filename,
                            bucket_filename=bucket_filename)
+
 
 def main(argv):
     """Reads argument line and creates cropped files and pickle file
@@ -119,6 +129,7 @@ def main(argv):
         if exc.code != 0:
             six.reraise(*sys.exc_info())
 
+
 if __name__ == '__main__':
     # This permits to call main also from another python program
     # without having to make system calls
@@ -128,8 +139,3 @@ if __name__ == '__main__':
     # python3 convert_volume_to_bucket.py \
     # -s /neurospin/dico/data/deep_folding/current/crops/CINGULATE/mask/sulcus_based/2mm/simple_combined/Rcrops \
     # -t /neurospin/dico/data/deep_folding/current/crops/CINGULATE/mask/sulcus_based/2mm/simple_combined/Rbuckets
-
-
-
-
-

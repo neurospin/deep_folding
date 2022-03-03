@@ -24,6 +24,7 @@ import torch.nn.functional as func
 
 class PaddingTensor(object):
     """A class to pad a tensor"""
+
     def __init__(self, shape, nb_channels=1, fill_value=0):
         """ Initialize the instance.
         Parameters
@@ -75,7 +76,7 @@ class PaddingTensor(object):
             half_shape_i = shape_i // 2
             if shape_i % 2 == 0 and shape_i != 0:
                 padding += (half_shape_i, half_shape_i)
-            elif shape_i % 2 ==1:
+            elif shape_i % 2 == 1:
                 padding += (half_shape_i, half_shape_i + 1)
         for cnt in range(len(tensor.shape) - len(padding)):
             padding += (0, 0)
@@ -87,6 +88,7 @@ class PaddingTensor(object):
 class DownsampleTensor(object):
     """ A class to downsample a tensor.
     """
+
     def __init__(self, scale, with_channels=True):
         """ Initialize the instance.
         Parameters
@@ -134,6 +136,7 @@ class DownsampleTensor(object):
 class Padding(object):
     """ A class to pad an image.
     """
+
     def __init__(self, shape, nb_channels=1, fill_value=0):
         """ Initialize the instance.
         Parameters
@@ -198,6 +201,7 @@ class Padding(object):
 class Downsample(object):
     """ A class to downsample an array.
     """
+
     def __init__(self, scale, with_channels=True):
         """ Initialize the instance.
         Parameters
@@ -269,7 +273,7 @@ class NormalizeHisto(object):
         self.arr = self.arr.float()
         ave = self.arr.mean()
         std = self.arr.std()
-        self.arr = (self.arr - ave)/std
+        self.arr = (self.arr - ave) / std
         # After normalization
         # flat2 = self.arr.flatten()
         # plt.hist(flat2, bins=100)
@@ -277,24 +281,26 @@ class NormalizeHisto(object):
 
         return self.arr
 
+
 class NormalizeSkeleton(object):
     """
     Class to normalize skeleton objects,
     black voxels: 0
     grey and white voxels: 1
     """
+
     def __init__(self, nb_cls=3):
         """ Initialize the instance"""
         self.nb_cls = nb_cls
 
     def __call__(self, arr):
-        if self.nb_cls==3:
+        if self.nb_cls == 3:
             arr[arr < 11] = 0
             arr[arr > 11] = 2
             arr[arr == 11] = 1
 
-        else: # output is binary image
-            arr[arr == 0] = 0 # inside the brain
-            arr[arr > 0] = 1 # sulci + out of the brain
+        else:  # output is binary image
+            arr[arr == 0] = 0  # inside the brain
+            arr[arr > 0] = 1  # sulci + out of the brain
 
         return arr

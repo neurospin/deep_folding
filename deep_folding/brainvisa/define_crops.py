@@ -120,9 +120,9 @@ class BoundingBoxMax:
                          else path_to_graph)
         self.graph_file = []
         for path in path_to_graph:
-            self.graph_file.append('%(subject)s/' \
-                              + path \
-                              + '/%(side)s%(subject)s*.arg')
+            self.graph_file.append('%(subject)s/'
+                                   + path
+                                   + '/%(side)s%(subject)s*.arg')
 
         self.sulcus = sulcus
         self.bbox_dir = bbox_dir
@@ -139,7 +139,11 @@ class BoundingBoxMax:
         json_file = join(self.bbox_dir, self.side, self.sulcus + '.json')
         self.json = LogJson(json_file)
         self.mask = aims.Volume()
-        self.mask_file = join(self.mask_dir, self.side, self.sulcus + '.nii.gz')
+        self.mask_file = join(
+            self.mask_dir,
+            self.side,
+            self.sulcus +
+            '.nii.gz')
 
     def list_all_subjects(self):
         """List all subjects from the clean database (directory src_dir).
@@ -162,10 +166,13 @@ class BoundingBoxMax:
                 if os.path.isdir(directory):
                     if filename != 'ra':
                         subject = filename
-                        subject_d = {'subject': subject,
-                                     'side': self.side,
-                                     'dir': src_dir,
-                                     'graph_file': graph_file % {'side': self.side, 'subject': subject}}
+                        subject_d = {
+                            'subject': subject,
+                            'side': self.side,
+                            'dir': src_dir,
+                            'graph_file': graph_file % {
+                                'side': self.side,
+                                'subject': subject}}
                         subjects.append(subject_d)
 
         return subjects
@@ -198,7 +205,8 @@ class BoundingBoxMax:
 
         # Reads the data graph and transforms it to MNI ICBM152 referential
         graph = aims.read(graph_filename)
-        g_to_icbm_template = aims.GraphManip.getICBM2009cTemplateTransform(graph)
+        g_to_icbm_template = aims.GraphManip.getICBM2009cTemplateTransform(
+            graph)
         voxel_size_in = graph['voxel_size'][:3]
         arr = np.asarray(self.mask)
 
@@ -216,12 +224,13 @@ class BoundingBoxMax:
                          for voxel in bucket[0].keys()])
                     if voxels_real.shape == (0,):
                         continue
-                    voxels = np.round(np.array(voxels_real) / self.voxel_size_out[:3]).astype(int)
+                    voxels = np.round(np.array(voxels_real) /
+                                      self.voxel_size_out[:3]).astype(int)
 
                     if voxels.shape == (0,):
                         continue
-                    for i,j,k in voxels:
-                        arr[i,j,k,0] += 1
+                    for i, j, k in voxels:
+                        arr[i, j, k, 0] += 1
 
     def get_one_bounding_box(self, graph_filename):
         """get bounding box of the chosen sulcus for one data graph in MNI 152
@@ -317,12 +326,13 @@ class BoundingBoxMax:
                 list_bbmin.append([bbox_min[0], bbox_min[1], bbox_min[2]])
                 list_bbmax.append([bbox_max[0], bbox_max[1], bbox_max[2]])
             else:
-                print(f"No sulcus {self.sulcus} found for {sub}; it can be OK.")
+                print(
+                    f"No sulcus {self.sulcus} found for {sub}; it can be OK.")
 
         if not list_bbmin:
             raise ValueError(f"No sulcus named {self.sulcus} found "
-                        'for the whole dataset. '
-                        'It is an error. You should check sulcus name.')
+                             'for the whole dataset. '
+                             'It is an error. You should check sulcus name.')
 
         return list_bbmin, list_bbmax
 
@@ -371,8 +381,10 @@ class BoundingBoxMax:
 
         # To go back from mms to voxels
         voxel_size = self.voxel_size_out
-        bbmin_vox = np.round(np.array(bbmin_mni152) / voxel_size[:3]).astype(int)
-        bbmax_vox = np.round(np.array(bbmax_mni152) / voxel_size[:3]).astype(int)
+        bbmin_vox = np.round(np.array(bbmin_mni152) /
+                             voxel_size[:3]).astype(int)
+        bbmax_vox = np.round(np.array(bbmax_mni152) /
+                             voxel_size[:3]).astype(int)
 
         return bbmin_vox, bbmax_vox
 
@@ -430,7 +442,7 @@ class BoundingBoxMax:
             self.increment_mask(subjects)
 
             # Smoothing and filling of the mask with gaussian filtering
-            #self.filter_mask()
+            # self.filter_mask()
 
             # Saving of generated masks
             self.write_mask()
@@ -563,8 +575,10 @@ def parse_args(argv):
 
     params['src_dir'] = args.src_dir  # src_dir is a list
     params['path_to_graph'] = args.path_to_graph
-    params['bbox_dir']= args.bbox_dir # bbox_dir is a string, only one directory
-    params['mask_dir']= args.mask_dir # bbox_dir is a string, only one directory
+    # bbox_dir is a string, only one directory
+    params['bbox_dir'] = args.bbox_dir
+    # bbox_dir is a string, only one directory
+    params['mask_dir'] = args.mask_dir
     params['sulcus'] = args.sulcus  # sulcus is a string
     params['side'] = args.side
     params['out_voxel_size'] = args.out_voxel_size
