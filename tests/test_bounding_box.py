@@ -2,9 +2,9 @@ import os
 import glob
 import json
 
-from deep_folding.anatomist_tools import crop_definition
+from deep_folding.anatomist_tools import define_crops
 
-_ALL_SUBJECTS = crop_definition._ALL_SUBJECTS
+_ALL_SUBJECTS = define_crops._ALL_SUBJECTS
 
 def test_bounding_box():
 	"""Tests if the bounding box one one subject gives the expected result.
@@ -41,7 +41,7 @@ def test_bounding_box():
 	out_voxel_size = 1
 
 	# Determines the bounding box around the sulcus
-	crop_definition.bounding_box(src_dir=src_dir,
+	define_crops.bounding_box(src_dir=src_dir,
 							  bbox_dir=bbox_dir,
 							  path_to_graph=path_to_graph,
 							  sulcus=sulcus,

@@ -39,7 +39,7 @@ The aim of this script is to remove skeleton's voxels that correspond to the
 hull and to use this new volume for visualization if needed.
 
 """
-import moving_averages as ma
+import pcpm
 import dico_toolbox as dtx
 
 # pyAims import
