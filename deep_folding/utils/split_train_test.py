@@ -51,6 +51,7 @@ _TGT_DIR_DEFAULT = "."
 _NB_TEST_SUBJECTS_DEFAULT = 150
 _SEED = 1
 
+
 def parse_args(argv):
     """Function parsing command-line arguments
 
@@ -74,10 +75,14 @@ def parse_args(argv):
         help='Target directory where to store the csv files. '
              'Default is : ' + _TGT_DIR_DEFAULT)
     parser.add_argument(
-        "-n", "--nb_test_subjects", type=int, default=_NB_TEST_SUBJECTS_DEFAULT,
+        "-n",
+        "--nb_test_subjects",
+        type=int,
+        default=_NB_TEST_SUBJECTS_DEFAULT,
         help='Number of subjects of the test set')
 
     return parser.parse_args(argv)
+
 
 def split_train_test(src_dir, tgt_dir, nb_test_subjects):
     """Splits the subject IDs in train and test
@@ -108,6 +113,7 @@ def split_train_test(src_dir, tgt_dir, nb_test_subjects):
         for sub in test_subjects:
             wr.writerow([sub])
 
+
 def main(argv):
     """Reads argument line and creates cropped files and pickle file
 
@@ -130,6 +136,7 @@ def main(argv):
 ######################################################################
 # Main program
 ######################################################################
+
 
 if __name__ == '__main__':
     # This permits to call main also from another python program

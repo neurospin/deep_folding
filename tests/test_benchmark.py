@@ -4,7 +4,7 @@ from glob import glob
 import random
 import pandas as pd
 import os
-from deep_folding.anatomist_tools.benchmark_generation import Benchmark
+from deep_folding.brainvisa.benchmark_generation import Benchmark
 
 
 def equal_skeletons(skel_ref, skel_target):

@@ -44,6 +44,7 @@ from scipy.ndimage import rotate
 
 from .pynet_transforms import *
 
+
 class TensorDataset():
     """Custom dataset that includes image file paths.
     Applies different transformations to data depending on the type of input.
@@ -52,6 +53,7 @@ class TensorDataset():
         skeleton: boolean, whether input is skeleton images or not
     OUT: tensor of [batch, sample, subject ID]
     """
+
     def __init__(self, data_tensor, filenames, skeleton):
         self.skeleton = skeleton
         self.data_tensor = data_tensor
@@ -73,9 +75,8 @@ class TensorDataset():
         if self.skeleton:
             fill_value = 1
             sample = NormalizeSkeleton(sample)()
-            self.transform = transforms.Compose([DownsampleTensor(scale=2),
-                        PaddingTensor([1, 40, 40, 40], fill_value=fill_value)
-            ])
+            self.transform = transforms.Compose([DownsampleTensor(
+                scale=2), PaddingTensor([1, 40, 40, 40], fill_value=fill_value)])
 
             sample = self.transform(sample)
 
@@ -99,6 +100,7 @@ class SkeletonDataset():
     filenames: optional, list of corresponding filenames
     Works on CPUs
     """
+
     def __init__(self, dataframe, filenames=None):
         self.df = dataframe
         if filenames:
@@ -124,9 +126,8 @@ class SkeletonDataset():
 
         fill_value = 1
         #sample = NormalizeSkeleton(sample)()
-        self.transform = transforms.Compose([NormalizeSkeleton(),
-                         Padding([1, 40, 40, 40], fill_value=fill_value)
-                         ])
+        self.transform = transforms.Compose(
+            [NormalizeSkeleton(), Padding([1, 40, 40, 40], fill_value=fill_value)])
         #self.transform = Padding([1, 40, 40, 40], fill_value=fill_value)
         sample = self.transform(sample)
         tuple_with_path = (sample, filename)
@@ -139,6 +140,7 @@ class AugDatasetTransformer(torch.utils.data.Dataset):
     through TensorDataset or Skeleton Dataset classes.
     Transformations are performed on CPU.
     """
+
     def __init__(self, base_dataset):
         self.base_dataset = base_dataset
 
@@ -146,7 +148,14 @@ class AugDatasetTransformer(torch.utils.data.Dataset):
         img, filename = self.base_dataset[index]
         if np.random.rand() > 0.6:
             self.angle = np.random.randint(-90, 90)
-            img = np.expand_dims(rotate(img[0], angle=self.angle, reshape=False, cval=1, order=1), axis=0)
+            img = np.expand_dims(
+                rotate(
+                    img[0],
+                    angle=self.angle,
+                    reshape=False,
+                    cval=1,
+                    order=1),
+                axis=0)
         return img, filename
 
     def __len__(self):

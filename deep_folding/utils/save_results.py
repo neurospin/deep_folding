@@ -1,6 +1,7 @@
 import os
 import json
 
+
 def create_folder(root_dir):
     """
     Creates folder in whiche results will be saved
@@ -13,9 +14,9 @@ def create_folder(root_dir):
     try:
         print('here')
         os.mkdir(dir_name)
-        print("Directory " , dir_name ,  " Created ")
+        print("Directory ", dir_name, " Created ")
     except FileExistsError:
-        print("Directory " , dir_name ,  " already exists")
+        print("Directory ", dir_name, " already exists")
 
 
 def save_logs(input_dict):
