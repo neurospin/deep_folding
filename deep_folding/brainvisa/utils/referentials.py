@@ -37,19 +37,17 @@ import numpy as np
 from soma import aims
 
 
-def define_ref_volume_MNI_2009(out_voxel_size: tuple) -> aims.Volume:
+def generate_ref_volume_MNI_2009(out_voxel_size: tuple) -> aims.Volume:
     """Defines MNI 2009 reference aims volume with output voxel size
 
-    Parameters
-    ----------
-    output_voxel_size: tuple
-        Output voxel size (default: None, no resampling)
+    Args:
+        output_voxel_size: tuple
+            Output voxel size (default: None, no resampling)
 
-    Return
-    ------
-    vol:
-        volume (aims.Volume_S16) filled with 0 in MNI2009 referential
-        and with requested voxel_size
+    Returns:
+        vol: volume (aims.Volume_S16) filled with 0 in MNI2009 referential
+            and with requested voxel_size
+            
     """
     hdr = aims.StandardReferentials.icbm2009cTemplateHeader()
     voxel_size = np.concatenate((out_voxel_size, [1]))
@@ -63,3 +61,13 @@ def define_ref_volume_MNI_2009(out_voxel_size: tuple) -> aims.Volume:
     vol.header()['voxel_size'] = voxel_size
 
     return vol
+
+
+def ICBM2009c_to_aims_talairach(self, point_ICBM2009c: np.array) -> np.array:
+    """Transforms coordinates from ICBM2009c to AIMS talairach referential"""
+
+    g_icbm_template_to_talairach = \
+        aims.StandardReferentials.talairachToICBM2009cTemplate().inverse()
+    point_tal = g_icbm_template_to_talairach.transform(point_ICBM2009c)
+
+    return np.asarray(point_tal)
