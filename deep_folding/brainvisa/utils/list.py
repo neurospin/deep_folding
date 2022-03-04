@@ -35,26 +35,64 @@
 
 _ALL_SUBJECTS = -1
 
+def get_number_subjects(nb_subjects: str) -> int:
+    """Returns nb_subjects as int
+    
+    If it is \"all\", it returns -1
 
-def get_sublist(orig_list: list, nb_subjects: str) -> list:
-    """Returns a sublist of nb_subjects elements
-
-    if nb_subjects == "all", it returns the original list
+    Args:
+        nb_subjects: string giving nb of subjects (\"all\" if all subjects)
+    
+    Returns:
+        nb_subjects_int: int giving nb of subjects (-1 if all subjects)
     """
     try:
         if nb_subjects == "all":
-            number_subjects = _ALL_SUBJECTS
+            nb_subjects_int = _ALL_SUBJECTS
         else:
-            number_subjects = int(nb_subjects)
-            if number_subjects < 0:
+            nb_subjects_int = int(nb_subjects)
+            if nb_subjects_int < 0:
                 raise ValueError
     except ValueError:
         raise ValueError(
             "number_subjects must be either the string \"all\" or an integer")
+    return nb_subjects_int
 
+
+def select_subjects_int(orig_list: list, nb_subjects: int) -> list:
+    """Retrns a sublist of nb_subjects elements
+
+    if nb_subjects == -1, it returns the original list
+
+    Args:
+        orig_list: list of strings, the origin list of subjects
+        nb_subjects: intgiving nb of subjects (-1 if all subjects)
+    
+    Returns:
+        sublist: list of strings, being the select number of subjects
+    """
     sublist = (
         orig_list
-        if number_subjects == _ALL_SUBJECTS
-        else orig_list[:number_subjects])
+        if nb_subjects == _ALL_SUBJECTS
+        else orig_list[:nb_subjects])
+
+    return sublist
+
+
+def select_subjects(orig_list: list, nb_subjects: str) -> list:
+    """Returns a sublist of nb_subjects elements
+
+    if nb_subjects == \"all\", it returns the original list
+    Otherwise it returns the nb_subjects first elements of orig_list
+    
+    Args:
+        orig_list: list of strings, the origin list of subjects
+        nb_subjects: string giving nb of subjects ("all" if all subjects)
+    
+    Returns:
+        sublist: list of strings, being the select number of subjects
+    """
+    nb_subjects_int = get_number_subjects(nb_subjects)
+    sublist = select_subjects_int(orig_list, nb_subjects_int)
 
     return sublist
