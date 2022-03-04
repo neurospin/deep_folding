@@ -71,7 +71,7 @@ log = log_module.getChild(basename(__file__))
 _SRC_DIR_DEFAULT = "/neurospin/dico/data/bv_databases/human/pclean/all"
 
 # Default directory to which we write the bounding box results
-_bbox_dir_DEFAULT = "/neurospin/dico/data/deep_folding/test/bbox"
+_BBOX_DIR_DEFAULT = "/neurospin/dico/data/deep_folding/test/bbox"
 
 # Default directory to which we write the masks
 _MASK_DIR_DEFAULT = "/neurospin/dico/data/deep_folding/test/mask"
@@ -81,10 +81,10 @@ _SIDE_DEFAULT = 'R'
 
 # sulcus to encompass:
 # its name depends on the hemisphere side
-_SULCUS_DEFAULT = 'S.T.s.ter.asc.ant.'
+_SULCUS_DEFAULT = 'F.C.M.ant.'
 
 # Gives the relative path to the manually labelled graph .arg
-# in the supervise
+# in the supervised database
 _PATH_TO_GRAPH_DEFAULT = "t1mri/t1/default_analysis/folds/3.3/base2018_manual"
 
 
@@ -101,7 +101,7 @@ def create_mask(out_voxel_size: tuple) -> aims.Volume:
             and with requested voxel_size
     """
 
-    mask = generate_ref_volume_MNI_2009(out_voxel_size)
+    return generate_ref_volume_MNI_2009(out_voxel_size)
 
 
 def box_ICBM2009c_to_aims_talairach(bbmin_mni152: np.array,
@@ -261,7 +261,7 @@ class BoundingBoxMax:
     def __init__(self,
                  src_dir=_SRC_DIR_DEFAULT,
                  path_to_graph=_PATH_TO_GRAPH_DEFAULT,
-                 bbox_dir=_bbox_dir_DEFAULT,
+                 bbox_dir=_BBOX_DIR_DEFAULT,
                  mask_dir=_MASK_DIR_DEFAULT,
                  sulcus=_SULCUS_DEFAULT,
                  side=_SIDE_DEFAULT,
@@ -481,7 +481,7 @@ class BoundingBoxMax:
 
 
 def bounding_box(src_dir=_SRC_DIR_DEFAULT,
-                 bbox_dir=_bbox_dir_DEFAULT,
+                 bbox_dir=_BBOX_DIR_DEFAULT,
                  mask_dir=_MASK_DIR_DEFAULT,
                  path_to_graph=_PATH_TO_GRAPH_DEFAULT,
                  sulcus=_SULCUS_DEFAULT, side=_SIDE_DEFAULT,
@@ -541,9 +541,9 @@ def parse_args(argv: list) -> dict:
              'one after the other. Example: -s DIR_1 DIR_2. '
              'Default is : ' + _SRC_DIR_DEFAULT)
     parser.add_argument(
-        "-b", "--bbox_dir", type=str, default=_bbox_dir_DEFAULT,
+        "-b", "--bbox_dir", type=str, default=_BBOX_DIR_DEFAULT,
         help='Output directory where to store the output bbox json files. '
-             'Default is : ' + _bbox_dir_DEFAULT)
+             'Default is : ' + _BBOX_DIR_DEFAULT)
     parser.add_argument(
         "-m", "--mask_dir", type=str, default=_MASK_DIR_DEFAULT,
         help='Output directory where to store the output mask files. '
