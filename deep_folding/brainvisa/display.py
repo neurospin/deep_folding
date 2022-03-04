@@ -2,11 +2,12 @@
 Model outputs are stored as numpy arrays.
 """
 
-import anatomist.api as anatomist
-from soma import aims
-import numpy as np
 import argparse
+
+import anatomist.api as anatomist
 import dico_toolbox as dtx
+import numpy as np
+from soma import aims
 
 
 def array_to_ana(ana_a, img, sub_id, phase, status):

@@ -38,16 +38,18 @@ The aim of this script is to put together useful classes and functions
 used by brainvisa-dependent preprocessing for logging
 """
 
+import errno
 import json
 import logging
 import os
 import sys
-import errno
 import time
-from venv import create
-import git
-from datetime import datetime
 from argparse import Namespace
+from datetime import datetime
+from venv import create
+
+import git
+
 from .folder import create_folder
 
 logging.basicConfig(level=logging.INFO)

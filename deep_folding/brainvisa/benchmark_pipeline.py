@@ -37,21 +37,20 @@
 
 """
 
-######################################################################
-# Imports and global variables definitions
-######################################################################
-from pqdm.processes import pqdm
-from joblib import cpu_count
+import argparse
+import json
+import math
+import re
+import sys
 
 from deep_folding.brainvisa.benchmark_generation import *
 from deep_folding.brainvisa.utils.resample import resample
 from deep_folding.brainvisa.utils.sulcus_side import complete_sulci_name
-
-import re
-import sys
-import argparse
-import json
-import math
+from joblib import cpu_count
+######################################################################
+# Imports and global variables definitions
+######################################################################
+from pqdm.processes import pqdm
 
 
 def parse_args(argv):

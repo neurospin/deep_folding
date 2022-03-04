@@ -51,26 +51,22 @@ The aim of this script is to resample skeletons.
 """
 
 import argparse
-import sys
 import glob
 import os
-from os.path import join
-import tempfile
 import re
+import sys
+import tempfile
+from os.path import join
 
 import numpy as np
-
 import six
-
-from soma import aims
-
-from pqdm.processes import pqdm
-
 from deep_folding.brainvisa.utils.logs import LogJson
-from deep_folding.brainvisa.utils.resample import resample
-from deep_folding.brainvisa.utils.sulcus_side import complete_sulci_name
 from deep_folding.brainvisa.utils.logs import log_command_line
 from deep_folding.brainvisa.utils.parallel import define_njobs
+from deep_folding.brainvisa.utils.resample import resample
+from deep_folding.brainvisa.utils.sulcus_side import complete_sulci_name
+from pqdm.processes import pqdm
+from soma import aims
 
 _ALL_SUBJECTS = -1
 

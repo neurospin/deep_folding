@@ -37,15 +37,15 @@
 
 """
 
+import argparse
+import os
+import random
+import sys
+
+import numpy as np
+import scipy.ndimage
 from soma import aims
 from soma import aimsalgo as ago
-import random
-import os
-import sys
-import argparse
-import scipy.ndimage
-import numpy as np
-
 
 _SULCUS_DEFAULT = 'S.C.'
 _SIDE_DEFAULT = 'R'

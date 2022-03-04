@@ -3,13 +3,13 @@ Scripts that enables to create a dataframe of numpy arrays from .nii.gz or .nii
 images.
 """
 from __future__ import division
+
 import os
-
-from soma import aims
-
-import pandas as pd
-import numpy as np
 import re
+
+import numpy as np
+import pandas as pd
+from soma import aims
 
 
 def is_file_nii(filename):

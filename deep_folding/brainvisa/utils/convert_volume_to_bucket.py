@@ -30,14 +30,15 @@
 This program converts volumes contained in a folder into buckets.
 It writes bucket files in the output folder
 """
-import six
-import sys
+import argparse
 import glob
 import os
-import argparse
-from tqdm import tqdm
-from soma import aims
+import sys
+
+import six
 from deep_folding.brainvisa.utils.remove_hull import convert_volume_to_bucket
+from soma import aims
+from tqdm import tqdm
 
 
 def read_convert_write(vol_filename, bucket_filename):

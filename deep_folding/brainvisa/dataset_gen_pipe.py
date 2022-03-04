@@ -53,33 +53,29 @@ Several steps are required: normalization, crop and .pickle generation
 """
 
 import argparse
-import sys
 import glob
 import os
+import re
+import sys
+import tempfile
 from os import listdir
 from os.path import join
-import tempfile
-import re
 
 import numpy as np
 import scipy.ndimage
-
 import six
-
-from soma import aims
-
-from pqdm.processes import pqdm
-from joblib import cpu_count
-
-from deep_folding.brainvisa.utils.logs import LogJson
-from deep_folding.brainvisa.utils.bbox import compute_max_box
-from deep_folding.brainvisa.utils.mask import compute_simple_mask, compute_centered_mask
-from deep_folding.brainvisa.utils.resample import resample
-from deep_folding.brainvisa.utils import remove_hull
-from deep_folding.brainvisa.utils.sulcus_side import complete_sulci_name
 from deep_folding.brainvisa.load_data import fetch_data
+from deep_folding.brainvisa.utils import remove_hull
+from deep_folding.brainvisa.utils.bbox import compute_max_box
+from deep_folding.brainvisa.utils.logs import LogJson
 from deep_folding.brainvisa.utils.logs import log_command_line
-
+from deep_folding.brainvisa.utils.mask import compute_centered_mask
+from deep_folding.brainvisa.utils.mask import compute_simple_mask
+from deep_folding.brainvisa.utils.resample import resample
+from deep_folding.brainvisa.utils.sulcus_side import complete_sulci_name
+from joblib import cpu_count
+from pqdm.processes import pqdm
+from soma import aims
 from tqdm import tqdm
 
 _ALL_SUBJECTS = -1

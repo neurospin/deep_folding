@@ -40,13 +40,15 @@ a specified hemisphere.
 
 """
 
+import json
 from os.path import join
+
+import deep_folding.brainvisa.utils.dilate_mask as dl
+import numpy as np
+from scipy import ndimage
 from soma import aims
 from soma.aimsalgo import MorphoGreyLevel_S16
-from scipy import ndimage
-import numpy as np
-import json
-import deep_folding.brainvisa.utils.dilate_mask as dl
+
 #import dilate_mask as dl
 
 _AIMS_BINARY_ONE = 32767

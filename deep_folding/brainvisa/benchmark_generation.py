@@ -47,15 +47,15 @@ be considered as abnormal).
 # Imports and global variables definitions
 ######################################################################
 
-from soma import aims
-import numpy as np
-from glob import glob
-import random
-import pandas as pd
 import os
+import random
+from glob import glob
+
+import numpy as np
+import pandas as pd
 from deep_folding.brainvisa.utils.bbox import compute_max_box
 from deep_folding.brainvisa.utils.sulcus_side import complete_sulci_name
-
+from soma import aims
 
 _DEFAULT_DATA_DIR = '/neurospin/hcp/ANALYSIS/3T_morphologist/'
 _DEFAULT_SAVING_DIR = '/neurospin/dico/lguillon/mic21/anomalies_set/dataset/'

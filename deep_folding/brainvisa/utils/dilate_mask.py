@@ -37,6 +37,7 @@
 
 import numpy as np
 from soma.aimsalgo import MorphoGreyLevel_S16
+
 #import anatomist.api as anatomist
 #from soma.qt_gui.qt_backend import Qt
 

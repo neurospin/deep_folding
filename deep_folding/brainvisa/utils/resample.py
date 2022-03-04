@@ -1,11 +1,13 @@
 """
     Resample a volume that contains discret values
 """
-import numpy as np
 import logging
-from soma import aims, aimsalgo
 from time import time
 from typing import Union
+
+import numpy as np
+from soma import aims
+from soma import aimsalgo
 
 logging.basicConfig(level=logging.WARNING)
 log = logging.getLogger(__name__)

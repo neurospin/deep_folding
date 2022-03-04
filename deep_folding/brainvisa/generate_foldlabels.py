@@ -46,22 +46,22 @@
 
 """
 
-import sys
-import glob
-import re
 import argparse
+import glob
 import logging
-import numpy as np
-from pqdm.processes import pqdm
+import re
+import sys
 from os.path import abspath
 from os.path import basename
-from soma import aims
 from typing import Tuple
 
-from deep_folding.brainvisa.utils.list import get_sublist
+import numpy as np
 from deep_folding.brainvisa.utils.folder import create_folder
+from deep_folding.brainvisa.utils.list import get_sublist
 from deep_folding.brainvisa.utils.logs import log_command_line
 from deep_folding.brainvisa.utils.parallel import define_njobs
+from pqdm.processes import pqdm
+from soma import aims
 
 logging.basicConfig(level=logging.INFO)
 

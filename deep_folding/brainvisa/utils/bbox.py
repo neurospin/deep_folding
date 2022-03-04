@@ -40,10 +40,10 @@ a specified hemisphere.
 
 """
 
-from os.path import join
-import numpy as np
 import json
+from os.path import join
 
+import numpy as np
 
 _BOX_DIR_DEFAULT = "/neurospin/dico/deep_folding_data/data/bbox/"
 

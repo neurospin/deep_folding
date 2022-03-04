@@ -39,23 +39,21 @@ The aim of this script is to remove skeleton's voxels that correspond to the
 hull and to use this new volume for visualization if needed.
 
 """
-import pcpm
-import dico_toolbox as dtx
-
-# pyAims import
-from soma import aims
-
+import argparse
+import glob
 # system imports
 import os
-import glob
-import numpy as np
-import argparse
 import sys
-import six
-import pandas as pd
 
-from pqdm.processes import pqdm
+import dico_toolbox as dtx
+import numpy as np
+import pandas as pd
+import pcpm
+import six
 from joblib import cpu_count
+from pqdm.processes import pqdm
+# pyAims import
+from soma import aims
 
 _AIMS_BINARY_ONE = 32767
 _EXTERNAL = 11  # Value of external part

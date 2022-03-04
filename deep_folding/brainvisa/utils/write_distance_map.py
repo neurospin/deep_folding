@@ -46,15 +46,16 @@
 
 """
 
-import sys
+import argparse
 import glob
 import os
 import re
-import argparse
+import sys
+
+import numpy as np
+from joblib import cpu_count
 from pqdm.processes import pqdm
 from tqdm import tqdm
-from joblib import cpu_count
-import numpy as np
 
 
 def define_njobs():
