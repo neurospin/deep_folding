@@ -63,7 +63,7 @@ def generate_ref_volume_MNI_2009(out_voxel_size: tuple) -> aims.Volume:
     return vol
 
 
-def ICBM2009c_to_aims_talairach(self, point_ICBM2009c: np.array) -> np.array:
+def ICBM2009c_to_aims_talairach(point_ICBM2009c: np.array) -> np.array:
     """Transforms coordinates from ICBM2009c to AIMS talairach referential"""
 
     g_icbm_template_to_talairach = \
