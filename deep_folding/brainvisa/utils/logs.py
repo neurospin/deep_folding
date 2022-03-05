@@ -41,6 +41,7 @@ used by brainvisa-dependent preprocessing for logging
 import errno
 import json
 import logging
+import numbers
 import os
 import sys
 import time
@@ -140,7 +141,7 @@ class LogJson:
         self.update(dict_to_add=dict_to_add)
 
 
-def log_command_line(args: Namespace, prog_name: str, tgt_dir: str) -> None:
+def log_command_line(args: Namespace, prog_name: str, tgt_dir: str, suffix: str=None) -> None:
     """Logs command on file command_line.sh in target directory
 
     The command file gives thus the exact command line
@@ -159,13 +160,19 @@ def log_command_line(args: Namespace, prog_name: str, tgt_dir: str) -> None:
         elif isinstance(args_dict[key], list):
             cmd_line += " --" + key + " " \
                         + ' '.join([str(e) for e in args_dict[key]])
+        elif isinstance(args_dict[key], numbers.Number):
+            cmd_line += " --" + key + " " + str(args_dict[key])
         else:
             cmd_line += " --" + key + " " + args_dict[key]
-    log.info(cmd_line)
+    log.info(f"$ {cmd_line}")
 
     # Name of command line file, which is a bash script file
     create_folder(tgt_dir)
-    cmd_line_file = f"{tgt_dir}/command_line.sh"
+    if suffix:
+        suffix = suffix.rstrip('.')
+        cmd_line_file = f"{tgt_dir}/command_line_{suffix}.sh"
+    else:
+        cmd_line_file = f"{tgt_dir}/command_line.sh"
 
     # Save a reference to the original standard output
     original_stdout = sys.stdout
