@@ -47,8 +47,8 @@ REQUIRES = ['six', 'numpy', 'pytest', 'GitPython', 'typing', 'joblib',
                 git+https://git@github.com/neurospin/dico_toolbox#egg=dico_toolbox',
             'colorado @ \
                 git+https://git@github.com/neurospin/colorado#egg=colorado',
-            'moving_averages @ \
-                git+https://git@github.com/neurospin/point-cloud-pattern-mining.git@dev#egg=moving_averages']
+            'point-cloud-pattern-mining @ \
+                git+https://git@github.com/neurospin/point-cloud-pattern-mining@main#egg=point-cloud-pattern-mining']
 EXTRA_REQUIRES = {
     "plotting": ["matplotlib", "seaborn"],
     "doc": ["sphinx>=" + SPHINX_MIN_VERSION, 'sphinx-rtd-theme']}
