@@ -45,6 +45,7 @@ import argparse
 import glob
 import os
 import sys
+import logging
 from os.path import basename
 from os.path import join
 
@@ -57,16 +58,16 @@ from deep_folding.brainvisa.utils.logs import LogJson
 from deep_folding.brainvisa.utils.logs import log_command_line
 from deep_folding.brainvisa.utils.referentials import \
     ICBM2009c_to_aims_talairach
-from deep_folding.brainvisa.utils.referentials import \
-    generate_ref_volume_MNI_2009
 from deep_folding.brainvisa.utils.subjects import get_number_subjects
 from deep_folding.brainvisa.utils.subjects import select_subjects_int
 from deep_folding.brainvisa.utils.sulcus import complete_sulci_name
-from deep_folding.config import log_module
+from deep_folding.config.logs import set_root_logger_level
+from deep_folding.config.logs import set_file_logger
+from deep_folding.config.logs import set_file_log_handler
 from soma import aims
 
 # Defines logger
-log = log_module.getChild(basename(__file__))
+log = set_file_logger(__file__)
 
 # Default directory in which lies the manually segmented database
 _SRC_DIR_DEFAULT = "/neurospin/dico/data/bv_databases/human/pclean/all"
@@ -92,8 +93,8 @@ def box_ICBM2009c_to_aims_talairach(bbmin_mni152: np.array,
 
     bbmin_tal = ICBM2009c_to_aims_talairach(bbmin_mni152)
     bbmax_tal = ICBM2009c_to_aims_talairach(bbmax_mni152)
-    log.info(f"box (AIMS Talairach) min: {bbmin_tal}")
-    log.info(f"box (AIMS Talairach) max: {bbmax_tal}")
+    log.debug(f"box (AIMS Talairach) min: {bbmin_tal}")
+    log.debug(f"box (AIMS Talairach) max: {bbmax_tal}")
 
     return bbmin_tal, bbmax_tal
 
@@ -150,8 +151,8 @@ def get_one_bounding_box(graph_filename, sulcus):
                     ([bbox_max] if bbox_max is not None else [])
                     + [voxels]), axis=0)
 
-    log.info(f"box (MNI 152) min: {bbox_min}")
-    log.info(f"box (MNI 152) max: {bbox_max}")
+    log.debug(f"box (MNI 152) min: {bbox_min}")
+    log.debug(f"box (MNI 152) max: {bbox_max}")
 
     return bbox_min, bbox_max
 
@@ -306,7 +307,7 @@ class BoundingBoxMax:
                 list_bbmin.append([bbox_min[0], bbox_min[1], bbox_min[2]])
                 list_bbmax.append([bbox_max[0], bbox_max[1], bbox_max[2]])
             else:
-                log.info(
+                log.debug(
                     f"No sulcus {self.sulcus} found for {sub}; it can be OK.")
 
         if not list_bbmin:
@@ -369,8 +370,8 @@ class BoundingBoxMax:
                            'bbmax_AIMS_Talairach': bbmax_tal.tolist()
                            }
             self.json.update(dict_to_add=dict_to_add)
-            log.info(f"box (voxel): min = {bbmin_vox}")
-            log.info(f"box (voxel): max = {bbmax_vox}")
+            log.debug(f"box (voxel): min = {bbmin_vox}")
+            log.debug(f"box (voxel): max = {bbmax_vox}")
 
         else:
             bbmin_vox = 0
@@ -457,6 +458,11 @@ def parse_args(argv: list) -> dict:
         help='Number of subjects to take into account, or \'all\'. '
              '0 subject is allowed, for debug purpose. '
              'Default is : all')
+    parser.add_argument('-v', '--verbose', action='count', default=0,
+        help='Verbose mode: '
+             'If no option is provided then logging.INFO is selected. '
+             'If one option -v (or -vv) or more is provided '
+             'then logging.DEBUG is selected.')
     parser.add_argument(
         "-x", "--out_voxel_size", type=float, default=None,
         help='Voxel size of of bounding box. '
@@ -466,8 +472,17 @@ def parse_args(argv: list) -> dict:
 
     args = parser.parse_args(argv)
 
+    # Sets level of root logger
+    set_root_logger_level(args.verbose+1)
+    # Sets handler for deep_folding logger
+    set_file_log_handler(file_dir=f"{args.bbox_dir}/{args.side}",
+                         suffix=args.sulcus)
+
     # Writes command line argument to target dir for logging
-    log_command_line(args, basename(__file__), f"{args.bbox_dir}/{args.side}", args.sulcus)
+    log_command_line(args,
+                     prog_name=basename(__file__),
+                     tgt_dir=f"{args.bbox_dir}/{args.side}",
+                     suffix=args.sulcus)
 
     params['src_dir'] = args.src_dir  # src_dir is a list
     params['path_to_graph'] = args.path_to_graph

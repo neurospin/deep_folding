@@ -51,12 +51,13 @@ from venv import create
 
 import git
 
+from deep_folding.config.logs import set_file_logger
+from deep_folding.config.logs import log_deep_folding
+from deep_folding.config.logs import simple_critical_log
 from .folder import create_folder
 
-logging.basicConfig(level=logging.INFO)
-
-log = logging.getLogger(os.path.basename(__file__))
-
+# Defines logger
+log = set_file_logger(__file__)
 
 class LogJson:
     """Handles json file lifecycle
@@ -90,7 +91,7 @@ class LogJson:
             with open(self.json_file, "w") as json_file:
                 json_file.write(json.dumps({}))
         except IOError:
-            log.info("File " + self.json_file + " cannot be overwritten")
+            log.critical("File " + self.json_file + " cannot be overwritten")
 
     def update(self, dict_to_add):
         """Updates json file with new dictionary entry
@@ -103,9 +104,7 @@ class LogJson:
             with open(self.json_file, "r") as json_file:
                 data = json.load(json_file)
         except IOError:
-            log.info(
-                "File %s is not readable through json.load",
-                self.json_file)
+            log.critical("File %s is not readable through json.load", self.json_file)
 
         data.update(dict_to_add)
 
@@ -113,7 +112,7 @@ class LogJson:
             with open(self.json_file, "w") as json_file:
                 json_file.write(json.dumps(data, sort_keys=True, indent=4))
         except IOError:
-            log.info("File %s is not writable", self.json_file)
+            log.critical("File %s is not writable", self.json_file)
 
     def write_general_info(self):
         """Writes general information on json
@@ -141,18 +140,23 @@ class LogJson:
         self.update(dict_to_add=dict_to_add)
 
 
-def log_command_line(args: Namespace, prog_name: str, tgt_dir: str, suffix: str=None) -> None:
+def log_command_line(args: Namespace,
+                     prog_name: str,
+                     tgt_dir: str,
+                     suffix: str=None) -> None:
     """Logs command on file command_line.sh in target directory
 
     The command file gives thus the exact command line
     the should be given to reproduce the results"""
 
+    global log_deep_folding
+
     # Builds the effective command line
-    log.info(type(args))
-    log.info(f"args = {args}")
+    log.debug(f"type of rags = {type(args)}")
+    log.debug(f"args = {args}")
     cmd_line = f"python3 {prog_name}"
     args_dict = vars(args)
-    log.info(f"args_dict = {args_dict}")
+    log.debug(f"args_dict = {args_dict}")
     for key in args_dict:
         if isinstance(args_dict[key], bool):
             if args_dict[key]:
@@ -164,7 +168,9 @@ def log_command_line(args: Namespace, prog_name: str, tgt_dir: str, suffix: str=
             cmd_line += " --" + key + " " + str(args_dict[key])
         else:
             cmd_line += " --" + key + " " + args_dict[key]
-    log.info(f"$ {cmd_line}")
+    
+    simple_critical_log(log=log,
+                        log_message=f"\nBash command:\n$ {cmd_line}\n")
 
     # Name of command line file, which is a bash script file
     create_folder(tgt_dir)
