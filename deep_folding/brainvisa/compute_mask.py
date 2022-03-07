@@ -51,7 +51,6 @@ from os.path import join
 import numpy as np
 import six
 from deep_folding.brainvisa import _ALL_SUBJECTS
-from deep_folding.brainvisa.utils.bbox import compute_max
 from deep_folding.brainvisa.utils.folder import create_folder
 from deep_folding.brainvisa.utils.logs import LogJson
 from deep_folding.brainvisa.utils.logs import log_command_line
@@ -62,16 +61,16 @@ from deep_folding.brainvisa.utils.referentials import \
 from deep_folding.brainvisa.utils.subjects import get_number_subjects
 from deep_folding.brainvisa.utils.subjects import select_subjects_int
 from deep_folding.brainvisa.utils.sulcus import complete_sulci_name
-from deep_folding.config import log_module
+from deep_folding.config.logs import set_root_logger_level
+from deep_folding.config.logs import set_file_logger
+from deep_folding.config.logs import set_file_log_handler
 from soma import aims
 
-log = log_module.getChild(basename(__file__))
+# Defines logger
+log = set_file_logger(__file__)
 
 # Default directory in which lies the manually segmented database
 _SRC_DIR_DEFAULT = "/neurospin/dico/data/bv_databases/human/pclean/all"
-
-# Default directory to which we write the bounding box results
-_BBOX_DIR_DEFAULT = "/neurospin/dico/data/deep_folding/test/bbox"
 
 # Default directory to which we write the masks
 _MASK_DIR_DEFAULT = "/neurospin/dico/data/deep_folding/test/mask"
@@ -102,18 +101,6 @@ def create_mask(out_voxel_size: tuple) -> aims.Volume:
     """
 
     return generate_ref_volume_MNI_2009(out_voxel_size)
-
-
-def box_ICBM2009c_to_aims_talairach(bbmin_mni152: np.array,
-                                    bbmax_mni152: np.array) -> tuple:
-    """Transform bbox coordinates from MNI152 to AIMS talairach referential"""
-
-    bbmin_tal = ICBM2009c_to_aims_talairach(bbmin_mni152)
-    bbmax_tal = ICBM2009c_to_aims_talairach(bbmax_mni152)
-    log.info('box (AIMS Talairach) min:', bbmin_tal.tolist())
-    log.info('box (AIMS Talairach) max:', bbmax_tal.tolist())
-
-    return bbmin_tal, bbmax_tal
 
 
 def increment_one_mask(graph_filename, mask, sulcus, voxel_size_out):
@@ -155,103 +142,15 @@ def increment_one_mask(graph_filename, mask, sulcus, voxel_size_out):
                     arr[i, j, k, 0] += 1
 
 
-def get_one_bounding_box(graph_filename, sulcus):
-    """get bounding box of the chosen sulcus for one data graph in MNI 152
-
-    Function that outputs the bounding box for the listed sulci
-    for this datagraph. The bounding box is the smallest rectangular box
-    that encompasses the chosen sulcus.
-    It is given in the MNI 152 referential.
-
-    Args:
-        graph_filename: string being the name of graph file .arg to analyze:
-                        for example: 'Lammon_base2018_manual.arg'
-
-    Returns:
-        bbox_min: numpy array giving the upper right vertex coordinates
-                of the box in the MNI 152 referential
-        bbox_max: numpy array fiving the lower left vertex coordinates
-                of the box in the MNI 152 referential
-    """
-
-    # Reads the data graph and transforms it to AIMS Talairach referential
-    # Note that this is NOT the MNI Talairach referential
-    # This is the Talairach referential used in AIMS
-    # There are several Talairach referentials
-    graph = aims.read(graph_filename)
-    voxel_size_in = graph['voxel_size'][:3]
-    g_to_icbm_template = \
-        aims.GraphManip.getICBM2009cTemplateTransform(graph)
-    bbox_min = None
-    bbox_max = None
-
-    # Gets the min and max coordinates of the sulci
-    # by looping over all the vertices of the graph
-    for vertex in graph.vertices():
-        vname = vertex.get('name')
-        if vname != sulcus:
-            continue
-        for bucket_name in ('aims_ss', 'aims_bottom', 'aims_other'):
-            bucket = vertex.get(bucket_name)
-            if bucket is not None:
-                voxels = np.asarray(
-                    [g_to_icbm_template.transform(np.array(voxel) * voxel_size_in)
-                        for voxel in bucket[0].keys()])
-                if voxels.shape == (0,):
-                    continue
-
-                bbox_min = np.min(np.vstack(
-                    ([bbox_min] if bbox_min is not None else [])
-                    + [voxels]), axis=0)
-                bbox_max = np.max(np.vstack(
-                    ([bbox_max] if bbox_max is not None else [])
-                    + [voxels]), axis=0)
-
-    log.info('box (MNI 152) min:', bbox_min)
-    log.info('box (MNI 152) max:', bbox_max)
-
-    return bbox_min, bbox_max
-
-
 def write_mask(mask: aims.Volume, mask_file: str):
     """Writes mask on mask file"""
     mask_file_dir = os.path.dirname(mask_file)
     os.makedirs(mask_file_dir, exist_ok=True)
-    log.info(mask_file)
+    log.info(f"Final mask file: {mask_file}")
     aims.write(mask, mask_file)
 
 
-def compute_box_voxel(bbmin_mni152, bbmax_mni152, voxel_size_out):
-    """Returns the coordinates of the box as voxels
-
-    Coordinates of the box in voxels are determined in the MNI referential
-
-    Args:
-        bbmin_mni152: numpy array with the coordinates of the upper right corner
-                of the box (MNI152 space)
-        bbmax_mni152: numpy array with the coordinates of the lower left corner
-                of the box (MNI152 space)
-        voxel_size: voxel size (in MNI referential or HCP normalized SPM space)
-
-    Returns:
-        tuple (bbmin_vox, bbmax_vox) with
-            bbmin_vox: numpy array with the coordinates of the upper right corner
-                of the box (voxels in MNI space); 
-            bbmax_vox: numpy array with the coordinates of the lower left corner
-                    of the box (voxels in MNI space)
-    """
-
-    # To go back from mms to voxels
-    voxel_size = voxel_size_out
-    bbmin_vox = np.round(np.array(bbmin_mni152) /
-                         voxel_size[:3]).astype(int)
-    bbmax_vox = np.round(np.array(bbmax_mni152) /
-                         voxel_size[:3]).astype(int)
-
-    return bbmin_vox, bbmax_vox
-
-
-class BoundingBoxMax:
+class MaskAroundSulcus:
     """Determines the maximum Bounding Box around given sulci
 
     It is determined in the  MNI ICBM152 nonlinear 2009c asymmetrical template
@@ -261,7 +160,6 @@ class BoundingBoxMax:
     def __init__(self,
                  src_dir=_SRC_DIR_DEFAULT,
                  path_to_graph=_PATH_TO_GRAPH_DEFAULT,
-                 bbox_dir=_BBOX_DIR_DEFAULT,
                  mask_dir=_MASK_DIR_DEFAULT,
                  sulcus=_SULCUS_DEFAULT,
                  side=_SIDE_DEFAULT,
@@ -271,9 +169,10 @@ class BoundingBoxMax:
         Attributes:
             src_dir: list of strings naming full path source directories
             path_to_graph: string naming relative path to labelled graph
-            bbox_dir: name of target directory with full path
+            mask_dir: name of target directory with full path
             sulcus: sulcus name
             side: hemisphere side (either L for left, or R for right hemisphere)
+            out_voxel_size: float for voxel size in mm
         """
 
         # Transforms input source dir to a list of strings
@@ -291,18 +190,12 @@ class BoundingBoxMax:
                                    + '/%(side)s%(subject)s*.arg')
 
         self.sulcus = sulcus
-        self.bbox_dir = bbox_dir
         self.mask_dir = mask_dir
         self.side = side
         self.sulcus = complete_sulci_name(sulcus, side)
         self.voxel_size_out = (out_voxel_size,
                                out_voxel_size,
                                out_voxel_size)
-
-        # Json full name is the name of the sulcus + .json
-        # and is kept under the subdirectory Left or Right
-        json_file = join(self.bbox_dir, self.side, self.sulcus + '.json')
-        self.json = LogJson(json_file)
 
         # Initiliazes mask
         self.mask = aims.Volume()
@@ -341,54 +234,6 @@ class BoundingBoxMax:
 
         return subjects
 
-    def get_bounding_boxes(self, subjects):
-        """get bounding boxes of the chosen sulcus for all subjects.
-
-        Function that outputs bounding box for the listed sulci on a manually
-        labeled dataset.
-        Bounding box corresponds to the biggest box encountered in the manually
-        labeled subjects in the MNI1 152 space.
-        The bounding box is the smallest rectangular box that
-        encompasses the sulcus.
-
-        Args:
-            subjects: list containing all subjects to be analyzed
-
-        Returns:
-            tuple (list_bbmin, list_bbmax) with:
-                list_bbmin: list containing the upper right vertex of the box
-                        in the MNI 152 space;
-                list_bbmax: list containing the lower left vertex of the box
-                        in the MNI 152 space
-        """
-
-        # Initialization
-        list_bbmin = []
-        list_bbmax = []
-
-        for sub in subjects:
-            log.info(sub)
-            # It substitutes 'subject' in graph_file name
-            graph_file = sub['graph_file'] % sub
-            # It looks for a graph file .arg
-            sulci_pattern = glob.glob(join(sub['dir'], graph_file))[0]
-
-            bbox_min, bbox_max = \
-                get_one_bounding_box(sulci_pattern % sub, self.sulcus)
-            if bbox_min is not None:
-                list_bbmin.append([bbox_min[0], bbox_min[1], bbox_min[2]])
-                list_bbmax.append([bbox_max[0], bbox_max[1], bbox_max[2]])
-            else:
-                log.info(
-                    f"No sulcus {self.sulcus} found for {sub}; it can be OK.")
-
-        if not list_bbmin:
-            raise ValueError(f"No sulcus named {self.sulcus} found "
-                             'for the whole dataset. '
-                             'It is an error. You should check sulcus name.')
-
-        return list_bbmin, list_bbmax
-
     def increment_mask(self, subjects: list):
         """Increments mask for the chosen sulcus for all subjects
 
@@ -408,7 +253,7 @@ class BoundingBoxMax:
                                self.sulcus,
                                self.voxel_size_out)
 
-    def compute_bounding_box(self, number_subjects=_ALL_SUBJECTS):
+    def compute_mask(self, number_subjects=_ALL_SUBJECTS):
         """Main class program to compute the bounding box
 
         Args:
@@ -418,22 +263,11 @@ class BoundingBoxMax:
         if number_subjects:
             subjects = self.get_all_subjects_as_dictionary()
 
-            # Logs general information on json file
-            self.json.write_general_info()
-
             # Gives the possibility to list only the first number_subjects
             subjects = select_subjects_int(subjects, number_subjects)
 
-            # Creates target bbox dir and mask_dir if they don't exist
-            create_folder(self.bbox_dir)
+            # Creates target mask_dir if they don't exist
             create_folder(self.mask_dir)
-
-            # Logs number of subjects and directory names to json file
-            dict_to_add = {'nb_subjects': len(subjects),
-                           'src_dir': self.src_dir,
-                           'bbox_dir': self.bbox_dir,
-                           'out_voxel_size': self.voxel_size_out[0]}
-            self.json.update(dict_to_add=dict_to_add)
 
             # Creates volume that will take the mask
             self.mask = create_mask(self.voxel_size_out)
@@ -444,49 +278,14 @@ class BoundingBoxMax:
             # Saving of generated masks
             write_mask(self.mask, self.mask_file)
 
-            # Determines the box encompassing the sulcus for all subjects
-            # The coordinates are determined in MNI 152  space
-            # And takes the max box in two referentials: 
-            # ICBM2009c and aims Talairach
-            list_bbmin, list_bbmax = self.get_bounding_boxes(subjects)
-            bbmin_mni152, bbmax_mni152 = compute_max(list_bbmin, list_bbmax)
 
-            bbmin_tal, bbmax_tal = \
-                box_ICBM2009c_to_aims_talairach(bbmin_mni152, bbmax_mni152)
-
-            # Determines the box encompassing the sulcus for all subjects
-            # The coordinates are determined in voxels in ICBM009c space
-            bbmin_vox, bbmax_vox = compute_box_voxel(bbmin_mni152,
-                                                     bbmax_mni152)
-
-            # Logging results on json file
-            dict_to_add = {'side': self.side,
-                           'sulcus': self.sulcus,
-                           'bbmin_voxel': bbmin_vox.tolist(),
-                           'bbmax_voxel': bbmax_vox.tolist(),
-                           'bbmin_MNI152': bbmin_mni152.tolist(),
-                           'bbmax_MNI152': bbmax_mni152.tolist(),
-                           'bbmin_AIMS_Talairach': bbmin_tal.tolist(),
-                           'bbmax_AIMS_Talairach': bbmax_tal.tolist()
-                           }
-            self.json.update(dict_to_add=dict_to_add)
-            log.info("box (voxel): min = ", bbmin_vox)
-            log.info("box (voxel): max = ", bbmax_vox)
-
-        else:
-            bbmin_vox = 0
-            bbmax_vox = 0
-
-        return bbmin_vox, bbmax_vox
-
-
-def bounding_box(src_dir=_SRC_DIR_DEFAULT,
-                 bbox_dir=_BBOX_DIR_DEFAULT,
-                 mask_dir=_MASK_DIR_DEFAULT,
-                 path_to_graph=_PATH_TO_GRAPH_DEFAULT,
-                 sulcus=_SULCUS_DEFAULT, side=_SIDE_DEFAULT,
-                 number_subjects=_ALL_SUBJECTS,
-                 out_voxel_size=None):
+def mask_around_sulcus(src_dir=_SRC_DIR_DEFAULT,
+                       mask_dir=_MASK_DIR_DEFAULT,
+                       path_to_graph=_PATH_TO_GRAPH_DEFAULT,
+                       sulcus=_SULCUS_DEFAULT,
+                       side=_SIDE_DEFAULT,
+                       number_subjects=_ALL_SUBJECTS,
+                       out_voxel_size=None):
     """ Main program computing the box encompassing the sulcus in all subjects
 
     The programm loops over all subjects
@@ -495,7 +294,6 @@ def bounding_box(src_dir=_SRC_DIR_DEFAULT,
 
     Args:
         src_dir: list of strings -> directories of the supervised databases
-        bbox_dir: string giving target bbox directory path
         mask_dir: string giving target mask directory path
         path_to_graph: string giving relative path to manually labelled graph
         side: hemisphere side (either 'L' for left, or 'R' for right)
@@ -505,19 +303,17 @@ def bounding_box(src_dir=_SRC_DIR_DEFAULT,
         out_voxel_size: float giving voxel size
 
     Returns:
-        tuple (bbmin_vox, bbmax_vox, box.mask)
+        aims volume containing the mask
     """
 
-    box = BoundingBoxMax(src_dir=src_dir,
-                         bbox_dir=bbox_dir,
-                         mask_dir=mask_dir,
-                         path_to_graph=path_to_graph,
-                         sulcus=sulcus, side=side,
-                         out_voxel_size=out_voxel_size)
-    bbmin_vox, bbmax_vox = box.compute_bounding_box(
-        number_subjects=number_subjects)
+    mask = MaskAroundSulcus(src_dir=src_dir,
+                            mask_dir=mask_dir,
+                            path_to_graph=path_to_graph,
+                            sulcus=sulcus, side=side,
+                            out_voxel_size=out_voxel_size)
+    mask.compute_mask(number_subjects=number_subjects)
 
-    return bbmin_vox, bbmax_vox, box.mask
+    return mask.mask
 
 
 def parse_args(argv: list) -> dict:
@@ -532,18 +328,14 @@ def parse_args(argv: list) -> dict:
 
     # Parse command line arguments
     parser = argparse.ArgumentParser(
-        prog='define_crops.py',
-        description='Computes mask and bounding box around the named sulcus')
+        prog=basename(__file__),
+        description='Computes mask around the named sulcus')
     parser.add_argument(
         "-s", "--src_dir", type=str, default=_SRC_DIR_DEFAULT, nargs='+',
         help='Source directory where the MRI data lies. '
              'If there are several directories, add all directories '
              'one after the other. Example: -s DIR_1 DIR_2. '
              'Default is : ' + _SRC_DIR_DEFAULT)
-    parser.add_argument(
-        "-b", "--bbox_dir", type=str, default=_BBOX_DIR_DEFAULT,
-        help='Output directory where to store the output bbox json files. '
-             'Default is : ' + _BBOX_DIR_DEFAULT)
     parser.add_argument(
         "-m", "--mask_dir", type=str, default=_MASK_DIR_DEFAULT,
         help='Output directory where to store the output mask files. '
@@ -565,6 +357,11 @@ def parse_args(argv: list) -> dict:
         help='Number of subjects to take into account, or \'all\'. '
              '0 subject is allowed, for debug purpose. '
              'Default is : all')
+    parser.add_argument('-v', '--verbose', action='count', default=0,
+                        help='Verbose mode: '
+                        'If no option is provided then logging.INFO is selected. '
+                        'If one option -v (or -vv) or more is provided '
+                        'then logging.DEBUG is selected.')
     parser.add_argument(
         "-x", "--out_voxel_size", type=float, default=None,
         help='Voxel size of of bounding box. '
@@ -574,14 +371,21 @@ def parse_args(argv: list) -> dict:
 
     args = parser.parse_args(argv)
 
+    # Sets level of root logger
+    set_root_logger_level(args.verbose+1)
+    # Sets handler for deep_folding logger
+    tgt_dir = f"{args.mask_dir}/{args.side}"
+    set_file_log_handler(file_dir=tgt_dir,
+                         suffix=args.sulcus)
+
     # Writes command line argument to target dir for logging
-    log_command_line(args, basename(__file__), args.tgt_dir)
+    log_command_line(args,
+                     prog_name=basename(__file__),
+                     tgt_dir=tgt_dir)
 
     params['src_dir'] = args.src_dir  # src_dir is a list
     params['path_to_graph'] = args.path_to_graph
-    # bbox_dir is a string, only one directory
-    params['bbox_dir'] = args.bbox_dir
-    # bbox_dir is a string, only one directory
+    # mask_dir is a string, only one directory
     params['mask_dir'] = args.mask_dir
     params['sulcus'] = args.sulcus  # sulcus is a string
     params['side'] = args.side
@@ -606,14 +410,13 @@ def main(argv):
         # Parsing arguments
         params = parse_args(argv)
         # Actual API
-        bounding_box(src_dir=params['src_dir'],
-                     path_to_graph=params['path_to_graph'],
-                     bbox_dir=params['bbox_dir'],
-                     mask_dir=params['mask_dir'],
-                     sulcus=params['sulcus'],
-                     side=params['side'],
-                     number_subjects=params['nb_subjects'],
-                     out_voxel_size=params['out_voxel_size'])
+        mask_around_sulcus(src_dir=params['src_dir'],
+                           path_to_graph=params['path_to_graph'],
+                           mask_dir=params['mask_dir'],
+                           sulcus=params['sulcus'],
+                           side=params['side'],
+                           number_subjects=params['nb_subjects'],
+                           out_voxel_size=params['out_voxel_size'])
     except SystemExit as exc:
         if exc.code != 0:
             six.reraise(*sys.exc_info())

@@ -40,7 +40,6 @@ used by brainvisa-dependent preprocessing for logging
 
 import errno
 import json
-import logging
 import numbers
 import os
 import sys
@@ -152,7 +151,7 @@ def log_command_line(args: Namespace,
     global log_deep_folding
 
     # Builds the effective command line
-    log.debug(f"type of rags = {type(args)}")
+    log.debug(f"type of args = {type(args)}")
     log.debug(f"args = {args}")
     cmd_line = f"python3 {prog_name}"
     args_dict = vars(args)

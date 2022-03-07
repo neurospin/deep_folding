@@ -45,7 +45,6 @@ import argparse
 import glob
 import os
 import sys
-import logging
 from os.path import basename
 from os.path import join
 
@@ -475,13 +474,14 @@ def parse_args(argv: list) -> dict:
     # Sets level of root logger
     set_root_logger_level(args.verbose+1)
     # Sets handler for deep_folding logger
-    set_file_log_handler(file_dir=f"{args.bbox_dir}/{args.side}",
+    tgt_dir = f"{args.bbox_dir}/{args.side}"
+    set_file_log_handler(file_dir=tgt_dir,
                          suffix=args.sulcus)
 
     # Writes command line argument to target dir for logging
     log_command_line(args,
                      prog_name=basename(__file__),
-                     tgt_dir=f"{args.bbox_dir}/{args.side}",
+                     tgt_dir=tgt_dir,
                      suffix=args.sulcus)
 
     params['src_dir'] = args.src_dir  # src_dir is a list
