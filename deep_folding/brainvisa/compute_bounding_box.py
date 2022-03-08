@@ -54,7 +54,7 @@ from deep_folding.brainvisa import _ALL_SUBJECTS
 from deep_folding.brainvisa.utils.bbox import compute_max
 from deep_folding.brainvisa.utils.folder import create_folder
 from deep_folding.brainvisa.utils.logs import LogJson
-from deep_folding.brainvisa.utils.logs import log_command_line
+from deep_folding.brainvisa.utils.logs import setup_log
 from deep_folding.brainvisa.utils.referentials import \
     ICBM2009c_to_aims_talairach
 from deep_folding.brainvisa.utils.subjects import get_number_subjects
@@ -62,9 +62,7 @@ from deep_folding.brainvisa.utils.subjects import select_subjects_int
 from deep_folding.brainvisa.utils.subjects import \
     get_all_subjects_as_dictionary
 from deep_folding.brainvisa.utils.sulcus import complete_sulci_name
-from deep_folding.config.logs import set_root_logger_level
 from deep_folding.config.logs import set_file_logger
-from deep_folding.config.logs import set_file_log_handler
 from soma import aims
 
 # Defines logger
@@ -160,6 +158,55 @@ def get_one_bounding_box(graph_filename, sulcus):
 
     return bbox_min, bbox_max
 
+def get_bounding_boxes(subjects, sulcus):
+    """get bounding boxes of the chosen sulcus for all subjects.
+
+    Function that outputs bounding box for the listed sulci on a manually
+    labeled dataset.
+    Bounding box corresponds to the biggest box encountered in the manually
+    labeled subjects in the MNI1 152 space.
+    The bounding box is the smallest rectangular box that
+    encompasses the sulcus.
+
+    Args:
+        subjects: list containing all subjects to be analyzed
+        sulcus: str -> sulcus to be analyzed
+
+    Returns:
+        tuple (list_bbmin, list_bbmax) with:
+            list_bbmin: list containing the upper right vertex of the box
+                    in the MNI 152 space;
+            list_bbmax: list containing the lower left vertex of the box
+                    in the MNI 152 space
+    """
+
+    # Initialization
+    list_bbmin = []
+    list_bbmax = []
+
+    for sub in subjects:
+        log.info(sub)
+        # It substitutes 'subject' in graph_file name
+        graph_file = sub['graph_file'] % sub
+        # It looks for a graph file .arg
+        sulci_pattern = glob.glob(join(sub['dir'], graph_file))[0]
+
+        bbox_min, bbox_max = \
+            get_one_bounding_box(sulci_pattern % sub, sulcus)
+        if bbox_min is not None:
+            list_bbmin.append([bbox_min[0], bbox_min[1], bbox_min[2]])
+            list_bbmax.append([bbox_max[0], bbox_max[1], bbox_max[2]])
+        else:
+            log.debug(
+                f"No sulcus {sulcus} found for {sub}; it can be OK.")
+
+    if not list_bbmin:
+        raise ValueError(f"No sulcus named {sulcus} found "
+                            'for the whole dataset. '
+                            'It is an error. You should check sulcus name.')
+
+    return list_bbmin, list_bbmax
+
 
 def compute_box_voxel(bbmin_mni152, bbmax_mni152, voxel_size_out):
     """Returns the coordinates of the box as voxels
@@ -243,55 +290,7 @@ class BoundingBoxMax:
         json_file = join(self.bbox_dir, self.side, self.sulcus + '.json')
         self.json = LogJson(json_file)
 
-    def get_bounding_boxes(self, subjects):
-        """get bounding boxes of the chosen sulcus for all subjects.
-
-        Function that outputs bounding box for the listed sulci on a manually
-        labeled dataset.
-        Bounding box corresponds to the biggest box encountered in the manually
-        labeled subjects in the MNI1 152 space.
-        The bounding box is the smallest rectangular box that
-        encompasses the sulcus.
-
-        Args:
-            subjects: list containing all subjects to be analyzed
-
-        Returns:
-            tuple (list_bbmin, list_bbmax) with:
-                list_bbmin: list containing the upper right vertex of the box
-                        in the MNI 152 space;
-                list_bbmax: list containing the lower left vertex of the box
-                        in the MNI 152 space
-        """
-
-        # Initialization
-        list_bbmin = []
-        list_bbmax = []
-
-        for sub in subjects:
-            log.info(sub)
-            # It substitutes 'subject' in graph_file name
-            graph_file = sub['graph_file'] % sub
-            # It looks for a graph file .arg
-            sulci_pattern = glob.glob(join(sub['dir'], graph_file))[0]
-
-            bbox_min, bbox_max = \
-                get_one_bounding_box(sulci_pattern % sub, self.sulcus)
-            if bbox_min is not None:
-                list_bbmin.append([bbox_min[0], bbox_min[1], bbox_min[2]])
-                list_bbmax.append([bbox_max[0], bbox_max[1], bbox_max[2]])
-            else:
-                log.debug(
-                    f"No sulcus {self.sulcus} found for {sub}; it can be OK.")
-
-        if not list_bbmin:
-            raise ValueError(f"No sulcus named {self.sulcus} found "
-                             'for the whole dataset. '
-                             'It is an error. You should check sulcus name.')
-
-        return list_bbmin, list_bbmax
-
-    def compute_bounding_box(self, number_subjects=_ALL_SUBJECTS):
+    def compute(self, number_subjects=_ALL_SUBJECTS):
         """Main class program to compute the bounding box
 
         Args:
@@ -322,7 +321,7 @@ class BoundingBoxMax:
 
             # MAIN PROGRAM
             # Determines box for each subject
-            list_bbmin, list_bbmax = self.get_bounding_boxes(subjects)
+            list_bbmin, list_bbmax = get_bounding_boxes(subjects, self.sulcus)
 
             # Determines the box encompassing the sulcus for all subjects
             # The coordinates are determined in MNI 152  space
@@ -360,12 +359,12 @@ class BoundingBoxMax:
         return bbmin_vox, bbmax_vox
 
 
-def bounding_box(src_dir=_SRC_DIR_DEFAULT,
-                 bbox_dir=_BBOX_DIR_DEFAULT,
-                 path_to_graph=_PATH_TO_GRAPH_DEFAULT,
-                 sulcus=_SULCUS_DEFAULT, side=_SIDE_DEFAULT,
-                 number_subjects=_ALL_SUBJECTS,
-                 out_voxel_size=None):
+def compute_bounding_box(src_dir=_SRC_DIR_DEFAULT,
+                         bbox_dir=_BBOX_DIR_DEFAULT,
+                         path_to_graph=_PATH_TO_GRAPH_DEFAULT,
+                         sulcus=_SULCUS_DEFAULT, side=_SIDE_DEFAULT,
+                         number_subjects=_ALL_SUBJECTS,
+                         out_voxel_size=None):
     """ Main program computing the box encompassing the sulcus in all subjects
 
     The programm loops over all subjects
@@ -391,7 +390,7 @@ def bounding_box(src_dir=_SRC_DIR_DEFAULT,
                          path_to_graph=path_to_graph,
                          sulcus=sulcus, side=side,
                          out_voxel_size=out_voxel_size)
-    bbmin_vox, bbmax_vox = box.compute_bounding_box(
+    bbmin_vox, bbmax_vox = box.compute(
         number_subjects=number_subjects)
 
     return bbmin_vox, bbmax_vox
@@ -452,18 +451,11 @@ def parse_args(argv: list) -> dict:
 
     args = parser.parse_args(argv)
 
-    # Sets level of root logger
-    set_root_logger_level(args.verbose+1)
-    # Sets handler for deep_folding logger
-    tgt_dir = f"{args.bbox_dir}/{args.side}"
-    set_file_log_handler(file_dir=tgt_dir,
-                         suffix=args.sulcus)
-
-    # Writes command line argument to target dir for logging
-    log_command_line(args,
-                     prog_name=basename(__file__),
-                     tgt_dir=tgt_dir,
-                     suffix=args.sulcus)
+    # Sets logger level, fils log handler and prints/logs command line
+    setup_log(args,
+              log_dir=f"{args.bbox_dir}/{args.side}",
+              prog_name=basename(__file__),
+              suffix=args.sulcus)
 
     params['src_dir'] = args.src_dir  # src_dir is a list
     params['path_to_graph'] = args.path_to_graph
@@ -492,13 +484,13 @@ def main(argv):
         # Parsing arguments
         params = parse_args(argv)
         # Actual API
-        bounding_box(src_dir=params['src_dir'],
-                     path_to_graph=params['path_to_graph'],
-                     bbox_dir=params['bbox_dir'],
-                     sulcus=params['sulcus'],
-                     side=params['side'],
-                     number_subjects=params['nb_subjects'],
-                     out_voxel_size=params['out_voxel_size'])
+        compute_bounding_box(src_dir=params['src_dir'],
+                             path_to_graph=params['path_to_graph'],
+                             bbox_dir=params['bbox_dir'],
+                             sulcus=params['sulcus'],
+                             side=params['side'],
+                             number_subjects=params['nb_subjects'],
+                             out_voxel_size=params['out_voxel_size'])
     except SystemExit as exc:
         if exc.code != 0:
             six.reraise(*sys.exc_info())

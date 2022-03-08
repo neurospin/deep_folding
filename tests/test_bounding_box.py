@@ -41,13 +41,13 @@ def test_bounding_box():
     out_voxel_size = 1
 
     # Determines the bounding box around the sulcus
-    compute_bounding_box.bounding_box(src_dir=src_dir,
-                                      bbox_dir=bbox_dir,
-                                      path_to_graph=path_to_graph,
-                                      sulcus=sulcus,
-                                      side=side,
-                                      number_subjects=_ALL_SUBJECTS,
-                                      out_voxel_size=out_voxel_size)
+    compute_bounding_box.compute_bounding_box(src_dir=src_dir,
+                                              bbox_dir=bbox_dir,
+                                              path_to_graph=path_to_graph,
+                                              sulcus=sulcus,
+                                              side=side,
+                                              number_subjects=_ALL_SUBJECTS,
+                                              out_voxel_size=out_voxel_size)
 
     # Selected keys to test
     selected_keys = ['bbmin_voxel', 'bbmax_voxel',

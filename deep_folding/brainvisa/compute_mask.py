@@ -52,8 +52,7 @@ import numpy as np
 import six
 from deep_folding.brainvisa import _ALL_SUBJECTS
 from deep_folding.brainvisa.utils.folder import create_folder
-from deep_folding.brainvisa.utils.logs import LogJson
-from deep_folding.brainvisa.utils.logs import log_command_line
+from deep_folding.brainvisa.utils.logs import setup_log
 from deep_folding.brainvisa.utils.referentials import \
     ICBM2009c_to_aims_talairach
 from deep_folding.brainvisa.utils.referentials import \
@@ -63,9 +62,7 @@ from deep_folding.brainvisa.utils.subjects import select_subjects_int
 from deep_folding.brainvisa.utils.subjects import \
     get_all_subjects_as_dictionary
 from deep_folding.brainvisa.utils.sulcus import complete_sulci_name
-from deep_folding.config.logs import set_root_logger_level
 from deep_folding.config.logs import set_file_logger
-from deep_folding.config.logs import set_file_log_handler
 from soma import aims
 
 # Defines logger
@@ -89,7 +86,7 @@ _SULCUS_DEFAULT = 'F.C.M.ant.'
 _PATH_TO_GRAPH_DEFAULT = "t1mri/t1/default_analysis/folds/3.3/base2018_manual"
 
 
-def create_mask(out_voxel_size: tuple) -> aims.Volume:
+def initialize_mask(out_voxel_size: tuple) -> aims.Volume:
     """Creates aims volume in MNI ICBM152 nonlinear 2009c asymmetrical template
     http://www.bic.mni.mcgill.ca/~vfonov/icbm/2009/mni_icbm152_nlin_asym_09b_nifti.zip
 
@@ -143,6 +140,27 @@ def increment_one_mask(graph_filename, mask, sulcus, voxel_size_out):
                 for i, j, k in voxels:
                     arr[i, j, k, 0] += 1
 
+def increment_mask(subjects: list,
+                    mask: aims.Volume,
+                    sulcus: str,
+                    voxel_size_out: tuple):
+    """Increments mask for the chosen sulcus for all subjects
+
+    Parameters:
+        subjects: list containing all subjects to be analyzed
+    """
+
+    for sub in subjects:
+        log.info(sub)
+        # It substitutes 'subject' in graph_file name
+        graph_file = sub['graph_file'] % sub
+        # It looks for a graph file .arg
+        sulci_pattern = glob.glob(join(sub['dir'], graph_file))[0]
+
+        increment_one_mask(sulci_pattern % sub,
+                            mask,
+                            sulcus,
+                            voxel_size_out)
 
 def write_mask(mask: aims.Volume, mask_file: str):
     """Writes mask on mask file"""
@@ -206,26 +224,7 @@ class MaskAroundSulcus:
             self.side,
             self.sulcus + '.nii.gz')
 
-    def increment_mask(self, subjects: list):
-        """Increments mask for the chosen sulcus for all subjects
-
-        Parameters:
-            subjects: list containing all subjects to be analyzed
-        """
-
-        for sub in subjects:
-            log.info(sub)
-            # It substitutes 'subject' in graph_file name
-            graph_file = sub['graph_file'] % sub
-            # It looks for a graph file .arg
-            sulci_pattern = glob.glob(join(sub['dir'], graph_file))[0]
-
-            increment_one_mask(sulci_pattern % sub,
-                               self.mask,
-                               self.sulcus,
-                               self.voxel_size_out)
-
-    def compute_mask(self, number_subjects=_ALL_SUBJECTS):
+    def compute(self, number_subjects=_ALL_SUBJECTS):
         """Main class program to compute the bounding box
 
         Args:
@@ -245,22 +244,25 @@ class MaskAroundSulcus:
             create_folder(self.mask_dir)
 
             # Creates volume that will take the mask
-            self.mask = create_mask(self.voxel_size_out)
+            self.mask = initialize_mask(self.voxel_size_out)
 
             # Increments mask for each sulcus and subjects
-            self.increment_mask(subjects)
+            increment_mask(subjects,
+                           self.mask,
+                           self.sulcus,
+                           self.voxel_size_out)
 
             # Saving of generated masks
             write_mask(self.mask, self.mask_file)
 
 
-def mask_around_sulcus(src_dir=_SRC_DIR_DEFAULT,
-                       mask_dir=_MASK_DIR_DEFAULT,
-                       path_to_graph=_PATH_TO_GRAPH_DEFAULT,
-                       sulcus=_SULCUS_DEFAULT,
-                       side=_SIDE_DEFAULT,
-                       number_subjects=_ALL_SUBJECTS,
-                       out_voxel_size=None):
+def compute_mask(src_dir=_SRC_DIR_DEFAULT,
+                 mask_dir=_MASK_DIR_DEFAULT,
+                 path_to_graph=_PATH_TO_GRAPH_DEFAULT,
+                 sulcus=_SULCUS_DEFAULT,
+                 side=_SIDE_DEFAULT,
+                 number_subjects=_ALL_SUBJECTS,
+                 out_voxel_size=None):
     """ Main program computing the box encompassing the sulcus in all subjects
 
     The programm loops over all subjects
@@ -286,7 +288,7 @@ def mask_around_sulcus(src_dir=_SRC_DIR_DEFAULT,
                             path_to_graph=path_to_graph,
                             sulcus=sulcus, side=side,
                             out_voxel_size=out_voxel_size)
-    mask.compute_mask(number_subjects=number_subjects)
+    mask.compute(number_subjects=number_subjects)
 
     return mask.mask
 
@@ -346,17 +348,11 @@ def parse_args(argv: list) -> dict:
 
     args = parser.parse_args(argv)
 
-    # Sets level of root logger
-    set_root_logger_level(args.verbose+1)
-    # Sets handler for deep_folding logger
-    tgt_dir = f"{args.mask_dir}/{args.side}"
-    set_file_log_handler(file_dir=tgt_dir,
-                         suffix=args.sulcus)
-
-    # Writes command line argument to target dir for logging
-    log_command_line(args,
-                     prog_name=basename(__file__),
-                     tgt_dir=tgt_dir)
+    # Sets logger level, fils log handler and prints/logs command line
+    setup_log(args,
+              log_dir=f"{args.mask_dir}/{args.side}",
+              prog_name=basename(__file__),
+              suffix=args.sulcus)
 
     params['src_dir'] = args.src_dir  # src_dir is a list
     params['path_to_graph'] = args.path_to_graph
@@ -385,13 +381,13 @@ def main(argv):
         # Parsing arguments
         params = parse_args(argv)
         # Actual API
-        mask_around_sulcus(src_dir=params['src_dir'],
-                           path_to_graph=params['path_to_graph'],
-                           mask_dir=params['mask_dir'],
-                           sulcus=params['sulcus'],
-                           side=params['side'],
-                           number_subjects=params['nb_subjects'],
-                           out_voxel_size=params['out_voxel_size'])
+        compute_mask(src_dir=params['src_dir'],
+                     path_to_graph=params['path_to_graph'],
+                     mask_dir=params['mask_dir'],
+                     sulcus=params['sulcus'],
+                     side=params['side'],
+                     number_subjects=params['nb_subjects'],
+                     out_voxel_size=params['out_voxel_size'])
     except SystemExit as exc:
         if exc.code != 0:
             six.reraise(*sys.exc_info())
