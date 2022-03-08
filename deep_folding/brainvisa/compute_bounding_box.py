@@ -455,7 +455,7 @@ def parse_args(argv: list) -> dict:
     setup_log(args,
               log_dir=f"{args.bbox_dir}/{args.side}",
               prog_name=basename(__file__),
-              suffix=args.sulcus)
+              suffix=complete_sulci_name(args.sulcus, args.side))
 
     params['src_dir'] = args.src_dir  # src_dir is a list
     params['path_to_graph'] = args.path_to_graph
