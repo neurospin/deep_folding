@@ -83,6 +83,9 @@ _SIDE_DEFAULT = 'R'
 # its name depends on the hemisphere side
 _SULCUS_DEFAULT = 'F.C.M.ant.'
 
+# voxel size:
+_VOXEL_SIZE_DEFAULT = 1.0
+
 # Gives the relative path to the manually labelled graph .arg
 # in the supervised database
 _PATH_TO_GRAPH_DEFAULT = "t1mri/t1/default_analysis/folds/3.3/base2018_manual"
@@ -343,7 +346,8 @@ class BoundingBoxMax:
                            'bbmax_voxel': bbmax_vox.tolist(),
                            'bbmin_MNI152': bbmin_mni152.tolist(),
                            'bbmax_MNI152': bbmax_mni152.tolist(),
-                           'bbmin_AIMS_Talairach': bbmin_tal.tolist()
+                           'bbmin_AIMS_Talairach': bbmin_tal.tolist(),
+                           'bbmax_AIMS_Talairach': bbmax_tal.tolist()
                            }
             self.json.update(dict_to_add=dict_to_add)
             log.debug(f"box (voxel): min = {bbmin_vox}")
@@ -440,7 +444,7 @@ def parse_args(argv: list) -> dict:
                         'If one option -v (or -vv) or more is provided '
                         'then logging.DEBUG is selected.')
     parser.add_argument(
-        "-x", "--out_voxel_size", type=float, default=None,
+        "-x", "--out_voxel_size", type=float, default=_VOXEL_SIZE_DEFAULT,
         help='Voxel size of of bounding box. '
              'Default is : None')
 
