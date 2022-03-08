@@ -8,7 +8,7 @@ This folder contains scripts that work with BrainVISA/Anatomist.
 
 
 Step-by-step tutorial: generate a dataset
-=========================================
+#########################################
 
 We start by computing, for each sulcus, bounding boxes and masks.
 For this, we are using a manually labelled database. At the end of the programs,
@@ -16,9 +16,11 @@ we will have a bounding box that encompasses the sulcus with the given name
 for all subjects. In the same way, we will obtain a mask that encompasses
 the given sulcus for all subjects.
 
+Compute a sulcus-specific bounding box
+======================================
+
 We suppose that we have already installed brainvisa singularity image 
-and the deep_folding module following the steps described in 
-_`../../README.rst`_
+and the deep_folding module following the steps described in `<../../README.rst>`_
 
 We first need to enter in the brainvisa singularity bash:
 
@@ -26,7 +28,7 @@ We first need to enter in the brainvisa singularity bash:
 
    bv bash
 
-We then define the parameters to launch :
+We then define the parameters to launch the computation of the bounding box:
 
 .. code-block:: shell
 
@@ -55,21 +57,17 @@ We then determine the bounding box around the sulcus named SULCUS:
 
 .. code-block:: shell
 
-  python3 compute_bounding_box.py -s $SRC_DIR_SUPERVISED
-  -b $BBOX_DIR -u $SULCUS -i $SIDE -p $PATH_TO_GRAPH -x $VOXEL_SIZE
+  python3 compute_bounding_box.py -s $SRC_DIR_SUPERVISED -b $BBOX_DIR -u $SULCUS -i $SIDE -p $PATH_TO_GRAPH -x $VOXEL_SIZE
 
 This will create in the $BBOX_DIR three files 
 (SIDE is now either 'left' or 'right'):
-* a json file ${SULCUS}_${SIDE}.json: it contains the bounding box coordinates
-* a bash file command_line_${SULCUS}_${SIDE}.sh: we can the launch this file
-from deep_folding/brainvisa to reproduce the results
-* a log file log_${SULCUS}_${SIDE}.log: it contains the log of the command
 
-Last, we determine the mask around the sulcus named SULCUS:
+* ${SULCUS}_${SIDE}.json: a json file that contains the bounding box coordinates
+* command_line_${SULCUS}_${SIDE}.sh: a bash file to reproduce the results (to be launched from deep_folding/brainvisa) 
+* log_${SULCUS}_${SIDE}.log: a log file that contains the log of the command
 
-.. code-block:: shell
-
-   SRC_DIR=
+Compute a sulcus-specific mask
+==============================
 
 
 
