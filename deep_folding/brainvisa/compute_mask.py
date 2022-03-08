@@ -60,6 +60,8 @@ from deep_folding.brainvisa.utils.referentials import \
     generate_ref_volume_MNI_2009
 from deep_folding.brainvisa.utils.subjects import get_number_subjects
 from deep_folding.brainvisa.utils.subjects import select_subjects_int
+from deep_folding.brainvisa.utils.subjects import \
+    get_all_subjects_as_dictionary
 from deep_folding.brainvisa.utils.sulcus import complete_sulci_name
 from deep_folding.config.logs import set_root_logger_level
 from deep_folding.config.logs import set_file_logger
@@ -204,36 +206,6 @@ class MaskAroundSulcus:
             self.side,
             self.sulcus + '.nii.gz')
 
-    def get_all_subjects_as_dictionary(self):
-        """Lists all subjects from the database (directory src_dir).
-
-        Subjects are the names of the subdirectories of the root directory.
-
-        Returns:
-            subjects: a list of dictionaries containing all subjects as dict
-        """
-
-        subjects = []
-
-        # Main loop: list all subjects of the directories
-        # listed in self.src_dir
-        for src_dir, graph_file in zip(self.src_dir, self.graph_file):
-            for filename in os.listdir(src_dir):
-                directory = os.path.join(src_dir, filename)
-                if os.path.isdir(directory):
-                    if filename != 'ra':
-                        subject = filename
-                        subject_d = {
-                            'subject': subject,
-                            'side': self.side,
-                            'dir': src_dir,
-                            'graph_file': graph_file % {
-                                'side': self.side,
-                                'subject': subject}}
-                        subjects.append(subject_d)
-
-        return subjects
-
     def increment_mask(self, subjects: list):
         """Increments mask for the chosen sulcus for all subjects
 
@@ -261,7 +233,10 @@ class MaskAroundSulcus:
         """
 
         if number_subjects:
-            subjects = self.get_all_subjects_as_dictionary()
+            subjects = get_all_subjects_as_dictionary(
+                self.src_dir,
+                self.graph_file,
+                self.side)
 
             # Gives the possibility to list only the first number_subjects
             subjects = select_subjects_int(subjects, number_subjects)

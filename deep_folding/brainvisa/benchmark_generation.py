@@ -54,7 +54,7 @@ from glob import glob
 import numpy as np
 import pandas as pd
 from deep_folding.brainvisa.utils.bbox import compute_max_box
-from deep_folding.brainvisa.utils.sulcus_side import complete_sulci_name
+from deep_folding.brainvisa.utils.sulcus import complete_sulci_name
 from soma import aims
 
 _DEFAULT_DATA_DIR = '/neurospin/hcp/ANALYSIS/3T_morphologist/'

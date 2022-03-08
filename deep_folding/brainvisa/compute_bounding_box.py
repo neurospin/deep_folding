@@ -59,6 +59,8 @@ from deep_folding.brainvisa.utils.referentials import \
     ICBM2009c_to_aims_talairach
 from deep_folding.brainvisa.utils.subjects import get_number_subjects
 from deep_folding.brainvisa.utils.subjects import select_subjects_int
+from deep_folding.brainvisa.utils.subjects import \
+    get_all_subjects_as_dictionary
 from deep_folding.brainvisa.utils.sulcus import complete_sulci_name
 from deep_folding.config.logs import set_root_logger_level
 from deep_folding.config.logs import set_file_logger
@@ -238,36 +240,6 @@ class BoundingBoxMax:
         json_file = join(self.bbox_dir, self.side, self.sulcus + '.json')
         self.json = LogJson(json_file)
 
-    def get_all_subjects_as_dictionary(self):
-        """Lists all subjects from the database (directory src_dir).
-
-        Subjects are the names of the subdirectories of the root directory.
-
-        Returns:
-            subjects: a list of dictionaries containing all subjects as dict
-        """
-
-        subjects = []
-
-        # Main loop: list all subjects of the directories
-        # listed in self.src_dir
-        for src_dir, graph_file in zip(self.src_dir, self.graph_file):
-            for filename in os.listdir(src_dir):
-                directory = os.path.join(src_dir, filename)
-                if os.path.isdir(directory):
-                    if filename != 'ra':
-                        subject = filename
-                        subject_d = {
-                            'subject': subject,
-                            'side': self.side,
-                            'dir': src_dir,
-                            'graph_file': graph_file % {
-                                'side': self.side,
-                                'subject': subject}}
-                        subjects.append(subject_d)
-
-        return subjects
-
     def get_bounding_boxes(self, subjects):
         """get bounding boxes of the chosen sulcus for all subjects.
 
@@ -324,7 +296,10 @@ class BoundingBoxMax:
         """
 
         if number_subjects:
-            subjects = self.get_all_subjects_as_dictionary()
+            subjects = get_all_subjects_as_dictionary(
+                self.src_dir,
+                self.graph_file,
+                self.side)
 
             # Logs general information on json file
             self.json.write_general_info()
@@ -342,11 +317,14 @@ class BoundingBoxMax:
                            'out_voxel_size': self.voxel_size_out[0]}
             self.json.update(dict_to_add=dict_to_add)
 
+            # MAIN PROGRAM
+            # Determines box for each subject
+            list_bbmin, list_bbmax = self.get_bounding_boxes(subjects)
+
             # Determines the box encompassing the sulcus for all subjects
             # The coordinates are determined in MNI 152  space
-            # And takes the max box in two referentials: 
+            # And takes the max box in two referentials:
             # ICBM2009c and aims Talairach
-            list_bbmin, list_bbmax = self.get_bounding_boxes(subjects)
             bbmin_mni152, bbmax_mni152 = compute_max(list_bbmin, list_bbmax)
 
             bbmin_tal, bbmax_tal = \
@@ -365,8 +343,7 @@ class BoundingBoxMax:
                            'bbmax_voxel': bbmax_vox.tolist(),
                            'bbmin_MNI152': bbmin_mni152.tolist(),
                            'bbmax_MNI152': bbmax_mni152.tolist(),
-                           'bbmin_AIMS_Talairach': bbmin_tal.tolist(),
-                           'bbmax_AIMS_Talairach': bbmax_tal.tolist()
+                           'bbmin_AIMS_Talairach': bbmin_tal.tolist()
                            }
             self.json.update(dict_to_add=dict_to_add)
             log.debug(f"box (voxel): min = {bbmin_vox}")
@@ -458,10 +435,10 @@ def parse_args(argv: list) -> dict:
              '0 subject is allowed, for debug purpose. '
              'Default is : all')
     parser.add_argument('-v', '--verbose', action='count', default=0,
-        help='Verbose mode: '
-             'If no option is provided then logging.INFO is selected. '
-             'If one option -v (or -vv) or more is provided '
-             'then logging.DEBUG is selected.')
+                        help='Verbose mode: '
+                        'If no option is provided then logging.INFO is selected. '
+                        'If one option -v (or -vv) or more is provided '
+                        'then logging.DEBUG is selected.')
     parser.add_argument(
         "-x", "--out_voxel_size", type=float, default=None,
         help='Voxel size of of bounding box. '

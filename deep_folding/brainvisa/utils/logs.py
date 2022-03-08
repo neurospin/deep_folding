@@ -171,7 +171,7 @@ def log_command_line(args: Namespace,
     simple_critical_log(log=log,
                         log_message=f"\nBash command:\n$ {cmd_line}\n")
 
-    # Name of command line file, which is a bash script file
+    # Builds the name of command line file, which is a bash script file
     create_folder(tgt_dir)
     if suffix:
         suffix = suffix.rstrip('.')
@@ -189,5 +189,5 @@ def log_command_line(args: Namespace,
         print("#!/bin/sh")
         print(cmd_line)
 
-        # Reset the standard output to its original value
-        sys.stdout = original_stdout
+    # Reset the standard output to its original value
+    sys.stdout = original_stdout
