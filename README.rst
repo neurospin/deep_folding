@@ -8,12 +8,22 @@ MRIs are processed through BrainVISA/Morphologist tools.
 Prerequisites
 -------------
 
-Anatomist parts (anatomist_tools) must run with brainvisa installed
+Brainvisa parts (deep_folding.brainvisa) must run with brainvisa installer (usually using brainvisa singularity container).
 
 Deep learning part (preprocessing and utils) must run with python3 and works with pytorch.
 
 Package documentation can be found at `https://neurospin.github.io/deep_folding/index.html <https://neurospin.github.io/deep_folding/index.html>`_.
 
+Generates datasets of crops
+---------------------------
+
+Deep learning pipelines to investigate folding patterns are not working on the whole brain (or the whole hemisphere) but on brain crops.
+Several processings are required, as drawn here:
+
+.. image:: docs/general_scheme.png
+  :width: 600
+ 
+We give a step-by-step description of the pipeline in `<deep_folding/brainvisa/README.rst>`_.
 
 Development
 -----------
