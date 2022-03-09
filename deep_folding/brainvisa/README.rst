@@ -10,14 +10,26 @@ This folder contains scripts that work with BrainVISA/Anatomist.
 Step-by-step tutorial: generate a dataset
 #########################################
 
-We start by computing, for each sulcus, bounding boxes and masks.
-For this, we are using a manually labelled database. At the end of the programs,
-we will have a bounding box that encompasses the sulcus with the given name
-for all subjects. In the same way, we will obtain a mask that encompasses
-the given sulcus for all subjects.
+The first part of the pipeline (first column of the figure) is using a manually labelled dataset.
+In such a dataset, each sulcus is manually labelled. Names of the different sulci can be found as a json file at
+`<https://github.com/brainvisa/brainvisa-share/blob/master/nomenclature/translation/sulci_default_list.json>`_, and they are represented in the brain here:
+
+.. image:: https://brainvisa.info/web/_static/images/bsa/brainvisa_sulci_atlas_with_table_150dpi-r90.png
+  :width: 600
+
+The first step is to generate for each sulcus of interest a bounding box (compute_bounding_box.py) and a mask (compute_mask.py) that encompass the given sulcus for all subjects of the manually labelled dataset.
+
+The second step is then to generate crops (generate_crops.py) in the target datset (for example `HCP http://www.humanconnectomeproject.org/>`_) using different combinations of masks and/or bounding boxes. For visualization, we generate each crop as nifit file; for the deep learning program, we combine all volumes in a dataframe and save it as a pickle file.
+
+When generating crops, sulci can be regrouped in different overlapping regions. We have subdivided the brain in different overlapping regions as a json file at `<https://github.com/brainvisa/brainvisa-share/blob/master/nomenclature/translation/sulci_regions_overlap.json>`_.
 
 Compute a sulcus-specific bounding box
 ======================================
+
+We start by computing, for each sulcus, bounding boxes and masks.
+For this, we are using a manually labelled database. At the end of the program,
+we will have a bounding box that encompasses the sulcus with the given name
+for all subjects. 
 
 We suppose that we have already installed brainvisa singularity image 
 and the deep_folding module following the steps described in `<../../README.rst>`_
@@ -69,7 +81,7 @@ This will create in the folder $BBOX_DIR three files
 Compute a sulcus-specific mask
 ==============================
 
-We will now compiute the mask encompassing the sulcus SULCUS:
+We will now compute the mask encompassing the sulcus SULCUS:
 
 We first define a mask folder to put the results of the mask:
 
