@@ -33,7 +33,9 @@
 # The fact that you are presently reading this means that you have had
 # knowledge of the CeCILL license version 2 and that you accept its terms.
 
-_ALL_SUBJECTS = -1
+import os
+
+from deep_folding.brainvisa import _ALL_SUBJECTS
 
 def get_number_subjects(nb_subjects: str) -> int:
     """Returns nb_subjects as int
@@ -96,3 +98,36 @@ def select_subjects(orig_list: list, nb_subjects: str) -> list:
     sublist = select_subjects_int(orig_list, nb_subjects_int)
 
     return sublist
+
+
+def get_all_subjects_as_dictionary(src_dir_list,
+                                   graph_file_list,
+                                   side):
+    """Lists all subjects from the database (directory src_dir).
+
+    Subjects are the names of the subdirectories of the root directory.
+
+    Returns:
+        subjects: a list of dictionaries containing all subjects as dict
+    """
+
+    subjects = []
+
+    # Main loop: list all subjects of the directories
+    # listed in self.src_dir
+    for src_dir, graph_file in zip(src_dir_list, graph_file_list):
+        for filename in os.listdir(src_dir):
+            directory = os.path.join(src_dir, filename)
+            if os.path.isdir(directory):
+                if filename != 'ra':
+                    subject = filename
+                    subject_d = {
+                        'subject': subject,
+                        'side': side,
+                        'dir': src_dir,
+                        'graph_file': graph_file % {
+                            'side': side,
+                            'subject': subject}}
+                    subjects.append(subject_d)
+
+    return subjects

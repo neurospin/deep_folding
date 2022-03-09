@@ -53,10 +53,13 @@ import git
 from deep_folding.config.logs import set_file_logger
 from deep_folding.config.logs import log_deep_folding
 from deep_folding.config.logs import simple_critical_log
+from deep_folding.config.logs import set_root_logger_level
+from deep_folding.config.logs import set_file_log_handler
 from .folder import create_folder
 
 # Defines logger
 log = set_file_logger(__file__)
+
 
 class LogJson:
     """Handles json file lifecycle
@@ -103,7 +106,8 @@ class LogJson:
             with open(self.json_file, "r") as json_file:
                 data = json.load(json_file)
         except IOError:
-            log.critical("File %s is not readable through json.load", self.json_file)
+            log.critical(
+                "File %s is not readable through json.load", self.json_file)
 
         data.update(dict_to_add)
 
@@ -142,7 +146,7 @@ class LogJson:
 def log_command_line(args: Namespace,
                      prog_name: str,
                      tgt_dir: str,
-                     suffix: str=None) -> None:
+                     suffix: str = None) -> None:
     """Logs command on file command_line.sh in target directory
 
     The command file gives thus the exact command line
@@ -167,11 +171,11 @@ def log_command_line(args: Namespace,
             cmd_line += " --" + key + " " + str(args_dict[key])
         else:
             cmd_line += " --" + key + " " + args_dict[key]
-    
+
     simple_critical_log(log=log,
                         log_message=f"\nBash command:\n$ {cmd_line}\n")
 
-    # Name of command line file, which is a bash script file
+    # Builds the name of command line file, which is a bash script file
     create_folder(tgt_dir)
     if suffix:
         suffix = suffix.rstrip('.')
@@ -189,5 +193,24 @@ def log_command_line(args: Namespace,
         print("#!/bin/sh")
         print(cmd_line)
 
-        # Reset the standard output to its original value
-        sys.stdout = original_stdout
+    # Reset the standard output to its original value
+    sys.stdout = original_stdout
+
+
+def setup_log(args: Namespace,
+              log_dir: str,
+              prog_name: str,
+              suffix: str = None) -> None:
+    """Setups log for command line programs"""
+
+    # Sets level of root logger
+    set_root_logger_level(args.verbose+1)
+    # Sets handler for deep_folding logger
+    set_file_log_handler(file_dir=log_dir,
+                         suffix=suffix)
+
+    # Writes command line argument to target dir for logging
+    log_command_line(args,
+                     prog_name=prog_name,
+                     tgt_dir=log_dir,
+                     suffix=suffix)
