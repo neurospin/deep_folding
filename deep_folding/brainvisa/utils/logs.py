@@ -167,9 +167,12 @@ def log_command_line(args: Namespace,
         elif isinstance(args_dict[key], list):
             cmd_line += " --" + key + " " \
                         + ' '.join([str(e) for e in args_dict[key]])
+        elif key == "verbose":
+            for _ in range(args_dict[key]):
+                cmd_line += " --verbose"
         elif isinstance(args_dict[key], numbers.Number):
             cmd_line += " --" + key + " " + str(args_dict[key])
-        else:
+        elif args_dict[key]:
             cmd_line += " --" + key + " " + args_dict[key]
 
     simple_critical_log(log=log,

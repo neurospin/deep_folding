@@ -158,6 +158,7 @@ def get_one_bounding_box(graph_filename, sulcus):
 
     return bbox_min, bbox_max
 
+
 def get_bounding_boxes(subjects, sulcus):
     """get bounding boxes of the chosen sulcus for all subjects.
 
@@ -202,8 +203,8 @@ def get_bounding_boxes(subjects, sulcus):
 
     if not list_bbmin:
         raise ValueError(f"No sulcus named {sulcus} found "
-                            'for the whole dataset. '
-                            'It is an error. You should check sulcus name.')
+                         'for the whole dataset. '
+                         'It is an error. You should check sulcus name.')
 
     return list_bbmin, list_bbmax
 
@@ -250,6 +251,7 @@ class BoundingBoxMax:
                  path_to_graph=_PATH_TO_GRAPH_DEFAULT,
                  bbox_dir=_BBOX_DIR_DEFAULT,
                  sulcus=_SULCUS_DEFAULT,
+                 new_sulcus=None,
                  side=_SIDE_DEFAULT,
                  out_voxel_size=None):
         """Inits with list of directories and list of sulci
@@ -259,6 +261,7 @@ class BoundingBoxMax:
             path_to_graph: string naming relative path to labelled graph
             bbox_dir: name of target directory with full path
             sulcus: sulcus name
+            new_sulcus: new sulcus name
             side: hemisphere side (either L for left, or R for right hemisphere)
             out_voxel_size: float for voxel size in mm
         """
@@ -277,17 +280,18 @@ class BoundingBoxMax:
                                    + path
                                    + '/%(side)s%(subject)s*.arg')
 
-        self.sulcus = sulcus
+        self.new_sulcus = new_sulcus if new_sulcus else sulcus
         self.bbox_dir = bbox_dir
         self.side = side
         self.sulcus = complete_sulci_name(sulcus, side)
+        self.new_sulcus = complete_sulci_name(self.new_sulcus, side)
         self.voxel_size_out = (out_voxel_size,
                                out_voxel_size,
                                out_voxel_size)
 
         # Json full name is the name of the sulcus + .json
         # and is kept under the subdirectory Left or Right
-        json_file = join(self.bbox_dir, self.side, self.sulcus + '.json')
+        json_file = join(self.bbox_dir, self.side, self.new_sulcus + '.json')
         self.json = LogJson(json_file)
 
     def compute(self, number_subjects=_ALL_SUBJECTS):
@@ -341,6 +345,7 @@ class BoundingBoxMax:
             # Logging results on json file
             dict_to_add = {'side': self.side,
                            'sulcus': self.sulcus,
+                           'new_sulcus': self.new_sulcus,
                            'bbmin_voxel': bbmin_vox.tolist(),
                            'bbmax_voxel': bbmax_vox.tolist(),
                            'bbmin_MNI152': bbmin_mni152.tolist(),
@@ -362,7 +367,9 @@ class BoundingBoxMax:
 def compute_bounding_box(src_dir=_SRC_DIR_DEFAULT,
                          bbox_dir=_BBOX_DIR_DEFAULT,
                          path_to_graph=_PATH_TO_GRAPH_DEFAULT,
-                         sulcus=_SULCUS_DEFAULT, side=_SIDE_DEFAULT,
+                         sulcus=_SULCUS_DEFAULT,
+                         new_sulcus=None,
+                         side=_SIDE_DEFAULT,
                          number_subjects=_ALL_SUBJECTS,
                          out_voxel_size=None):
     """ Main program computing the box encompassing the sulcus in all subjects
@@ -377,6 +384,7 @@ def compute_bounding_box(src_dir=_SRC_DIR_DEFAULT,
         path_to_graph: string giving relative path to manually labelled graph
         side: hemisphere side (either 'L' for left, or 'R' for right)
         sulcus: string giving the sulcus to analyze
+        sulcus_name: string giving a new sulcus name (optional)
         number_subjects: integer giving the number of subjects to analyze,
             by default it is set to _ALL_SUBJECTS (-1)
         out_voxel_size: float giving voxel size in mm
@@ -388,7 +396,9 @@ def compute_bounding_box(src_dir=_SRC_DIR_DEFAULT,
     box = BoundingBoxMax(src_dir=src_dir,
                          bbox_dir=bbox_dir,
                          path_to_graph=path_to_graph,
-                         sulcus=sulcus, side=side,
+                         sulcus=sulcus,
+                         new_sulcus=new_sulcus,
+                         side=side,
                          out_voxel_size=out_voxel_size)
     bbmin_vox, bbmax_vox = box.compute(
         number_subjects=number_subjects)
@@ -425,6 +435,10 @@ def parse_args(argv: list) -> dict:
         help='Sulcus name around which we determine the bounding box. '
              'Default is : ' + _SULCUS_DEFAULT)
     parser.add_argument(
+        "-w", "--new_sulcus", type=str, default=None,
+        help='Sulcus name around which we determine the bounding box. '
+             'Default is : None (same name as \'sulcus\')')
+    parser.add_argument(
         "-i", "--side", type=str, default=_SIDE_DEFAULT,
         help='Hemisphere side. Default is : ' + _SIDE_DEFAULT)
     parser.add_argument(
@@ -437,11 +451,12 @@ def parse_args(argv: list) -> dict:
         help='Number of subjects to take into account, or \'all\'. '
              '0 subject is allowed, for debug purpose. '
              'Default is : all')
-    parser.add_argument('-v', '--verbose', action='count', default=0,
-                        help='Verbose mode: '
-                        'If no option is provided then logging.INFO is selected. '
-                        'If one option -v (or -vv) or more is provided '
-                        'then logging.DEBUG is selected.')
+    parser.add_argument(
+        '-v', '--verbose', action='count', default=0,
+        help='Verbose mode: '
+             'If no option is provided then logging.INFO is selected. '
+             'If one option -v (or -vv) or more is provided '
+             'then logging.DEBUG is selected.')
     parser.add_argument(
         "-x", "--out_voxel_size", type=float, default=_VOXEL_SIZE_DEFAULT,
         help='Voxel size of of bounding box. '
@@ -451,17 +466,19 @@ def parse_args(argv: list) -> dict:
 
     args = parser.parse_args(argv)
 
-    # Sets logger level, fils log handler and prints/logs command line
+    # Sets logger level, files log handler and prints/logs command line
+    new_sulcus = args.new_sulcus if args.new_sulcus else args.sulcus
     setup_log(args,
               log_dir=f"{args.bbox_dir}/{args.side}",
               prog_name=basename(__file__),
-              suffix=complete_sulci_name(args.sulcus, args.side))
+              suffix=complete_sulci_name(new_sulcus, args.side))
 
     params['src_dir'] = args.src_dir  # src_dir is a list
     params['path_to_graph'] = args.path_to_graph
     # bbox_dir is a string, only one directory
     params['bbox_dir'] = args.bbox_dir
     params['sulcus'] = args.sulcus  # sulcus is a string
+    params['new_sulcus'] = args.new_sulcus
     params['side'] = args.side
     params['out_voxel_size'] = args.out_voxel_size
 
@@ -488,6 +505,7 @@ def main(argv):
                              path_to_graph=params['path_to_graph'],
                              bbox_dir=params['bbox_dir'],
                              sulcus=params['sulcus'],
+                             new_sulcus=params['new_sulcus'],
                              side=params['side'],
                              number_subjects=params['nb_subjects'],
                              out_voxel_size=params['out_voxel_size'])
