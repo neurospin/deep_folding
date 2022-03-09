@@ -25,9 +25,7 @@
         <script src="_static/doctools.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="deep_folding.preprocessing package" href="deep_folding.preprocessing.html" />
-    <link rel="prev" title="deep_folding.anatomist_tools package" href="deep_folding.anatomist_tools.html" /> 
+    <link rel="search" title="Search" href="search.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -52,31 +50,8 @@
 <li class="toctree-l1"><a class="reference internal" href="readme.html#development">Development</a></li>
 </ul>
 <p class="caption"><span class="caption-text">API documentation</span></p>
-<ul class="current">
-<li class="toctree-l1 current"><a class="reference internal" href="deep_folding.html">deep_folding package</a><ul class="current">
-<li class="toctree-l2 current"><a class="reference internal" href="deep_folding.html#subpackages">Subpackages</a><ul class="current">
-<li class="toctree-l3 current"><a class="reference internal" href="deep_folding.anatomist_tools.html">deep_folding.anatomist_tools package</a><ul class="current">
-<li class="toctree-l4 current"><a class="reference internal" href="deep_folding.anatomist_tools.html#subpackages">Subpackages</a></li>
-<li class="toctree-l4"><a class="reference internal" href="deep_folding.anatomist_tools.html#submodules">Submodules</a></li>
-<li class="toctree-l4"><a class="reference internal" href="deep_folding.anatomist_tools.html#module-deep_folding.anatomist_tools.benchmark_generation">deep_folding.anatomist_tools.benchmark_generation module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="deep_folding.anatomist_tools.html#module-deep_folding.anatomist_tools.benchmark_pipeline">deep_folding.anatomist_tools.benchmark_pipeline module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="deep_folding.anatomist_tools.html#module-deep_folding.anatomist_tools.crop_definition">deep_folding.anatomist_tools.crop_definition module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="deep_folding.anatomist_tools.html#module-deep_folding.anatomist_tools.dataset_gen_pipe">deep_folding.anatomist_tools.dataset_gen_pipe module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="deep_folding.anatomist_tools.html#module-deep_folding.anatomist_tools.display">deep_folding.anatomist_tools.display module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="deep_folding.anatomist_tools.html#module-deep_folding.anatomist_tools.load_data">deep_folding.anatomist_tools.load_data module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="deep_folding.anatomist_tools.html#module-deep_folding.anatomist_tools.mask_qc">deep_folding.anatomist_tools.mask_qc module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="deep_folding.anatomist_tools.html#module-deep_folding.anatomist_tools">Module contents</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="deep_folding.preprocessing.html">deep_folding.preprocessing package</a></li>
-<li class="toctree-l3"><a class="reference internal" href="deep_folding.utils.html">deep_folding.utils package</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="deep_folding.html#submodules">Submodules</a></li>
-<li class="toctree-l2"><a class="reference internal" href="deep_folding.html#module-deep_folding.info">deep_folding.info module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="deep_folding.html#module-deep_folding">Module contents</a></li>
-</ul>
-</li>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="deep_folding.html">deep_folding package</a></li>
 </ul>
 
         </div>
@@ -93,8 +68,6 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="deep_folding.html">deep_folding package</a> &raquo;</li>
-          <li><a href="deep_folding.anatomist_tools.html">deep_folding.anatomist_tools package</a> &raquo;</li>
       <li>deep_folding.anatomist_tools.utils package</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/deep_folding.anatomist_tools.utils.rst.txt" rel="nofollow"> View page source</a>
@@ -110,515 +83,42 @@
 <div class="section" id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
 </div>
-<div class="section" id="module-deep_folding.anatomist_tools.utils.bbox">
-<span id="deep-folding-anatomist-tools-utils-bbox-module"></span><h2>deep_folding.anatomist_tools.utils.bbox module<a class="headerlink" href="#module-deep_folding.anatomist_tools.utils.bbox" title="Permalink to this headline">¶</a></h2>
-<p>Getting bounding box from a list of sulci and specific hemisphere</p>
-<p>The aim of this script is to output the bounding box of one or several sulci of
-a specified hemisphere.</p>
-<dl class="function">
-<dt id="deep_folding.anatomist_tools.utils.bbox.compute_max">
-<code class="descclassname">deep_folding.anatomist_tools.utils.bbox.</code><code class="descname">compute_max</code><span class="sig-paren">(</span><em>list_bbmin</em>, <em>list_bbmax</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.utils.bbox.compute_max" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the coordinates of the box encompassing all input boxes</p>
-<p>Parameters:
-list_bbmin: list containing the upper right vertex of the box
-list_bbmax: list containing the lower left vertex of the box</p>
-<p>Returns:
-bbmin: numpy array with the x,y,z coordinates</p>
-<blockquote>
-<div>of the upper right corner of the box</div></blockquote>
-<dl class="docutils">
-<dt>bblax: numpy array with the x,y,z coordinates</dt>
-<dd>of the lower left corner of the box</dd>
-</dl>
-</dd></dl>
-
-<dl class="function">
-<dt id="deep_folding.anatomist_tools.utils.bbox.compute_max_box">
-<code class="descclassname">deep_folding.anatomist_tools.utils.bbox.</code><code class="descname">compute_max_box</code><span class="sig-paren">(</span><em>sulci_list</em>, <em>side</em>, <em>talairach_box=False</em>, <em>src_dir='/neurospin/dico/deep_folding_data/data/bbox/'</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.utils.bbox.compute_max_box" title="Permalink to this definition">¶</a></dt>
-<dd><p>Function returning maximal bounding box of a given list of sulci</p>
-<p>It reads json files contained in the source directory.
-They are listed in subdirectory ‘L’ or ‘R’ according t hemisphere
-Each json file is the name of the sulcus + ‘json’</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>sulci_list</strong> – a list of sulci</li>
-<li><strong>side</strong> – a string corresponding to the hemisphere, whether ‘L’ or ‘R’</li>
-<li><strong>talairach_box</strong> – a boolean whether using Talairach coordinates or voxels</li>
-<li><strong>src_dir</strong> – path to source directory containing bbox dimensions</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">an array of minimum coordinates of bounding box of given sulci
-bbmax: an array of maximum coordinates of bounding box of given sulci</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">bbmin</p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
+<div class="section" id="deep-folding-anatomist-tools-utils-bbox-module">
+<h2>deep_folding.anatomist_tools.utils.bbox module<a class="headerlink" href="#deep-folding-anatomist-tools-utils-bbox-module" title="Permalink to this headline">¶</a></h2>
 </div>
-<div class="section" id="module-deep_folding.anatomist_tools.utils.convert_volume_to_bucket">
-<span id="deep-folding-anatomist-tools-utils-convert-volume-to-bucket-module"></span><h2>deep_folding.anatomist_tools.utils.convert_volume_to_bucket module<a class="headerlink" href="#module-deep_folding.anatomist_tools.utils.convert_volume_to_bucket" title="Permalink to this headline">¶</a></h2>
-<p>This program converts volumes contained in a folder into buckets.
-It writes bucket files in the output folder</p>
-<dl class="function">
-<dt id="deep_folding.anatomist_tools.utils.convert_volume_to_bucket.build_bucket_filename">
-<code class="descclassname">deep_folding.anatomist_tools.utils.convert_volume_to_bucket.</code><code class="descname">build_bucket_filename</code><span class="sig-paren">(</span><em>subject</em>, <em>tgt_dir</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.utils.convert_volume_to_bucket.build_bucket_filename" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns bucket filename</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="deep_folding.anatomist_tools.utils.convert_volume_to_bucket.get_basename_without_extension">
-<code class="descclassname">deep_folding.anatomist_tools.utils.convert_volume_to_bucket.</code><code class="descname">get_basename_without_extension</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.utils.convert_volume_to_bucket.get_basename_without_extension" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns file basename without extension</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="deep_folding.anatomist_tools.utils.convert_volume_to_bucket.loop_over_directory">
-<code class="descclassname">deep_folding.anatomist_tools.utils.convert_volume_to_bucket.</code><code class="descname">loop_over_directory</code><span class="sig-paren">(</span><em>src_dir</em>, <em>tgt_dir</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.utils.convert_volume_to_bucket.loop_over_directory" title="Permalink to this definition">¶</a></dt>
-<dd><p>Loops conversion over input directory</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="deep_folding.anatomist_tools.utils.convert_volume_to_bucket.main">
-<code class="descclassname">deep_folding.anatomist_tools.utils.convert_volume_to_bucket.</code><code class="descname">main</code><span class="sig-paren">(</span><em>argv</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.utils.convert_volume_to_bucket.main" title="Permalink to this definition">¶</a></dt>
-<dd><p>Reads argument line and creates cropped files and pickle file</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>argv</strong> – a list containing command line arguments</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="deep_folding.anatomist_tools.utils.convert_volume_to_bucket.parse_args">
-<code class="descclassname">deep_folding.anatomist_tools.utils.convert_volume_to_bucket.</code><code class="descname">parse_args</code><span class="sig-paren">(</span><em>argv</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.utils.convert_volume_to_bucket.parse_args" title="Permalink to this definition">¶</a></dt>
-<dd><p>Parses command-line arguments</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>argv</strong> – a list containing command line arguments</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">args</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="deep_folding.anatomist_tools.utils.convert_volume_to_bucket.read_convert_write">
-<code class="descclassname">deep_folding.anatomist_tools.utils.convert_volume_to_bucket.</code><code class="descname">read_convert_write</code><span class="sig-paren">(</span><em>vol_filename</em>, <em>bucket_filename</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.utils.convert_volume_to_bucket.read_convert_write" title="Permalink to this definition">¶</a></dt>
-<dd><p>Reads volume, converts and writes back bucket.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>[</strong><strong>str</strong><strong>]</strong> (<em>bucket_filename</em>) – path to input volume file</li>
-<li><strong>[</strong><strong>str</strong><strong>]</strong> – path to output bucket file</li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
+<div class="section" id="deep-folding-anatomist-tools-utils-convert-volume-to-bucket-module">
+<h2>deep_folding.anatomist_tools.utils.convert_volume_to_bucket module<a class="headerlink" href="#deep-folding-anatomist-tools-utils-convert-volume-to-bucket-module" title="Permalink to this headline">¶</a></h2>
 </div>
-<div class="section" id="module-deep_folding.anatomist_tools.utils.dilate_mask">
-<span id="deep-folding-anatomist-tools-utils-dilate-mask-module"></span><h2>deep_folding.anatomist_tools.utils.dilate_mask module<a class="headerlink" href="#module-deep_folding.anatomist_tools.utils.dilate_mask" title="Permalink to this headline">¶</a></h2>
-<dl class="function">
-<dt id="deep_folding.anatomist_tools.utils.dilate_mask.dilate">
-<code class="descclassname">deep_folding.anatomist_tools.utils.dilate_mask.</code><code class="descname">dilate</code><span class="sig-paren">(</span><em>mask</em>, <em>radius=10.0</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.utils.dilate_mask.dilate" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
-<dt id="deep_folding.anatomist_tools.utils.dilate_mask.main">
-<code class="descclassname">deep_folding.anatomist_tools.utils.dilate_mask.</code><code class="descname">main</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.utils.dilate_mask.main" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
+<div class="section" id="deep-folding-anatomist-tools-utils-dilate-mask-module">
+<h2>deep_folding.anatomist_tools.utils.dilate_mask module<a class="headerlink" href="#deep-folding-anatomist-tools-utils-dilate-mask-module" title="Permalink to this headline">¶</a></h2>
 </div>
-<div class="section" id="module-deep_folding.anatomist_tools.utils.logs">
-<span id="deep-folding-anatomist-tools-utils-logs-module"></span><h2>deep_folding.anatomist_tools.utils.logs module<a class="headerlink" href="#module-deep_folding.anatomist_tools.utils.logs" title="Permalink to this headline">¶</a></h2>
-<p>The aim of this script is to put together useful classes and functions
-used by brainvisa-dependent preprocessing</p>
-<dl class="class">
-<dt id="deep_folding.anatomist_tools.utils.logs.LogJson">
-<em class="property">class </em><code class="descclassname">deep_folding.anatomist_tools.utils.logs.</code><code class="descname">LogJson</code><span class="sig-paren">(</span><em>json_file</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.utils.logs.LogJson" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
-<p>Handles json file lifecycle</p>
-<p>Json file is created by overwriting old file.
-Upon loading a ne dictionary, it updates the json file
-by reading back and writing the updated content</p>
-<dl class="method">
-<dt id="deep_folding.anatomist_tools.utils.logs.LogJson.create_file">
-<code class="descname">create_file</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.utils.logs.LogJson.create_file" title="Permalink to this definition">¶</a></dt>
-<dd><p>Creates json file and overwrites old content</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="deep_folding.anatomist_tools.utils.logs.LogJson.update">
-<code class="descname">update</code><span class="sig-paren">(</span><em>dict_to_add</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.utils.logs.LogJson.update" title="Permalink to this definition">¶</a></dt>
-<dd><p>Updates json file with new dictionary entry</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>dict_to_add</strong> – dictionary appended to json file</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="deep_folding.anatomist_tools.utils.logs.LogJson.write_general_info">
-<code class="descname">write_general_info</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.utils.logs.LogJson.write_general_info" title="Permalink to this definition">¶</a></dt>
-<dd><p>Writes general information on json</p>
-<p>It contains information about generation date, git hash/version number.</p>
-</dd></dl>
-
-</dd></dl>
-
+<div class="section" id="deep-folding-anatomist-tools-utils-logs-module">
+<h2>deep_folding.anatomist_tools.utils.logs module<a class="headerlink" href="#deep-folding-anatomist-tools-utils-logs-module" title="Permalink to this headline">¶</a></h2>
 </div>
-<div class="section" id="module-deep_folding.anatomist_tools.utils.mask">
-<span id="deep-folding-anatomist-tools-utils-mask-module"></span><h2>deep_folding.anatomist_tools.utils.mask module<a class="headerlink" href="#module-deep_folding.anatomist_tools.utils.mask" title="Permalink to this headline">¶</a></h2>
-<p>Getting bounding box from a list of sulci and specific hemisphere</p>
-<p>The aim of this script is to output the bounding box of one or several sulci of
-a specified hemisphere.</p>
-<dl class="function">
-<dt id="deep_folding.anatomist_tools.utils.mask.compute_bbox_mask">
-<code class="descclassname">deep_folding.anatomist_tools.utils.mask.</code><code class="descname">compute_bbox_mask</code><span class="sig-paren">(</span><em>arr</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.utils.mask.compute_bbox_mask" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
-<dt id="deep_folding.anatomist_tools.utils.mask.compute_centered_mask">
-<code class="descclassname">deep_folding.anatomist_tools.utils.mask.</code><code class="descname">compute_centered_mask</code><span class="sig-paren">(</span><em>sulci_list</em>, <em>side</em>, <em>mask_dir='/neurospin/dico/data/deep_folding/current/mask/2mm'</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.utils.mask.compute_centered_mask" title="Permalink to this definition">¶</a></dt>
-<dd><p>Function returning mask combining mask over several sulci</p>
-<p>It reads mask files in the source mask directory and combines them.
-They are listed in subdirectory ‘L’ or ‘R’ according the hemisphere</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>sulci_list</strong> – a list of sulci</li>
-<li><strong>side</strong> – a string corresponding to the hemisphere, whether ‘L’ or ‘R’</li>
-<li><strong>mask_dir</strong> – path to source directory containing masks</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">AIMS volume containing combined mask
-bbmin: an array of minimum coordinates of min box around the mask
-bbmax: an array of maximum coordinates of max_box around the mask</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">mask_result</p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="deep_folding.anatomist_tools.utils.mask.compute_simple_mask">
-<code class="descclassname">deep_folding.anatomist_tools.utils.mask.</code><code class="descname">compute_simple_mask</code><span class="sig-paren">(</span><em>sulci_list</em>, <em>side</em>, <em>mask_dir='/neurospin/dico/data/deep_folding/current/mask/2mm'</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.utils.mask.compute_simple_mask" title="Permalink to this definition">¶</a></dt>
-<dd><p>Function returning mask combining mask over several sulci</p>
-<p>It reads mask files in the source mask directory and combines them.
-They are listed in subdirectory ‘L’ or ‘R’ according the hemisphere</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>sulci_list</strong> – a list of sulci</li>
-<li><strong>side</strong> – a string corresponding to the hemisphere, whether ‘L’ or ‘R’</li>
-<li><strong>mask_dir</strong> – path to source directory containing masks</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">AIMS volume containing combined mask
-bbmin: an array of minimum coordinates of min box around the mask
-bbmax: an array of maximum coordinates of max_box around the mask</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">mask_result</p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
+<div class="section" id="deep-folding-anatomist-tools-utils-mask-module">
+<h2>deep_folding.anatomist_tools.utils.mask module<a class="headerlink" href="#deep-folding-anatomist-tools-utils-mask-module" title="Permalink to this headline">¶</a></h2>
 </div>
-<div class="section" id="module-deep_folding.anatomist_tools.utils.remove_hull">
-<span id="deep-folding-anatomist-tools-utils-remove-hull-module"></span><h2>deep_folding.anatomist_tools.utils.remove_hull module<a class="headerlink" href="#module-deep_folding.anatomist_tools.utils.remove_hull" title="Permalink to this headline">¶</a></h2>
-<p>Removing hull voxels from skeletons’ crops</p>
-<p>The aim of this script is to remove skeleton’s voxels that correspond to the
-hull and to use this new volume for visualization if needed.</p>
-<dl class="class">
-<dt id="deep_folding.anatomist_tools.utils.remove_hull.DatasetHullRemoved">
-<em class="property">class </em><code class="descclassname">deep_folding.anatomist_tools.utils.remove_hull.</code><code class="descname">DatasetHullRemoved</code><span class="sig-paren">(</span><em>src_dir='/nfs/neurospin/dico/data/deep_folding/data/crops/SC/sulcus_based/2mm/'</em>, <em>tgt_dir='/nfs/neurospin/dico/data/deep_folding/data/crops/SC/sulcus_based/2mm/meshes/'</em>, <em>side='R'</em>, <em>number_subjects=-1</em>, <em>list_subjects=None</em>, <em>file_subjects=None</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.utils.remove_hull.DatasetHullRemoved" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
-<p>Generates meshes of crops without hull</p>
-<dl class="method">
-<dt id="deep_folding.anatomist_tools.utils.remove_hull.DatasetHullRemoved.create_meshes">
-<code class="descname">create_meshes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.utils.remove_hull.DatasetHullRemoved.create_meshes" title="Permalink to this definition">¶</a></dt>
-<dd><p>Creates meshes from skeleton crops (.nii files)</p>
-<p>The programm loops over all subjects from the input (source) directory.
-:param number_subjects: integer giving the number of subjects to analyze,</p>
-<blockquote>
-<div>by default it is set to _ALL_SUBJECTS (-1).</div></blockquote>
-</dd></dl>
-
-<dl class="method">
-<dt id="deep_folding.anatomist_tools.utils.remove_hull.DatasetHullRemoved.create_one_mesh">
-<code class="descname">create_one_mesh</code><span class="sig-paren">(</span><em>subject_id</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.utils.remove_hull.DatasetHullRemoved.create_one_mesh" title="Permalink to this definition">¶</a></dt>
-<dd><p>Creates one mesh from a skeleton crop (.nii file)</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>subject_id</strong> – string giving the subject ID</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="function">
-<dt id="deep_folding.anatomist_tools.utils.remove_hull.convert_volume_to_bucket">
-<code class="descclassname">deep_folding.anatomist_tools.utils.remove_hull.</code><code class="descname">convert_volume_to_bucket</code><span class="sig-paren">(</span><em>vol</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.utils.remove_hull.convert_volume_to_bucket" title="Permalink to this definition">¶</a></dt>
-<dd><p>Converts volume to bucket</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>arr</strong> – numpy array</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="deep_folding.anatomist_tools.utils.remove_hull.create_one_mesh">
-<code class="descclassname">deep_folding.anatomist_tools.utils.remove_hull.</code><code class="descname">create_one_mesh</code><span class="sig-paren">(</span><em>vol</em>, <em>padding=1</em>, <em>ext=1</em>, <em>threshold=12</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.utils.remove_hull.create_one_mesh" title="Permalink to this definition">¶</a></dt>
-<dd><p>Creates</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>vol</strong> – aims volume</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="deep_folding.anatomist_tools.utils.remove_hull.define_njobs">
-<code class="descclassname">deep_folding.anatomist_tools.utils.remove_hull.</code><code class="descname">define_njobs</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.utils.remove_hull.define_njobs" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns number of cpus used by main loop</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="deep_folding.anatomist_tools.utils.remove_hull.main">
-<code class="descclassname">deep_folding.anatomist_tools.utils.remove_hull.</code><code class="descname">main</code><span class="sig-paren">(</span><em>argv</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.utils.remove_hull.main" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
-<dt id="deep_folding.anatomist_tools.utils.remove_hull.parse_args">
-<code class="descclassname">deep_folding.anatomist_tools.utils.remove_hull.</code><code class="descname">parse_args</code><span class="sig-paren">(</span><em>argv</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.utils.remove_hull.parse_args" title="Permalink to this definition">¶</a></dt>
-<dd><p>Function parsing command-line arguments</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>argv</strong> – a list containing command line arguments</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">dictionary with keys: src_dir, tgt_dir, nb_subjects, list_sulci</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">params</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="deep_folding.anatomist_tools.utils.remove_hull.remove_hull">
-<code class="descclassname">deep_folding.anatomist_tools.utils.remove_hull.</code><code class="descname">remove_hull</code><span class="sig-paren">(</span><em>arr</em>, <em>padding=1</em>, <em>ext=1</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.utils.remove_hull.remove_hull" title="Permalink to this definition">¶</a></dt>
-<dd><p>Removes the pixels on the hull.</p>
-<p>Pixels on the hull are defined as being in contact with both the internal and external part.
-This function removes the hull in place</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>arr</strong> – numpy array modified in the array</li>
-<li><strong>padding</strong> – padding of the image, equal to the extension ext</li>
-<li><strong>ext</strong> – local array extension in which to look for external and internal pixels</li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="deep_folding.anatomist_tools.utils.remove_hull.threshold_and_binarize">
-<code class="descclassname">deep_folding.anatomist_tools.utils.remove_hull.</code><code class="descname">threshold_and_binarize</code><span class="sig-paren">(</span><em>arr</em>, <em>threshold=12</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.utils.remove_hull.threshold_and_binarize" title="Permalink to this definition">¶</a></dt>
-<dd><p>Threshold images</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>arr</strong> – numpy array</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
+<div class="section" id="deep-folding-anatomist-tools-utils-remove-hull-module">
+<h2>deep_folding.anatomist_tools.utils.remove_hull module<a class="headerlink" href="#deep-folding-anatomist-tools-utils-remove-hull-module" title="Permalink to this headline">¶</a></h2>
 </div>
-<div class="section" id="module-deep_folding.anatomist_tools.utils.resample">
-<span id="deep-folding-anatomist-tools-utils-resample-module"></span><h2>deep_folding.anatomist_tools.utils.resample module<a class="headerlink" href="#module-deep_folding.anatomist_tools.utils.resample" title="Permalink to this headline">¶</a></h2>
-<p>Resample a volume that contains discret values</p>
-<dl class="function">
-<dt id="deep_folding.anatomist_tools.utils.resample.resample">
-<code class="descclassname">deep_folding.anatomist_tools.utils.resample.</code><code class="descname">resample</code><span class="sig-paren">(</span><em>input_image</em>, <em>transformation</em>, <em>output_vs=None</em>, <em>background=11</em>, <em>values=None</em>, <em>verbose=True</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.utils.resample.resample" title="Permalink to this definition">¶</a></dt>
-<dd><p>Transform and resample a volume that as discret values</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>input_image</strong> (<em>file</em>) – Path to the input volume (.nii or .nii.gz file)</li>
-<li><strong>transformation</strong> (<em>file</em>) – Linear transformation file (.trm file)</li>
-<li><strong>output_vs</strong> (<em>tuple</em>) – Output voxel size (default: None, no resampling)</li>
-<li><strong>background</strong> (<em>int</em>) – Background value (default: 11)</li>
-<li><strong>values</strong> (<em>[</em><em>]</em>) – Array of unique values ordered by descendent priority. If not given,
-priority is set by ascendent values</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Transformed and resampled volume</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">resampled_vol</p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
+<div class="section" id="deep-folding-anatomist-tools-utils-resample-module">
+<h2>deep_folding.anatomist_tools.utils.resample module<a class="headerlink" href="#deep-folding-anatomist-tools-utils-resample-module" title="Permalink to this headline">¶</a></h2>
 </div>
-<div class="section" id="module-deep_folding.anatomist_tools.utils.sulcus_side">
-<span id="deep-folding-anatomist-tools-utils-sulcus-side-module"></span><h2>deep_folding.anatomist_tools.utils.sulcus_side module<a class="headerlink" href="#module-deep_folding.anatomist_tools.utils.sulcus_side" title="Permalink to this headline">¶</a></h2>
-<p>Getting complete sulci names based on generic name and side</p>
-<p>The aim of this script is to output the complete name of sulci. For instance,
-giving “S.T.s.ter.asc.ant” and right side, script outputs
-“S.T.s.ter.asc.ant._right”</p>
-<dl class="function">
-<dt id="deep_folding.anatomist_tools.utils.sulcus_side.complete_sulci_name">
-<code class="descclassname">deep_folding.anatomist_tools.utils.sulcus_side.</code><code class="descname">complete_sulci_name</code><span class="sig-paren">(</span><em>sulci_list</em>, <em>side</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.utils.sulcus_side.complete_sulci_name" title="Permalink to this definition">¶</a></dt>
-<dd><p>Function gathering sulci and side to obtain full name of sulci</p>
-<p>It reads suli prefixes from a list and adds a suffix depending on a given
-side.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>sulci_list</strong> – a list of sulci</li>
-<li><strong>side</strong> – a string corresponding to the hemisphere, whether ‘L’ or ‘R’</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">a list with full sulci names, ie with side included</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">full_sulci_list</p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
+<div class="section" id="deep-folding-anatomist-tools-utils-sulcus-side-module">
+<h2>deep_folding.anatomist_tools.utils.sulcus_side module<a class="headerlink" href="#deep-folding-anatomist-tools-utils-sulcus-side-module" title="Permalink to this headline">¶</a></h2>
 </div>
-<div class="section" id="module-deep_folding.anatomist_tools.utils.write_skeleton">
-<span id="deep-folding-anatomist-tools-utils-write-skeleton-module"></span><h2>deep_folding.anatomist_tools.utils.write_skeleton module<a class="headerlink" href="#module-deep_folding.anatomist_tools.utils.write_skeleton" title="Permalink to this headline">¶</a></h2>
-<p>Write skeletons from graph files</p>
-<div class="section" id="typical-usage">
-<h3>Typical usage<a class="headerlink" href="#typical-usage" title="Permalink to this headline">¶</a></h3>
-<p>You can use this program by first entering in the brainvisa environment
-(here brainvisa 5.0.0 installed with singurity) and launching the script
-from the terminal:
-&gt;&gt;&gt; bv bash
-&gt;&gt;&gt; python write_skeleton.py</p>
-<dl class="class">
-<dt id="deep_folding.anatomist_tools.utils.write_skeleton.GraphConvert2Skeleton">
-<em class="property">class </em><code class="descclassname">deep_folding.anatomist_tools.utils.write_skeleton.</code><code class="descname">GraphConvert2Skeleton</code><span class="sig-paren">(</span><em>src_dir</em>, <em>tgt_dir</em>, <em>side</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.utils.write_skeleton.GraphConvert2Skeleton" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
-<dl class="method">
-<dt id="deep_folding.anatomist_tools.utils.write_skeleton.GraphConvert2Skeleton.write_loop">
-<code class="descname">write_loop</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.utils.write_skeleton.GraphConvert2Skeleton.write_loop" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="deep_folding.anatomist_tools.utils.write_skeleton.GraphConvert2Skeleton.write_skeleton">
-<code class="descname">write_skeleton</code><span class="sig-paren">(</span><em>subject</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.utils.write_skeleton.GraphConvert2Skeleton.write_skeleton" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="function">
-<dt id="deep_folding.anatomist_tools.utils.write_skeleton.define_njobs">
-<code class="descclassname">deep_folding.anatomist_tools.utils.write_skeleton.</code><code class="descname">define_njobs</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.utils.write_skeleton.define_njobs" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns number of cpus used by main loop</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="deep_folding.anatomist_tools.utils.write_skeleton.main">
-<code class="descclassname">deep_folding.anatomist_tools.utils.write_skeleton.</code><code class="descname">main</code><span class="sig-paren">(</span><em>argv</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.utils.write_skeleton.main" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
-<dt id="deep_folding.anatomist_tools.utils.write_skeleton.parse_args">
-<code class="descclassname">deep_folding.anatomist_tools.utils.write_skeleton.</code><code class="descname">parse_args</code><span class="sig-paren">(</span><em>argv</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.anatomist_tools.utils.write_skeleton.parse_args" title="Permalink to this definition">¶</a></dt>
-<dd><p>Parses command-line arguments</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>argv</strong> – a list containing command line arguments</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">args</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
+<div class="section" id="deep-folding-anatomist-tools-utils-write-skeleton-module">
+<h2>deep_folding.anatomist_tools.utils.write_skeleton module<a class="headerlink" href="#deep-folding-anatomist-tools-utils-write-skeleton-module" title="Permalink to this headline">¶</a></h2>
 </div>
-</div>
-<div class="section" id="module-deep_folding.anatomist_tools.utils">
-<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-deep_folding.anatomist_tools.utils" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-contents">
+<h2>Module contents<a class="headerlink" href="#module-contents" title="Permalink to this headline">¶</a></h2>
 </div>
 </div>
 
 
            </div>
           </div>
-          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="deep_folding.anatomist_tools.html" class="btn btn-neutral float-left" title="deep_folding.anatomist_tools package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="deep_folding.preprocessing.html" class="btn btn-neutral float-right" title="deep_folding.preprocessing package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-    </div>
+          <footer>
 
   <hr/>
 

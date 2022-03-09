@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html class="writer-html4" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>deep_folding.brainvisa.utils package &mdash; deep_folding 0.0.1 documentation</title><link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+      <script>
+          var DOCUMENTATION_OPTIONS = {
+              URL_ROOT:'./',
+              VERSION:'0.0.1',
+              LANGUAGE:'None',
+              COLLAPSE_INDEX:false,
+              FILE_SUFFIX:'.html',
+              HAS_SOURCE:  true,
+              SOURCELINK_SUFFIX: '.txt'
+          };
+      </script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="deep_folding.preprocessing package" href="deep_folding.preprocessing.html" />
+    <link rel="prev" title="deep_folding.brainvisa package" href="deep_folding.brainvisa.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html" class="icon icon-home"> deep_folding
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption"><span class="caption-text">README:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="readme.html">Deep folding</a></li>
+<li class="toctree-l1"><a class="reference internal" href="readme.html#prerequisites">Prerequisites</a></li>
+<li class="toctree-l1"><a class="reference internal" href="readme.html#development">Development</a></li>
+</ul>
+<p class="caption"><span class="caption-text">API documentation</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="deep_folding.html">deep_folding package</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="deep_folding.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="deep_folding.brainvisa.html">deep_folding.brainvisa package</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="deep_folding.brainvisa.html#subpackages">Subpackages</a></li>
+<li class="toctree-l4"><a class="reference internal" href="deep_folding.brainvisa.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="deep_folding.brainvisa.html#module-deep_folding.brainvisa.benchmark_generation">deep_folding.brainvisa.benchmark_generation module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="deep_folding.brainvisa.html#deep-folding-brainvisa-benchmark-pipeline-module">deep_folding.brainvisa.benchmark_pipeline module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="deep_folding.brainvisa.html#module-deep_folding.brainvisa.compute_bounding_box">deep_folding.brainvisa.compute_bounding_box module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="deep_folding.brainvisa.html#module-deep_folding.brainvisa.compute_mask">deep_folding.brainvisa.compute_mask module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="deep_folding.brainvisa.html#module-deep_folding.brainvisa.dataset_gen_pipe">deep_folding.brainvisa.dataset_gen_pipe module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="deep_folding.brainvisa.html#module-deep_folding.brainvisa.display">deep_folding.brainvisa.display module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="deep_folding.brainvisa.html#module-deep_folding.brainvisa.generate_crops">deep_folding.brainvisa.generate_crops module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="deep_folding.brainvisa.html#deep-folding-brainvisa-generate-foldlabels-module">deep_folding.brainvisa.generate_foldlabels module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="deep_folding.brainvisa.html#deep-folding-brainvisa-generate-skeletons-module">deep_folding.brainvisa.generate_skeletons module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="deep_folding.brainvisa.html#module-deep_folding.brainvisa.load_data">deep_folding.brainvisa.load_data module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="deep_folding.brainvisa.html#module-deep_folding.brainvisa.mask_qc">deep_folding.brainvisa.mask_qc module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="deep_folding.brainvisa.html#deep-folding-brainvisa-resample-module">deep_folding.brainvisa.resample module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="deep_folding.brainvisa.html#module-deep_folding.brainvisa">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="deep_folding.preprocessing.html">deep_folding.preprocessing package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="deep_folding.utils.html">deep_folding.utils package</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="deep_folding.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="deep_folding.html#module-deep_folding.info">deep_folding.info module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="deep_folding.html#module-deep_folding">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">deep_folding</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="deep_folding.html">deep_folding package</a> &raquo;</li>
+          <li><a href="deep_folding.brainvisa.html">deep_folding.brainvisa package</a> &raquo;</li>
+      <li>deep_folding.brainvisa.utils package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/deep_folding.brainvisa.utils.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="section" id="deep-folding-brainvisa-utils-package">
+<h1>deep_folding.brainvisa.utils package<a class="headerlink" href="#deep-folding-brainvisa-utils-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-deep_folding.brainvisa.utils.bbox">
+<span id="deep-folding-brainvisa-utils-bbox-module"></span><h2>deep_folding.brainvisa.utils.bbox module<a class="headerlink" href="#module-deep_folding.brainvisa.utils.bbox" title="Permalink to this headline">¶</a></h2>
+<p>Getting bounding box from a list of sulci and specific hemisphere</p>
+<p>The aim of this script is to output the bounding box of one or several sulci of
+a specified hemisphere.</p>
+<dl class="function">
+<dt id="deep_folding.brainvisa.utils.bbox.compute_max">
+<code class="descclassname">deep_folding.brainvisa.utils.bbox.</code><code class="descname">compute_max</code><span class="sig-paren">(</span><em>list_bbmin: list</em>, <em>list_bbmax: list</em><span class="sig-paren">)</span> &#x2192; tuple<a class="headerlink" href="#deep_folding.brainvisa.utils.bbox.compute_max" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the coordinates of the box encompassing all input boxes</p>
+<p>Parameters:
+list_bbmin: list containing the upper right vertex of the box
+list_bbmax: list containing the lower left vertex of the box</p>
+<p>Returns:
+tuple (bbmin, bbmax) with</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>bbmin: numpy array with the x,y,z coordinates</dt>
+<dd>of the upper right corner of the box;</dd>
+<dt>bbMax: numpy array with the x,y,z coordinates</dt>
+<dd>of the lower left corner of the box</dd>
+</dl>
+</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="deep_folding.brainvisa.utils.bbox.compute_max_box">
+<code class="descclassname">deep_folding.brainvisa.utils.bbox.</code><code class="descname">compute_max_box</code><span class="sig-paren">(</span><em>sulci_list</em>, <em>side</em>, <em>talairach_box=False</em>, <em>src_dir='/neurospin/dico/deep_folding_data/data/bbox/'</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.utils.bbox.compute_max_box" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns maximal bounding box of a given list of sulci</p>
+<p>It reads json files contained in the source directory.
+They are listed in subdirectory ‘L’ or ‘R’ according t hemisphere
+Each json file is the name of the sulcus + ‘json’</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>sulci_list</strong> – a list of sulci</li>
+<li><strong>side</strong> – a string corresponding to the hemisphere, whether ‘L’ or ‘R’</li>
+<li><strong>talairach_box</strong> – a boolean whether using Talairach coordinates or voxels</li>
+<li><strong>src_dir</strong> – path to source directory containing bbox dimensions</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><dl class="docutils">
+<dt>tuple (bbminx, bbmax) with</dt>
+<dd><p class="first last">bbmin: an array of minimum coordinates of bounding box of given sulci;
+bbmax: an array of maximum coordinates of bounding box of given sulci</p>
+</dd>
+</dl>
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-deep_folding.brainvisa.utils.convert_volume_to_bucket">
+<span id="deep-folding-brainvisa-utils-convert-volume-to-bucket-module"></span><h2>deep_folding.brainvisa.utils.convert_volume_to_bucket module<a class="headerlink" href="#module-deep_folding.brainvisa.utils.convert_volume_to_bucket" title="Permalink to this headline">¶</a></h2>
+<p>This program converts volumes contained in a folder into buckets.
+It writes bucket files in the output folder</p>
+<dl class="function">
+<dt id="deep_folding.brainvisa.utils.convert_volume_to_bucket.build_bucket_filename">
+<code class="descclassname">deep_folding.brainvisa.utils.convert_volume_to_bucket.</code><code class="descname">build_bucket_filename</code><span class="sig-paren">(</span><em>subject</em>, <em>tgt_dir</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.utils.convert_volume_to_bucket.build_bucket_filename" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns bucket filename</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="deep_folding.brainvisa.utils.convert_volume_to_bucket.get_basename_without_extension">
+<code class="descclassname">deep_folding.brainvisa.utils.convert_volume_to_bucket.</code><code class="descname">get_basename_without_extension</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.utils.convert_volume_to_bucket.get_basename_without_extension" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns file basename without extension</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="deep_folding.brainvisa.utils.convert_volume_to_bucket.loop_over_directory">
+<code class="descclassname">deep_folding.brainvisa.utils.convert_volume_to_bucket.</code><code class="descname">loop_over_directory</code><span class="sig-paren">(</span><em>src_dir</em>, <em>tgt_dir</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.utils.convert_volume_to_bucket.loop_over_directory" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loops conversion over input directory</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="deep_folding.brainvisa.utils.convert_volume_to_bucket.main">
+<code class="descclassname">deep_folding.brainvisa.utils.convert_volume_to_bucket.</code><code class="descname">main</code><span class="sig-paren">(</span><em>argv</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.utils.convert_volume_to_bucket.main" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads argument line and creates cropped files and pickle file</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>argv</strong> – a list containing command line arguments</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="deep_folding.brainvisa.utils.convert_volume_to_bucket.parse_args">
+<code class="descclassname">deep_folding.brainvisa.utils.convert_volume_to_bucket.</code><code class="descname">parse_args</code><span class="sig-paren">(</span><em>argv</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.utils.convert_volume_to_bucket.parse_args" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parses command-line arguments</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>argv</strong> – a list containing command line arguments</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">args</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="deep_folding.brainvisa.utils.convert_volume_to_bucket.read_convert_write">
+<code class="descclassname">deep_folding.brainvisa.utils.convert_volume_to_bucket.</code><code class="descname">read_convert_write</code><span class="sig-paren">(</span><em>vol_filename</em>, <em>bucket_filename</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.utils.convert_volume_to_bucket.read_convert_write" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads volume, converts and writes back bucket.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>[</strong><strong>str</strong><strong>]</strong> (<em>bucket_filename</em>) – path to input volume file</li>
+<li><strong>[</strong><strong>str</strong><strong>]</strong> – path to output bucket file</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-deep_folding.brainvisa.utils.dilate_mask">
+<span id="deep-folding-brainvisa-utils-dilate-mask-module"></span><h2>deep_folding.brainvisa.utils.dilate_mask module<a class="headerlink" href="#module-deep_folding.brainvisa.utils.dilate_mask" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="deep_folding.brainvisa.utils.dilate_mask.dilate">
+<code class="descclassname">deep_folding.brainvisa.utils.dilate_mask.</code><code class="descname">dilate</code><span class="sig-paren">(</span><em>mask</em>, <em>radius=10.0</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.utils.dilate_mask.dilate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="deep_folding.brainvisa.utils.dilate_mask.main">
+<code class="descclassname">deep_folding.brainvisa.utils.dilate_mask.</code><code class="descname">main</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.utils.dilate_mask.main" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-deep_folding.brainvisa.utils.folder">
+<span id="deep-folding-brainvisa-utils-folder-module"></span><h2>deep_folding.brainvisa.utils.folder module<a class="headerlink" href="#module-deep_folding.brainvisa.utils.folder" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="deep_folding.brainvisa.utils.folder.create_folder">
+<code class="descclassname">deep_folding.brainvisa.utils.folder.</code><code class="descname">create_folder</code><span class="sig-paren">(</span><em>folder: str</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#deep_folding.brainvisa.utils.folder.create_folder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates folder if it doesn’t exist</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-deep_folding.brainvisa.utils.logs">
+<span id="deep-folding-brainvisa-utils-logs-module"></span><h2>deep_folding.brainvisa.utils.logs module<a class="headerlink" href="#module-deep_folding.brainvisa.utils.logs" title="Permalink to this headline">¶</a></h2>
+<p>The aim of this script is to put together useful classes and functions
+used by brainvisa-dependent preprocessing for logging</p>
+<dl class="class">
+<dt id="deep_folding.brainvisa.utils.logs.LogJson">
+<em class="property">class </em><code class="descclassname">deep_folding.brainvisa.utils.logs.</code><code class="descname">LogJson</code><span class="sig-paren">(</span><em>json_file</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.utils.logs.LogJson" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Handles json file lifecycle</p>
+<p>Json file is created by overwriting old file.
+Upon loading a ne dictionary, it updates the json file
+by reading back and writing the updated content</p>
+<dl class="method">
+<dt id="deep_folding.brainvisa.utils.logs.LogJson.create_file">
+<code class="descname">create_file</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.utils.logs.LogJson.create_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates json file and overwrites old content</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="deep_folding.brainvisa.utils.logs.LogJson.update">
+<code class="descname">update</code><span class="sig-paren">(</span><em>dict_to_add</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.utils.logs.LogJson.update" title="Permalink to this definition">¶</a></dt>
+<dd><p>Updates json file with new dictionary entry</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>dict_to_add</strong> – dictionary appended to json file</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="deep_folding.brainvisa.utils.logs.LogJson.write_general_info">
+<code class="descname">write_general_info</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.utils.logs.LogJson.write_general_info" title="Permalink to this definition">¶</a></dt>
+<dd><p>Writes general information on json</p>
+<p>It contains information about generation date, git hash/version number.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="deep_folding.brainvisa.utils.logs.log_command_line">
+<code class="descclassname">deep_folding.brainvisa.utils.logs.</code><code class="descname">log_command_line</code><span class="sig-paren">(</span><em>args: argparse.Namespace</em>, <em>prog_name: str</em>, <em>tgt_dir: str</em>, <em>suffix: str = None</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#deep_folding.brainvisa.utils.logs.log_command_line" title="Permalink to this definition">¶</a></dt>
+<dd><p>Logs command on file command_line.sh in target directory</p>
+<p>The command file gives thus the exact command line
+the should be given to reproduce the results</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="deep_folding.brainvisa.utils.logs.setup_log">
+<code class="descclassname">deep_folding.brainvisa.utils.logs.</code><code class="descname">setup_log</code><span class="sig-paren">(</span><em>args: argparse.Namespace</em>, <em>log_dir: str</em>, <em>prog_name: str</em>, <em>suffix: str = None</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#deep_folding.brainvisa.utils.logs.setup_log" title="Permalink to this definition">¶</a></dt>
+<dd><p>Setups log for command line programs</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-deep_folding.brainvisa.utils.mask">
+<span id="deep-folding-brainvisa-utils-mask-module"></span><h2>deep_folding.brainvisa.utils.mask module<a class="headerlink" href="#module-deep_folding.brainvisa.utils.mask" title="Permalink to this headline">¶</a></h2>
+<p>Getting bounding box from a list of sulci and specific hemisphere</p>
+<p>The aim of this script is to output the bounding box of one or several sulci of
+a specified hemisphere.</p>
+<dl class="function">
+<dt id="deep_folding.brainvisa.utils.mask.compute_bbox_mask">
+<code class="descclassname">deep_folding.brainvisa.utils.mask.</code><code class="descname">compute_bbox_mask</code><span class="sig-paren">(</span><em>arr</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.utils.mask.compute_bbox_mask" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="deep_folding.brainvisa.utils.mask.compute_centered_mask">
+<code class="descclassname">deep_folding.brainvisa.utils.mask.</code><code class="descname">compute_centered_mask</code><span class="sig-paren">(</span><em>sulci_list</em>, <em>side</em>, <em>mask_dir='/neurospin/dico/data/deep_folding/current/mask/2mm'</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.utils.mask.compute_centered_mask" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function returning mask combining mask over several sulci</p>
+<p>It reads mask files in the source mask directory and combines them.
+They are listed in subdirectory ‘L’ or ‘R’ according the hemisphere</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>sulci_list</strong> – a list of sulci</li>
+<li><strong>side</strong> – a string corresponding to the hemisphere, whether ‘L’ or ‘R’</li>
+<li><strong>mask_dir</strong> – path to source directory containing masks</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">AIMS volume containing combined mask
+bbmin: an array of minimum coordinates of min box around the mask
+bbmax: an array of maximum coordinates of max_box around the mask</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">mask_result</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="deep_folding.brainvisa.utils.mask.compute_simple_mask">
+<code class="descclassname">deep_folding.brainvisa.utils.mask.</code><code class="descname">compute_simple_mask</code><span class="sig-paren">(</span><em>sulci_list</em>, <em>side</em>, <em>mask_dir='/neurospin/dico/data/deep_folding/current/mask/2mm'</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.utils.mask.compute_simple_mask" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function returning mask combining mask over several sulci</p>
+<p>It reads mask files in the source mask directory and combines them.
+They are listed in subdirectory ‘L’ or ‘R’ according the hemisphere</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>sulci_list</strong> – a list of sulci</li>
+<li><strong>side</strong> – a string corresponding to the hemisphere, whether ‘L’ or ‘R’</li>
+<li><strong>mask_dir</strong> – path to source directory containing masks</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">AIMS volume containing combined mask
+bbmin: an array of minimum coordinates of min box around the mask
+bbmax: an array of maximum coordinates of max_box around the mask</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">mask_result</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-deep_folding.brainvisa.utils.parallel">
+<span id="deep-folding-brainvisa-utils-parallel-module"></span><h2>deep_folding.brainvisa.utils.parallel module<a class="headerlink" href="#module-deep_folding.brainvisa.utils.parallel" title="Permalink to this headline">¶</a></h2>
+<p>The aim of this script is to put together useful classes and functions
+for parallel computing</p>
+<dl class="function">
+<dt id="deep_folding.brainvisa.utils.parallel.define_njobs">
+<code class="descclassname">deep_folding.brainvisa.utils.parallel.</code><code class="descname">define_njobs</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.utils.parallel.define_njobs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns number of cpus used by main loop</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-deep_folding.brainvisa.utils.referentials">
+<span id="deep-folding-brainvisa-utils-referentials-module"></span><h2>deep_folding.brainvisa.utils.referentials module<a class="headerlink" href="#module-deep_folding.brainvisa.utils.referentials" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="deep_folding.brainvisa.utils.referentials.ICBM2009c_to_aims_talairach">
+<code class="descclassname">deep_folding.brainvisa.utils.referentials.</code><code class="descname">ICBM2009c_to_aims_talairach</code><span class="sig-paren">(</span><em>point_ICBM2009c: &lt;built-in function array&gt;</em><span class="sig-paren">)</span> &#x2192; &lt;built-in function array&gt;<a class="headerlink" href="#deep_folding.brainvisa.utils.referentials.ICBM2009c_to_aims_talairach" title="Permalink to this definition">¶</a></dt>
+<dd><p>Transforms coordinates from ICBM2009c to AIMS talairach referential</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="deep_folding.brainvisa.utils.referentials.generate_ref_volume_MNI_2009">
+<code class="descclassname">deep_folding.brainvisa.utils.referentials.</code><code class="descname">generate_ref_volume_MNI_2009</code><span class="sig-paren">(</span><em>out_voxel_size: tuple</em><span class="sig-paren">)</span> &#x2192; &lt;function Volume at 0x7fc822b87510&gt;<a class="headerlink" href="#deep_folding.brainvisa.utils.referentials.generate_ref_volume_MNI_2009" title="Permalink to this definition">¶</a></dt>
+<dd><p>Defines MNI 2009 reference aims volume with output voxel size</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>output_voxel_size</strong> – tuple
+Output voxel size (default: None, no resampling)</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="docutils">
+<dt>volume (aims.Volume_S16) filled with 0 in MNI2009 referential</dt>
+<dd>and with requested voxel_size</dd>
+</dl>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">vol</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-deep_folding.brainvisa.utils.remove_hull">
+<span id="deep-folding-brainvisa-utils-remove-hull-module"></span><h2>deep_folding.brainvisa.utils.remove_hull module<a class="headerlink" href="#module-deep_folding.brainvisa.utils.remove_hull" title="Permalink to this headline">¶</a></h2>
+<p>Removing hull voxels from skeletons’ crops</p>
+<p>The aim of this script is to remove skeleton’s voxels that correspond to the
+hull and to use this new volume for visualization if needed.</p>
+<dl class="class">
+<dt id="deep_folding.brainvisa.utils.remove_hull.DatasetHullRemoved">
+<em class="property">class </em><code class="descclassname">deep_folding.brainvisa.utils.remove_hull.</code><code class="descname">DatasetHullRemoved</code><span class="sig-paren">(</span><em>src_dir='/nfs/neurospin/dico/data/deep_folding/data/crops/SC/sulcus_based/2mm/'</em>, <em>tgt_dir='/nfs/neurospin/dico/data/deep_folding/data/crops/SC/sulcus_based/2mm/meshes/'</em>, <em>side='R'</em>, <em>number_subjects=-1</em>, <em>list_subjects=None</em>, <em>file_subjects=None</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.utils.remove_hull.DatasetHullRemoved" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Generates meshes of crops without hull</p>
+<dl class="method">
+<dt id="deep_folding.brainvisa.utils.remove_hull.DatasetHullRemoved.create_meshes">
+<code class="descname">create_meshes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.utils.remove_hull.DatasetHullRemoved.create_meshes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates meshes from skeleton crops (.nii files)</p>
+<p>The programm loops over all subjects from the input (source) directory.
+:param number_subjects: integer giving the number of subjects to analyze,</p>
+<blockquote>
+<div>by default it is set to _ALL_SUBJECTS (-1).</div></blockquote>
+</dd></dl>
+
+<dl class="method">
+<dt id="deep_folding.brainvisa.utils.remove_hull.DatasetHullRemoved.create_one_mesh">
+<code class="descname">create_one_mesh</code><span class="sig-paren">(</span><em>subject_id</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.utils.remove_hull.DatasetHullRemoved.create_one_mesh" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates one mesh from a skeleton crop (.nii file)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>subject_id</strong> – string giving the subject ID</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="deep_folding.brainvisa.utils.remove_hull.convert_volume_to_bucket">
+<code class="descclassname">deep_folding.brainvisa.utils.remove_hull.</code><code class="descname">convert_volume_to_bucket</code><span class="sig-paren">(</span><em>vol</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.utils.remove_hull.convert_volume_to_bucket" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts volume to bucket</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>arr</strong> – numpy array</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="deep_folding.brainvisa.utils.remove_hull.create_one_mesh">
+<code class="descclassname">deep_folding.brainvisa.utils.remove_hull.</code><code class="descname">create_one_mesh</code><span class="sig-paren">(</span><em>vol</em>, <em>padding=1</em>, <em>ext=1</em>, <em>threshold=12</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.utils.remove_hull.create_one_mesh" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>vol</strong> – aims volume</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="deep_folding.brainvisa.utils.remove_hull.define_njobs">
+<code class="descclassname">deep_folding.brainvisa.utils.remove_hull.</code><code class="descname">define_njobs</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.utils.remove_hull.define_njobs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns number of cpus used by main loop</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="deep_folding.brainvisa.utils.remove_hull.main">
+<code class="descclassname">deep_folding.brainvisa.utils.remove_hull.</code><code class="descname">main</code><span class="sig-paren">(</span><em>argv</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.utils.remove_hull.main" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="deep_folding.brainvisa.utils.remove_hull.parse_args">
+<code class="descclassname">deep_folding.brainvisa.utils.remove_hull.</code><code class="descname">parse_args</code><span class="sig-paren">(</span><em>argv</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.utils.remove_hull.parse_args" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function parsing command-line arguments</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>argv</strong> – a list containing command line arguments</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">dictionary with keys: src_dir, tgt_dir, nb_subjects, list_sulci</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">params</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="deep_folding.brainvisa.utils.remove_hull.remove_hull">
+<code class="descclassname">deep_folding.brainvisa.utils.remove_hull.</code><code class="descname">remove_hull</code><span class="sig-paren">(</span><em>arr</em>, <em>padding=1</em>, <em>ext=1</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.utils.remove_hull.remove_hull" title="Permalink to this definition">¶</a></dt>
+<dd><p>Removes the pixels on the hull.</p>
+<p>Pixels on the hull are defined as being in contact with both the internal and external part.
+This function removes the hull in place</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>arr</strong> – numpy array modified in the array</li>
+<li><strong>padding</strong> – padding of the image, equal to the extension ext</li>
+<li><strong>ext</strong> – local array extension in which to look for external and internal pixels</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="deep_folding.brainvisa.utils.remove_hull.threshold_and_binarize">
+<code class="descclassname">deep_folding.brainvisa.utils.remove_hull.</code><code class="descname">threshold_and_binarize</code><span class="sig-paren">(</span><em>arr</em>, <em>threshold=12</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.utils.remove_hull.threshold_and_binarize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Threshold images</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>arr</strong> – numpy array</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-deep_folding.brainvisa.utils.resample">
+<span id="deep-folding-brainvisa-utils-resample-module"></span><h2>deep_folding.brainvisa.utils.resample module<a class="headerlink" href="#module-deep_folding.brainvisa.utils.resample" title="Permalink to this headline">¶</a></h2>
+<p>Resample a volume that contains discret values</p>
+<dl class="function">
+<dt id="deep_folding.brainvisa.utils.resample.resample">
+<code class="descclassname">deep_folding.brainvisa.utils.resample.</code><code class="descname">resample</code><span class="sig-paren">(</span><em>input_image: typing.Union[str, Volume], transformation: typing.Union[str, soma.aims.aims.AffineTransformation3d], output_vs: tuple = None, background: int = 0, values: &lt;built-in function array&gt; = None, verbose: bool = True</em><span class="sig-paren">)</span> &#x2192; &lt;function Volume at 0x7fc822b87510&gt;<a class="headerlink" href="#deep_folding.brainvisa.utils.resample.resample" title="Permalink to this definition">¶</a></dt>
+<dd><p>Transforms and resamples a volume that has discret values</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>input_image</strong> (<em>path to nifti file</em><em> or </em><em>aims volume</em>) – Path to the input volume (.nii or .nii.gz file)</li>
+<li><strong>transformation</strong> (<em>path to file</em>) – Linear transformation file (.trm file)</li>
+<li><strong>output_vs</strong> (<em>tuple</em>) – Output voxel size (default: None, no resampling)</li>
+<li><strong>background</strong> (<em>int</em>) – Background value (default: 11)</li>
+<li><strong>values</strong> (<em>[</em><em>]</em>) – Array of unique values ordered by ascendent priority without background. If not given,
+priority is set by ascendent values</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Transformed and resampled volume</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">resampled</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-deep_folding.brainvisa.utils.subjects">
+<span id="deep-folding-brainvisa-utils-subjects-module"></span><h2>deep_folding.brainvisa.utils.subjects module<a class="headerlink" href="#module-deep_folding.brainvisa.utils.subjects" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="deep_folding.brainvisa.utils.subjects.get_all_subjects_as_dictionary">
+<code class="descclassname">deep_folding.brainvisa.utils.subjects.</code><code class="descname">get_all_subjects_as_dictionary</code><span class="sig-paren">(</span><em>src_dir_list</em>, <em>graph_file_list</em>, <em>side</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.utils.subjects.get_all_subjects_as_dictionary" title="Permalink to this definition">¶</a></dt>
+<dd><p>Lists all subjects from the database (directory src_dir).</p>
+<p>Subjects are the names of the subdirectories of the root directory.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">a list of dictionaries containing all subjects as dict</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#module-deep_folding.brainvisa.utils.subjects" title="deep_folding.brainvisa.utils.subjects">subjects</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="deep_folding.brainvisa.utils.subjects.get_number_subjects">
+<code class="descclassname">deep_folding.brainvisa.utils.subjects.</code><code class="descname">get_number_subjects</code><span class="sig-paren">(</span><em>nb_subjects: str</em><span class="sig-paren">)</span> &#x2192; int<a class="headerlink" href="#deep_folding.brainvisa.utils.subjects.get_number_subjects" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns nb_subjects as int</p>
+<p>If it is “all”, it returns -1</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>nb_subjects</strong> – string giving nb of subjects (“all” if all subjects)</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">int giving nb of subjects (-1 if all subjects)</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">nb_subjects_int</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="deep_folding.brainvisa.utils.subjects.select_subjects">
+<code class="descclassname">deep_folding.brainvisa.utils.subjects.</code><code class="descname">select_subjects</code><span class="sig-paren">(</span><em>orig_list: list</em>, <em>nb_subjects: str</em><span class="sig-paren">)</span> &#x2192; list<a class="headerlink" href="#deep_folding.brainvisa.utils.subjects.select_subjects" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a sublist of nb_subjects elements</p>
+<p>if nb_subjects == “all”, it returns the original list
+Otherwise it returns the nb_subjects first elements of orig_list</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>orig_list</strong> – list of strings, the origin list of subjects</li>
+<li><strong>nb_subjects</strong> – string giving nb of subjects (“all” if all subjects)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">list of strings, being the select number of subjects</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">sublist</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="deep_folding.brainvisa.utils.subjects.select_subjects_int">
+<code class="descclassname">deep_folding.brainvisa.utils.subjects.</code><code class="descname">select_subjects_int</code><span class="sig-paren">(</span><em>orig_list: list</em>, <em>nb_subjects: int</em><span class="sig-paren">)</span> &#x2192; list<a class="headerlink" href="#deep_folding.brainvisa.utils.subjects.select_subjects_int" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrns a sublist of nb_subjects elements</p>
+<p>if nb_subjects == -1, it returns the original list</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>orig_list</strong> – list of strings, the origin list of subjects</li>
+<li><strong>nb_subjects</strong> – intgiving nb of subjects (-1 if all subjects)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">list of strings, being the select number of subjects</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">sublist</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-deep_folding.brainvisa.utils.sulcus">
+<span id="deep-folding-brainvisa-utils-sulcus-module"></span><h2>deep_folding.brainvisa.utils.sulcus module<a class="headerlink" href="#module-deep_folding.brainvisa.utils.sulcus" title="Permalink to this headline">¶</a></h2>
+<p>Getting complete sulci names based on generic name and side</p>
+<p>The aim of this script is to output the complete name of sulci. For instance,
+giving “S.T.s.ter.asc.ant” and right side, script outputs
+“S.T.s.ter.asc.ant._right”</p>
+<dl class="function">
+<dt id="deep_folding.brainvisa.utils.sulcus.complete_sulci_name">
+<code class="descclassname">deep_folding.brainvisa.utils.sulcus.</code><code class="descname">complete_sulci_name</code><span class="sig-paren">(</span><em>sulci_list</em>, <em>side</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.utils.sulcus.complete_sulci_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function gathering sulci and side to obtain full name of sulci</p>
+<p>It reads suli prefixes from a list and adds a suffix depending on a given
+side.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>sulci_list</strong> – a list of sulci</li>
+<li><strong>side</strong> – a string corresponding to the hemisphere, whether ‘L’ or ‘R’</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">a list with full sulci names, ie with side included</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">full_sulci_list</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-deep_folding.brainvisa.utils.write_distance_map">
+<span id="deep-folding-brainvisa-utils-write-distance-map-module"></span><h2>deep_folding.brainvisa.utils.write_distance_map module<a class="headerlink" href="#module-deep_folding.brainvisa.utils.write_distance_map" title="Permalink to this headline">¶</a></h2>
+<p>Write distance maps from skeleton files</p>
+<div class="section" id="typical-usage">
+<h3>Typical usage<a class="headerlink" href="#typical-usage" title="Permalink to this headline">¶</a></h3>
+<p>You can use this program by first entering in the brainvisa environment
+(here brainvisa 5.0.0 installed with singurity) and launching the script
+from the terminal:
+&gt;&gt;&gt; bv bash
+&gt;&gt;&gt; python write_distance_map.py</p>
+<dl class="function">
+<dt id="deep_folding.brainvisa.utils.write_distance_map.build_distMap_filename">
+<code class="descclassname">deep_folding.brainvisa.utils.write_distance_map.</code><code class="descname">build_distMap_filename</code><span class="sig-paren">(</span><em>subject</em>, <em>tgt_dir</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.utils.write_distance_map.build_distMap_filename" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns bucket filename</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="deep_folding.brainvisa.utils.write_distance_map.define_njobs">
+<code class="descclassname">deep_folding.brainvisa.utils.write_distance_map.</code><code class="descname">define_njobs</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.utils.write_distance_map.define_njobs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns number of cpus used by main loop</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="deep_folding.brainvisa.utils.write_distance_map.get_subject_name">
+<code class="descclassname">deep_folding.brainvisa.utils.write_distance_map.</code><code class="descname">get_subject_name</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.utils.write_distance_map.get_subject_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns file basename without extension</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="deep_folding.brainvisa.utils.write_distance_map.loop_over_directory">
+<code class="descclassname">deep_folding.brainvisa.utils.write_distance_map.</code><code class="descname">loop_over_directory</code><span class="sig-paren">(</span><em>src_dir</em>, <em>tgt_dir</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.utils.write_distance_map.loop_over_directory" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loops conversion over input directory</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="deep_folding.brainvisa.utils.write_distance_map.main">
+<code class="descclassname">deep_folding.brainvisa.utils.write_distance_map.</code><code class="descname">main</code><span class="sig-paren">(</span><em>argv</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.utils.write_distance_map.main" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads argument line and creates cropped files and pickle file</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>argv</strong> – a list containing command line arguments</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="deep_folding.brainvisa.utils.write_distance_map.parse_args">
+<code class="descclassname">deep_folding.brainvisa.utils.write_distance_map.</code><code class="descname">parse_args</code><span class="sig-paren">(</span><em>argv</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.utils.write_distance_map.parse_args" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parses command-line arguments</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>argv</strong> – a list containing command line arguments</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">args</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="deep_folding.brainvisa.utils.write_distance_map.skel_2_distMap">
+<code class="descclassname">deep_folding.brainvisa.utils.write_distance_map.</code><code class="descname">skel_2_distMap</code><span class="sig-paren">(</span><em>subject</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.utils.write_distance_map.skel_2_distMap" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads volume, converts and writes back bucket.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>[</strong><strong>str</strong><strong>]</strong> (<em>bucket_filename</em>) – path to input volume file</li>
+<li><strong>[</strong><strong>str</strong><strong>]</strong> – path to output bucket file</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="module-deep_folding.brainvisa.utils">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-deep_folding.brainvisa.utils" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="deep_folding.brainvisa.html" class="btn btn-neutral float-left" title="deep_folding.brainvisa package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="deep_folding.preprocessing.html" class="btn btn-neutral float-right" title="deep_folding.preprocessing package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, Louise Guillon et Joel Chavas.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
