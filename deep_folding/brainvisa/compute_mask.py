@@ -81,6 +81,9 @@ _SIDE_DEFAULT = 'R'
 # its name depends on the hemisphere side
 _SULCUS_DEFAULT = 'F.C.M.ant.'
 
+# voxel size:
+_VOXEL_SIZE_DEFAULT = 1.0
+
 # Gives the relative path to the manually labelled graph .arg
 # in the supervised database
 _PATH_TO_GRAPH_DEFAULT = "t1mri/t1/default_analysis/folds/3.3/base2018_manual"
@@ -140,10 +143,11 @@ def increment_one_mask(graph_filename, mask, sulcus, voxel_size_out):
                 for i, j, k in voxels:
                     arr[i, j, k, 0] += 1
 
+
 def increment_mask(subjects: list,
-                    mask: aims.Volume,
-                    sulcus: str,
-                    voxel_size_out: tuple):
+                   mask: aims.Volume,
+                   sulcus: str,
+                   voxel_size_out: tuple):
     """Increments mask for the chosen sulcus for all subjects
 
     Parameters:
@@ -158,9 +162,10 @@ def increment_mask(subjects: list,
         sulci_pattern = glob.glob(join(sub['dir'], graph_file))[0]
 
         increment_one_mask(sulci_pattern % sub,
-                            mask,
-                            sulcus,
-                            voxel_size_out)
+                           mask,
+                           sulcus,
+                           voxel_size_out)
+
 
 def write_mask(mask: aims.Volume, mask_file: str):
     """Writes mask on mask file"""
@@ -182,6 +187,7 @@ class MaskAroundSulcus:
                  path_to_graph=_PATH_TO_GRAPH_DEFAULT,
                  mask_dir=_MASK_DIR_DEFAULT,
                  sulcus=_SULCUS_DEFAULT,
+                 new_sulcus=None,
                  side=_SIDE_DEFAULT,
                  out_voxel_size=None):
         """Inits with list of directories and list of sulci
@@ -191,6 +197,7 @@ class MaskAroundSulcus:
             path_to_graph: string naming relative path to labelled graph
             mask_dir: name of target directory with full path
             sulcus: sulcus name
+            new_sulcus: new sulcus name
             side: hemisphere side (either L for left, or R for right hemisphere)
             out_voxel_size: float for voxel size in mm
         """
@@ -209,10 +216,11 @@ class MaskAroundSulcus:
                                    + path
                                    + '/%(side)s%(subject)s*.arg')
 
-        self.sulcus = sulcus
+        self.new_sulcus = new_sulcus if new_sulcus else sulcus
         self.mask_dir = mask_dir
         self.side = side
         self.sulcus = complete_sulci_name(sulcus, side)
+        self.new_sulcus = complete_sulci_name(self.new_sulcus, side)
         self.voxel_size_out = (out_voxel_size,
                                out_voxel_size,
                                out_voxel_size)
@@ -222,7 +230,7 @@ class MaskAroundSulcus:
         self.mask_file = join(
             self.mask_dir,
             self.side,
-            self.sulcus + '.nii.gz')
+            self.new_sulcus + '.nii.gz')
 
     def compute(self, number_subjects=_ALL_SUBJECTS):
         """Main class program to compute the bounding box
@@ -260,6 +268,7 @@ def compute_mask(src_dir=_SRC_DIR_DEFAULT,
                  mask_dir=_MASK_DIR_DEFAULT,
                  path_to_graph=_PATH_TO_GRAPH_DEFAULT,
                  sulcus=_SULCUS_DEFAULT,
+                 new_sulcus=None,
                  side=_SIDE_DEFAULT,
                  number_subjects=_ALL_SUBJECTS,
                  out_voxel_size=None):
@@ -275,6 +284,7 @@ def compute_mask(src_dir=_SRC_DIR_DEFAULT,
         path_to_graph: string giving relative path to manually labelled graph
         side: hemisphere side (either 'L' for left, or 'R' for right)
         sulcus: string giving the sulcus to analyze
+        new_sulcus: string giving a new sulcus name (optional)
         number_subjects: integer giving the number of subjects to analyze,
             by default it is set to _ALL_SUBJECTS (-1)
         out_voxel_size: float giving voxel size
@@ -286,7 +296,9 @@ def compute_mask(src_dir=_SRC_DIR_DEFAULT,
     mask = MaskAroundSulcus(src_dir=src_dir,
                             mask_dir=mask_dir,
                             path_to_graph=path_to_graph,
-                            sulcus=sulcus, side=side,
+                            sulcus=sulcus,
+                            new_sulcus=new_sulcus,
+                            side=side,
                             out_voxel_size=out_voxel_size)
     mask.compute(number_subjects=number_subjects)
 
@@ -322,6 +334,10 @@ def parse_args(argv: list) -> dict:
         help='Sulcus name around which we determine the bounding box/mask. '
              'Default is : ' + _SULCUS_DEFAULT)
     parser.add_argument(
+        "-w", "--new_sulcus", type=str, default=None,
+        help='Sulcus name around which we determine the bounding box. '
+             'Default is : None (same name as \'sulcus\')')
+    parser.add_argument(
         "-i", "--side", type=str, default=_SIDE_DEFAULT,
         help='Hemisphere side. Default is : ' + _SIDE_DEFAULT)
     parser.add_argument(
@@ -334,13 +350,14 @@ def parse_args(argv: list) -> dict:
         help='Number of subjects to take into account, or \'all\'. '
              '0 subject is allowed, for debug purpose. '
              'Default is : all')
-    parser.add_argument('-v', '--verbose', action='count', default=0,
-                        help='Verbose mode: '
-                        'If no option is provided then logging.INFO is selected. '
-                        'If one option -v (or -vv) or more is provided '
-                        'then logging.DEBUG is selected.')
     parser.add_argument(
-        "-x", "--out_voxel_size", type=float, default=None,
+        '-v', '--verbose', action='count', default=0,
+        help='Verbose mode: '
+             'If no option is provided then logging.INFO is selected. '
+             'If one option -v (or -vv) or more is provided '
+             'then logging.DEBUG is selected.')
+    parser.add_argument(
+        "-x", "--out_voxel_size", type=float, default=_VOXEL_SIZE_DEFAULT,
         help='Voxel size of of bounding box. '
              'Default is : None')
 
@@ -349,16 +366,18 @@ def parse_args(argv: list) -> dict:
     args = parser.parse_args(argv)
 
     # Sets logger level, fils log handler and prints/logs command line
+    new_sulcus = args.new_sulcus if args.new_sulcus else args.sulcus
     setup_log(args,
               log_dir=f"{args.mask_dir}/{args.side}",
               prog_name=basename(__file__),
-              suffix=complete_sulci_name(args.sulcus, args.side))
+              suffix=complete_sulci_name(new_sulcus, args.side))
 
     params['src_dir'] = args.src_dir  # src_dir is a list
     params['path_to_graph'] = args.path_to_graph
     # mask_dir is a string, only one directory
     params['mask_dir'] = args.mask_dir
     params['sulcus'] = args.sulcus  # sulcus is a string
+    params['new_sulcus'] = args.new_sulcus  # sulcus is a string
     params['side'] = args.side
     params['out_voxel_size'] = args.out_voxel_size
 
@@ -385,6 +404,7 @@ def main(argv):
                      path_to_graph=params['path_to_graph'],
                      mask_dir=params['mask_dir'],
                      sulcus=params['sulcus'],
+                     new_sulcus=params['new_sulcus'],
                      side=params['side'],
                      number_subjects=params['nb_subjects'],
                      out_voxel_size=params['out_voxel_size'])
