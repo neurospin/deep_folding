@@ -6,7 +6,7 @@ Subpackages
 
 .. toctree::
 
-    deep_folding.anatomist_tools
+    deep_folding.brainvisa
     deep_folding.preprocessing
     deep_folding.utils
 
