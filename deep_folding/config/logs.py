@@ -3,6 +3,7 @@
 """It provides log configuration and utilities"""
 
 import logging
+from os import makedirs
 from os.path import basename
 from stat import filemode
 
@@ -62,10 +63,14 @@ def set_file_log_handler(file_dir, suffix):
     global formatter
 
     # Creates filename
-    suffix = suffix.rstrip('.')
-    file_name = f"{file_dir}/log_{suffix}.log"
+    if suffix:
+        suffix = suffix.rstrip('.')
+        file_name = f"{file_dir}/log_{suffix}.log"
+    else:
+        file_name = f"{file_dir}/log.log"
 
     # Creates handler
+    makedirs(file_dir, exist_ok=True)
     filehandler = logging.FileHandler(file_name, mode='w')
 
     # Substitutes file handler in main logger

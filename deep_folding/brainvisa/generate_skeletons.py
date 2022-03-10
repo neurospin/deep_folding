@@ -41,7 +41,7 @@
   (here brainvisa 5.0.0 installed with singurity) and launching the script
   from the terminal:
   >>> bv bash
-  >>> python generate_skeleton.py
+  >>> python generate_skeletons.py
 
 
 """
@@ -56,19 +56,35 @@ from os.path import basename
 from typing import Tuple
 
 import numpy as np
+from deep_folding.brainvisa import _ALL_SUBJECTS
+from deep_folding.brainvisa import exception_handler
 from deep_folding.brainvisa.utils.folder import create_folder
-from deep_folding.brainvisa.utils.list import get_sublist
-from deep_folding.brainvisa.utils.logs import log_command_line
+from deep_folding.brainvisa.utils.subjects import get_number_subjects
+from deep_folding.brainvisa.utils.subjects import select_subjects_int
+from deep_folding.brainvisa.utils.logs import setup_log
 from deep_folding.brainvisa.utils.parallel import define_njobs
 from pqdm.processes import pqdm
+from deep_folding.config.logs import set_file_logger
 from soma import aims
 
-logging.basicConfig(level=logging.INFO)
+# Defines logger
+log = set_file_logger(__file__)
 
-log = logging.getLogger(basename(__file__))
+# Default directory in which lies the dataset
+_SRC_DIR_DEFAULT = "/tgcc/hcp/ANALYSIS/3T_morphologist"
 
-_ALL_SUBJECTS = -1
+# Default directory where we put skeletons
+_SKELETON_DIR_DEFAULT = "/neurospin/dico/data/deep_folding/test/hcp"
 
+# Gives the relative path to the manually labelled graph .arg
+# in the supervised database
+_PATH_TO_GRAPH_DEFAULT = "t1mri/default_acquisition/default_analysis/folds/3.1/default_session_*"
+
+# hemisphere 'L' or 'R'
+_SIDE_DEFAULT = 'R'
+
+# junction type 'wide' or 'thin'
+_JUNCTION_DEFAULT = 'thin'
 
 def parse_args(argv):
     """Parses command-line arguments
@@ -82,39 +98,65 @@ def parse_args(argv):
 
     # Parse command line arguments
     parser = argparse.ArgumentParser(
-        prog='generate_skeleton.py',
-        description='Generates skeleton and foldlabel files from graphs')
+        prog=basename(__file__),
+        description='Generates skeleton files from graphs')
     parser.add_argument(
-        "-s", "--src_dir", type=str, required=True,
-        help='Source directory where the graph data lies.')
+        "-s", "--src_dir", type=str, default=_SRC_DIR_DEFAULT,
+        help='Source directory where the graph data lies. '
+             'Default is : ' + _SRC_DIR_DEFAULT)
     parser.add_argument(
-        "-t", "--tgt_dir", type=str, required=True,
-        help='Output directory where to put skeleton and fold label files.')
+        "-o", "--output_dir", type=str, default=_SKELETON_DIR_DEFAULT,
+        help='Output directory where to put skeleton files.'
+            'Default is : ' + _SKELETON_DIR_DEFAULT)
     parser.add_argument(
-        "-i", "--side", type=str, required=True,
-        help='Hemisphere side (either L or R).')
+        "-i", "--side", type=str, default=_SIDE_DEFAULT,
+        help='Hemisphere side. Default is : ' + _SIDE_DEFAULT)
     parser.add_argument(
-        "-j", "--junction", type=str, required=True,
-        help='junction rendering (either \'wide\' or \'thin\')')
+        "-p", "--path_to_graph", type=str,
+        default=_PATH_TO_GRAPH_DEFAULT,
+        help='Relative path to graph. '
+             'Default is ' + _PATH_TO_GRAPH_DEFAULT)
+    parser.add_argument(
+        "-j", "--junction", type=str, default=_JUNCTION_DEFAULT,
+        help='junction rendering (either \'wide\' or \'thin\') '
+             f"Default is {_JUNCTION_DEFAULT}")
+    parser.add_argument(
+        "-a", "--parallel", default=False, action='store_true',
+        help='if set (-a), launches computation in parallel')
     parser.add_argument(
         "-n", "--nb_subjects", type=str, default="all",
         help='Number of subjects to take into account, or \'all\'. '
              '0 subject is allowed, for debug purpose.'
              'Default is : all')
     parser.add_argument(
-        "-v", "--verbose",
-        default=False,
-        action='store_true',
-        help='If verbose is true, no parallelism.')
+        '-v', '--verbose', action='count', default=0,
+        help='Verbose mode: '
+        'If no option is provided then logging.INFO is selected. '
+        'If one option -v (or -vv) or more is provided '
+        'then logging.DEBUG is selected.')
 
     args = parser.parse_args(argv)
-    args.src_dir = abspath(args.src_dir)
-    args.tgt_dir = abspath(args.tgt_dir)
 
-    return args
+    setup_log(args,
+              log_dir=f"{args.output_dir}/skeletons",
+              prog_name=basename(__file__),
+              suffix='right' if args.side == 'R' else 'left')
+
+    params = {}
+
+    params['src_dir'] = abspath(args.src_dir)
+    params['skeleton_dir'] = abspath(args.output_dir)
+    params['path_to_graph'] = args.path_to_graph
+    params['side'] = args.side
+    params['junction'] = args.junction
+    params['parallel'] = args.parallel
+    # Checks if nb_subjects is either the string "all" or a positive integer
+    params['nb_subjects'] = get_number_subjects(args.nb_subjects)
+
+    return params
 
 
-def create_volume_from_graph(graph: aims.Graph) -> aims.Volume:
+def create_empty_volume_from_graph(graph: aims.Graph) -> aims.Volume:
     """Creates empty volume with graph header"""
 
     voxel_size = graph['voxel_size'][:3]
@@ -134,7 +176,7 @@ def create_volume_from_graph(graph: aims.Graph) -> aims.Volume:
 
 
 def generate_skeleton_thin_junction(
-        graph: aims.Graph) -> Tuple[aims.Volume, aims.Volume]:
+        graph: aims.Graph) -> aims.Volume:
     """Converts an aims graph into skeleton and foldlabel volumes
 
     It should produce thin junctions as vertices (aims_ss, aims_bottom)
@@ -142,11 +184,8 @@ def generate_skeleton_thin_junction(
     Thus, when voxels are present in both, simple and bottom surfaces override
     junctions
     """
-    vol_skel = create_volume_from_graph(graph)
+    vol_skel = create_empty_volume_from_graph(graph)
     arr_skel = np.asarray(vol_skel)
-
-    vol_label = create_volume_from_graph(graph)
-    arr_label = np.asarray(vol_label)
 
     # Sorted in ascendent priority
     label = {'aims_other': 1,
@@ -168,7 +207,6 @@ def generate_skeleton_thin_junction(
                     continue
                 for i, j, k in voxels:
                     arr_skel[i, j, k] = value
-                    arr_label[i, j, k] = label[bucket_name]
 
     for edge in graph.edges():
         for bucket_name, value in {'aims_plidepassage': 120}.items():
@@ -180,7 +218,6 @@ def generate_skeleton_thin_junction(
                     continue
                 for i, j, k in voxels:
                     arr_skel[i, j, k] = value
-                    arr_label[i, j, k] = label[bucket_name]
 
     for vertex in graph.vertices():
         for bucket_name, value in {'aims_other': 100,
@@ -196,13 +233,12 @@ def generate_skeleton_thin_junction(
                     if arr_skel[i, j, k] != 0:
                         cnt_duplicate += 1
                     arr_skel[i, j, k] = value
-                    arr_label[i, j, k] = label[bucket_name]
 
-    return vol_skel, vol_label
+    return vol_skel
 
 
 def generate_skeleton_wide_junction(
-        graph: aims.Graph) -> Tuple[aims.Volume, aims.Volume]:
+        graph: aims.Graph) -> aims.Volume:
     """Converts an aims graph into skeleton and foldlabel volumes
 
     It should produce wide junctions as edges (junction, plidepassage)
@@ -210,11 +246,8 @@ def generate_skeleton_wide_junction(
     Thus, when voxels are present in both, junction voxels override
     simple surface and bottom voxels
     """
-    vol_skel = create_volume_from_graph(graph)
+    vol_skel = create_empty_volume_from_graph(graph)
     arr_skel = np.asarray(vol_skel)
-
-    vol_label = create_volume_from_graph(graph)
-    arr_label = np.asarray(vol_label)
 
     # Sorted in ascendent priority
     label = {'aims_other': 1,
@@ -240,7 +273,6 @@ def generate_skeleton_wide_junction(
                     if arr_skel[i, j, k] != 0:
                         cnt_duplicate += 1
                     arr_skel[i, j, k] = value
-                    arr_label[i, j, k] = label[bucket_name]
 
     for edge in graph.edges():
         for bucket_name, value in {'aims_junction': 110}.items():
@@ -252,7 +284,6 @@ def generate_skeleton_wide_junction(
                     continue
                 for i, j, k in voxels:
                     arr_skel[i, j, k] = value
-                    arr_label[i, j, k] = label[bucket_name]
 
     for edge in graph.edges():
         for bucket_name, value in {'aims_plidepassage': 120}.items():
@@ -264,93 +295,128 @@ def generate_skeleton_wide_junction(
                     continue
                 for i, j, k in voxels:
                     arr_skel[i, j, k] = value
-                    arr_label[i, j, k] = label[bucket_name]
 
-    return vol_skel, vol_label
+    return vol_skel
+
+
+def generate_skeleton_from_graph(graph: aims.Graph,
+                                 junction: str = _JUNCTION_DEFAULT) -> aims.Volume:
+    """Generates skeleton from graph"""
+    if junction == 'wide':
+        vol_skel = generate_skeleton_wide_junction(graph)
+    else:
+        vol_skel = generate_skeleton_thin_junction(graph)
+    return vol_skel
+
+
+def generate_skeleton_from_graph_file(graph_file: str,
+                                      skeleton_file: str,
+                                      junction: str = _JUNCTION_DEFAULT):
+    """Generates skeleton from graph file"""
+    graph = aims.read(graph_file)
+    vol_skeleton = generate_skeleton_from_graph(graph, junction)
+    aims.write(vol_skeleton, skeleton_file)
 
 
 class GraphConvert2Skeleton:
-    """Class to convert graph into skeleton and foldlabel files
+    """Class to convert all graphs from a folder into skeletons
 
     It contains all information to scan a dataset for graphs
     and writes skeletons and foldlabels into target directory
     """
 
-    def __init__(self, src_dir, tgt_dir, nb_subjects, side, junction):
+    def __init__(self, src_dir, skeleton_dir,
+                 side, junction, parallel,
+                 path_to_graph):
         self.src_dir = src_dir
-        self.tgt_dir = tgt_dir
-        self.nb_subjects = nb_subjects
+        self.skeleton_dir = skeleton_dir
         self.side = side
         self.junction = junction
-        self.graph_subdir = "t1mri/default_acquisition/default_analysis/folds/3.1/default_session_*"
-        self.skeleton_dir = f"{self.tgt_dir}/skeleton/{self.side}"
-        self.foldlabel_dir = f"{self.tgt_dir}/foldlabel/{self.side}"
-
+        self.parallel = parallel
+        self.path_to_graph = path_to_graph
+        self.skeleton_dir = f"{self.skeleton_dir}/skeletons/{self.side}"
         create_folder(abspath(self.skeleton_dir))
-        create_folder(abspath(self.foldlabel_dir))
 
-    def generate_skeleton(self, subject: str):
+    def generate_one_skeleton(self, subject: str):
         """Generates and writes skeleton for one subject.
         """
         graph_file = glob.glob(
-            f"{self.src_dir}/{subject}*/{self.graph_subdir}/{self.side}{subject}*.arg")[0]
-        graph = aims.read(graph_file)
+            f"{self.src_dir}/{subject}*/{self.path_to_graph}/{self.side}{subject}*.arg")[0]
+        skeleton_file = f"{self.skeleton_dir}/{self.side}skeleton_generated_{subject}.nii.gz"
 
-        if self.junction == 'wide':
-            vol_skel, vol_label = generate_skeleton_wide_junction(graph)
-        else:
-            vol_skel, vol_label = generate_skeleton_thin_junction(graph)
+        generate_skeleton_from_graph_file(graph_file,
+                                          skeleton_file,
+                                          self.junction)
 
-        skeleton_filename = f"{self.skeleton_dir}/{self.side}skeleton_generated_{subject}.nii.gz"
-        foldlabel_filename = f"{self.foldlabel_dir}/{self.side}foldlabel_{subject}.nii.gz"
-
-        aims.write(vol_skel, skeleton_filename)
-        aims.write(vol_label, foldlabel_filename)
-
-    def loop(self, nb_subjects, verbose=False):
+    def compute(self, number_subjects):
         """Loops over subjects and converts graphs into skeletons.
         """
+        # Gets list fo subjects
         filenames = glob.glob(f"{self.src_dir}/*/")
         list_subjects = [
             re.search(
                 '([ae\\d]{5,6})',
                 filename).group(0) for filename in filenames]
-        list_subjects = get_sublist(list_subjects, nb_subjects)
-        if verbose:
+        list_subjects = select_subjects_int(list_subjects, number_subjects)
+
+        # Performs computation on all subjects either serially or in parallel
+        if self.parallel:
             log.info(
-                "VERBOSE MODE: subjects are scanned serially, without parallelism")
-            for sub in list_subjects:
-                self.generate_skeleton(sub)
+                "PARALLEL MODE: subjects are computed in parallel.")
+            pqdm(list_subjects, self.generate_one_skeleton, n_jobs=define_njobs())
         else:
-            pqdm(list_subjects, self.generate_skeleton, n_jobs=define_njobs())
+            log.info(
+                "SERIAL MODE: subjects are scanned serially, "
+                "without parallelism")
+            for sub in list_subjects:
+                self.generate_one_skeleton(sub)
 
 
+def generate_skeletons(
+        src_dir=_SRC_DIR_DEFAULT,
+        skeleton_dir=_SKELETON_DIR_DEFAULT,
+        path_to_graph=_PATH_TO_GRAPH_DEFAULT,
+        side=_SIDE_DEFAULT,
+        junction=_JUNCTION_DEFAULT,
+        parallel=False,
+        number_subjects=_ALL_SUBJECTS):
+    """Generates skeletons from graphs"""
+
+    # Initialization
+    conversion = GraphConvert2Skeleton(
+        src_dir=src_dir,
+        skeleton_dir=skeleton_dir,
+        path_to_graph=path_to_graph,
+        side=side,
+        junction=junction,
+        parallel=parallel
+    )
+    # Actual generation of skeletons from graphs
+    conversion.compute(number_subjects=number_subjects)
+
+
+@exception_handler
 def main(argv):
-    """
+    """Reads argument line and generates skeleton from graph
+
+    Args:
+        argv: a list containing command line arguments
     """
     # Parsing arguments
-    args = parse_args(argv)
+    params = parse_args(argv)
 
-    # Writes command line argument to target dir for logging
-    log_command_line(args, "generate_skeleton.py", args.tgt_dir)
-
-    # Converts graph to skeleton and foldlabel
-    conversion = GraphConvert2Skeleton(args.src_dir,
-                                       args.tgt_dir,
-                                       args.nb_subjects,
-                                       args.side,
-                                       args.junction)
-    conversion.loop(nb_subjects=args.nb_subjects,
-                    verbose=args.verbose)
+    # Actual API
+    generate_skeletons(
+        src_dir=params['src_dir'],
+        skeleton_dir=params['skeleton_dir'],
+        path_to_graph=params['path_to_graph'],
+        side=params['side'],
+        junction=params['junction'],
+        parallel=params['parallel'],
+        number_subjects=params['nb_subjects'])
 
 
 if __name__ == '__main__':
-    # src_dir = "/mnt/n4hhcp/hcp/ANALYSIS/3T_morphologist"
-    # tgt_dir = "/neurospin/dico/data/deep_folding/datasets/hcp"
-    # args = "-i R -v True -n 5 -s " + src_dir + " -t " + tgt_dir
-    # argv = args.split(' ')
-    # main(argv=argv)
-
     # This permits to call main also from another python program
     # without having to make system calls
     main(argv=sys.argv[1:])
