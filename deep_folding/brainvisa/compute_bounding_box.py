@@ -43,14 +43,13 @@ in the MNI152  space.
 """
 import argparse
 import glob
-import os
 import sys
 from os.path import basename
 from os.path import join
 
 import numpy as np
-import six
 from deep_folding.brainvisa import _ALL_SUBJECTS
+from deep_folding.brainvisa import exception_handler
 from deep_folding.brainvisa.utils.bbox import compute_max
 from deep_folding.brainvisa.utils.folder import create_folder
 from deep_folding.brainvisa.utils.logs import LogJson
@@ -321,7 +320,7 @@ class BoundingBoxMax:
                            'src_dir': self.src_dir,
                            'bbox_dir': self.bbox_dir,
                            'out_voxel_size': self.voxel_size_out[0]}
-            self.json.update(dict_to_add=dict_to_add)
+            self.json.update(dict_to_add)
 
             # MAIN PROGRAM
             # Determines box for each subject
@@ -353,7 +352,7 @@ class BoundingBoxMax:
                            'bbmin_AIMS_Talairach': bbmin_tal.tolist(),
                            'bbmax_AIMS_Talairach': bbmax_tal.tolist()
                            }
-            self.json.update(dict_to_add=dict_to_add)
+            self.json.update(dict_to_add)
             log.debug(f"box (voxel): min = {bbmin_vox}")
             log.debug(f"box (voxel): max = {bbmax_vox}")
 
@@ -384,7 +383,7 @@ def compute_bounding_box(src_dir=_SRC_DIR_DEFAULT,
         path_to_graph: string giving relative path to manually labelled graph
         side: hemisphere side (either 'L' for left, or 'R' for right)
         sulcus: string giving the sulcus to analyze
-        sulcus_name: string giving a new sulcus name (optional)
+        new_sulcus: string giving a new sulcus name (optional)
         number_subjects: integer giving the number of subjects to analyze,
             by default it is set to _ALL_SUBJECTS (-1)
         out_voxel_size: float giving voxel size in mm
@@ -427,7 +426,7 @@ def parse_args(argv: list) -> dict:
              'one after the other. Example: -s DIR_1 DIR_2. '
              'Default is : ' + _SRC_DIR_DEFAULT)
     parser.add_argument(
-        "-b", "--bbox_dir", type=str, default=_BBOX_DIR_DEFAULT,
+        "-o", "--output_dir", type=str, default=_BBOX_DIR_DEFAULT,
         help='Output directory where to store the output bbox json files. '
              'Default is : ' + _BBOX_DIR_DEFAULT)
     parser.add_argument(
@@ -459,7 +458,7 @@ def parse_args(argv: list) -> dict:
              'then logging.DEBUG is selected.')
     parser.add_argument(
         "-x", "--out_voxel_size", type=float, default=_VOXEL_SIZE_DEFAULT,
-        help='Voxel size of of bounding box. '
+        help='Voxel size of bounding box. '
              'Default is : None')
 
     params = {}
@@ -469,14 +468,14 @@ def parse_args(argv: list) -> dict:
     # Sets logger level, files log handler and prints/logs command line
     new_sulcus = args.new_sulcus if args.new_sulcus else args.sulcus
     setup_log(args,
-              log_dir=f"{args.bbox_dir}/{args.side}",
+              log_dir=f"{args.output_dir}/{args.side}",
               prog_name=basename(__file__),
               suffix=complete_sulci_name(new_sulcus, args.side))
 
     params['src_dir'] = args.src_dir  # src_dir is a list
     params['path_to_graph'] = args.path_to_graph
     # bbox_dir is a string, only one directory
-    params['bbox_dir'] = args.bbox_dir
+    params['bbox_dir'] = args.output_dir
     params['sulcus'] = args.sulcus  # sulcus is a string
     params['new_sulcus'] = args.new_sulcus
     params['side'] = args.side
@@ -488,6 +487,7 @@ def parse_args(argv: list) -> dict:
     return params
 
 
+@exception_handler
 def main(argv):
     """Reads argument line and determines the max bounding box
 
@@ -495,28 +495,22 @@ def main(argv):
         argv: a list containing command line arguments
     """
 
-    # This code permits to catch SystemExit with exit code 0
-    # such as the one raised when "--help" is given as argument
-    try:
-        # Parsing arguments
-        params = parse_args(argv)
-        # Actual API
-        compute_bounding_box(src_dir=params['src_dir'],
-                             path_to_graph=params['path_to_graph'],
-                             bbox_dir=params['bbox_dir'],
-                             sulcus=params['sulcus'],
-                             new_sulcus=params['new_sulcus'],
-                             side=params['side'],
-                             number_subjects=params['nb_subjects'],
-                             out_voxel_size=params['out_voxel_size'])
-    except SystemExit as exc:
-        if exc.code != 0:
-            six.reraise(*sys.exc_info())
-
+    # Parsing arguments
+    params = parse_args(argv)
+    # Actual API
+    compute_bounding_box(src_dir=params['src_dir'],
+                         path_to_graph=params['path_to_graph'],
+                         bbox_dir=params['bbox_dir'],
+                         sulcus=params['sulcus'],
+                         new_sulcus=params['new_sulcus'],
+                         side=params['side'],
+                         number_subjects=params['nb_subjects'],
+                         out_voxel_size=params['out_voxel_size'])
 
 ######################################################################
 # Main program
 ######################################################################
+
 
 if __name__ == '__main__':
     # This permits to call main also from another python program
