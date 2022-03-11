@@ -63,7 +63,7 @@ from deep_folding.brainvisa.utils.subjects import get_number_subjects
 from deep_folding.brainvisa.utils.subjects import select_subjects_int
 from deep_folding.brainvisa.utils.logs import setup_log
 from deep_folding.brainvisa.utils.parallel import define_njobs
-from deep_folding.brainvisa.utils.skeletons import \
+from deep_folding.brainvisa.utils.skeleton import \
     generate_skeleton_from_graph_file
 from pqdm.processes import pqdm
 from deep_folding.config.logs import set_file_logger
