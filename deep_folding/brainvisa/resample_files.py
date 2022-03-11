@@ -57,6 +57,7 @@ import re
 import sys
 import tempfile
 from os.path import join
+from os.path import basename
 
 import numpy as np
 import six
@@ -64,8 +65,10 @@ from deep_folding.brainvisa.utils.logs import LogJson
 from deep_folding.brainvisa.utils.logs import log_command_line
 from deep_folding.brainvisa.utils.parallel import define_njobs
 from deep_folding.brainvisa.utils.resample import resample
-from deep_folding.brainvisa.utils.sulcus_side import complete_sulci_name
+from deep_folding.brainvisa.utils.sulcus import complete_sulci_name
+from deep_folding.brainvisa.utils.logs import setup_log
 from pqdm.processes import pqdm
+from deep_folding.config.logs import set_file_logger
 from soma import aims
 
 _ALL_SUBJECTS = -1
@@ -96,16 +99,16 @@ _MORPHOLOGIST_DIR_DEFAULT = 'ANALYSIS/3T_morphologist'
 # -------------------------
 _TGT_DIR_DEFAULT = '/neurospin/dico/data/deep_folding/test'
 
-_VERBOSE_DEFAULT = False
+# Defines logger
+log = set_file_logger(__file__)
 
 # temporary directory
 temp_dir = tempfile.mkdtemp()
 
 
-def resample_one_skeleton(input_image,
-                          out_voxel_size,
-                          transformation,
-                          verbose=False):
+def resample_one_file(input_image,
+                      out_voxel_size,
+                      transformation):
     """Resamples one skeleton
 
     Args
@@ -116,7 +119,6 @@ def resample_one_skeleton(input_image,
             Output voxel size (default: None, no resampling)
         transformation: string or aims.Volume
             either path to transformation file or transformation itself
-        verbose: boolean
 
     Returns:
         resampled: aims.Volume
@@ -134,15 +136,13 @@ def resample_one_skeleton(input_image,
     resampled = resample(input_image=input_image,
                          output_vs=out_voxel_size,
                          transformation=transformation,
-                         values=values,
-                         verbose=verbose)
+                         values=values)
     return resampled
 
 
 def resample_one_foldlabel(input_image,
                            out_voxel_size,
-                           transformation,
-                           verbose=False):
+                           transformation):
     """Resamples one foldlabel
 
     Args
@@ -153,7 +153,6 @@ def resample_one_foldlabel(input_image,
             Output voxel size (default: None, no resampling)
         transformation: string or aims.Volume
             either path to transformation file or transformation itself
-        verbose: boolean
 
     Returns:
         resampled: aims.Volume
@@ -164,7 +163,7 @@ def resample_one_foldlabel(input_image,
     resampled = resample(input_image=input_image,
                          output_vs=out_voxel_size,
                          transformation=transformation,
-                         verbose=verbose)
+                         verbose=log.level)
     return resampled
 
 
@@ -179,8 +178,7 @@ class DatasetResampledSkeleton:
                  morphologist_dir=_MORPHOLOGIST_DIR_DEFAULT,
                  list_sulci=_SULCUS_DEFAULT,
                  side=_SIDE_DEFAULT,
-                 out_voxel_size=_OUT_VOXEL_SIZE,
-                 verbose=_VERBOSE_DEFAULT):
+                 out_voxel_size=_OUT_VOXEL_SIZE):
         """Inits with list of directories and list of sulci
 
         Args:
@@ -202,7 +200,6 @@ class DatasetResampledSkeleton:
         self.tgt_dir = tgt_dir
         self.morphologist_dir = morphologist_dir
         self.out_voxel_size = out_voxel_size
-        self.verbose = verbose
 
         # Morphologist directory
         self.morphologist_dir = join(self.graph_dir, self.morphologist_dir)
@@ -276,31 +273,16 @@ class DatasetResampledSkeleton:
             file_resampled_skeleton = self.resampled_skeleton_file % {
                 'subject': subject_id, 'side': self.side}
 
-            resampled = resample_one_skeleton(
+            resampled = resample_one_file(
                 input_image=file_skeleton,
                 out_voxel_size=self.out_voxel_size,
-                transformation=g_to_icbm_template,
-                verbose=False)
+                transformation=g_to_icbm_template)
             aims.write(resampled, file_resampled_skeleton)
 
         else:
             raise FileNotFoundError(f"{file_skeleton} not found")
 
-        if os.path.exists(file_foldlabel):
-            # Output resampled foldlabel file name
-            file_resampled_foldlabel = self.resampled_label_file % {
-                'subject': subject_id, 'side': self.side}
-
-            # Normalization and resampling of skeleton images
-            resampled = resample(input_image=file_foldlabel,
-                                 output_vs=self.out_voxel_size,
-                                 transformation=g_to_icbm_template,
-                                 verbose=False)
-            aims.write(resampled, file_resampled_foldlabel)
-        else:
-            raise FileNotFoundError(f"{file_foldlabel} not found")
-
-    def loop(self, number_subjects=_ALL_SUBJECTS):
+    def compute(self, number_subjects=_ALL_SUBJECTS):
         """Loops over nii files
 
         The programm loops over all subjects from the input (source) directory.
@@ -347,19 +329,21 @@ class DatasetResampledSkeleton:
             self.json.update(dict_to_add=dict_to_add)
 
             # Performs resampling for each file in a parallelized way
-            print("list_subjects = ", list_subjects)
+            log.info("list_subjects[:5] = ", list_subjects[:5])
+            log.debug("list_subjects = ", list_subjects)
 
-            if self.verbose:
-                print("VERBOSE MODE: subjects are scanned serially, without parallelism")
-                for sub in list_subjects:
-                    self.resample_one_file(sub)
-                print(
-                    "VERBOSE MODE: subjects have been scanned serially, without parallelism")
-            else:
+            if self.parallel:
+                log.info(
+                    "PARALLEL MODE: subjects are in parallel")
                 pqdm(
                     list_subjects,
                     self.resample_one_file,
                     n_jobs=define_njobs())
+           else:
+                log.info(
+                    "SERIAL MODE: subjects are scanned serially")
+                 for sub in list_subjects:
+                    self.resample_one_file(sub)
 
     def resample_skeletons(self, number_subjects=_ALL_SUBJECTS):
         """Main API to resample skeletons
@@ -389,15 +373,15 @@ def parse_args(argv):
 
     # Parse command line arguments
     parser = argparse.ArgumentParser(
-        prog='generate_skeletons.py',
-        description='Generates resampled skeletons')
+        prog=basename(__file__),
+        description='Generates resampled files (either skeletons or foldlabels)')
     parser.add_argument(
         "-g", "--graph_dir", type=str, default=_GRAPH_DIR_DEFAULT,
         help='Source directory where the graph lies. '
              'Default is : ' + _GRAPH_DIR_DEFAULT)
     parser.add_argument(
         "-s", "--src_dir", type=str, default=_SRC_DIR_DEFAULT,
-        help='Source directory where skeletons and labels lie. '
+        help='Source directory where inputs files (skeletons or labels) lie. '
              'Default is : ' + _SRC_DIR_DEFAULT)
     parser.add_argument(
         "-t", "--tgt_dir", type=str, default=_TGT_DIR_DEFAULT,
