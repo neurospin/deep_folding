@@ -63,12 +63,13 @@ from deep_folding.brainvisa.utils.skeleton import \
     generate_skeleton_from_graph_file
 from pqdm.processes import pqdm
 from deep_folding.config.logs import set_file_logger
+from soma import aims
 
 # Import constants
 from deep_folding.brainvisa.utils.constants import \
     _ALL_SUBJECTS, _SRC_DIR_DEFAULT,\
-    _SKELETON_DIR_DEFAULT, _SIDE_DEFAULT, \
-    _JUNCTION_DEFAULT, _PATH_TO_GRAPH_DEFAULT
+    _TRANSFORM_DIR_DEFAULT, _SIDE_DEFAULT, \
+    _PATH_TO_GRAPH_DEFAULT
 
 # Defines logger
 log = set_file_logger(__file__)
@@ -86,15 +87,16 @@ def parse_args(argv):
     # Parse command line arguments
     parser = argparse.ArgumentParser(
         prog=basename(__file__),
-        description='Generates skeleton files from graphs')
+        description='Generates transformation files '
+                    'to ICBM 2009c template from graphs')
     parser.add_argument(
         "-s", "--src_dir", type=str, default=_SRC_DIR_DEFAULT,
         help='Source directory where the graph data lies. '
              'Default is : ' + _SRC_DIR_DEFAULT)
     parser.add_argument(
-        "-o", "--output_dir", type=str, default=_SKELETON_DIR_DEFAULT,
+        "-o", "--output_dir", type=str, default=_TRANSFORM_DIR_DEFAULT,
         help='Output directory where to put skeleton files.'
-            'Default is : ' + _SKELETON_DIR_DEFAULT)
+            'Default is : ' + _TRANSFORM_DIR_DEFAULT)
     parser.add_argument(
         "-i", "--side", type=str, default=_SIDE_DEFAULT,
         help='Hemisphere side. Default is : ' + _SIDE_DEFAULT)
@@ -103,10 +105,6 @@ def parse_args(argv):
         default=_PATH_TO_GRAPH_DEFAULT,
         help='Relative path to graph. '
              'Default is ' + _PATH_TO_GRAPH_DEFAULT)
-    parser.add_argument(
-        "-j", "--junction", type=str, default=_JUNCTION_DEFAULT,
-        help='junction rendering (either \'wide\' or \'thin\') '
-             f"Default is {_JUNCTION_DEFAULT}")
     parser.add_argument(
         "-a", "--parallel", default=False, action='store_true',
         help='if set (-a), launches computation in parallel')
@@ -132,10 +130,9 @@ def parse_args(argv):
     params = {}
 
     params['src_dir'] = abspath(args.src_dir)
-    params['skeleton_dir'] = abspath(args.output_dir)
+    params['transform_dir'] = abspath(args.output_dir)
     params['path_to_graph'] = args.path_to_graph
     params['side'] = args.side
-    params['junction'] = args.junction
     params['parallel'] = args.parallel
     # Checks if nb_subjects is either the string "all" or a positive integer
     params['nb_subjects'] = get_number_subjects(args.nb_subjects)
@@ -143,35 +140,35 @@ def parse_args(argv):
     return params
 
 
-class GraphConvert2Skeleton:
+class GraphGenerateTransform:
     """Class to convert all graphs from a folder into skeletons
 
     It contains all information to scan a dataset for graphs
     and writes skeletons and foldlabels into target directory
     """
 
-    def __init__(self, src_dir, skeleton_dir,
-                 side, junction, parallel,
+    def __init__(self, src_dir, transform_dir,
+                 side, parallel,
                  path_to_graph):
         self.src_dir = src_dir
-        self.skeleton_dir = skeleton_dir
+        self.transform_dir = transform_dir
         self.side = side
-        self.junction = junction
         self.parallel = parallel
         self.path_to_graph = path_to_graph
-        self.skeleton_dir = f"{self.skeleton_dir}/{self.side}"
-        create_folder(abspath(self.skeleton_dir))
+        self.transform_dir = f"{self.transform_dir}/{self.side}"
+        create_folder(abspath(self.transform_dir))
 
-    def generate_one_skeleton(self, subject: str):
-        """Generates and writes skeleton for one subject.
+    def generate_one_transform(self, subject: str):
+        """Generates and writes ICBM2009c transform for one subject.
         """
         graph_file = glob.glob(
             f"{self.src_dir}/{subject}*/{self.path_to_graph}/{self.side}{subject}*.arg")[0]
-        skeleton_file = f"{self.skeleton_dir}/{self.side}skeleton_generated_{subject}.nii.gz"
+        transform_file = f"{self.transform_dir}/{self.side}transform_to_ICBM2009c_{subject}.trm"
 
-        generate_skeleton_from_graph_file(graph_file,
-                                          skeleton_file,
-                                          self.junction)
+        graph = aims.read(graph_file)
+        g_to_icbm_template = aims.GraphManip.getICBM2009cTemplateTransform(
+            graph)
+        aims.write(g_to_icbm_template, transform_file)
 
     def compute(self, number_subjects):
         """Loops over subjects and converts graphs into skeletons.
@@ -188,36 +185,34 @@ class GraphConvert2Skeleton:
         if self.parallel:
             log.info(
                 "PARALLEL MODE: subjects are computed in parallel.")
-            pqdm(list_subjects, self.generate_one_skeleton, n_jobs=define_njobs())
+            pqdm(list_subjects, self.generate_one_transform, n_jobs=define_njobs())
         else:
             log.info(
                 "SERIAL MODE: subjects are scanned serially, "
                 "without parallelism")
             for sub in list_subjects:
-                self.generate_one_skeleton(sub)
+                self.generate_one_transform(sub)
 
 
-def generate_skeletons(
+def generate_ICBM2009c_transforms(
         src_dir=_SRC_DIR_DEFAULT,
-        skeleton_dir=_SKELETON_DIR_DEFAULT,
+        transform_dir=_TRANSFORM_DIR_DEFAULT,
         path_to_graph=_PATH_TO_GRAPH_DEFAULT,
         side=_SIDE_DEFAULT,
-        junction=_JUNCTION_DEFAULT,
         parallel=False,
         number_subjects=_ALL_SUBJECTS):
     """Generates skeletons from graphs"""
 
     # Initialization
-    conversion = GraphConvert2Skeleton(
+    transform = GraphGenerateTransform(
         src_dir=src_dir,
-        skeleton_dir=skeleton_dir,
+        transform_dir=transform_dir,
         path_to_graph=path_to_graph,
         side=side,
-        junction=junction,
         parallel=parallel
     )
     # Actual generation of skeletons from graphs
-    conversion.compute(number_subjects=number_subjects)
+    transform.compute(number_subjects=number_subjects)
 
 
 @exception_handler
@@ -231,12 +226,11 @@ def main(argv):
     params = parse_args(argv)
 
     # Actual API
-    generate_skeletons(
+    generate_ICBM2009c_transforms(
         src_dir=params['src_dir'],
-        skeleton_dir=params['skeleton_dir'],
+        transform_dir=params['transform_dir'],
         path_to_graph=params['path_to_graph'],
         side=params['side'],
-        junction=params['junction'],
         parallel=params['parallel'],
         number_subjects=params['nb_subjects'])
 

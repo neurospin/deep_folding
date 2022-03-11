@@ -37,7 +37,7 @@ import numpy as np
 from soma import aims
 
 
-def generate_ref_volume_MNI_2009(out_voxel_size: tuple) -> aims.Volume:
+def generate_ref_volume_ICBM2009c(out_voxel_size: tuple) -> aims.Volume:
     """Defines MNI 2009 reference aims volume with output voxel size
 
     Args:

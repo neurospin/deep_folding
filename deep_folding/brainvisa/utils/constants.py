@@ -19,6 +19,10 @@ _SKELETON_DIR_DEFAULT = "/neurospin/dico/data/deep_folding/test/hcp/skeletons/ra
 # Default directory where we put foldlabels
 _FOLDLABEL_DIR_DEFAULT = "/neurospin/dico/data/deep_folding/test/hcp/foldlabels/raw"
 
+# Default directory where we put transform files to ICBM2009c
+_TRANSFORM_DIR_DEFAULT = "/neurospin/dico/data/deep_folding/test/hcp/transforms"
+
+
 # Default directory where we put resampled skeletons
 _RESAMPLED_SKELETON_DIR_DEFAULT = "/neurospin/dico/data/deep_folding/test/hcp/skeletons/1mm"
 
