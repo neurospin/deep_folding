@@ -1,8 +1,6 @@
 from six import reraise
 from sys import exc_info
 
-_ALL_SUBJECTS = -1
-
 def exception_handler(func):
     """This code permits to catch SystemExit with exit code 0
     

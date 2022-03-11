@@ -48,15 +48,11 @@
 
 import argparse
 import glob
-import logging
 import re
 import sys
 from os.path import abspath
 from os.path import basename
-from typing import Tuple
 
-import numpy as np
-from deep_folding.brainvisa import _ALL_SUBJECTS
 from deep_folding.brainvisa import exception_handler
 from deep_folding.brainvisa.utils.folder import create_folder
 from deep_folding.brainvisa.utils.subjects import get_number_subjects
@@ -67,26 +63,15 @@ from deep_folding.brainvisa.utils.skeleton import \
     generate_skeleton_from_graph_file
 from pqdm.processes import pqdm
 from deep_folding.config.logs import set_file_logger
-from soma import aims
+
+# Import constants
+from deep_folding.brainvisa.utils.constants import \
+    _ALL_SUBJECTS, _SRC_DIR_DEFAULT,\
+    _SKELETON_DIR_DEFAULT, _SIDE_DEFAULT, \
+    _JUNCTION_DEFAULT, _PATH_TO_GRAPH_DEFAULT
 
 # Defines logger
 log = set_file_logger(__file__)
-
-# Default directory in which lies the dataset
-_SRC_DIR_DEFAULT = "/tgcc/hcp/ANALYSIS/3T_morphologist"
-
-# Default directory where we put skeletons
-_SKELETON_DIR_DEFAULT = "/neurospin/dico/data/deep_folding/test/hcp"
-
-# Gives the relative path to the manually labelled graph .arg
-# in the supervised database
-_PATH_TO_GRAPH_DEFAULT = "t1mri/default_acquisition/default_analysis/folds/3.1/default_session_*"
-
-# hemisphere 'L' or 'R'
-_SIDE_DEFAULT = 'R'
-
-# junction type 'wide' or 'thin'
-_JUNCTION_DEFAULT = 'thin'
 
 def parse_args(argv):
     """Parses command-line arguments

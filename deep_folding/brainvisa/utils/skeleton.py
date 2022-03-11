@@ -91,9 +91,9 @@ def generate_skeleton_thin_junction(
                 if voxels.shape == (0,):
                     continue
                 for i, j, k in voxels:
-                    cnt_total += 1
-                    if arr_skel[i, j, k] != 0:
-                        cnt_duplicate += 1
+                    # cnt_total += 1
+                    # if arr_skel[i, j, k] != 0:
+                    #     cnt_duplicate += 1
                     arr_skel[i, j, k] = value
 
     return vol_skel
@@ -123,9 +123,9 @@ def generate_skeleton_wide_junction(
                 if voxels.shape == (0,):
                     continue
                 for i, j, k in voxels:
-                    cnt_total += 1
-                    if arr_skel[i, j, k] != 0:
-                        cnt_duplicate += 1
+                    # cnt_total += 1
+                    # if arr_skel[i, j, k] != 0:
+                    #     cnt_duplicate += 1
                     arr_skel[i, j, k] = value
 
     for edge in graph.edges():

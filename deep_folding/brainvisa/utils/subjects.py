@@ -35,7 +35,7 @@
 
 import os
 
-from deep_folding.brainvisa import _ALL_SUBJECTS
+from deep_folding.brainvisa.utils.constants import _ALL_SUBJECTS
 
 def get_number_subjects(nb_subjects: str) -> int:
     """Returns nb_subjects as int

@@ -48,7 +48,6 @@ from os.path import basename
 from os.path import join
 
 import numpy as np
-from deep_folding.brainvisa import _ALL_SUBJECTS
 from deep_folding.brainvisa import exception_handler
 from deep_folding.brainvisa.utils.bbox import compute_max
 from deep_folding.brainvisa.utils.folder import create_folder
@@ -64,28 +63,14 @@ from deep_folding.brainvisa.utils.sulcus import complete_sulci_name
 from deep_folding.config.logs import set_file_logger
 from soma import aims
 
+# Import constants
+from deep_folding.brainvisa.utils.constants import \
+    _ALL_SUBJECTS, _SUPERVISED_SRC_DIR_DEFAULT,\
+    _BBOX_DIR_DEFAULT, _SIDE_DEFAULT, _SULCUS_DEFAULT,\
+    _VOXEL_SIZE_DEFAULT, _PATH_TO_GRAPH_SUPERVISED_DEFAULT
+
 # Defines logger
 log = set_file_logger(__file__)
-
-# Default directory in which lies the manually segmented database
-_SRC_DIR_DEFAULT = "/neurospin/dico/data/bv_databases/human/pclean/all"
-
-# Default directory to which we write the bounding box results
-_BBOX_DIR_DEFAULT = "/neurospin/dico/data/deep_folding/test/bbox"
-
-# hemisphere 'L' or 'R'
-_SIDE_DEFAULT = 'R'
-
-# sulcus to encompass:
-# its name depends on the hemisphere side
-_SULCUS_DEFAULT = 'F.C.M.ant.'
-
-# voxel size:
-_VOXEL_SIZE_DEFAULT = 1.0
-
-# Gives the relative path to the manually labelled graph .arg
-# in the supervised database
-_PATH_TO_GRAPH_DEFAULT = "t1mri/t1/default_analysis/folds/3.3/base2018_manual"
 
 
 def box_ICBM2009c_to_aims_talairach(bbmin_mni152: np.array,
@@ -246,8 +231,8 @@ class BoundingBoxMax:
     """
 
     def __init__(self,
-                 src_dir=_SRC_DIR_DEFAULT,
-                 path_to_graph=_PATH_TO_GRAPH_DEFAULT,
+                 src_dir=_SUPERVISED_SRC_DIR_DEFAULT,
+                 path_to_graph=_PATH_TO_GRAPH_SUPERVISED_DEFAULT,
                  bbox_dir=_BBOX_DIR_DEFAULT,
                  sulcus=_SULCUS_DEFAULT,
                  new_sulcus=None,
@@ -363,9 +348,9 @@ class BoundingBoxMax:
         return bbmin_vox, bbmax_vox
 
 
-def compute_bounding_box(src_dir=_SRC_DIR_DEFAULT,
+def compute_bounding_box(src_dir=_SUPERVISED_SRC_DIR_DEFAULT,
                          bbox_dir=_BBOX_DIR_DEFAULT,
-                         path_to_graph=_PATH_TO_GRAPH_DEFAULT,
+                         path_to_graph=_PATH_TO_GRAPH_SUPERVISED_DEFAULT,
                          sulcus=_SULCUS_DEFAULT,
                          new_sulcus=None,
                          side=_SIDE_DEFAULT,
@@ -420,11 +405,11 @@ def parse_args(argv: list) -> dict:
         prog=basename(__file__),
         description='Computes bounding box around the named sulcus')
     parser.add_argument(
-        "-s", "--src_dir", type=str, default=_SRC_DIR_DEFAULT, nargs='+',
+        "-s", "--src_dir", type=str, default=_SUPERVISED_SRC_DIR_DEFAULT, nargs='+',
         help='Source directory where the MRI data lies. '
              'If there are several directories, add all directories '
              'one after the other. Example: -s DIR_1 DIR_2. '
-             'Default is : ' + _SRC_DIR_DEFAULT)
+             'Default is : ' + _SUPERVISED_SRC_DIR_DEFAULT)
     parser.add_argument(
         "-o", "--output_dir", type=str, default=_BBOX_DIR_DEFAULT,
         help='Output directory where to store the output bbox json files. '
@@ -442,9 +427,9 @@ def parse_args(argv: list) -> dict:
         help='Hemisphere side. Default is : ' + _SIDE_DEFAULT)
     parser.add_argument(
         "-p", "--path_to_graph", type=str,
-        default=_PATH_TO_GRAPH_DEFAULT,
+        default=_PATH_TO_GRAPH_SUPERVISED_DEFAULT,
         help='Relative path to manually labelled graph. '
-             'Default is ' + _PATH_TO_GRAPH_DEFAULT)
+             'Default is ' + _PATH_TO_GRAPH_SUPERVISED_DEFAULT)
     parser.add_argument(
         "-n", "--nb_subjects", type=str, default="all",
         help='Number of subjects to take into account, or \'all\'. '

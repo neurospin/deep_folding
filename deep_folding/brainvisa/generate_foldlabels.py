@@ -33,7 +33,7 @@
 # The fact that you are presently reading this means that you have had
 # knowledge of the CeCILL license version 2 and that you accept its terms.
 
-"""Write skeletons from graph files
+"""Write foldlabels from graph files
 
   Typical usage
   -------------
@@ -41,35 +41,37 @@
   (here brainvisa 5.0.0 installed with singurity) and launching the script
   from the terminal:
   >>> bv bash
-  >>> python generate_skeleton.py
+  >>> python generate_foldlabels.py
 
 
 """
 
 import argparse
 import glob
-import logging
 import re
 import sys
 from os.path import abspath
 from os.path import basename
-from typing import Tuple
 
-import numpy as np
+from deep_folding.brainvisa import exception_handler
 from deep_folding.brainvisa.utils.folder import create_folder
 from deep_folding.brainvisa.utils.subjects import get_number_subjects
 from deep_folding.brainvisa.utils.subjects import select_subjects_int
-from deep_folding.brainvisa.utils.logs import log_command_line
+from deep_folding.brainvisa.utils.logs import setup_log
 from deep_folding.brainvisa.utils.parallel import define_njobs
+from deep_folding.brainvisa.utils.foldlabel import \
+    generate_foldlabel_from_graph_file
 from pqdm.processes import pqdm
-from soma import aims
+from deep_folding.config.logs import set_file_logger
 
-logging.basicConfig(level=logging.INFO)
+# Import constants
+from deep_folding.brainvisa.utils.constants import \
+    _ALL_SUBJECTS, _SRC_DIR_DEFAULT,\
+    _FOLDLABEL_DIR_DEFAULT, _SIDE_DEFAULT, \
+    _JUNCTION_DEFAULT, _PATH_TO_GRAPH_DEFAULT
 
-log = logging.getLogger(basename(__file__))
-
-_ALL_SUBJECTS = -1
-
+# Defines logger
+log = set_file_logger(__file__)
 
 def parse_args(argv):
     """Parses command-line arguments
@@ -83,232 +85,98 @@ def parse_args(argv):
 
     # Parse command line arguments
     parser = argparse.ArgumentParser(
-        prog='generate_skeleton.py',
-        description='Generates skeleton and foldlabel files from graphs')
+        prog=basename(__file__),
+        description='Generates foldlabel files from graphs')
     parser.add_argument(
-        "-s", "--src_dir", type=str, required=True,
-        help='Source directory where the graph data lies.')
+        "-s", "--src_dir", type=str, default=_SRC_DIR_DEFAULT,
+        help='Source directory where the graph data lies.'
+             'Default is : ' + _SRC_DIR_DEFAULT)
     parser.add_argument(
-        "-t", "--tgt_dir", type=str, required=True,
-        help='Output directory where to put skeleton and fold label files.')
+        "-o", "--output_dir", type=str, default=_FOLDLABEL_DIR_DEFAULT,
+        help='Output directory where to put fold label files.'
+             'Default is : ' + _FOLDLABEL_DIR_DEFAULT)
     parser.add_argument(
-        "-i", "--side", type=str, required=True,
+        "-i", "--side", type=str, default=_SIDE_DEFAULT,
         help='Hemisphere side (either L or R).')
     parser.add_argument(
-        "-j", "--junction", type=str, required=True,
-        help='junction rendering (either \'wide\' or \'thin\')')
+        "-p", "--path_to_graph", type=str,
+        default=_PATH_TO_GRAPH_DEFAULT,
+        help='Relative path to graph. '
+             'Default is ' + _PATH_TO_GRAPH_DEFAULT)
+    parser.add_argument(
+        "-j", "--junction", type=str, default=_JUNCTION_DEFAULT,
+        help='junction rendering (either \'wide\' or \'thin\') '
+             f"Default is {_JUNCTION_DEFAULT}")
+    parser.add_argument(
+        "-a", "--parallel", default=False, action='store_true',
+        help='if set (-a), launches computation in parallel')
     parser.add_argument(
         "-n", "--nb_subjects", type=str, default="all",
         help='Number of subjects to take into account, or \'all\'. '
              '0 subject is allowed, for debug purpose.'
              'Default is : all')
     parser.add_argument(
-        "-v", "--verbose",
-        default=False,
-        action='store_true',
-        help='If verbose is true, no parallelism.')
+        '-v', '--verbose', action='count', default=0,
+        help='Verbose mode: '
+        'If no option is provided then logging.INFO is selected. '
+        'If one option -v (or -vv) or more is provided '
+        'then logging.DEBUG is selected.')
 
     args = parser.parse_args(argv)
-    args.src_dir = abspath(args.src_dir)
-    args.tgt_dir = abspath(args.tgt_dir)
 
-    return args
+    setup_log(args,
+              log_dir=f"{args.output_dir}/foldlabels",
+              prog_name=basename(__file__),
+              suffix='right' if args.side == 'R' else 'left')
 
+    params = {}
 
-def create_volume_from_graph(graph: aims.Graph) -> aims.Volume:
-    """Creates empty volume with graph header"""
+    params['src_dir'] = abspath(args.src_dir)
+    params['foldlabel_dir'] = abspath(args.output_dir)
+    params['path_to_graph'] = args.path_to_graph
+    params['side'] = args.side
+    params['junction'] = args.junction
+    params['parallel'] = args.parallel
+    # Checks if nb_subjects is either the string "all" or a positive integer
+    params['nb_subjects'] = get_number_subjects(args.nb_subjects)
 
-    voxel_size = graph['voxel_size'][:3]
-    # Adds 1 for each x,y,z dimension
-    dimensions = [i + j for i,
-                  j in zip(graph['boundingbox_max'], [1, 1, 1, 0])]
-
-    vol = aims.Volume(dimensions, dtype='S16')
-    vol.header()['voxel_size'] = voxel_size
-    if 'transformations' in graph.keys():
-        vol.header()['transformations'] = graph['transformations']
-    if 'referentials' in graph.keys():
-        vol.header()['referentials'] = graph['referentials']
-    if 'referential' in graph.keys():
-        vol.header()['referential'] = graph['referential']
-    return vol
+    return params
 
 
-def generate_skeleton_thin_junction(
-        graph: aims.Graph) -> Tuple[aims.Volume, aims.Volume]:
-    """Converts an aims graph into skeleton and foldlabel volumes
-
-    It should produce thin junctions as vertices (aims_ss, aims_bottom)
-    are written after edges (junction, plidepassage).
-    Thus, when voxels are present in both, simple and bottom surfaces override
-    junctions
-    """
-    vol_skel = create_volume_from_graph(graph)
-    arr_skel = np.asarray(vol_skel)
-
-    vol_label = create_volume_from_graph(graph)
-    arr_label = np.asarray(vol_label)
-
-    # Sorted in ascendent priority
-    label = {'aims_other': 1,
-             'aims_ss': 1000,
-             'aims_bottom': 2000,
-             'aims_junction': 3000,
-             'aims_plidepassage': 4000}
-
-    cnt_duplicate = 0
-    cnt_total = 0
-
-    for edge in graph.edges():
-        for bucket_name, value in {'aims_junction': 110}.items():
-            bucket = edge.get(bucket_name)
-            label[bucket_name] += 1
-            if bucket is not None:
-                voxels = np.array(bucket[0].keys())
-                if voxels.shape == (0,):
-                    continue
-                for i, j, k in voxels:
-                    arr_skel[i, j, k] = value
-                    arr_label[i, j, k] = label[bucket_name]
-
-    for edge in graph.edges():
-        for bucket_name, value in {'aims_plidepassage': 120}.items():
-            bucket = edge.get(bucket_name)
-            label[bucket_name] += 1
-            if bucket is not None:
-                voxels = np.array(bucket[0].keys())
-                if voxels.shape == (0,):
-                    continue
-                for i, j, k in voxels:
-                    arr_skel[i, j, k] = value
-                    arr_label[i, j, k] = label[bucket_name]
-
-    for vertex in graph.vertices():
-        for bucket_name, value in {'aims_other': 100,
-                                   'aims_ss': 60, 'aims_bottom': 30}.items():
-            bucket = vertex.get(bucket_name)
-            label[bucket_name] += 1
-            if bucket is not None:
-                voxels = np.array(bucket[0].keys())
-                if voxels.shape == (0,):
-                    continue
-                for i, j, k in voxels:
-                    cnt_total += 1
-                    if arr_skel[i, j, k] != 0:
-                        cnt_duplicate += 1
-                    arr_skel[i, j, k] = value
-                    arr_label[i, j, k] = label[bucket_name]
-
-    return vol_skel, vol_label
-
-
-def generate_skeleton_wide_junction(
-        graph: aims.Graph) -> Tuple[aims.Volume, aims.Volume]:
-    """Converts an aims graph into skeleton and foldlabel volumes
-
-    It should produce wide junctions as edges (junction, plidepassage)
-    are written after vertices (aims_ss, aims_bottom).
-    Thus, when voxels are present in both, junction voxels override
-    simple surface and bottom voxels
-    """
-    vol_skel = create_volume_from_graph(graph)
-    arr_skel = np.asarray(vol_skel)
-
-    vol_label = create_volume_from_graph(graph)
-    arr_label = np.asarray(vol_label)
-
-    # Sorted in ascendent priority
-    label = {'aims_other': 1,
-             'aims_ss': 1000,
-             'aims_bottom': 2000,
-             'aims_junction': 3000,
-             'aims_plidepassage': 4000}
-
-    cnt_duplicate = 0
-    cnt_total = 0
-
-    for vertex in graph.vertices():
-        for bucket_name, value in {'aims_other': 100,
-                                   'aims_ss': 60, 'aims_bottom': 30}.items():
-            bucket = vertex.get(bucket_name)
-            label[bucket_name] += 1
-            if bucket is not None:
-                voxels = np.array(bucket[0].keys())
-                if voxels.shape == (0,):
-                    continue
-                for i, j, k in voxels:
-                    cnt_total += 1
-                    if arr_skel[i, j, k] != 0:
-                        cnt_duplicate += 1
-                    arr_skel[i, j, k] = value
-                    arr_label[i, j, k] = label[bucket_name]
-
-    for edge in graph.edges():
-        for bucket_name, value in {'aims_junction': 110}.items():
-            bucket = edge.get(bucket_name)
-            label[bucket_name] += 1
-            if bucket is not None:
-                voxels = np.array(bucket[0].keys())
-                if voxels.shape == (0,):
-                    continue
-                for i, j, k in voxels:
-                    arr_skel[i, j, k] = value
-                    arr_label[i, j, k] = label[bucket_name]
-
-    for edge in graph.edges():
-        for bucket_name, value in {'aims_plidepassage': 120}.items():
-            bucket = edge.get(bucket_name)
-            label[bucket_name] += 1
-            if bucket is not None:
-                voxels = np.array(bucket[0].keys())
-                if voxels.shape == (0,):
-                    continue
-                for i, j, k in voxels:
-                    arr_skel[i, j, k] = value
-                    arr_label[i, j, k] = label[bucket_name]
-
-    return vol_skel, vol_label
-
-
-class GraphConvert2Skeleton:
-    """Class to convert graph into skeleton and foldlabel files
+class GraphConvert2FoldLabel:
+    """Class to convert graph into foldlabel files
 
     It contains all information to scan a dataset for graphs
-    and writes skeletons and foldlabels into target directory
+    and writes foldlabels into target directory
     """
 
-    def __init__(self, src_dir, tgt_dir, nb_subjects, side, junction):
+    def __init__(self, src_dir, foldlabel_dir,
+                 side, junction, parallel,
+                 path_to_graph):
         self.src_dir = src_dir
-        self.tgt_dir = tgt_dir
-        self.nb_subjects = nb_subjects
+        self.foldlabel_dir = foldlabel_dir
         self.side = side
         self.junction = junction
-        self.graph_subdir = "t1mri/default_acquisition/default_analysis/folds/3.1/default_session_*"
-        self.skeleton_dir = f"{self.tgt_dir}/skeleton/{self.side}"
-        self.foldlabel_dir = f"{self.tgt_dir}/foldlabel/{self.side}"
+        self.parallel = parallel
+        self.path_to_graph = path_to_graph
+        self.foldlabel_dir = f"{self.foldlabel_dir}/foldlabels/{self.side}"
 
-        create_folder(abspath(self.skeleton_dir))
         create_folder(abspath(self.foldlabel_dir))
 
-    def generate_skeleton(self, subject: str):
+    def generate_one_foldlabel(self, subject: str):
         """Generates and writes skeleton for one subject.
         """
         graph_file = glob.glob(
-            f"{self.src_dir}/{subject}*/{self.graph_subdir}/{self.side}{subject}*.arg")[0]
-        graph = aims.read(graph_file)
+            f"{self.src_dir}/{subject}*/"
+            f"{self.path_to_graph}/{self.side}{subject}*.arg")[0]
+        foldlabel_file = \
+            f"{self.foldlabel_dir}/{self.side}foldlabel_{subject}.nii.gz"
 
-        if self.junction == 'wide':
-            vol_skel, vol_label = generate_skeleton_wide_junction(graph)
-        else:
-            vol_skel, vol_label = generate_skeleton_thin_junction(graph)
+        generate_foldlabel_from_graph_file(graph_file,
+                                           foldlabel_file,
+                                           self.junction)
 
-        skeleton_filename = f"{self.skeleton_dir}/{self.side}skeleton_generated_{subject}.nii.gz"
-        foldlabel_filename = f"{self.foldlabel_dir}/{self.side}foldlabel_{subject}.nii.gz"
-
-        aims.write(vol_skel, skeleton_filename)
-        aims.write(vol_label, foldlabel_filename)
-
-    def loop(self, nb_subjects, verbose=False):
+    def compute(self, number_subjects):
         """Loops over subjects and converts graphs into skeletons.
         """
         filenames = glob.glob(f"{self.src_dir}/*/")
@@ -316,42 +184,64 @@ class GraphConvert2Skeleton:
             re.search(
                 '([ae\\d]{5,6})',
                 filename).group(0) for filename in filenames]
-        list_subjects = get_sublist(list_subjects, nb_subjects)
-        if verbose:
+        list_subjects = select_subjects_int(list_subjects, number_subjects)
+
+        # Performs computation on all subjects either serially or in parallel
+        if self.parallel:
             log.info(
-                "VERBOSE MODE: subjects are scanned serially, without parallelism")
-            for sub in list_subjects:
-                self.generate_skeleton(sub)
+                "PARALLEL MODE: subjects are computed in parallel.")
+            pqdm(list_subjects, self.generate_one_foldlabel, n_jobs=define_njobs())
         else:
-            pqdm(list_subjects, self.generate_skeleton, n_jobs=define_njobs())
+            log.info(
+                "SERIAL MODE: subjects are scanned serially, "
+                "without parallelism")
+            for sub in list_subjects:
+                self.generate_one_foldlabel(sub)
 
+def generate_foldlabels(
+        src_dir=_SRC_DIR_DEFAULT,
+        foldlabel_dir=_FOLDLABEL_DIR_DEFAULT,
+        path_to_graph=_PATH_TO_GRAPH_DEFAULT,
+        side=_SIDE_DEFAULT,
+        junction=_JUNCTION_DEFAULT,
+        parallel=False,
+        number_subjects=_ALL_SUBJECTS):
+    """Generates foldlabels from graphs"""
 
+    # Initialization
+    conversion = GraphConvert2FoldLabel(
+        src_dir=src_dir,
+        foldlabel_dir=foldlabel_dir,
+        path_to_graph=path_to_graph,
+        side=side,
+        junction=junction,
+        parallel=parallel
+    )
+    # Actual generation of skeletons from graphs
+    conversion.compute(number_subjects=number_subjects)
+
+@exception_handler
 def main(argv):
-    """
+    """Reads argument line and generates foldlabel from graph
+
+    Args:
+        argv: a list containing command line arguments
     """
     # Parsing arguments
-    args = parse_args(argv)
+    params = parse_args(argv)
 
-    # Writes command line argument to target dir for logging
-    log_command_line(args, "generate_skeleton.py", args.tgt_dir)
-
-    # Converts graph to skeleton and foldlabel
-    conversion = GraphConvert2Skeleton(args.src_dir,
-                                       args.tgt_dir,
-                                       args.nb_subjects,
-                                       args.side,
-                                       args.junction)
-    conversion.loop(nb_subjects=args.nb_subjects,
-                    verbose=args.verbose)
+    # Actual API
+    generate_foldlabels(
+        src_dir=params['src_dir'],
+        foldlabel_dir=params['foldlabel_dir'],
+        path_to_graph=params['path_to_graph'],
+        side=params['side'],
+        junction=params['junction'],
+        parallel=params['parallel'],
+        number_subjects=params['nb_subjects'])
 
 
 if __name__ == '__main__':
-    # src_dir = "/mnt/n4hhcp/hcp/ANALYSIS/3T_morphologist"
-    # tgt_dir = "/neurospin/dico/data/deep_folding/datasets/hcp"
-    # args = "-i R -v True -n 5 -s " + src_dir + " -t " + tgt_dir
-    # argv = args.split(' ')
-    # main(argv=argv)
-
     # This permits to call main also from another python program
     # without having to make system calls
     main(argv=sys.argv[1:])
