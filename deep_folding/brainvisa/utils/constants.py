@@ -14,10 +14,13 @@ _BBOX_DIR_DEFAULT = "/neurospin/dico/data/deep_folding/test/bbox"
 _MASK_DIR_DEFAULT = "/neurospin/dico/data/deep_folding/test/mask"
 
 # Default directory where we put skeletons
-_SKELETON_DIR_DEFAULT = "/neurospin/dico/data/deep_folding/test/hcp"
+_SKELETON_DIR_DEFAULT = "/neurospin/dico/data/deep_folding/test/hcp/skeletons/raw"
 
 # Default directory where we put foldlabels
-_FOLDLABEL_DIR_DEFAULT = "/neurospin/dico/data/deep_folding/test/hcp"
+_FOLDLABEL_DIR_DEFAULT = "/neurospin/dico/data/deep_folding/test/hcp/foldlabels/raw"
+
+# Default directory where we put resampled skeletons
+_RESAMPLED_SKELETON_DIR_DEFAULT = "/neurospin/dico/data/deep_folding/test/hcp/skeletons/1mm"
 
 # hemisphere 'L' or 'R'
 _SIDE_DEFAULT = 'R'

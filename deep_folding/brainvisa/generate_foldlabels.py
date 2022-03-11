@@ -125,7 +125,7 @@ def parse_args(argv):
     args = parser.parse_args(argv)
 
     setup_log(args,
-              log_dir=f"{args.output_dir}/foldlabels",
+              log_dir=f"{args.output_dir}",
               prog_name=basename(__file__),
               suffix='right' if args.side == 'R' else 'left')
 
@@ -159,7 +159,7 @@ class GraphConvert2FoldLabel:
         self.junction = junction
         self.parallel = parallel
         self.path_to_graph = path_to_graph
-        self.foldlabel_dir = f"{self.foldlabel_dir}/foldlabels/{self.side}"
+        self.foldlabel_dir = f"{self.foldlabel_dir}/{self.side}"
 
         create_folder(abspath(self.foldlabel_dir))
 

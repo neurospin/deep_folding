@@ -125,7 +125,7 @@ def parse_args(argv):
     args = parser.parse_args(argv)
 
     setup_log(args,
-              log_dir=f"{args.output_dir}/skeletons",
+              log_dir=f"{args.output_dir}",
               prog_name=basename(__file__),
               suffix='right' if args.side == 'R' else 'left')
 
@@ -159,7 +159,7 @@ class GraphConvert2Skeleton:
         self.junction = junction
         self.parallel = parallel
         self.path_to_graph = path_to_graph
-        self.skeleton_dir = f"{self.skeleton_dir}/skeletons/{self.side}"
+        self.skeleton_dir = f"{self.skeleton_dir}/{self.side}"
         create_folder(abspath(self.skeleton_dir))
 
     def generate_one_skeleton(self, subject: str):
