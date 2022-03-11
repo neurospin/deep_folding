@@ -57,7 +57,8 @@ from typing import Tuple
 
 import numpy as np
 from deep_folding.brainvisa.utils.folder import create_folder
-from deep_folding.brainvisa.utils.list import get_sublist
+from deep_folding.brainvisa.utils.subjects import get_number_subjects
+from deep_folding.brainvisa.utils.subjects import select_subjects_int
 from deep_folding.brainvisa.utils.logs import log_command_line
 from deep_folding.brainvisa.utils.parallel import define_njobs
 from pqdm.processes import pqdm
