@@ -33,7 +33,7 @@
 # The fact that you are presently reading this means that you have had
 # knowledge of the CeCILL license version 2 and that you accept its terms.
 
-"""Write skeletons from graph files
+"""Write transform files to ICBM 2009c from graph files
 
   Typical usage
   -------------
@@ -41,7 +41,7 @@
   (here brainvisa 5.0.0 installed with singurity) and launching the script
   from the terminal:
   >>> bv bash
-  >>> python generate_skeletons.py
+  >>> python generate_ICBM2009c_transforms.py
 
 
 """

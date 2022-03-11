@@ -43,10 +43,10 @@ The aim of this script is to resample skeletons.
   (here brainvisa 5.0.0 installed with singurity) and launching the script
   from the terminal:
   >>> bv bash
-  >>> python resample_skeletons.py
+  >>> python resample_files.py
 
   Alternatively, you can launch the script in the interactive terminal ipython:
-  >>> %run resample_skeleton.py
+  >>> %run resample_files.py
 
 """
 
@@ -56,13 +56,11 @@ import os
 import re
 import sys
 import tempfile
+from os.path import abspath
 from os.path import join
 from os.path import basename
 
-import numpy as np
-import six
-from deep_folding.brainvisa.utils.logs import LogJson
-from deep_folding.brainvisa.utils.logs import log_command_line
+from deep_folding.brainvisa import exception_handler
 from deep_folding.brainvisa.utils.parallel import define_njobs
 from deep_folding.brainvisa.utils.resample import resample
 from deep_folding.brainvisa.utils.sulcus import complete_sulci_name
@@ -71,33 +69,11 @@ from pqdm.processes import pqdm
 from deep_folding.config.logs import set_file_logger
 from soma import aims
 
-_ALL_SUBJECTS = -1
-
-_SIDE_DEFAULT = 'L'  # hemisphere 'L' or 'R'
-
-_OUT_VOXEL_SIZE = (1, 1, 1)  # default output voxel size
-
-# sulcus to encompass:
-# its name depends on the hemisphere side
-_SULCUS_DEFAULT = 'S.T.s.ter.asc.ant.'
-
-# Input directories
-# -----------------
-
-# Input directory contaning the skeletons and labels
-_SRC_DIR_DEFAULT = '/neurospin/dico/data/deep_folding/datasets/hcp'
-
-# Input directory contaning the morphologist analysis of the HCP database
-_GRAPH_DIR_DEFAULT = '/neurospin/hcp'
-
-# Directory where subjects to be processed are stored.
-# Default is for HCP dataset
-_MORPHOLOGIST_DIR_DEFAULT = 'ANALYSIS/3T_morphologist'
-
-# Directory containing bounding box json files
-# default corresponds to bounding boxes computed for voxinput
-# -------------------------
-_TGT_DIR_DEFAULT = '/neurospin/dico/data/deep_folding/test'
+# Import constants
+from deep_folding.brainvisa.utils.constants import \
+    _ALL_SUBJECTS, _SKELETON_DIR_DEFAULT,\
+    _TRANSFORM_DIR_DEFAULT, _SIDE_DEFAULT,\
+    _SULCUS_DEFAULT, _VOXEL_SIZE_DEFAULT
 
 # Defines logger
 log = set_file_logger(__file__)
@@ -140,45 +116,17 @@ def resample_one_file(input_image,
     return resampled
 
 
-def resample_one_foldlabel(input_image,
-                           out_voxel_size,
-                           transformation):
-    """Resamples one foldlabel
-
-    Args
-    ----
-        input_image: either string or aims.Volume
-            either path to foldlabel or foldlabel aims Volume
-        out_voxel_size: tuple
-            Output voxel size (default: None, no resampling)
-        transformation: string or aims.Volume
-            either path to transformation file or transformation itself
-
-    Returns:
-        resampled: aims.Volume
-            Transformed or resampled foldlabel
-    """
-
-    # Normalization and resampling of foldlabel images
-    resampled = resample(input_image=input_image,
-                         output_vs=out_voxel_size,
-                         transformation=transformation,
-                         verbose=log.level)
-    return resampled
-
-
-class DatasetResampledSkeleton:
-    """Generates cropped skeleton files and corresponding pickle file
+class FileResampler:
+    """Resamples all files from source directories
     """
 
     def __init__(self,
                  graph_dir=_GRAPH_DIR_DEFAULT,
                  src_dir=_SRC_DIR_DEFAULT,
                  tgt_dir=_TGT_DIR_DEFAULT,
-                 morphologist_dir=_MORPHOLOGIST_DIR_DEFAULT,
                  list_sulci=_SULCUS_DEFAULT,
                  side=_SIDE_DEFAULT,
-                 out_voxel_size=_OUT_VOXEL_SIZE):
+                 out_voxel_size=_VOXEL_SIZE_DEFAULT):
         """Inits with list of directories and list of sulci
 
         Args:
