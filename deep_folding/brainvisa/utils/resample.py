@@ -1,6 +1,9 @@
 """
     Resample a volume that contains discret values
 """
+import os
+import sys
+from contextlib import contextmanager
 import logging
 from time import time
 from typing import Union
@@ -9,8 +12,9 @@ import numpy as np
 from soma import aims
 from soma import aimsalgo
 
-logging.basicConfig(level=logging.WARNING)
-log = logging.getLogger(__name__)
+from deep_folding.config.logs import set_file_logger
+# Defines logger
+log = set_file_logger(__file__)
 
 
 def resample(input_image: Union[str, aims.Volume],
@@ -18,7 +22,7 @@ def resample(input_image: Union[str, aims.Volume],
              output_vs: tuple = None,
              background: int = 0,
              values: np.array = None,
-             verbose: bool = True) -> aims.Volume:
+             verbose: bool = False) -> aims.Volume:
     """
         Transforms and resamples a volume that has discret values
 
@@ -31,7 +35,7 @@ def resample(input_image: Union[str, aims.Volume],
         output_vs: tuple
             Output voxel size (default: None, no resampling)
         background: int
-            Background value (default: 11)
+            Background value (default: 0)
         values: []
             Array of unique values ordered by ascendent priority without background. If not given,
             priority is set by ascendent values
@@ -42,11 +46,12 @@ def resample(input_image: Union[str, aims.Volume],
             Transformed and resampled volume
     """
 
+    global log
+
     # Handling of verbosity
     if verbose:
-        log.setLevel(level=logging.INFO)
-    else:
-        log.setLevel(level=logging.WARNING)
+        log.setLevel(level=logging.DEBUG)
+
     tic = time()
 
     # Reads input image (either path to file or aims volume)
@@ -81,7 +86,7 @@ def resample(input_image: Union[str, aims.Volume],
         output_vs = vol.header()['voxel_size'][:3]
         new_dim = vol.header()['volume_dimension'][:3]
 
-    log.info("Time before resampling: {}s".format(time() - tic))
+    log.debug("Time before resampling: {}s".format(time() - tic))
     tic = time()
 
     # Transform the background
@@ -94,10 +99,10 @@ def resample(input_image: Union[str, aims.Volume],
     resampler = aimsalgo.ResamplerFactory(vol).getResampler(0)
     resampler.setDefaultValue(background)
     resampler.setRef(vol)
-    resampler.resample_inv(vol, inv_trm, 0, resampled)
+    resampler.resample_inv(vol, inv_trm, 0, resampled, True)
     resampled_dt = np.asarray(resampled)
 
-    log.info("Background resampling: {}s".format(time() - tic))
+    log.debug("Background resampling: {}s".format(time() - tic))
     tic = time()
 
     if values is None:
@@ -132,9 +137,9 @@ def resample(input_image: Union[str, aims.Volume],
             if c[0] < new_dim[0] and c[1] < new_dim[1] and c[2] < new_dim[2]:
                 resampled_dt[c[0], c[1], c[2]] = values[i]
 
-        log.info("Time for value {} ({} voxels): {}s".format(
+        log.debug("Time for value {} ({} voxels): {}s".format(
             v, np.sum(np.where(vol_dt == v)), time() - tic))
-        log.info("\t{}s to create the bucket\n\t{}s to resample bucket\n"
+        log.debug("\t{}s to create the bucket\n\t{}s to resample bucket\n"
                  "\t{}s to assign values".format(t_bck, t_rs, time() - toc))
         tic = time()
 

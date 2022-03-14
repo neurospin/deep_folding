@@ -66,7 +66,7 @@ from deep_folding.config.logs import set_file_logger
 
 # Import constants
 from deep_folding.brainvisa.utils.constants import \
-    _ALL_SUBJECTS, _SRC_DIR_DEFAULT,\
+    _SRC_DIR_DEFAULT,\
     _SKELETON_DIR_DEFAULT, _SIDE_DEFAULT, \
     _JUNCTION_DEFAULT, _PATH_TO_GRAPH_DEFAULT
 
@@ -186,13 +186,8 @@ class GraphConvert2Skeleton:
 
         # Performs computation on all subjects either serially or in parallel
         if self.parallel:
-            log.info(
-                "PARALLEL MODE: subjects are computed in parallel.")
-            pqdm(list_subjects, self.generate_one_skeleton, n_jobs=define_njobs())
-        else:
-            log.info(
-                "SERIAL MODE: subjects are scanned serially, "
-                "without parallelism")
+            log.info(        file_foldlabel = self.foldlabel_file % {
+            'subject': subject_id, 'side': self.side}       
             for sub in list_subjects:
                 self.generate_one_skeleton(sub)
 

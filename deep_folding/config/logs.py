@@ -3,6 +3,7 @@
 """It provides log configuration and utilities"""
 
 import logging
+import sys
 from os import makedirs
 from os.path import basename
 from stat import filemode
@@ -15,9 +16,8 @@ LOG_FORMAT = "%(levelname)s:%(name)s: %(message)s"
 logging.basicConfig(
     level=LOGGING_LEVEL,
     handlers=[
-        logging.StreamHandler()
+        logging.StreamHandler(sys.stderr)
     ])
-ch = logging.StreamHandler()
 formatter = logging.Formatter(LOG_FORMAT)
 log_deep_folding = logging.getLogger('')
 for hdlr in log_deep_folding.handlers[:]:
@@ -81,7 +81,7 @@ def set_file_log_handler(file_dir, suffix):
     for hdlr in log_deep_folding.handlers[:]:
         hdlr.setFormatter(formatter)
 
-    # Logs name of log fle
+    # Logs name of log file
     simple_critical_log(log=log_deep_folding,
                         log_message=f"\nLog written to:\n{file_name}\n")
 

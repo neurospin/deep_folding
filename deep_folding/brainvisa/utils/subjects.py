@@ -62,7 +62,7 @@ def get_number_subjects(nb_subjects: str) -> int:
 
 
 def select_subjects_int(orig_list: list, nb_subjects: int) -> list:
-    """Retrns a sublist of nb_subjects elements
+    """Returns a sublist of nb_subjects elements
 
     if nb_subjects == -1, it returns the original list
 

@@ -51,19 +51,24 @@ The aim of this script is to resample skeletons.
 """
 
 import argparse
+from asyncio.subprocess import DEVNULL
+from email.mime import base
 import glob
 import os
 import re
 import sys
 import tempfile
-from os.path import abspath
 from os.path import join
 from os.path import basename
+
+import numpy as np
 
 from deep_folding.brainvisa import exception_handler
 from deep_folding.brainvisa.utils.parallel import define_njobs
 from deep_folding.brainvisa.utils.resample import resample
-from deep_folding.brainvisa.utils.sulcus import complete_sulci_name
+from deep_folding.brainvisa.utils.subjects import get_number_subjects
+from deep_folding.brainvisa.utils.subjects import select_subjects_int
+from deep_folding.brainvisa.utils.folder import create_folder
 from deep_folding.brainvisa.utils.logs import setup_log
 from pqdm.processes import pqdm
 from deep_folding.config.logs import set_file_logger
@@ -71,9 +76,9 @@ from soma import aims
 
 # Import constants
 from deep_folding.brainvisa.utils.constants import \
-    _ALL_SUBJECTS, _SKELETON_DIR_DEFAULT,\
-    _TRANSFORM_DIR_DEFAULT, _SIDE_DEFAULT,\
-    _SULCUS_DEFAULT, _VOXEL_SIZE_DEFAULT
+    _ALL_SUBJECTS, _INPUT_TYPE_DEFAULT, _SKELETON_DIR_DEFAULT,\
+    _TRANSFORM_DIR_DEFAULT, _RESAMPLED_SKELETON_DIR_DEFAULT,\
+    _SIDE_DEFAULT, _VOXEL_SIZE_DEFAULT
 
 # Defines logger
 log = set_file_logger(__file__)
@@ -82,10 +87,10 @@ log = set_file_logger(__file__)
 temp_dir = tempfile.mkdtemp()
 
 
-def resample_one_file(input_image,
-                      out_voxel_size,
-                      transformation):
-    """Resamples one skeleton
+def resample_one_skeleton(input_image,
+                          out_voxel_size,
+                          transformation):
+    """Resamples one skeleton file
 
     Args
     ----
@@ -116,81 +121,84 @@ def resample_one_file(input_image,
     return resampled
 
 
-class FileResampler:
+def resample_one_foldlabel(input_image,
+                           out_voxel_size,
+                           transformation):
+    """Resamples one foldlabel file
+
+    Args
+    ----
+        input_image: either string or aims.Volume
+            either path to skeleton or skeleton aims Volume
+        out_voxel_size: tuple
+            Output voxel size (default: None, no resampling)
+        transformation: string or aims.Volume
+            either path to transformation file or transformation itself
+
+    Returns:
+        resampled: aims.Volume
+            Transformed or resampled volume
+    """
+
+    # We have given values with ascendent priority
+    # Higher values have more priority than smaller values
+
+    # Normalization and resampling of skeleton images
+    resampled = resample(input_image=input_image,
+                         output_vs=out_voxel_size,
+                         transformation=transformation)
+    return resampled
+
+
+class SkeletonResampler:
     """Resamples all files from source directories
     """
 
-    def __init__(self,
-                 graph_dir=_GRAPH_DIR_DEFAULT,
-                 src_dir=_SRC_DIR_DEFAULT,
-                 tgt_dir=_TGT_DIR_DEFAULT,
-                 list_sulci=_SULCUS_DEFAULT,
-                 side=_SIDE_DEFAULT,
-                 out_voxel_size=_VOXEL_SIZE_DEFAULT):
-        """Inits with list of directories and list of sulci
+    def __init__(self, src_dir, resampled_dir, transform_dir,
+                 side, out_voxel_size, parallel
+                 ):
+        """Inits with list of directories
 
         Args:
-            graph_dir: list of strings naming full path source directories,
-                    containing MRI and graph images
-            src_dir: folder containing generated skeletons and labels
-            tgt_dir: name of target (output) directory with full path
-            list_sulci: list of sulcus names
-            side: hemisphere side (either L for left, or R for right hemisphere)
+            src_dir: folder containing generated skeletons or labels
+            resampled_dir: name of target (output) directory,
+            transform_dir: directory containing transform files to ICBM2009c
+            side: either 'L' or 'R', hemisphere side
+            out_voxel_size: float giving voxel size in mm
+            parallel: does parallel computation if True
         """
-
-        self.graph_dir = graph_dir
-        self.src_dir = src_dir
         self.side = side
-        # Transforms sulcus in a list of sulci
-        self.list_sulci = ([list_sulci] if isinstance(list_sulci, str)
-                           else list_sulci)
-        self.list_sulci = complete_sulci_name(self.list_sulci, self.side)
-        self.tgt_dir = tgt_dir
-        self.morphologist_dir = morphologist_dir
-        self.out_voxel_size = out_voxel_size
-
-        # Morphologist directory
-        self.morphologist_dir = join(self.graph_dir, self.morphologist_dir)
-
-        # default acquisition subdirectory
-        self.acquisition_dir = "%(subject)s/t1mri/default_acquisition"
+        self.parallel = parallel
 
         # Names of files in function of dictionary: keys -> 'subject' and 'side'
-        # Generated skeleton from folding graphs
-        self.skeleton_dir = join(self.src_dir, 'skeleton', self.side)
-        self.skeleton_file = join(
-            self.skeleton_dir,
+        # Src directory contains either 'R' or 'L' a subdirectory
+        self.src_dir = join(src_dir, self.side)
+        self.src_file = join(
+            self.src_dir,
             '%(side)sskeleton_generated_%(subject)s.nii.gz')
-        self.foldlabel_dir = join(self.src_dir, 'foldlabel', self.side)
-        self.foldlabel_file = join(self.foldlabel_dir,
-                                   '%(side)sfoldlabel_%(subject)s.nii.gz')
-
-        self.graph_file = 'default_analysis/folds/3.1/default_session_auto/' \
-            '%(side)s%(subject)s_default_session_auto.arg'
 
         # Names of files in function of dictionary: keys -> 'subject' and
         # 'side'
-        self.resampled_skeleton_dir = join(self.tgt_dir, 'skeleton', self.side)
-        self.resampled_skeleton_file = join(
-            self.resampled_skeleton_dir,
-            '%(subject)s_resampled_skeleton.nii.gz')
-        self.resampled_label_dir = join(self.tgt_dir, 'foldlabel', self.side)
-        self.resampled_label_file = join(self.resampled_label_dir,
-                                         '%(subject)s_resampled_label.nii.gz')
+        self.resampled_dir = join(resampled_dir, self.side)
+        self.resampled_file = join(
+            self.resampled_dir,
+            f'%(side)sresampled_skeleton_{out_voxel_size}mm_%(subject)s.nii.gz')
 
-        # Initialization of bounding box coordinates
-        self.bbmin = np.zeros(3)
-        self.bbmax = np.zeros(3)
+        # transform_dir contains side 'R' or 'L'
+        self.transform_dir = join(transform_dir, self.side)
+        self.transform_file = join(
+            self.transform_dir,
+            '%(side)stransform_to_ICBM2009c_%(subject)s.trm')
 
-        # Creates json log class
-        json_file = join(self.tgt_dir, self.side + 'dataset.json')
-        self.json = LogJson(json_file)
+        self.out_voxel_size = (out_voxel_size,
+                               out_voxel_size,
+                               out_voxel_size)
 
-        # reference file in MNI template with correct voxel size
-        self.ref_file = f"{temp_dir}/file_ref.nii.gz"
+        # subjects are detected as the nifti file names under src_dir
+        self.expr = '^.skeleton_generated_([0-9a-zA-Z]*).nii.gz$'
 
-    def resample_one_file(self, subject_id, verbose=False):
-        """Resamples one skeleton file and one foldlabel file
+    def resample_one_subject(self, subject_id):
+        """Resamples one file
 
         Args:
             subject_id: string giving the subject ID
@@ -199,36 +207,25 @@ class FileResampler:
         # Identifies 'subject' in a mapping (for file and directory namings)
         subject = {'subject': subject_id, 'side': self.side}
 
-        # Names directory where input subject analysis files are stored
-        subject_dir = \
-            join(self.morphologist_dir, self.acquisition_dir % subject)
-
         # Creates transformation MNI template
-        file_graph = join(subject_dir, self.graph_file % subject)
-        graph = aims.read(file_graph)
-        g_to_icbm_template = aims.GraphManip.getICBM2009cTemplateTransform(
-            graph)
+        transform_file = self.transform_file % subject
+        g_to_icbm_template = aims.read(transform_file)
 
-        # Input skeleton file name
-        file_skeleton = self.skeleton_file % {
-            'subject': subject_id, 'side': self.side}
-        # Input foldlabel file name
-        file_foldlabel = self.foldlabel_file % {
-            'subject': subject_id, 'side': self.side}
+        # Input raw file name
+        src_file = self.src_file % subject
 
-        if os.path.exists(file_skeleton):
-            # Creates output (cropped) file name
-            file_resampled_skeleton = self.resampled_skeleton_file % {
-                'subject': subject_id, 'side': self.side}
+        # Output resampled file name
+        resampled_file = self.resampled_file % subject
 
-            resampled = resample_one_file(
-                input_image=file_skeleton,
+        # Performs the resampling
+        if os.path.exists(src_file):
+            resampled = resample_one_skeleton(
+                input_image=src_file,
                 out_voxel_size=self.out_voxel_size,
                 transformation=g_to_icbm_template)
-            aims.write(resampled, file_resampled_skeleton)
-
+            aims.write(resampled, resampled_file)
         else:
-            raise FileNotFoundError(f"{file_skeleton} not found")
+            raise FileNotFoundError(f"{src_file} not found")
 
     def compute(self, number_subjects=_ALL_SUBJECTS):
         """Loops over nii files
@@ -242,71 +239,104 @@ class FileResampler:
 
         if number_subjects:
 
-            # subjects are detected as the nifti file names under src_dir
-            expr = '^.skeleton_generated_([0-9a-zA-Z]*).nii.gz$'
-            if os.path.isdir(self.skeleton_dir):
-                list_all_subjects = [re.search(expr, os.path.basename(dI))[1]
-                                     for dI in glob.glob(f"{self.skeleton_dir}/*.nii.gz")]
+            if os.path.isdir(self.src_dir):
+                list_all_subjects = \
+                    [re.search(self.expr, os.path.basename(dI))[1]
+                     for dI in glob.glob(f"{self.src_dir}/*.nii.gz")]
             else:
                 raise NotADirectoryError(
-                    f"{self.sksleton_dir} doesn't exist or is not a directory")
+                    f"{self.src_dir} doesn't exist or is not a directory")
 
             # Gives the possibility to list only the first number_subjects
-            list_subjects = (
-                list_all_subjects
-                if number_subjects == _ALL_SUBJECTS
-                else list_all_subjects[:number_subjects])
+            list_subjects = select_subjects_int(
+                list_all_subjects, number_subjects)
+            log.info(f"list_subjects[:5] = {list_subjects[:5]}")
+            log.debug(f"list_subjects = {list_subjects}")
 
             # Creates target directories
-            if not os.path.exists(self.resampled_skeleton_dir):
-                os.makedirs(self.resampled_skeleton_dir)
-            if not os.path.exists(self.resampled_label_dir):
-                os.makedirs(self.resampled_label_dir)
-
-            # Writes number of subjects and directory names to json file
-            dict_to_add = {'nb_subjects': len(list_subjects),
-                           'graph_dir': self.graph_dir,
-                           'src_dir': self.src_dir,
-                           'side': self.side,
-                           'tgt_dir': self.tgt_dir,
-                           'skeleton_dir': self.skeleton_dir,
-                           'label_dir': self.foldlabel_dir,
-                           'resampling_type': 'sulcus-based',
-                           'out_voxel_size': self.out_voxel_size
-                           }
-            self.json.update(dict_to_add=dict_to_add)
+            create_folder(self.resampled_dir)
 
             # Performs resampling for each file in a parallelized way
-            log.info("list_subjects[:5] = ", list_subjects[:5])
-            log.debug("list_subjects = ", list_subjects)
-
             if self.parallel:
                 log.info(
                     "PARALLEL MODE: subjects are in parallel")
                 pqdm(
                     list_subjects,
-                    self.resample_one_file,
+                    self.resample_one_subject,
                     n_jobs=define_njobs())
-           else:
+            else:
                 log.info(
                     "SERIAL MODE: subjects are scanned serially")
-                 for sub in list_subjects:
-                    self.resample_one_file(sub)
+                for sub in list_subjects:
+                    self.resample_one_subject(sub)
 
-    def resample_skeletons(self, number_subjects=_ALL_SUBJECTS):
-        """Main API to resample skeletons
 
-        The programm loops over all subjects from the input (source) directory.
+class FoldLabelResampler(SkeletonResampler):
+    """Resamples all files from source directories
+    """
+
+    def __init__(self, src_dir, resampled_dir, transform_dir,
+                 side, out_voxel_size, parallel
+                 ):
+        """Inits with list of directories
 
         Args:
-            number_subjects: integer giving the number of subjects to analyze,
-                by default it is set to _ALL_SUBJECTS (-1).
+            src_dir: folder containing generated skeletons or labels
+            resampled_dir: name of target (output) directory,
+            transform_dir: directory containing transform files to ICBM2009c
+            side: either 'L' or 'R', hemisphere side
+            out_voxel_size: float giving voxel size in mm
+            parallel: does parallel computation if True
+        """
+        super(FoldLabelResampler, self).__init__(
+            src_dir=src_dir, resampled_dir=resampled_dir,
+            transform_dir=transform_dir, side=side,
+            out_voxel_size=out_voxel_size, parallel=parallel)
+
+        # Names of files in function of dictionary: keys -> 'subject' and 'side'
+        # Src directory contains either 'R' or 'L' a subdirectory
+        self.src_file = join(
+            self.src_dir,
+            '%(side)sfoldlabel_%(subject)s.nii.gz')
+
+        # Names of files in function of dictionary: keys -> 'subject' and
+        # 'side'
+        self.resampled_file = join(
+            self.resampled_dir,
+            f'%(side)sresampled_foldlabel_{out_voxel_size}mm_%(subject)s.nii.gz')
+
+        # subjects are detected as the nifti file names under src_dir
+        self.expr = '^.foldlabel_([0-9a-zA-Z]*).nii.gz$'
+
+    def resample_one_subject(self, subject_id):
+        """Resamples one foldlabel file
+
+        Args:
+            subject_id: string giving the subject ID
         """
 
-        self.json.write_general_info()
+        # Identifies 'subject' in a mapping (for file and directory namings)
+        subject = {'subject': subject_id, 'side': self.side}
 
-        # Generate cropped files
-        self.loop(number_subjects=number_subjects)
+        # Creates transformation MNI template
+        transform_file = self.transform_file % subject
+        g_to_icbm_template = aims.read(transform_file)
+
+        # Input raw file name
+        src_file = self.src_file % subject
+
+        # Output resampled file name
+        resampled_file = self.resampled_file % subject
+
+        # Performs the resampling
+        if os.path.exists(src_file):
+            resampled = resample_one_foldlabel(
+                input_image=src_file,
+                out_voxel_size=self.out_voxel_size,
+                transformation=g_to_icbm_template)
+            aims.write(resampled, resampled_file)
+        else:
+            raise FileNotFoundError(f"{src_file} not found")
 
 
 def parse_args(argv):
@@ -322,125 +352,118 @@ def parse_args(argv):
     # Parse command line arguments
     parser = argparse.ArgumentParser(
         prog=basename(__file__),
-        description='Generates resampled files (either skeletons or foldlabels)')
+        description='Generates resampled files (skeletons, foldlabels,...)')
     parser.add_argument(
-        "-g", "--graph_dir", type=str, default=_GRAPH_DIR_DEFAULT,
-        help='Source directory where the graph lies. '
-             'Default is : ' + _GRAPH_DIR_DEFAULT)
-    parser.add_argument(
-        "-s", "--src_dir", type=str, default=_SRC_DIR_DEFAULT,
+        "-s", "--src_dir", type=str, default=_SKELETON_DIR_DEFAULT,
         help='Source directory where inputs files (skeletons or labels) lie. '
-             'Default is : ' + _SRC_DIR_DEFAULT)
+             'Default is : ' + _SKELETON_DIR_DEFAULT)
     parser.add_argument(
-        "-t", "--tgt_dir", type=str, default=_TGT_DIR_DEFAULT,
-        help='Target directory where to store the cropped and pickle files. '
-             'Default is : ' + _TGT_DIR_DEFAULT)
+        "-y", "--input_type", type=str, default=_INPUT_TYPE_DEFAULT,
+        help='Input type: \'skeleton\', \'foldlabel\' '
+             'Default is : ' + _INPUT_TYPE_DEFAULT)
     parser.add_argument(
-        "-m",
-        "--morphologist_dir",
-        type=str,
-        default=_MORPHOLOGIST_DIR_DEFAULT,
-        help='Directory where subjects to be processed are stored')
+        "-o", "--output_dir", type=str, default=_RESAMPLED_SKELETON_DIR_DEFAULT,
+        help='Target directory where to store the resampled files. '
+             'Default is : ' + _RESAMPLED_SKELETON_DIR_DEFAULT)
+    parser.add_argument(
+        "-t", "--transform_dir", type=str, default=_TRANSFORM_DIR_DEFAULT,
+        help='Transform directory containing transform files to ICBM2009c. '
+             'Default is : ' + _TRANSFORM_DIR_DEFAULT)
     parser.add_argument(
         "-i", "--side", type=str, default=_SIDE_DEFAULT,
         help='Hemisphere side (either L or R). Default is : ' + _SIDE_DEFAULT)
     parser.add_argument(
+        "-a", "--parallel", default=False, action='store_true',
+        help='if set (-a), launches computation in parallel')
+    parser.add_argument(
         "-n", "--nb_subjects", type=str, default="all",
         help='Number of subjects to take into account, or \'all\'. '
-             '0 subject is allowed, for debug purpose.'
-             'Default is : all')
+             '0 subject is allowed, for debug purpose.')
     parser.add_argument(
-        "-x",
-        "--out_voxel_size",
-        type=float,
-        nargs='+',
-        default=_OUT_VOXEL_SIZE,
-        help='Voxel size of output images'
-        'Default is : 1 1 1')
+        "-x", "--out_voxel_size", type=float, default=_VOXEL_SIZE_DEFAULT,
+        help='Voxel size of bounding box. '
+             'Default is : None')
     parser.add_argument(
-        "-v", "--verbose",
-        default=False,
-        action='store_true',
-        help='If verbose is true, no parallelism.')
+        '-v', '--verbose', action='count', default=0,
+        help='Verbose mode: '
+        'If no option is provided then logging.INFO is selected. '
+        'If one option -v (or -vv) or more is provided '
+        'then logging.DEBUG is selected.')
 
     params = {}
 
     args = parser.parse_args(argv)
 
-    # Writes command line argument to target dir for logging
-    log_command_line(args, "resample_skeletons.py", args.tgt_dir)
+    setup_log(args,
+              log_dir=f"{args.output_dir}",
+              prog_name=basename(__file__),
+              suffix='right' if args.side == 'R' else 'left')
 
     params['src_dir'] = args.src_dir
-    params['graph_dir'] = args.graph_dir
-    params['tgt_dir'] = args.tgt_dir
+    params['input_type'] = args.input_type
+    params['resampled_dir'] = args.output_dir
+    params['transform_dir'] = args.transform_dir
     params['side'] = args.side
-    params['out_voxel_size'] = tuple(args.out_voxel_size)
-    params['morphologist_dir'] = args.morphologist_dir
-    params['verbose'] = args.verbose
-
-    number_subjects = args.nb_subjects
-
-    # Check if nb_subjects is either the string "all" or a positive integer
-    try:
-        if number_subjects == "all":
-            number_subjects = _ALL_SUBJECTS
-        else:
-            number_subjects = int(number_subjects)
-            if number_subjects < 0:
-                raise ValueError
-    except ValueError:
-        raise ValueError(
-            "number_subjects must be either the string \"all\" or an integer")
-    params['nb_subjects'] = number_subjects
+    params['out_voxel_size'] = args.out_voxel_size
+    params['parallel'] = args.parallel
+    # Checks if nb_subjects is either the string "all" or a positive integer
+    params['nb_subjects'] = get_number_subjects(args.nb_subjects)
 
     return params
 
 
-def resample_skeletons(graph_dir=_GRAPH_DIR_DEFAULT,
-                       src_dir=_SRC_DIR_DEFAULT,
-                       tgt_dir=_TGT_DIR_DEFAULT,
-                       morphologist_dir=_MORPHOLOGIST_DIR_DEFAULT,
-                       side=_SIDE_DEFAULT,
-                       list_sulci=_SULCUS_DEFAULT,
-                       number_subjects=_ALL_SUBJECTS,
-                       out_voxel_size=_OUT_VOXEL_SIZE,
-                       verbose=_VERBOSE_DEFAULT):
+def resample_files(
+        src_dir=_SKELETON_DIR_DEFAULT,
+        input_type=_INPUT_TYPE_DEFAULT,
+        resampled_dir=_RESAMPLED_SKELETON_DIR_DEFAULT,
+        transform_dir=_TRANSFORM_DIR_DEFAULT,
+        side=_SIDE_DEFAULT,
+        out_voxel_size=_VOXEL_SIZE_DEFAULT,
+        parallel=False,
+        number_subjects=_ALL_SUBJECTS):
 
-    dataset = DatasetResampledSkeleton(graph_dir=graph_dir,
-                                       src_dir=src_dir,
-                                       tgt_dir=tgt_dir,
-                                       morphologist_dir=morphologist_dir,
-                                       side=side,
-                                       out_voxel_size=out_voxel_size,
-                                       verbose=verbose)
-    dataset.loop(number_subjects=number_subjects)
+    if input_type == "skeleton":
+        resampler = SkeletonResampler(
+            src_dir=src_dir,
+            resampled_dir=resampled_dir,
+            transform_dir=transform_dir,
+            side=side,
+            out_voxel_size=out_voxel_size,
+            parallel=parallel)
+    elif input_type == "foldlabel":
+        resampler = FoldLabelResampler(
+            src_dir=src_dir,
+            resampled_dir=resampled_dir,
+            transform_dir=transform_dir,
+            side=side,
+            out_voxel_size=out_voxel_size,
+            parallel=parallel)   
+    else:
+        raise ValueError("input_type: shall be either 'skeleton' or 'foldlabel'")
 
+    resampler.compute(number_subjects=number_subjects)
 
+@exception_handler
 def main(argv):
-    """Reads argument line and creates cropped files and pickle file
+    """Reads argument line and resamples files
 
     Args:
         argv: a list containing command line arguments
     """
 
-    # This code permits to catch SystemExit with exit code 0
-    # such as the one raised when "--help" is given as argument
-    try:
-        # Parsing arguments
-        params = parse_args(argv)
+    # Parsing arguments
+    params = parse_args(argv)
 
-        # Actual API
-        resample_skeletons(graph_dir=params['graph_dir'],
-                           src_dir=params['src_dir'],
-                           tgt_dir=params['tgt_dir'],
-                           morphologist_dir=params['morphologist_dir'],
-                           side=params['side'],
-                           number_subjects=params['nb_subjects'],
-                           out_voxel_size=params['out_voxel_size'],
-                           verbose=params['verbose'])
-    except SystemExit as exc:
-        if exc.code != 0:
-            six.reraise(*sys.exc_info())
+    # Actual API
+    resample_files(
+        src_dir=params['src_dir'],
+        input_type=params['input_type'],
+        resampled_dir=params['resampled_dir'],
+        transform_dir=params['transform_dir'],
+        side=params['side'],
+        number_subjects=params['nb_subjects'],
+        out_voxel_size=params['out_voxel_size'],
+        parallel=params['parallel'])
 
 
 ######################################################################

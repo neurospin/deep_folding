@@ -52,6 +52,7 @@ import re
 import sys
 from os.path import abspath
 from os.path import basename
+from os.path import dirname
 
 from deep_folding.brainvisa import exception_handler
 from deep_folding.brainvisa.utils.folder import create_folder
@@ -162,8 +163,11 @@ class GraphGenerateTransform:
         """Generates and writes ICBM2009c transform for one subject.
         """
         graph_file = glob.glob(
-            f"{self.src_dir}/{subject}*/{self.path_to_graph}/{self.side}{subject}*.arg")[0]
-        transform_file = f"{self.transform_dir}/{self.side}transform_to_ICBM2009c_{subject}.trm"
+            f"{self.src_dir}/{subject}*/{self.path_to_graph}/"
+            f"{self.side}{subject}*.arg")[0]
+        transform_file = (\
+            f"{self.transform_dir}/"
+            f"{self.side}transform_to_ICBM2009c_{subject}.trm")
 
         graph = aims.read(graph_file)
         g_to_icbm_template = aims.GraphManip.getICBM2009cTemplateTransform(
@@ -171,24 +175,30 @@ class GraphGenerateTransform:
         aims.write(g_to_icbm_template, transform_file)
 
     def compute(self, number_subjects):
-        """Loops over subjects and converts graphs into skeletons.
+        """Loops over subjects to generate transforms to ICBM2009c from graphs.
         """
         # Gets list fo subjects
         filenames = glob.glob(f"{self.src_dir}/*/")
+        log.info(f"filenames[:5] = {filenames[:5]}")
+
         list_subjects = [
             re.search(
                 '([ae\\d]{5,6})',
                 filename).group(0) for filename in filenames]
         list_subjects = select_subjects_int(list_subjects, number_subjects)
 
+        log.info(f"list_subjects[:5] = {list_subjects[:5]}")
+        log.debug(f"list_subjects = {list_subjects}")
         # Performs computation on all subjects either serially or in parallel
         if self.parallel:
             log.info(
-                "PARALLEL MODE: subjects are computed in parallel.")
-            pqdm(list_subjects, self.generate_one_transform, n_jobs=define_njobs())
+                "PARALLEL MODE: transforms are generated in parallel.")
+            pqdm(list_subjects,
+                 self.generate_one_transform,
+                 n_jobs=define_njobs())
         else:
             log.info(
-                "SERIAL MODE: subjects are scanned serially, "
+                "SERIAL MODE: transforms are generated serially, "
                 "without parallelism")
             for sub in list_subjects:
                 self.generate_one_transform(sub)
@@ -217,7 +227,7 @@ def generate_ICBM2009c_transforms(
 
 @exception_handler
 def main(argv):
-    """Reads argument line and generates skeleton from graph
+    """Reads argument line and generates transform to ICBM2009c from graph
 
     Args:
         argv: a list containing command line arguments

@@ -204,7 +204,7 @@ class MaskAroundSulcus:
         self.side = side
         self.sulcus = complete_sulci_name(sulcus, side)
         self.new_sulcus = complete_sulci_name(self.new_sulcus, side)
-        self.voxel_size_out = (out_voxel_size,
+        self.out_voxel_size = (out_voxel_size,
                                out_voxel_size,
                                out_voxel_size)
 
@@ -235,13 +235,13 @@ class MaskAroundSulcus:
             create_folder(self.mask_dir)
 
             # Creates volume that will take the mask
-            self.mask = initialize_mask(self.voxel_size_out)
+            self.mask = initialize_mask(self.out_voxel_size)
 
             # Increments mask for each sulcus and subjects
             increment_mask(subjects,
                            self.mask,
                            self.sulcus,
-                           self.voxel_size_out)
+                           self.out_voxel_size)
 
             # Saving of generated masks
             write_mask(self.mask, self.mask_file)
@@ -369,6 +369,7 @@ def parse_args(argv: list) -> dict:
 
     return params
 
+
 @exception_handler
 def main(argv):
     """Reads argument line and determines the max bounding box
@@ -380,14 +381,15 @@ def main(argv):
     # Parsing arguments
     params = parse_args(argv)
     # Actual API
-    compute_mask(src_dir=params['src_dir'],
-                    path_to_graph=params['path_to_graph'],
-                    mask_dir=params['mask_dir'],
-                    sulcus=params['sulcus'],
-                    new_sulcus=params['new_sulcus'],
-                    side=params['side'],
-                    number_subjects=params['nb_subjects'],
-                    out_voxel_size=params['out_voxel_size'])
+    compute_mask(
+        src_dir=params['src_dir'],
+        path_to_graph=params['path_to_graph'],
+        mask_dir=params['mask_dir'],
+        sulcus=params['sulcus'],
+        new_sulcus=params['new_sulcus'],
+        side=params['side'],
+        number_subjects=params['nb_subjects'],
+        out_voxel_size=params['out_voxel_size'])
 
 
 ######################################################################
