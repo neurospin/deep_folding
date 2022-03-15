@@ -1,4 +1,3 @@
-
 from deep_folding.brainvisa.utils.bbox import compute_max
 
 def test_compute_max_box():
