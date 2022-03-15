@@ -5,9 +5,21 @@ import numpy as np
 
 from soma import aims
 
-from deep_folding.brainvisa import dataset_gen_pipe
+from deep_folding.brainvisa import resample_files
+from deep_folding.brainvisa.utils.constants import _ALL_SUBJECTS
 
-_ALL_SUBJECTS = -1
+resampled_dir = 'data/test'
+
+def test_resample_files_help():
+    """Tests if calling help function is working"""
+    args = "--help"
+    argv = args.split(' ')
+    resample_files.main(argv)
+
+def test_resample_files_n_0():
+    resample_files.resample_files(
+        resampled_dir=resampled_dir,
+        number_subjects=0)
 
 # def are_arrays_almost_equal(arr1, arr2, epsilon, max_number_different_pixels):
 # 	"""Returns True if arrays arr1 and arr2 are almost equal
