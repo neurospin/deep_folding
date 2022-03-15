@@ -307,7 +307,7 @@ class SkeletonResampler(FileResampler):
         # 'side'
         self.resampled_file = join(
             self.resampled_dir,
-            f'%(side)sresampled_skeleton_{out_voxel_size}mm_%(subject)s.nii.gz')
+            f'%(side)sresampled_skeleton_%(subject)s.nii.gz')
 
         # subjects are detected as the nifti file names under src_dir
         self.expr = '^.skeleton_generated_([0-9a-zA-Z]*).nii.gz$'
@@ -357,7 +357,7 @@ class FoldLabelResampler(FileResampler):
         # 'side'
         self.resampled_file = join(
             self.resampled_dir,
-            f'%(side)sresampled_foldlabel_{out_voxel_size}mm_%(subject)s.nii.gz')
+            f'%(side)sresampled_foldlabel_%(subject)s.nii.gz')
 
         # subjects are detected as the nifti file names under src_dir
         self.expr = '^.foldlabel_([0-9a-zA-Z]*).nii.gz$'

@@ -21,10 +21,10 @@ _PATH_TO_GRAPH_DEFAULT = \
 
 
 # Default directory to which we write the bounding box results
-_BBOX_DIR_DEFAULT = "test/bbox"
+_BBOX_DIR_DEFAULT = "test/bbox/1mm"
 
 # Default directory to which we write the masks
-_MASK_DIR_DEFAULT = "test/mask"
+_MASK_DIR_DEFAULT = "test/mask/1mm"
 
 # Default directory to which we write the masks
 _INPUT_TYPE_DEFAULT = "skeleton"

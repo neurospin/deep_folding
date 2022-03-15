@@ -53,7 +53,7 @@ from deep_folding.brainvisa import exception_handler
 from deep_folding.brainvisa.utils.folder import create_folder
 from deep_folding.brainvisa.utils.logs import setup_log
 from deep_folding.brainvisa.utils.referentials import \
-    generate_ref_volume_MNI_2009
+    generate_ref_volume_ICBM2009c
 from deep_folding.brainvisa.utils.subjects import get_number_subjects
 from deep_folding.brainvisa.utils.subjects import select_subjects_int
 from deep_folding.brainvisa.utils.subjects import \
@@ -85,7 +85,7 @@ def initialize_mask(out_voxel_size: tuple) -> aims.Volume:
             and with requested voxel_size
     """
 
-    return generate_ref_volume_MNI_2009(out_voxel_size)
+    return generate_ref_volume_ICBM2009c(out_voxel_size)
 
 
 def increment_one_mask(graph_filename, mask, sulcus, voxel_size_out):
@@ -342,7 +342,7 @@ def parse_args(argv: list) -> dict:
     parser.add_argument(
         "-x", "--out_voxel_size", type=float, default=_VOXEL_SIZE_DEFAULT,
         help='Voxel size of mask. '
-             'Default is : None')
+             'Default is : ' + str(_VOXEL_SIZE_DEFAULT))
 
     params = {}
 
