@@ -2,7 +2,7 @@
 from deep_folding.brainvisa.utils.bbox import compute_max
 
 def test_compute_max_box():
-    """Tests the function compte_max_box
+    """Tests the function compute_max_box
     """
     # Upper right vertex of each box
     x1 = 10; y1 = -10; z1 = -100
