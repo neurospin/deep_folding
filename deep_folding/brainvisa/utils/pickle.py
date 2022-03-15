@@ -27,17 +27,16 @@ def is_file_nii(filename):
     return is_file_nii
 
 
-def fetch_data(cropped_dir, tgt_dir=None, side=None):
+def save_to_pickle(cropped_dir, tgt_dir=None, file_basename=None):
     """
     Creates a dataframe of data with a column for each subject and associated
-    np.array. Generation a dataframe of "normal" images and a dataframe of
-    "abnormal" images. Saved these this dataframe to pkl format on the target
+    np.array. Saved these this dataframe to pkl format on the target
     directory
 
     Args:
         cropped_dir: directory containing cropped images
         tgt_dir: directory where to save the pickle file
-        side: hemisphere side, either 'L' for left or 'R' for right hemisphere
+        file_basename: final file name = file_basename.pkl
     """
 
     data_dict = dict()
@@ -52,13 +51,13 @@ def fetch_data(cropped_dir, tgt_dir=None, side=None):
 
     dataframe = pd.DataFrame.from_dict(data_dict)
 
-    file_pickle_basename = side + 'labels.pkl'
+    file_pickle_basename = file_basename + '.pkl'
     file_pickle = os.path.join(tgt_dir, file_pickle_basename)
     dataframe.to_pickle(file_pickle)
 
 
 if __name__ == '__main__':
-    fetch_data(
+    save_to_pickle(
         cropped_dir='/neurospin/dico/data/deep_folding/current/crops/SC/mask/sulcus_based/2mm/Rlabels/',
         tgt_dir='/neurospin/dico/data/deep_folding/current/crops/SC/mask/sulcus_based/2mm/',
-        side='R')
+        file_basename='Rlabels')

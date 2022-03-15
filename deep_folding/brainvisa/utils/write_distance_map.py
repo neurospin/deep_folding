@@ -55,14 +55,9 @@ import sys
 import numpy as np
 from joblib import cpu_count
 from pqdm.processes import pqdm
-from tqdm import tqdm
 
-
-def define_njobs():
-    """Returns number of cpus used by main loop
-    """
-    nb_cpus = cpu_count()
-    return max(nb_cpus-2, 1)
+from deep_folding.brainvisa import exception_handler
+from deep_folding.brainvisa.utils.parallel import define_njobs
 
 
 def parse_args(argv):
@@ -106,10 +101,10 @@ def skel_2_distMap(subject):
     distMap_filename = build_distMap_filename(subject, tgt_dir)
 
     cmd_distMap = 'VipDistanceMap' + \
-                    ' -i ' + skeleton_filename + \
-                    ' -o ' + distMap_filename + \
-                    ' -g f -d 0'
-    #print(cmd_distMap)
+        ' -i ' + skeleton_filename + \
+        ' -o ' + distMap_filename + \
+        ' -g f -d 0'
+    # print(cmd_distMap)
     os.system(cmd_distMap)
 
 
@@ -133,28 +128,22 @@ def loop_over_directory(src_dir, tgt_dir):
     print(subjects)
     #distMap_filenames = [build_distMap_filename(subject, tgt_dir) for subject in subjects]
 
-    #for sub in tqdm(subjects):
+    # for sub in tqdm(subjects):
     #    skel_2_distMap(sub)
 
     pqdm(subjects, skel_2_distMap, n_jobs=define_njobs())
 
 
+@exception_handler
 def main(argv):
     """Reads argument line and creates cropped files and pickle file
 
     Args:
         argv: a list containing command line arguments
     """
-
-    # This code permits to catch SystemExit with exit code 0
-    # such as the one raised when "--help" is given as argument
-    try:
-        # Parsing arguments
-        args = parse_args(argv)
-        loop_over_directory(args.src_dir, args.tgt_dir)
-    except SystemExit as exc:
-        if exc.code != 0:
-            six.reraise(*sys.exc_info())
+    # Parsing arguments
+    args = parse_args(argv)
+    loop_over_directory(args.src_dir, args.tgt_dir)
 
 
 if __name__ == '__main__':

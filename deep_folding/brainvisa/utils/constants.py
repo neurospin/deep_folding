@@ -21,10 +21,10 @@ _PATH_TO_GRAPH_DEFAULT = \
 
 
 # Default directory to which we write the bounding box results
-_BBOX_DIR_DEFAULT = "test/bbox"
+_BBOX_DIR_DEFAULT = "test/bbox/1mm"
 
 # Default directory to which we write the masks
-_MASK_DIR_DEFAULT = "test/mask"
+_MASK_DIR_DEFAULT = "test/mask/1mm"
 
 # Default directory to which we write the masks
 _INPUT_TYPE_DEFAULT = "skeleton"
@@ -41,6 +41,9 @@ _TRANSFORM_DIR_DEFAULT = "test/datasets/hcp/transforms"
 # Default directory where we put resampled skeletons
 _RESAMPLED_SKELETON_DIR_DEFAULT = "test/datasets/hcp/skeletons/1mm"
 
+# Default directory where we put crops
+_CROP_DIR_DEFAULT = "test/datasets/hcp/crops/CINGULATE/mask/1mm"
+
 # hemisphere 'L' or 'R'
 _SIDE_DEFAULT = 'R'
 
@@ -53,3 +56,9 @@ _VOXEL_SIZE_DEFAULT = 1.0
 
 # junction type 'wide' or 'thin'
 _JUNCTION_DEFAULT = 'thin'
+
+# cropping default for generating crops
+_CROPPING_TYPE_DEFAULT = 'mask'  # crops according to a mask by default
+
+# Combines sulci using ordering (if true, ordering matters)
+_COMBINE_TYPE_DEFAULT = False 
