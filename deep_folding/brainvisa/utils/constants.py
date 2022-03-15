@@ -41,6 +41,9 @@ _TRANSFORM_DIR_DEFAULT = "test/datasets/hcp/transforms"
 # Default directory where we put resampled skeletons
 _RESAMPLED_SKELETON_DIR_DEFAULT = "test/datasets/hcp/skeletons/1mm"
 
+# Default directory where we put crops
+_CROP_DIR_DEFAULT = "test/datasets/hcp/crops/CINGULATE/mask/1mm"
+
 # hemisphere 'L' or 'R'
 _SIDE_DEFAULT = 'R'
 
@@ -53,3 +56,9 @@ _VOXEL_SIZE_DEFAULT = 1.0
 
 # junction type 'wide' or 'thin'
 _JUNCTION_DEFAULT = 'thin'
+
+# cropping default for generating crops
+_CROPPING_TYPE_DEFAULT = 'mask'  # crops according to a mask by default
+
+# Combines sulci using ordering (if true, ordering matters)
+_COMBINE_TYPE_DEFAULT = False 
