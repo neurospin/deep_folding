@@ -150,8 +150,10 @@ def resample_one_foldlabel(input_image,
     return resampled
 
 
-class SkeletonResampler:
+class FileResampler:
     """Resamples all files from source directories
+
+    Parent class from which derive SkeletonResampler, FoldLabelResampler,...
     """
 
     def __init__(self, src_dir, resampled_dir, transform_dir,
@@ -173,16 +175,10 @@ class SkeletonResampler:
         # Names of files in function of dictionary: keys -> 'subject' and 'side'
         # Src directory contains either 'R' or 'L' a subdirectory
         self.src_dir = join(src_dir, self.side)
-        self.src_file = join(
-            self.src_dir,
-            '%(side)sskeleton_generated_%(subject)s.nii.gz')
 
         # Names of files in function of dictionary: keys -> 'subject' and
         # 'side'
         self.resampled_dir = join(resampled_dir, self.side)
-        self.resampled_file = join(
-            self.resampled_dir,
-            f'%(side)sresampled_skeleton_{out_voxel_size}mm_%(subject)s.nii.gz')
 
         # transform_dir contains side 'R' or 'L'
         self.transform_dir = join(transform_dir, self.side)
@@ -194,10 +190,19 @@ class SkeletonResampler:
                                out_voxel_size,
                                out_voxel_size)
 
-        # subjects are detected as the nifti file names under src_dir
-        self.expr = '^.skeleton_generated_([0-9a-zA-Z]*).nii.gz$'
+    @staticmethod
+    def resample_one_subject(src_file: str,
+                             out_voxel_size: float,
+                             transform_file: str):
+        """Resamples skeleton
 
-    def resample_one_subject(self, subject_id):
+        This static method is called by resample_one_subject_wrapper
+        from parent class FileResampler"""
+        raise RuntimeError(
+            "Method from parent class FileResampler. "
+            "Shall be implemented and called only from child class.")
+
+    def resample_one_subject_wrapper(self, subject_id):
         """Resamples one file
 
         Args:
@@ -209,7 +214,6 @@ class SkeletonResampler:
 
         # Creates transformation MNI template
         transform_file = self.transform_file % subject
-        g_to_icbm_template = aims.read(transform_file)
 
         # Input raw file name
         src_file = self.src_file % subject
@@ -219,10 +223,10 @@ class SkeletonResampler:
 
         # Performs the resampling
         if os.path.exists(src_file):
-            resampled = resample_one_skeleton(
-                input_image=src_file,
+            resampled = self.resample_one_subject(
+                src_file=src_file,
                 out_voxel_size=self.out_voxel_size,
-                transformation=g_to_icbm_template)
+                transform_file=transform_file)
             aims.write(resampled, resampled_file)
         else:
             raise FileNotFoundError(f"{src_file} not found")
@@ -262,16 +266,66 @@ class SkeletonResampler:
                     "PARALLEL MODE: subjects are in parallel")
                 pqdm(
                     list_subjects,
-                    self.resample_one_subject,
+                    self.resample_one_subject_wrapper,
                     n_jobs=define_njobs())
             else:
                 log.info(
                     "SERIAL MODE: subjects are scanned serially")
                 for sub in list_subjects:
-                    self.resample_one_subject(sub)
+                    self.resample_one_subject_wrapper(sub)
 
 
-class FoldLabelResampler(SkeletonResampler):
+class SkeletonResampler(FileResampler):
+    """Resamples all skeletons from source directories
+    """
+
+    def __init__(self, src_dir, resampled_dir, transform_dir,
+                 side, out_voxel_size, parallel
+                 ):
+        """Inits with list of directories
+
+        Args:
+            src_dir: folder containing generated skeletons or labels
+            resampled_dir: name of target (output) directory,
+            transform_dir: directory containing transform files to ICBM2009c
+            side: either 'L' or 'R', hemisphere side
+            out_voxel_size: float giving voxel size in mm
+            parallel: does parallel computation if True
+        """
+        super(SkeletonResampler, self).__init__(
+            src_dir=src_dir, resampled_dir=resampled_dir,
+            transform_dir=transform_dir, side=side,
+            out_voxel_size=out_voxel_size, parallel=parallel)
+
+        # Names of files in function of dictionary: keys -> 'subject' and 'side'
+        # Src directory contains either 'R' or 'L' a subdirectory
+        self.src_file = join(
+            self.src_dir,
+            '%(side)sskeleton_generated_%(subject)s.nii.gz')
+
+        # Names of files in function of dictionary: keys -> 'subject' and
+        # 'side'
+        self.resampled_file = join(
+            self.resampled_dir,
+            f'%(side)sresampled_skeleton_{out_voxel_size}mm_%(subject)s.nii.gz')
+
+        # subjects are detected as the nifti file names under src_dir
+        self.expr = '^.skeleton_generated_([0-9a-zA-Z]*).nii.gz$'
+
+    @staticmethod
+    def resample_one_subject(src_file: str,
+                             out_voxel_size: float,
+                             transform_file: str):
+        """Resamples skeleton
+
+        This static method is called by resample_one_subject_wrapper
+        from parent class FileResampler"""
+        return resample_one_skeleton(input_image=src_file,
+                                     out_voxel_size=out_voxel_size,
+                                     transformation=transform_file)
+
+
+class FoldLabelResampler(FileResampler):
     """Resamples all files from source directories
     """
 
@@ -308,35 +362,13 @@ class FoldLabelResampler(SkeletonResampler):
         # subjects are detected as the nifti file names under src_dir
         self.expr = '^.foldlabel_([0-9a-zA-Z]*).nii.gz$'
 
-    def resample_one_subject(self, subject_id):
-        """Resamples one foldlabel file
-
-        Args:
-            subject_id: string giving the subject ID
-        """
-
-        # Identifies 'subject' in a mapping (for file and directory namings)
-        subject = {'subject': subject_id, 'side': self.side}
-
-        # Creates transformation MNI template
-        transform_file = self.transform_file % subject
-        g_to_icbm_template = aims.read(transform_file)
-
-        # Input raw file name
-        src_file = self.src_file % subject
-
-        # Output resampled file name
-        resampled_file = self.resampled_file % subject
-
-        # Performs the resampling
-        if os.path.exists(src_file):
-            resampled = resample_one_foldlabel(
-                input_image=src_file,
-                out_voxel_size=self.out_voxel_size,
-                transformation=g_to_icbm_template)
-            aims.write(resampled, resampled_file)
-        else:
-            raise FileNotFoundError(f"{src_file} not found")
+    @staticmethod
+    def resample_one_subject(src_file: str,
+                             out_voxel_size: float,
+                             transform_file: str):
+        return resample_one_foldlabel(input_image=src_file,
+                                      out_voxel_size=out_voxel_size,
+                                      transformation=transform_file)
 
 
 def parse_args(argv):
@@ -437,11 +469,13 @@ def resample_files(
             transform_dir=transform_dir,
             side=side,
             out_voxel_size=out_voxel_size,
-            parallel=parallel)   
+            parallel=parallel)
     else:
-        raise ValueError("input_type: shall be either 'skeleton' or 'foldlabel'")
+        raise ValueError(
+            "input_type: shall be either 'skeleton' or 'foldlabel'")
 
     resampler.compute(number_subjects=number_subjects)
+
 
 @exception_handler
 def main(argv):
