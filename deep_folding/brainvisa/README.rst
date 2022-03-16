@@ -75,7 +75,7 @@ We then determine the bounding box around the sulcus named SULCUS by launching t
 This will create in the folder $BBOX_DIR three files 
 (SIDE is now either 'left' or 'right'):
 
-* $${SULCUS}_${SIDE}.json: a json file in the subfolder '/R' or '/L' (depending on the side) that contains the bounding box coordinates
+* ${SULCUS}_${SIDE}.json: a json file in the subfolder '/R' or '/L' (depending on the side) that contains the bounding box coordinates
 * command_line_${SULCUS}_${SIDE}.sh: a bash file to reproduce the results (to be launched from deep_folding/brainvisa) 
 * log_${SULCUS}_${SIDE}.log: a log file that contains the log of the command
 
