@@ -60,17 +60,15 @@
 <li class="toctree-l4 current"><a class="reference internal" href="deep_folding.brainvisa.html#subpackages">Subpackages</a></li>
 <li class="toctree-l4"><a class="reference internal" href="deep_folding.brainvisa.html#submodules">Submodules</a></li>
 <li class="toctree-l4"><a class="reference internal" href="deep_folding.brainvisa.html#module-deep_folding.brainvisa.benchmark_generation">deep_folding.brainvisa.benchmark_generation module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="deep_folding.brainvisa.html#deep-folding-brainvisa-benchmark-pipeline-module">deep_folding.brainvisa.benchmark_pipeline module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="deep_folding.brainvisa.html#module-deep_folding.brainvisa.benchmark_pipeline">deep_folding.brainvisa.benchmark_pipeline module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="deep_folding.brainvisa.html#module-deep_folding.brainvisa.compute_bounding_box">deep_folding.brainvisa.compute_bounding_box module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="deep_folding.brainvisa.html#module-deep_folding.brainvisa.compute_mask">deep_folding.brainvisa.compute_mask module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="deep_folding.brainvisa.html#deep-folding-brainvisa-dataset-gen-pipe-module">deep_folding.brainvisa.dataset_gen_pipe module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="deep_folding.brainvisa.html#module-deep_folding.brainvisa.display">deep_folding.brainvisa.display module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="deep_folding.brainvisa.html#module-deep_folding.brainvisa.generate_crops">deep_folding.brainvisa.generate_crops module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="deep_folding.brainvisa.html#module-deep_folding.brainvisa.generate_foldlabels">deep_folding.brainvisa.generate_foldlabels module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="deep_folding.brainvisa.html#module-deep_folding.brainvisa.generate_skeletons">deep_folding.brainvisa.generate_skeletons module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="deep_folding.brainvisa.html#deep-folding-brainvisa-load-data-module">deep_folding.brainvisa.load_data module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="deep_folding.brainvisa.html#module-deep_folding.brainvisa.mask_qc">deep_folding.brainvisa.mask_qc module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="deep_folding.brainvisa.html#deep-folding-brainvisa-resample-module">deep_folding.brainvisa.resample module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="deep_folding.brainvisa.html#module-deep_folding.brainvisa.resample_files">deep_folding.brainvisa.resample_files module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="deep_folding.brainvisa.html#module-deep_folding.brainvisa">Module contents</a></li>
 </ul>
 </li>
@@ -412,7 +410,7 @@ for parallel computing</p>
 
 <dl class="function">
 <dt id="deep_folding.brainvisa.utils.referentials.generate_ref_volume_ICBM2009c">
-<code class="descclassname">deep_folding.brainvisa.utils.referentials.</code><code class="descname">generate_ref_volume_ICBM2009c</code><span class="sig-paren">(</span><em>out_voxel_size: tuple</em><span class="sig-paren">)</span> &#x2192; &lt;function Volume at 0x7f5aaac07158&gt;<a class="headerlink" href="#deep_folding.brainvisa.utils.referentials.generate_ref_volume_ICBM2009c" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">deep_folding.brainvisa.utils.referentials.</code><code class="descname">generate_ref_volume_ICBM2009c</code><span class="sig-paren">(</span><em>out_voxel_size: tuple</em><span class="sig-paren">)</span> &#x2192; &lt;function Volume at 0x7f43eb6122f0&gt;<a class="headerlink" href="#deep_folding.brainvisa.utils.referentials.generate_ref_volume_ICBM2009c" title="Permalink to this definition">¶</a></dt>
 <dd><p>Defines MNI 2009 reference aims volume with output voxel size</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -568,7 +566,7 @@ This function removes the hull in place</p>
 <p>Resample a volume that contains discret values</p>
 <dl class="function">
 <dt id="deep_folding.brainvisa.utils.resample.resample">
-<code class="descclassname">deep_folding.brainvisa.utils.resample.</code><code class="descname">resample</code><span class="sig-paren">(</span><em>input_image: typing.Union[str, Volume], transformation: typing.Union[str, soma.aims.aims.AffineTransformation3d], output_vs: tuple = None, background: int = 0, values: &lt;built-in function array&gt; = None, verbose: bool = False</em><span class="sig-paren">)</span> &#x2192; &lt;function Volume at 0x7f5aaac07158&gt;<a class="headerlink" href="#deep_folding.brainvisa.utils.resample.resample" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">deep_folding.brainvisa.utils.resample.</code><code class="descname">resample</code><span class="sig-paren">(</span><em>input_image: typing.Union[str, Volume], transformation: typing.Union[str, soma.aims.aims.AffineTransformation3d], output_vs: tuple = None, background: int = 0, values: &lt;built-in function array&gt; = None, verbose: bool = False</em><span class="sig-paren">)</span> &#x2192; &lt;function Volume at 0x7f43eb6122f0&gt;<a class="headerlink" href="#deep_folding.brainvisa.utils.resample.resample" title="Permalink to this definition">¶</a></dt>
 <dd><p>Transforms and resamples a volume that has discret values</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
