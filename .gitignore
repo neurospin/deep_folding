@@ -9,6 +9,7 @@ dist
 *.egg-info
 notebooks/.ipynb_checkpoints
 notebooks/.vscode
+notebooks/test
 data/target
 notebooks/mni_icbm152_nlin_asym_09c
 .vscode

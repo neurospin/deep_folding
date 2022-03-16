@@ -184,6 +184,9 @@ class GraphConvert2Skeleton:
                 filename).group(0) for filename in filenames]
         list_subjects = select_subjects_int(list_subjects, number_subjects)
 
+        log.info(f"list_subjects[:5] = {list_subjects[:5]}")
+        log.debug(f"list_subjects = {list_subjects}")
+
         # Performs computation on all subjects either serially or in parallel
         if self.parallel:
             log.info(
