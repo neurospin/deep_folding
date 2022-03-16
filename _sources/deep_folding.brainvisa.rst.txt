@@ -85,7 +85,7 @@ deep\_folding\.brainvisa\.mask\_qc module
     :show-inheritance:
 
 deep\_folding\.brainvisa\.resample\_files module
------------------------------------------
+------------------------------------------------
 
 .. automodule:: deep_folding.brainvisa.resample_files
     :members:
