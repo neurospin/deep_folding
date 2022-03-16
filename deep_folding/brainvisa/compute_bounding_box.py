@@ -453,7 +453,7 @@ def parse_args(argv: list) -> dict:
     # Sets logger level, files log handler and prints/logs command line
     new_sulcus = args.new_sulcus if args.new_sulcus else args.sulcus
     setup_log(args,
-              log_dir=f"{args.output_dir}/{args.side}",
+              log_dir=f"{args.output_dir}",
               prog_name=basename(__file__),
               suffix=complete_sulci_name(new_sulcus, args.side))
 
