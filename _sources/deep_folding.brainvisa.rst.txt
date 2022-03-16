@@ -84,7 +84,7 @@ deep\_folding\.brainvisa\.mask\_qc module
     :undoc-members:
     :show-inheritance:
 
-deep\_folding\.brainvisa\.resample_files module
+deep\_folding\.brainvisa\.resample\_files module
 -----------------------------------------
 
 .. automodule:: deep_folding.brainvisa.resample_files
