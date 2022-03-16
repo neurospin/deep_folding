@@ -60,14 +60,13 @@
 <li class="toctree-l4"><a class="reference internal" href="#subpackages">Subpackages</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#submodules">Submodules</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-deep_folding.brainvisa.benchmark_generation">deep_folding.brainvisa.benchmark_generation module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#deep-folding-brainvisa-benchmark-pipeline-module">deep_folding.brainvisa.benchmark_pipeline module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-deep_folding.brainvisa.benchmark_pipeline">deep_folding.brainvisa.benchmark_pipeline module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-deep_folding.brainvisa.compute_bounding_box">deep_folding.brainvisa.compute_bounding_box module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-deep_folding.brainvisa.compute_mask">deep_folding.brainvisa.compute_mask module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-deep_folding.brainvisa.display">deep_folding.brainvisa.display module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-deep_folding.brainvisa.generate_crops">deep_folding.brainvisa.generate_crops module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-deep_folding.brainvisa.generate_foldlabels">deep_folding.brainvisa.generate_foldlabels module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-deep_folding.brainvisa.generate_skeletons">deep_folding.brainvisa.generate_skeletons module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#deep-folding-brainvisa-load-data-module">deep_folding.brainvisa.load_data module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-deep_folding.brainvisa.mask_qc">deep_folding.brainvisa.mask_qc module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#deep-folding-brainvisa-resample-files-module">deep_folding.brainvisa.resample_files module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-deep_folding.brainvisa">Module contents</a></li>
@@ -275,8 +274,82 @@ Only right handed HCP subjects</p>
 </dd></dl>
 
 </div>
-<div class="section" id="deep-folding-brainvisa-benchmark-pipeline-module">
-<h2>deep_folding.brainvisa.benchmark_pipeline module<a class="headerlink" href="#deep-folding-brainvisa-benchmark-pipeline-module" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-deep_folding.brainvisa.benchmark_pipeline">
+<span id="deep-folding-brainvisa-benchmark-pipeline-module"></span><h2>deep_folding.brainvisa.benchmark_pipeline module<a class="headerlink" href="#module-deep_folding.brainvisa.benchmark_pipeline" title="Permalink to this headline">¶</a></h2>
+<p>Full pipeline to create a benchmark of abnormalities.</p>
+<dl class="class">
+<dt id="deep_folding.brainvisa.benchmark_pipeline.BenchmarkPipe">
+<em class="property">class </em><code class="descclassname">deep_folding.brainvisa.benchmark_pipeline.</code><code class="descname">BenchmarkPipe</code><span class="sig-paren">(</span><em>tgt_dir</em>, <em>sulcus</em>, <em>side</em>, <em>ss_size</em>, <em>mode</em>, <em>bench_size</em>, <em>resampling</em>, <em>bbox_dir</em>, <em>subjects_list</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.benchmark_pipeline.BenchmarkPipe" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Generates benchmark files of a given mode</p>
+<dl class="method">
+<dt id="deep_folding.brainvisa.benchmark_pipeline.BenchmarkPipe.crop_one_file">
+<code class="descname">crop_one_file</code><span class="sig-paren">(</span><em>sub</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.benchmark_pipeline.BenchmarkPipe.crop_one_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Normalizes, crops and flips if necessary, one file</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>sub</strong> – string giving the subject ID</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="deep_folding.brainvisa.benchmark_pipeline.BenchmarkPipe.get_sub_list">
+<code class="descname">get_sub_list</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.benchmark_pipeline.BenchmarkPipe.get_sub_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get IDs of subjects to normalize, crop</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="deep_folding.brainvisa.benchmark_pipeline.BenchmarkPipe.launch_pipe">
+<code class="descname">launch_pipe</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.benchmark_pipeline.BenchmarkPipe.launch_pipe" title="Permalink to this definition">¶</a></dt>
+<dd><p>Main API to create benchmark files</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="deep_folding.brainvisa.benchmark_pipeline.define_njobs">
+<code class="descclassname">deep_folding.brainvisa.benchmark_pipeline.</code><code class="descname">define_njobs</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.benchmark_pipeline.define_njobs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns number of cpus used by main loop</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="deep_folding.brainvisa.benchmark_pipeline.main">
+<code class="descclassname">deep_folding.brainvisa.benchmark_pipeline.</code><code class="descname">main</code><span class="sig-paren">(</span><em>argv</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.benchmark_pipeline.main" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads argument line and creates benchmark files</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>argv</strong> – a list containing command line arguments</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="deep_folding.brainvisa.benchmark_pipeline.parse_args">
+<code class="descclassname">deep_folding.brainvisa.benchmark_pipeline.</code><code class="descname">parse_args</code><span class="sig-paren">(</span><em>argv</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.benchmark_pipeline.parse_args" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function parsing command-line arguments</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>argv</strong> – a list containing command line arguments</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">a list with source directory names, full path
+sulcus: a string containing the sulcus to analyze
+number_subjects: number of subjects to analyze</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">src_dir</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 </div>
 <div class="section" id="module-deep_folding.brainvisa.compute_bounding_box">
 <span id="deep-folding-brainvisa-compute-bounding-box-module"></span><h2>deep_folding.brainvisa.compute_bounding_box module<a class="headerlink" href="#module-deep_folding.brainvisa.compute_bounding_box" title="Permalink to this headline">¶</a></h2>
@@ -531,7 +604,7 @@ by default it is set to _ALL_SUBJECTS (-1)</li>
 
 <dl class="function">
 <dt id="deep_folding.brainvisa.compute_mask.increment_mask">
-<code class="descclassname">deep_folding.brainvisa.compute_mask.</code><code class="descname">increment_mask</code><span class="sig-paren">(</span><em>subjects: list</em>, <em>mask: &lt;function Volume at 0x7fb482f6a1e0&gt;</em>, <em>sulcus: str</em>, <em>voxel_size_out: tuple</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.compute_mask.increment_mask" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">deep_folding.brainvisa.compute_mask.</code><code class="descname">increment_mask</code><span class="sig-paren">(</span><em>subjects: list</em>, <em>mask: &lt;function Volume at 0x7fd832db57b8&gt;</em>, <em>sulcus: str</em>, <em>voxel_size_out: tuple</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.compute_mask.increment_mask" title="Permalink to this definition">¶</a></dt>
 <dd><p>Increments mask for the chosen sulcus for all subjects</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -560,7 +633,7 @@ for example: ‘Lammon_base2018_manual.arg’</td>
 
 <dl class="function">
 <dt id="deep_folding.brainvisa.compute_mask.initialize_mask">
-<code class="descclassname">deep_folding.brainvisa.compute_mask.</code><code class="descname">initialize_mask</code><span class="sig-paren">(</span><em>out_voxel_size: tuple</em><span class="sig-paren">)</span> &#x2192; &lt;function Volume at 0x7fb482f6a1e0&gt;<a class="headerlink" href="#deep_folding.brainvisa.compute_mask.initialize_mask" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">deep_folding.brainvisa.compute_mask.</code><code class="descname">initialize_mask</code><span class="sig-paren">(</span><em>out_voxel_size: tuple</em><span class="sig-paren">)</span> &#x2192; &lt;function Volume at 0x7fd832db57b8&gt;<a class="headerlink" href="#deep_folding.brainvisa.compute_mask.initialize_mask" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creates aims volume in MNI ICBM152 nonlinear 2009c asymmetrical template
 <a class="reference external" href="http://www.bic.mni.mcgill.ca/~vfonov/icbm/2009/mni_icbm152_nlin_asym_09b_nifti.zip">http://www.bic.mni.mcgill.ca/~vfonov/icbm/2009/mni_icbm152_nlin_asym_09b_nifti.zip</a></p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -602,7 +675,7 @@ Output voxel size (default: None, no resampling)</td>
 
 <dl class="function">
 <dt id="deep_folding.brainvisa.compute_mask.write_mask">
-<code class="descclassname">deep_folding.brainvisa.compute_mask.</code><code class="descname">write_mask</code><span class="sig-paren">(</span><em>mask: &lt;function Volume at 0x7fb482f6a1e0&gt;</em>, <em>mask_file: str</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.compute_mask.write_mask" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">deep_folding.brainvisa.compute_mask.</code><code class="descname">write_mask</code><span class="sig-paren">(</span><em>mask: &lt;function Volume at 0x7fd832db57b8&gt;</em>, <em>mask_file: str</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.compute_mask.write_mask" title="Permalink to this definition">¶</a></dt>
 <dd><p>Writes mask on mask file</p>
 </dd></dl>
 
@@ -741,7 +814,7 @@ by default it is set to _ALL_SUBJECTS (-1).</td>
 
 <dl class="function">
 <dt id="deep_folding.brainvisa.generate_crops.filter_mask">
-<code class="descclassname">deep_folding.brainvisa.generate_crops.</code><code class="descname">filter_mask</code><span class="sig-paren">(</span><em>mask: &lt;function Volume at 0x7fb482f6a1e0&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.generate_crops.filter_mask" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">deep_folding.brainvisa.generate_crops.</code><code class="descname">filter_mask</code><span class="sig-paren">(</span><em>mask: &lt;function Volume at 0x7fd832db57b8&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.generate_crops.filter_mask" title="Permalink to this definition">¶</a></dt>
 <dd><p>Smooths the mask with Gaussian Filter</p>
 </dd></dl>
 
@@ -878,9 +951,6 @@ and writes skeletons and foldlabels into target directory</p>
 </dd></dl>
 
 </div>
-</div>
-<div class="section" id="deep-folding-brainvisa-load-data-module">
-<h2>deep_folding.brainvisa.load_data module<a class="headerlink" href="#deep-folding-brainvisa-load-data-module" title="Permalink to this headline">¶</a></h2>
 </div>
 <div class="section" id="module-deep_folding.brainvisa.mask_qc">
 <span id="deep-folding-brainvisa-mask-qc-module"></span><h2>deep_folding.brainvisa.mask_qc module<a class="headerlink" href="#module-deep_folding.brainvisa.mask_qc" title="Permalink to this headline">¶</a></h2>

@@ -75,13 +75,6 @@ deep\_folding\.brainvisa\.generate\_skeletons module
     :undoc-members:
     :show-inheritance:
 
-deep\_folding\.brainvisa\.load\_data module
--------------------------------------------
-
-.. automodule:: deep_folding.brainvisa.load_data
-    :members:
-    :undoc-members:
-    :show-inheritance:
 
 deep\_folding\.brainvisa\.mask\_qc module
 -----------------------------------------
