@@ -45,7 +45,7 @@ import sys
 
 from deep_folding.brainvisa.benchmark_generation import *
 from deep_folding.brainvisa.utils.resample import resample
-from deep_folding.brainvisa.utils.sulcus_side import complete_sulci_name
+from deep_folding.brainvisa.utils.sulcus import complete_sulci_name
 from joblib import cpu_count
 ######################################################################
 # Imports and global variables definitions

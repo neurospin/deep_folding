@@ -128,7 +128,7 @@ latex_elements = {
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
     (master_doc, 'deep_folding.tex', u'deep_folding Documentation',
-     u'Marco Pascucci', 'manual'),
+     u'Joel Chavas, Louise Guillon', 'manual'),
 ]
 
 

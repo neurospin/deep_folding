@@ -43,14 +43,6 @@ deep\_folding\.brainvisa\.compute\_mask module
     :undoc-members:
     :show-inheritance:
 
-deep\_folding\.brainvisa\.dataset\_gen\_pipe module
----------------------------------------------------
-
-.. automodule:: deep_folding.brainvisa.dataset_gen_pipe
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 deep\_folding\.brainvisa\.display module
 ----------------------------------------
 
@@ -83,13 +75,6 @@ deep\_folding\.brainvisa\.generate\_skeletons module
     :undoc-members:
     :show-inheritance:
 
-deep\_folding\.brainvisa\.load\_data module
--------------------------------------------
-
-.. automodule:: deep_folding.brainvisa.load_data
-    :members:
-    :undoc-members:
-    :show-inheritance:
 
 deep\_folding\.brainvisa\.mask\_qc module
 -----------------------------------------
@@ -99,10 +84,10 @@ deep\_folding\.brainvisa\.mask\_qc module
     :undoc-members:
     :show-inheritance:
 
-deep\_folding\.brainvisa\.resample module
------------------------------------------
+deep\_folding\.brainvisa\.resample\_files module
+------------------------------------------------
 
-.. automodule:: deep_folding.brainvisa.resample
+.. automodule:: deep_folding.brainvisa.resample_files
     :members:
     :undoc-members:
     :show-inheritance:
