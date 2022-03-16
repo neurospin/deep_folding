@@ -152,6 +152,8 @@
 </li>
         <li><a href="deep_folding.brainvisa.html#deep_folding.brainvisa.generate_skeletons.GraphConvert2Skeleton.compute">(deep_folding.brainvisa.generate_skeletons.GraphConvert2Skeleton method)</a>
 </li>
+        <li><a href="deep_folding.brainvisa.html#deep_folding.brainvisa.resample_files.FileResampler.compute">(deep_folding.brainvisa.resample_files.FileResampler method)</a>
+</li>
       </ul></li>
       <li><a href="deep_folding.brainvisa.utils.html#deep_folding.brainvisa.utils.mask.compute_bbox_mask">compute_bbox_mask() (in module deep_folding.brainvisa.utils.mask)</a>
 </li>
@@ -239,6 +241,8 @@
 </li>
       <li><a href="deep_folding.brainvisa.html#module-deep_folding.brainvisa.mask_qc">deep_folding.brainvisa.mask_qc (module)</a>
 </li>
+      <li><a href="deep_folding.brainvisa.html#module-deep_folding.brainvisa.resample_files">deep_folding.brainvisa.resample_files (module)</a>
+</li>
       <li><a href="deep_folding.brainvisa.utils.html#module-deep_folding.brainvisa.utils">deep_folding.brainvisa.utils (module)</a>
 </li>
       <li><a href="deep_folding.brainvisa.utils.html#module-deep_folding.brainvisa.utils.bbox">deep_folding.brainvisa.utils.bbox (module)</a>
@@ -255,10 +259,10 @@
 </li>
       <li><a href="deep_folding.brainvisa.utils.html#module-deep_folding.brainvisa.utils.parallel">deep_folding.brainvisa.utils.parallel (module)</a>
 </li>
-      <li><a href="deep_folding.brainvisa.utils.html#module-deep_folding.brainvisa.utils.referentials">deep_folding.brainvisa.utils.referentials (module)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="deep_folding.brainvisa.utils.html#module-deep_folding.brainvisa.utils.referentials">deep_folding.brainvisa.utils.referentials (module)</a>
+</li>
       <li><a href="deep_folding.brainvisa.utils.html#module-deep_folding.brainvisa.utils.remove_hull">deep_folding.brainvisa.utils.remove_hull (module)</a>
 </li>
       <li><a href="deep_folding.brainvisa.utils.html#module-deep_folding.brainvisa.utils.resample">deep_folding.brainvisa.utils.resample (module)</a>
@@ -319,11 +323,15 @@
 <h2 id="F">F</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="deep_folding.brainvisa.html#deep_folding.brainvisa.resample_files.FileResampler">FileResampler (class in deep_folding.brainvisa.resample_files)</a>
+</li>
       <li><a href="deep_folding.brainvisa.html#deep_folding.brainvisa.generate_crops.filter_mask">filter_mask() (in module deep_folding.brainvisa.generate_crops)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="deep_folding.brainvisa.html#deep_folding.brainvisa.generate_crops.FoldLabelCropGenerator">FoldLabelCropGenerator (class in deep_folding.brainvisa.generate_crops)</a>
+</li>
+      <li><a href="deep_folding.brainvisa.html#deep_folding.brainvisa.resample_files.FoldLabelResampler">FoldLabelResampler (class in deep_folding.brainvisa.resample_files)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -460,6 +468,8 @@
 </li>
         <li><a href="deep_folding.brainvisa.html#deep_folding.brainvisa.mask_qc.parse_args">(in module deep_folding.brainvisa.mask_qc)</a>
 </li>
+        <li><a href="deep_folding.brainvisa.html#deep_folding.brainvisa.resample_files.parse_args">(in module deep_folding.brainvisa.resample_files)</a>
+</li>
         <li><a href="deep_folding.brainvisa.utils.html#deep_folding.brainvisa.utils.convert_volume_to_bucket.parse_args">(in module deep_folding.brainvisa.utils.convert_volume_to_bucket)</a>
 </li>
         <li><a href="deep_folding.brainvisa.utils.html#deep_folding.brainvisa.utils.remove_hull.parse_args">(in module deep_folding.brainvisa.utils.remove_hull)</a>
@@ -479,11 +489,27 @@
 </li>
       <li><a href="deep_folding.brainvisa.utils.html#deep_folding.brainvisa.utils.convert_volume_to_bucket.read_convert_write">read_convert_write() (in module deep_folding.brainvisa.utils.convert_volume_to_bucket)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="deep_folding.brainvisa.utils.html#deep_folding.brainvisa.utils.remove_hull.remove_hull">remove_hull() (in module deep_folding.brainvisa.utils.remove_hull)</a>
 </li>
       <li><a href="deep_folding.brainvisa.utils.html#deep_folding.brainvisa.utils.resample.resample">resample() (in module deep_folding.brainvisa.utils.resample)</a>
+</li>
+      <li><a href="deep_folding.brainvisa.html#deep_folding.brainvisa.resample_files.resample_files">resample_files() (in module deep_folding.brainvisa.resample_files)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="deep_folding.brainvisa.html#deep_folding.brainvisa.resample_files.resample_one_foldlabel">resample_one_foldlabel() (in module deep_folding.brainvisa.resample_files)</a>
+</li>
+      <li><a href="deep_folding.brainvisa.html#deep_folding.brainvisa.resample_files.resample_one_skeleton">resample_one_skeleton() (in module deep_folding.brainvisa.resample_files)</a>
+</li>
+      <li><a href="deep_folding.brainvisa.html#deep_folding.brainvisa.resample_files.FileResampler.resample_one_subject">resample_one_subject() (deep_folding.brainvisa.resample_files.FileResampler static method)</a>
+
+      <ul>
+        <li><a href="deep_folding.brainvisa.html#deep_folding.brainvisa.resample_files.FoldLabelResampler.resample_one_subject">(deep_folding.brainvisa.resample_files.FoldLabelResampler static method)</a>
+</li>
+        <li><a href="deep_folding.brainvisa.html#deep_folding.brainvisa.resample_files.SkeletonResampler.resample_one_subject">(deep_folding.brainvisa.resample_files.SkeletonResampler static method)</a>
+</li>
+      </ul></li>
+      <li><a href="deep_folding.brainvisa.html#deep_folding.brainvisa.resample_files.FileResampler.resample_one_subject_wrapper">resample_one_subject_wrapper() (deep_folding.brainvisa.resample_files.FileResampler method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -501,10 +527,10 @@
 </li>
       <li><a href="deep_folding.brainvisa.utils.html#deep_folding.brainvisa.utils.subjects.select_subjects">select_subjects() (in module deep_folding.brainvisa.utils.subjects)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="deep_folding.brainvisa.utils.html#deep_folding.brainvisa.utils.subjects.select_subjects_int">select_subjects_int() (in module deep_folding.brainvisa.utils.subjects)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="deep_folding.brainvisa.utils.html#deep_folding.brainvisa.utils.logs.setup_log">setup_log() (in module deep_folding.brainvisa.utils.logs)</a>
 </li>
       <li><a href="deep_folding.brainvisa.utils.html#deep_folding.brainvisa.utils.write_distance_map.skel_2_distMap">skel_2_distMap() (in module deep_folding.brainvisa.utils.write_distance_map)</a>
@@ -512,6 +538,8 @@
       <li><a href="deep_folding.brainvisa.html#deep_folding.brainvisa.generate_crops.SkeletonCropGenerator">SkeletonCropGenerator (class in deep_folding.brainvisa.generate_crops)</a>
 </li>
       <li><a href="deep_folding.preprocessing.html#deep_folding.preprocessing.datasets.SkeletonDataset">SkeletonDataset (class in deep_folding.preprocessing.datasets)</a>
+</li>
+      <li><a href="deep_folding.brainvisa.html#deep_folding.brainvisa.resample_files.SkeletonResampler">SkeletonResampler (class in deep_folding.brainvisa.resample_files)</a>
 </li>
       <li><a href="deep_folding.utils.html#deep_folding.utils.split_train_test.split_train_test">split_train_test() (in module deep_folding.utils.split_train_test)</a>
 </li>
