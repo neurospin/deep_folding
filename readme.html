@@ -49,6 +49,7 @@
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Deep folding</a></li>
 <li class="toctree-l1"><a class="reference internal" href="#prerequisites">Prerequisites</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#generates-datasets-of-crops">Generates datasets of crops</a></li>
 <li class="toctree-l1"><a class="reference internal" href="#development">Development</a></li>
 </ul>
 <p class="caption"><span class="caption-text">API documentation</span></p>
@@ -87,9 +88,16 @@ MRIs are processed through BrainVISA/Morphologist tools.</p>
 </div>
 <div class="section" id="prerequisites">
 <h1>Prerequisites<a class="headerlink" href="#prerequisites" title="Permalink to this headline">¶</a></h1>
-<p>Anatomist parts (anatomist_tools) must run with brainvisa installed</p>
+<p>Brainvisa parts (deep_folding.brainvisa) must run with brainvisa installer (usually using brainvisa singularity container).</p>
 <p>Deep learning part (preprocessing and utils) must run with python3 and works with pytorch.</p>
 <p>Package documentation can be found at <a class="reference external" href="https://neurospin.github.io/deep_folding/index.html">https://neurospin.github.io/deep_folding/index.html</a>.</p>
+</div>
+<div class="section" id="generates-datasets-of-crops">
+<h1>Generates datasets of crops<a class="headerlink" href="#generates-datasets-of-crops" title="Permalink to this headline">¶</a></h1>
+<p>Deep learning pipelines to investigate folding patterns are not working on the whole brain (or the whole hemisphere) but on brain crops.
+Several processings are required, as drawn here:</p>
+<a class="reference internal image-reference" href="docs/general_scheme.png"><img alt="docs/general_scheme.png" src="docs/general_scheme.png" style="width: 600px;" /></a>
+<p>We give a step-by-step description of the pipeline in <a class="reference external" href="deep_folding/brainvisa/README.rst">deep_folding/brainvisa/README.rst</a>.</p>
 </div>
 <div class="section" id="development">
 <h1>Development<a class="headerlink" href="#development" title="Permalink to this headline">¶</a></h1>

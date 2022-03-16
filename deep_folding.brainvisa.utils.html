@@ -49,6 +49,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="readme.html">Deep folding</a></li>
 <li class="toctree-l1"><a class="reference internal" href="readme.html#prerequisites">Prerequisites</a></li>
+<li class="toctree-l1"><a class="reference internal" href="readme.html#generates-datasets-of-crops">Generates datasets of crops</a></li>
 <li class="toctree-l1"><a class="reference internal" href="readme.html#development">Development</a></li>
 </ul>
 <p class="caption"><span class="caption-text">API documentation</span></p>
@@ -62,12 +63,12 @@
 <li class="toctree-l4"><a class="reference internal" href="deep_folding.brainvisa.html#deep-folding-brainvisa-benchmark-pipeline-module">deep_folding.brainvisa.benchmark_pipeline module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="deep_folding.brainvisa.html#module-deep_folding.brainvisa.compute_bounding_box">deep_folding.brainvisa.compute_bounding_box module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="deep_folding.brainvisa.html#module-deep_folding.brainvisa.compute_mask">deep_folding.brainvisa.compute_mask module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="deep_folding.brainvisa.html#module-deep_folding.brainvisa.dataset_gen_pipe">deep_folding.brainvisa.dataset_gen_pipe module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="deep_folding.brainvisa.html#deep-folding-brainvisa-dataset-gen-pipe-module">deep_folding.brainvisa.dataset_gen_pipe module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="deep_folding.brainvisa.html#module-deep_folding.brainvisa.display">deep_folding.brainvisa.display module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="deep_folding.brainvisa.html#module-deep_folding.brainvisa.generate_crops">deep_folding.brainvisa.generate_crops module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="deep_folding.brainvisa.html#deep-folding-brainvisa-generate-foldlabels-module">deep_folding.brainvisa.generate_foldlabels module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="deep_folding.brainvisa.html#deep-folding-brainvisa-generate-skeletons-module">deep_folding.brainvisa.generate_skeletons module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="deep_folding.brainvisa.html#module-deep_folding.brainvisa.load_data">deep_folding.brainvisa.load_data module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="deep_folding.brainvisa.html#module-deep_folding.brainvisa.generate_foldlabels">deep_folding.brainvisa.generate_foldlabels module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="deep_folding.brainvisa.html#module-deep_folding.brainvisa.generate_skeletons">deep_folding.brainvisa.generate_skeletons module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="deep_folding.brainvisa.html#deep-folding-brainvisa-load-data-module">deep_folding.brainvisa.load_data module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="deep_folding.brainvisa.html#module-deep_folding.brainvisa.mask_qc">deep_folding.brainvisa.mask_qc module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="deep_folding.brainvisa.html#deep-folding-brainvisa-resample-module">deep_folding.brainvisa.resample module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="deep_folding.brainvisa.html#module-deep_folding.brainvisa">Module contents</a></li>
@@ -410,8 +411,8 @@ for parallel computing</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="deep_folding.brainvisa.utils.referentials.generate_ref_volume_MNI_2009">
-<code class="descclassname">deep_folding.brainvisa.utils.referentials.</code><code class="descname">generate_ref_volume_MNI_2009</code><span class="sig-paren">(</span><em>out_voxel_size: tuple</em><span class="sig-paren">)</span> &#x2192; &lt;function Volume at 0x7fc822b87510&gt;<a class="headerlink" href="#deep_folding.brainvisa.utils.referentials.generate_ref_volume_MNI_2009" title="Permalink to this definition">¶</a></dt>
+<dt id="deep_folding.brainvisa.utils.referentials.generate_ref_volume_ICBM2009c">
+<code class="descclassname">deep_folding.brainvisa.utils.referentials.</code><code class="descname">generate_ref_volume_ICBM2009c</code><span class="sig-paren">(</span><em>out_voxel_size: tuple</em><span class="sig-paren">)</span> &#x2192; &lt;function Volume at 0x7f5aaac07158&gt;<a class="headerlink" href="#deep_folding.brainvisa.utils.referentials.generate_ref_volume_ICBM2009c" title="Permalink to this definition">¶</a></dt>
 <dd><p>Defines MNI 2009 reference aims volume with output voxel size</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -567,7 +568,7 @@ This function removes the hull in place</p>
 <p>Resample a volume that contains discret values</p>
 <dl class="function">
 <dt id="deep_folding.brainvisa.utils.resample.resample">
-<code class="descclassname">deep_folding.brainvisa.utils.resample.</code><code class="descname">resample</code><span class="sig-paren">(</span><em>input_image: typing.Union[str, Volume], transformation: typing.Union[str, soma.aims.aims.AffineTransformation3d], output_vs: tuple = None, background: int = 0, values: &lt;built-in function array&gt; = None, verbose: bool = True</em><span class="sig-paren">)</span> &#x2192; &lt;function Volume at 0x7fc822b87510&gt;<a class="headerlink" href="#deep_folding.brainvisa.utils.resample.resample" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">deep_folding.brainvisa.utils.resample.</code><code class="descname">resample</code><span class="sig-paren">(</span><em>input_image: typing.Union[str, Volume], transformation: typing.Union[str, soma.aims.aims.AffineTransformation3d], output_vs: tuple = None, background: int = 0, values: &lt;built-in function array&gt; = None, verbose: bool = False</em><span class="sig-paren">)</span> &#x2192; &lt;function Volume at 0x7f5aaac07158&gt;<a class="headerlink" href="#deep_folding.brainvisa.utils.resample.resample" title="Permalink to this definition">¶</a></dt>
 <dd><p>Transforms and resamples a volume that has discret values</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -577,7 +578,7 @@ This function removes the hull in place</p>
 <li><strong>input_image</strong> (<em>path to nifti file</em><em> or </em><em>aims volume</em>) – Path to the input volume (.nii or .nii.gz file)</li>
 <li><strong>transformation</strong> (<em>path to file</em>) – Linear transformation file (.trm file)</li>
 <li><strong>output_vs</strong> (<em>tuple</em>) – Output voxel size (default: None, no resampling)</li>
-<li><strong>background</strong> (<em>int</em>) – Background value (default: 11)</li>
+<li><strong>background</strong> (<em>int</em>) – Background value (default: 0)</li>
 <li><strong>values</strong> (<em>[</em><em>]</em>) – Array of unique values ordered by ascendent priority without background. If not given,
 priority is set by ascendent values</li>
 </ul>
@@ -661,7 +662,7 @@ Otherwise it returns the nb_subjects first elements of orig_list</p>
 <dl class="function">
 <dt id="deep_folding.brainvisa.utils.subjects.select_subjects_int">
 <code class="descclassname">deep_folding.brainvisa.utils.subjects.</code><code class="descname">select_subjects_int</code><span class="sig-paren">(</span><em>orig_list: list</em>, <em>nb_subjects: int</em><span class="sig-paren">)</span> &#x2192; list<a class="headerlink" href="#deep_folding.brainvisa.utils.subjects.select_subjects_int" title="Permalink to this definition">¶</a></dt>
-<dd><p>Retrns a sublist of nb_subjects elements</p>
+<dd><p>Returns a sublist of nb_subjects elements</p>
 <p>if nb_subjects == -1, it returns the original list</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -734,12 +735,6 @@ from the terminal:
 </dd></dl>
 
 <dl class="function">
-<dt id="deep_folding.brainvisa.utils.write_distance_map.define_njobs">
-<code class="descclassname">deep_folding.brainvisa.utils.write_distance_map.</code><code class="descname">define_njobs</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.utils.write_distance_map.define_njobs" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns number of cpus used by main loop</p>
-</dd></dl>
-
-<dl class="function">
 <dt id="deep_folding.brainvisa.utils.write_distance_map.get_subject_name">
 <code class="descclassname">deep_folding.brainvisa.utils.write_distance_map.</code><code class="descname">get_subject_name</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.utils.write_distance_map.get_subject_name" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns file basename without extension</p>
@@ -749,20 +744,6 @@ from the terminal:
 <dt id="deep_folding.brainvisa.utils.write_distance_map.loop_over_directory">
 <code class="descclassname">deep_folding.brainvisa.utils.write_distance_map.</code><code class="descname">loop_over_directory</code><span class="sig-paren">(</span><em>src_dir</em>, <em>tgt_dir</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.utils.write_distance_map.loop_over_directory" title="Permalink to this definition">¶</a></dt>
 <dd><p>Loops conversion over input directory</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="deep_folding.brainvisa.utils.write_distance_map.main">
-<code class="descclassname">deep_folding.brainvisa.utils.write_distance_map.</code><code class="descname">main</code><span class="sig-paren">(</span><em>argv</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.utils.write_distance_map.main" title="Permalink to this definition">¶</a></dt>
-<dd><p>Reads argument line and creates cropped files and pickle file</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>argv</strong> – a list containing command line arguments</td>
-</tr>
-</tbody>
-</table>
 </dd></dl>
 
 <dl class="function">

@@ -49,6 +49,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="readme.html">Deep folding</a></li>
 <li class="toctree-l1"><a class="reference internal" href="readme.html#prerequisites">Prerequisites</a></li>
+<li class="toctree-l1"><a class="reference internal" href="readme.html#generates-datasets-of-crops">Generates datasets of crops</a></li>
 <li class="toctree-l1"><a class="reference internal" href="readme.html#development">Development</a></li>
 </ul>
 <p class="caption"><span class="caption-text">API documentation</span></p>
@@ -62,12 +63,12 @@
 <li class="toctree-l4"><a class="reference internal" href="#deep-folding-brainvisa-benchmark-pipeline-module">deep_folding.brainvisa.benchmark_pipeline module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-deep_folding.brainvisa.compute_bounding_box">deep_folding.brainvisa.compute_bounding_box module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-deep_folding.brainvisa.compute_mask">deep_folding.brainvisa.compute_mask module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#module-deep_folding.brainvisa.dataset_gen_pipe">deep_folding.brainvisa.dataset_gen_pipe module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#deep-folding-brainvisa-dataset-gen-pipe-module">deep_folding.brainvisa.dataset_gen_pipe module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-deep_folding.brainvisa.display">deep_folding.brainvisa.display module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-deep_folding.brainvisa.generate_crops">deep_folding.brainvisa.generate_crops module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#deep-folding-brainvisa-generate-foldlabels-module">deep_folding.brainvisa.generate_foldlabels module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#deep-folding-brainvisa-generate-skeletons-module">deep_folding.brainvisa.generate_skeletons module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#module-deep_folding.brainvisa.load_data">deep_folding.brainvisa.load_data module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-deep_folding.brainvisa.generate_foldlabels">deep_folding.brainvisa.generate_foldlabels module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-deep_folding.brainvisa.generate_skeletons">deep_folding.brainvisa.generate_skeletons module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#deep-folding-brainvisa-load-data-module">deep_folding.brainvisa.load_data module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-deep_folding.brainvisa.mask_qc">deep_folding.brainvisa.mask_qc module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#deep-folding-brainvisa-resample-module">deep_folding.brainvisa.resample module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-deep_folding.brainvisa">Module contents</a></li>
@@ -287,7 +288,7 @@ on all subjects of the manually labelled dataset. It measures the bounding box
 in the MNI152  space.</p>
 <dl class="class">
 <dt id="deep_folding.brainvisa.compute_bounding_box.BoundingBoxMax">
-<em class="property">class </em><code class="descclassname">deep_folding.brainvisa.compute_bounding_box.</code><code class="descname">BoundingBoxMax</code><span class="sig-paren">(</span><em>src_dir='/neurospin/dico/data/bv_databases/human/pclean/all'</em>, <em>path_to_graph='t1mri/t1/default_analysis/folds/3.3/base2018_manual'</em>, <em>bbox_dir='/neurospin/dico/data/deep_folding/test/bbox'</em>, <em>sulcus='F.C.M.ant.'</em>, <em>side='R'</em>, <em>out_voxel_size=None</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.compute_bounding_box.BoundingBoxMax" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">deep_folding.brainvisa.compute_bounding_box.</code><code class="descname">BoundingBoxMax</code><span class="sig-paren">(</span><em>src_dir='/neurospin/dico/data/bv_databases/human/pclean/all'</em>, <em>path_to_graph='t1mri/t1/default_analysis/folds/3.3/base2018_manual'</em>, <em>bbox_dir='test/bbox/1mm'</em>, <em>sulcus='F.C.M.ant.'</em>, <em>new_sulcus=None</em>, <em>side='R'</em>, <em>out_voxel_size=None</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.compute_bounding_box.BoundingBoxMax" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
 <p>Determines the maximum Bounding Box around given sulci</p>
 <p>It is determined in the  MNI ICBM152 nonlinear 2009c asymmetrical template
@@ -316,7 +317,7 @@ in the MNI152  space.</p>
 
 <dl class="function">
 <dt id="deep_folding.brainvisa.compute_bounding_box.compute_bounding_box">
-<code class="descclassname">deep_folding.brainvisa.compute_bounding_box.</code><code class="descname">compute_bounding_box</code><span class="sig-paren">(</span><em>src_dir='/neurospin/dico/data/bv_databases/human/pclean/all'</em>, <em>bbox_dir='/neurospin/dico/data/deep_folding/test/bbox'</em>, <em>path_to_graph='t1mri/t1/default_analysis/folds/3.3/base2018_manual'</em>, <em>sulcus='F.C.M.ant.'</em>, <em>side='R'</em>, <em>number_subjects=-1</em>, <em>out_voxel_size=None</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.compute_bounding_box.compute_bounding_box" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">deep_folding.brainvisa.compute_bounding_box.</code><code class="descname">compute_bounding_box</code><span class="sig-paren">(</span><em>src_dir='/neurospin/dico/data/bv_databases/human/pclean/all'</em>, <em>bbox_dir='test/bbox/1mm'</em>, <em>path_to_graph='t1mri/t1/default_analysis/folds/3.3/base2018_manual'</em>, <em>sulcus='F.C.M.ant.'</em>, <em>new_sulcus=None</em>, <em>side='R'</em>, <em>number_subjects=-1</em>, <em>out_voxel_size=None</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.compute_bounding_box.compute_bounding_box" title="Permalink to this definition">¶</a></dt>
 <dd><p>Main program computing the box encompassing the sulcus in all subjects</p>
 <p>The programm loops over all subjects
 and computes in MNI space the voxel coordinates of the box encompassing
@@ -331,6 +332,7 @@ the sulci for all subjects</p>
 <li><strong>path_to_graph</strong> – string giving relative path to manually labelled graph</li>
 <li><strong>side</strong> – hemisphere side (either ‘L’ for left, or ‘R’ for right)</li>
 <li><strong>sulcus</strong> – string giving the sulcus to analyze</li>
+<li><strong>new_sulcus</strong> – string giving a new sulcus name (optional)</li>
 <li><strong>number_subjects</strong> – integer giving the number of subjects to analyze,
 by default it is set to _ALL_SUBJECTS (-1)</li>
 <li><strong>out_voxel_size</strong> – float giving voxel size in mm</li>
@@ -449,20 +451,6 @@ for example: ‘Lammon_base2018_manual.arg’</td>
 </dd></dl>
 
 <dl class="function">
-<dt id="deep_folding.brainvisa.compute_bounding_box.main">
-<code class="descclassname">deep_folding.brainvisa.compute_bounding_box.</code><code class="descname">main</code><span class="sig-paren">(</span><em>argv</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.compute_bounding_box.main" title="Permalink to this definition">¶</a></dt>
-<dd><p>Reads argument line and determines the max bounding box</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>argv</strong> – a list containing command line arguments</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
 <dt id="deep_folding.brainvisa.compute_bounding_box.parse_args">
 <code class="descclassname">deep_folding.brainvisa.compute_bounding_box.</code><code class="descname">parse_args</code><span class="sig-paren">(</span><em>argv: list</em><span class="sig-paren">)</span> &#x2192; dict<a class="headerlink" href="#deep_folding.brainvisa.compute_bounding_box.parse_args" title="Permalink to this definition">¶</a></dt>
 <dd><p>Function parsing command-line arguments</p>
@@ -490,7 +478,7 @@ on all subjects of the manually labelled dataset. It measures the bounding box
 in the MNI152  space.</p>
 <dl class="class">
 <dt id="deep_folding.brainvisa.compute_mask.MaskAroundSulcus">
-<em class="property">class </em><code class="descclassname">deep_folding.brainvisa.compute_mask.</code><code class="descname">MaskAroundSulcus</code><span class="sig-paren">(</span><em>src_dir='/neurospin/dico/data/bv_databases/human/pclean/all'</em>, <em>path_to_graph='t1mri/t1/default_analysis/folds/3.3/base2018_manual'</em>, <em>mask_dir='/neurospin/dico/data/deep_folding/test/mask'</em>, <em>sulcus='F.C.M.ant.'</em>, <em>side='R'</em>, <em>out_voxel_size=None</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.compute_mask.MaskAroundSulcus" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">deep_folding.brainvisa.compute_mask.</code><code class="descname">MaskAroundSulcus</code><span class="sig-paren">(</span><em>src_dir='/neurospin/dico/data/bv_databases/human/pclean/all'</em>, <em>path_to_graph='t1mri/t1/default_analysis/folds/3.3/base2018_manual'</em>, <em>mask_dir='test/mask/1mm'</em>, <em>sulcus='F.C.M.ant.'</em>, <em>new_sulcus=None</em>, <em>side='R'</em>, <em>out_voxel_size=None</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.compute_mask.MaskAroundSulcus" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
 <p>Determines the maximum Bounding Box around given sulci</p>
 <p>It is determined in the  MNI ICBM152 nonlinear 2009c asymmetrical template
@@ -513,7 +501,7 @@ in the MNI152  space.</p>
 
 <dl class="function">
 <dt id="deep_folding.brainvisa.compute_mask.compute_mask">
-<code class="descclassname">deep_folding.brainvisa.compute_mask.</code><code class="descname">compute_mask</code><span class="sig-paren">(</span><em>src_dir='/neurospin/dico/data/bv_databases/human/pclean/all'</em>, <em>mask_dir='/neurospin/dico/data/deep_folding/test/mask'</em>, <em>path_to_graph='t1mri/t1/default_analysis/folds/3.3/base2018_manual'</em>, <em>sulcus='F.C.M.ant.'</em>, <em>side='R'</em>, <em>number_subjects=-1</em>, <em>out_voxel_size=None</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.compute_mask.compute_mask" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">deep_folding.brainvisa.compute_mask.</code><code class="descname">compute_mask</code><span class="sig-paren">(</span><em>src_dir='/neurospin/dico/data/bv_databases/human/pclean/all'</em>, <em>mask_dir='test/mask/1mm'</em>, <em>path_to_graph='t1mri/t1/default_analysis/folds/3.3/base2018_manual'</em>, <em>sulcus='F.C.M.ant.'</em>, <em>new_sulcus=None</em>, <em>side='R'</em>, <em>number_subjects=-1</em>, <em>out_voxel_size=None</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.compute_mask.compute_mask" title="Permalink to this definition">¶</a></dt>
 <dd><p>Main program computing the box encompassing the sulcus in all subjects</p>
 <p>The programm loops over all subjects
 and computes in MNI space the voxel coordinates of the box encompassing
@@ -528,6 +516,7 @@ the sulci for all subjects</p>
 <li><strong>path_to_graph</strong> – string giving relative path to manually labelled graph</li>
 <li><strong>side</strong> – hemisphere side (either ‘L’ for left, or ‘R’ for right)</li>
 <li><strong>sulcus</strong> – string giving the sulcus to analyze</li>
+<li><strong>new_sulcus</strong> – string giving a new sulcus name (optional)</li>
 <li><strong>number_subjects</strong> – integer giving the number of subjects to analyze,
 by default it is set to _ALL_SUBJECTS (-1)</li>
 <li><strong>out_voxel_size</strong> – float giving voxel size</li>
@@ -543,7 +532,7 @@ by default it is set to _ALL_SUBJECTS (-1)</li>
 
 <dl class="function">
 <dt id="deep_folding.brainvisa.compute_mask.increment_mask">
-<code class="descclassname">deep_folding.brainvisa.compute_mask.</code><code class="descname">increment_mask</code><span class="sig-paren">(</span><em>subjects: list</em>, <em>mask: &lt;function Volume at 0x7fdbb4ecb950&gt;</em>, <em>sulcus: str</em>, <em>voxel_size_out: tuple</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.compute_mask.increment_mask" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">deep_folding.brainvisa.compute_mask.</code><code class="descname">increment_mask</code><span class="sig-paren">(</span><em>subjects: list</em>, <em>mask: &lt;function Volume at 0x7f5aaac07158&gt;</em>, <em>sulcus: str</em>, <em>voxel_size_out: tuple</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.compute_mask.increment_mask" title="Permalink to this definition">¶</a></dt>
 <dd><p>Increments mask for the chosen sulcus for all subjects</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -572,7 +561,7 @@ for example: ‘Lammon_base2018_manual.arg’</td>
 
 <dl class="function">
 <dt id="deep_folding.brainvisa.compute_mask.initialize_mask">
-<code class="descclassname">deep_folding.brainvisa.compute_mask.</code><code class="descname">initialize_mask</code><span class="sig-paren">(</span><em>out_voxel_size: tuple</em><span class="sig-paren">)</span> &#x2192; &lt;function Volume at 0x7fdbb4ecb950&gt;<a class="headerlink" href="#deep_folding.brainvisa.compute_mask.initialize_mask" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">deep_folding.brainvisa.compute_mask.</code><code class="descname">initialize_mask</code><span class="sig-paren">(</span><em>out_voxel_size: tuple</em><span class="sig-paren">)</span> &#x2192; &lt;function Volume at 0x7f5aaac07158&gt;<a class="headerlink" href="#deep_folding.brainvisa.compute_mask.initialize_mask" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creates aims volume in MNI ICBM152 nonlinear 2009c asymmetrical template
 <a class="reference external" href="http://www.bic.mni.mcgill.ca/~vfonov/icbm/2009/mni_icbm152_nlin_asym_09b_nifti.zip">http://www.bic.mni.mcgill.ca/~vfonov/icbm/2009/mni_icbm152_nlin_asym_09b_nifti.zip</a></p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -589,20 +578,6 @@ Output voxel size (default: None, no resampling)</td>
 </td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="deep_folding.brainvisa.utils.html#module-deep_folding.brainvisa.utils.mask" title="deep_folding.brainvisa.utils.mask">mask</a></td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="deep_folding.brainvisa.compute_mask.main">
-<code class="descclassname">deep_folding.brainvisa.compute_mask.</code><code class="descname">main</code><span class="sig-paren">(</span><em>argv</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.compute_mask.main" title="Permalink to this definition">¶</a></dt>
-<dd><p>Reads argument line and determines the max bounding box</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>argv</strong> – a list containing command line arguments</td>
 </tr>
 </tbody>
 </table>
@@ -628,152 +603,13 @@ Output voxel size (default: None, no resampling)</td>
 
 <dl class="function">
 <dt id="deep_folding.brainvisa.compute_mask.write_mask">
-<code class="descclassname">deep_folding.brainvisa.compute_mask.</code><code class="descname">write_mask</code><span class="sig-paren">(</span><em>mask: &lt;function Volume at 0x7fdbb4ecb950&gt;</em>, <em>mask_file: str</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.compute_mask.write_mask" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">deep_folding.brainvisa.compute_mask.</code><code class="descname">write_mask</code><span class="sig-paren">(</span><em>mask: &lt;function Volume at 0x7f5aaac07158&gt;</em>, <em>mask_file: str</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.compute_mask.write_mask" title="Permalink to this definition">¶</a></dt>
 <dd><p>Writes mask on mask file</p>
 </dd></dl>
 
 </div>
-<div class="section" id="module-deep_folding.brainvisa.dataset_gen_pipe">
-<span id="deep-folding-brainvisa-dataset-gen-pipe-module"></span><h2>deep_folding.brainvisa.dataset_gen_pipe module<a class="headerlink" href="#module-deep_folding.brainvisa.dataset_gen_pipe" title="Permalink to this headline">¶</a></h2>
-<p>Creating pickle file from T1 MRI datas</p>
-<p>The aim of this script is to create dataset of cropped skeletons from MRIs
-saved in a .pickle file.
-Several steps are required: normalization, crop and .pickle generation</p>
-<blockquote>
-<div><p>You can use this program by first entering in the brainvisa environment
-(here brainvisa 5.0.0 installed with singurity) and launching the script
-from the terminal:
-&gt;&gt;&gt; bv bash
-&gt;&gt;&gt; python dataset_gen_pipe.py</p>
-<p>Alternatively, you can launch the script in the interactive terminal ipython:
-&gt;&gt;&gt; %run dataset_gen_pipe.py</p>
-</div></blockquote>
-<dl class="class">
-<dt id="deep_folding.brainvisa.dataset_gen_pipe.DatasetCroppedSkeleton">
-<em class="property">class </em><code class="descclassname">deep_folding.brainvisa.dataset_gen_pipe.</code><code class="descname">DatasetCroppedSkeleton</code><span class="sig-paren">(</span><em>graph_dir='/neurospin/hcp'</em>, <em>src_dir='/neurospin/dico/data/deep_folding/datasets/hcp'</em>, <em>tgt_dir='/neurospin/dico/data/deep_folding/test'</em>, <em>bbox_dir='/neurospin/dico/data/deep_folding/current/bbox'</em>, <em>mask_dir='/neurospin/dico/data/deep_folding/current/mask'</em>, <em>morphologist_dir='ANALYSIS/3T_morphologist'</em>, <em>list_sulci='S.T.s.ter.asc.ant.'</em>, <em>side='L'</em>, <em>cropping='mask'</em>, <em>out_voxel_size=(1</em>, <em>1</em>, <em>1)</em>, <em>combine_type=False</em>, <em>dist_map=False</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.dataset_gen_pipe.DatasetCroppedSkeleton" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
-<p>Generates cropped skeleton files and corresponding pickle file</p>
-<dl class="method">
-<dt id="deep_folding.brainvisa.dataset_gen_pipe.DatasetCroppedSkeleton.crop_bbox">
-<code class="descname">crop_bbox</code><span class="sig-paren">(</span><em>file_cropped</em>, <em>verbose</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.dataset_gen_pipe.DatasetCroppedSkeleton.crop_bbox" title="Permalink to this definition">¶</a></dt>
-<dd><p>Crops according to bounding box</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="deep_folding.brainvisa.dataset_gen_pipe.DatasetCroppedSkeleton.crop_files">
-<code class="descname">crop_files</code><span class="sig-paren">(</span><em>number_subjects=-1</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.dataset_gen_pipe.DatasetCroppedSkeleton.crop_files" title="Permalink to this definition">¶</a></dt>
-<dd><p>Crop nii files</p>
-<p>The programm loops over all subjects from the input (source) directory.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>number_subjects</strong> – integer giving the number of subjects to analyze,
-by default it is set to _ALL_SUBJECTS (-1).</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="deep_folding.brainvisa.dataset_gen_pipe.DatasetCroppedSkeleton.crop_mask">
-<code class="descname">crop_mask</code><span class="sig-paren">(</span><em>file_cropped</em>, <em>verbose</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.dataset_gen_pipe.DatasetCroppedSkeleton.crop_mask" title="Permalink to this definition">¶</a></dt>
-<dd><p>Crops according to mask</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="deep_folding.brainvisa.dataset_gen_pipe.DatasetCroppedSkeleton.crop_one_file">
-<code class="descname">crop_one_file</code><span class="sig-paren">(</span><em>subject_id</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.dataset_gen_pipe.DatasetCroppedSkeleton.crop_one_file" title="Permalink to this definition">¶</a></dt>
-<dd><p>Crops one file</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>subject_id</strong> – string giving the subject ID</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="deep_folding.brainvisa.dataset_gen_pipe.DatasetCroppedSkeleton.dataset_gen_pipe">
-<code class="descname">dataset_gen_pipe</code><span class="sig-paren">(</span><em>number_subjects=-1</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.dataset_gen_pipe.DatasetCroppedSkeleton.dataset_gen_pipe" title="Permalink to this definition">¶</a></dt>
-<dd><p>Main API to create pickle files</p>
-<dl class="docutils">
-<dt>The programm loops over all subjects from the input (source) directory.</dt>
-<dd># Writes number of subjects and directory names to json file
-dict_to_add = {‘nb_subjects’: len(list_subjects),joblib import Parallel, delayed</dd>
-</dl>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>number_subjects</strong> – integer giving the number of subjects to analyze,
-by default it is set to _ALL_SUBJECTS (-1).</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="deep_folding.brainvisa.dataset_gen_pipe.DatasetCroppedSkeleton.define_referentials">
-<code class="descname">define_referentials</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.dataset_gen_pipe.DatasetCroppedSkeleton.define_referentials" title="Permalink to this definition">¶</a></dt>
-<dd><p>Writes MNI 2009 reference file with output voxel size</p>
-<p>It will be used by AimsApplyTransform</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="deep_folding.brainvisa.dataset_gen_pipe.DatasetCroppedSkeleton.filter_mask">
-<code class="descname">filter_mask</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.dataset_gen_pipe.DatasetCroppedSkeleton.filter_mask" title="Permalink to this definition">¶</a></dt>
-<dd><p>Smooths the mask with Gaussian Filter</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="function">
-<dt id="deep_folding.brainvisa.dataset_gen_pipe.dataset_gen_pipe">
-<code class="descclassname">deep_folding.brainvisa.dataset_gen_pipe.</code><code class="descname">dataset_gen_pipe</code><span class="sig-paren">(</span><em>graph_dir='/neurospin/hcp'</em>, <em>src_dir='/neurospin/dico/data/deep_folding/datasets/hcp'</em>, <em>tgt_dir='/neurospin/dico/data/deep_folding/test'</em>, <em>bbox_dir='/neurospin/dico/data/deep_folding/current/bbox'</em>, <em>mask_dir='/neurospin/dico/data/deep_folding/current/mask'</em>, <em>morphologist_dir='ANALYSIS/3T_morphologist'</em>, <em>side='L'</em>, <em>list_sulci='S.T.s.ter.asc.ant.'</em>, <em>number_subjects=-1</em>, <em>cropping='mask'</em>, <em>out_voxel_size=(1</em>, <em>1</em>, <em>1)</em>, <em>combine_type=False</em>, <em>dist_map=False</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.dataset_gen_pipe.dataset_gen_pipe" title="Permalink to this definition">¶</a></dt>
-<dd><p>Main program generating cropped files and corresponding pickle file</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="deep_folding.brainvisa.dataset_gen_pipe.define_njobs">
-<code class="descclassname">deep_folding.brainvisa.dataset_gen_pipe.</code><code class="descname">define_njobs</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.dataset_gen_pipe.define_njobs" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns number of cpus used by main loop</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="deep_folding.brainvisa.dataset_gen_pipe.main">
-<code class="descclassname">deep_folding.brainvisa.dataset_gen_pipe.</code><code class="descname">main</code><span class="sig-paren">(</span><em>argv</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.dataset_gen_pipe.main" title="Permalink to this definition">¶</a></dt>
-<dd><p>Reads argument line and creates cropped files and pickle file</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>argv</strong> – a list containing command line arguments</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="deep_folding.brainvisa.dataset_gen_pipe.parse_args">
-<code class="descclassname">deep_folding.brainvisa.dataset_gen_pipe.</code><code class="descname">parse_args</code><span class="sig-paren">(</span><em>argv</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.dataset_gen_pipe.parse_args" title="Permalink to this definition">¶</a></dt>
-<dd><p>Function parsing command-line arguments</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>argv</strong> – a list containing command line arguments</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">dictionary with keys: src_dir, tgt_dir, nb_subjects, list_sulci</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">params</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
+<div class="section" id="deep-folding-brainvisa-dataset-gen-pipe-module">
+<h2>deep_folding.brainvisa.dataset_gen_pipe module<a class="headerlink" href="#deep-folding-brainvisa-dataset-gen-pipe-module" title="Permalink to this headline">¶</a></h2>
 </div>
 <div class="section" id="module-deep_folding.brainvisa.display">
 <span id="deep-folding-brainvisa-display-module"></span><h2>deep_folding.brainvisa.display module<a class="headerlink" href="#module-deep_folding.brainvisa.display" title="Permalink to this headline">¶</a></h2>
@@ -814,19 +650,44 @@ from the terminal:
 &gt;&gt;&gt; %run generate_crops.py</p>
 </div></blockquote>
 <dl class="class">
-<dt id="deep_folding.brainvisa.generate_crops.DatasetCroppedSkeleton">
-<em class="property">class </em><code class="descclassname">deep_folding.brainvisa.generate_crops.</code><code class="descname">DatasetCroppedSkeleton</code><span class="sig-paren">(</span><em>graph_dir='/neurospin/hcp'</em>, <em>src_dir='/neurospin/dico/data/deep_folding/datasets/hcp'</em>, <em>tgt_dir='/neurospin/dico/data/deep_folding/test'</em>, <em>bbox_dir='/neurospin/dico/data/deep_folding/current/bbox'</em>, <em>mask_dir='/neurospin/dico/data/deep_folding/current/mask'</em>, <em>morphologist_dir='ANALYSIS/3T_morphologist'</em>, <em>list_sulci='S.T.s.ter.asc.ant.'</em>, <em>side='L'</em>, <em>cropping='mask'</em>, <em>out_voxel_size=(1</em>, <em>1</em>, <em>1)</em>, <em>combine_type=False</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.generate_crops.DatasetCroppedSkeleton" title="Permalink to this definition">¶</a></dt>
+<dt id="deep_folding.brainvisa.generate_crops.CropGenerator">
+<em class="property">class </em><code class="descclassname">deep_folding.brainvisa.generate_crops.</code><code class="descname">CropGenerator</code><span class="sig-paren">(</span><em>src_dir='test/datasets/hcp/skeletons/1mm'</em>, <em>crop_dir='test/datasets/hcp/crops/CINGULATE/mask/1mm'</em>, <em>bbox_dir='test/bbox/1mm'</em>, <em>mask_dir='test/mask/1mm'</em>, <em>list_sulci='F.C.M.ant.'</em>, <em>side='R'</em>, <em>cropping_type='mask'</em>, <em>combine_type=False</em>, <em>parallel=False</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.generate_crops.CropGenerator" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
 <p>Generates cropped skeleton files and corresponding pickle file</p>
 <dl class="method">
-<dt id="deep_folding.brainvisa.generate_crops.DatasetCroppedSkeleton.crop_bbox">
-<code class="descname">crop_bbox</code><span class="sig-paren">(</span><em>file_cropped</em>, <em>verbose</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.generate_crops.DatasetCroppedSkeleton.crop_bbox" title="Permalink to this definition">¶</a></dt>
-<dd><p>Crops according to bounding box</p>
+<dt id="deep_folding.brainvisa.generate_crops.CropGenerator.compute">
+<code class="descname">compute</code><span class="sig-paren">(</span><em>number_subjects=-1</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.generate_crops.CropGenerator.compute" title="Permalink to this definition">¶</a></dt>
+<dd><p>Main API to create pickle files</p>
+<p>The programm loops over all subjects from the input (source) directory.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>number_subjects</strong> – integer giving the number of subjects to analyze,
+by default it is set to _ALL_SUBJECTS (-1).</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
-<dt id="deep_folding.brainvisa.generate_crops.DatasetCroppedSkeleton.crop_files">
-<code class="descname">crop_files</code><span class="sig-paren">(</span><em>number_subjects=-1</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.generate_crops.DatasetCroppedSkeleton.crop_files" title="Permalink to this definition">¶</a></dt>
+<dt id="deep_folding.brainvisa.generate_crops.CropGenerator.compute_bounding_box_or_mask">
+<code class="descname">compute_bounding_box_or_mask</code><span class="sig-paren">(</span><em>number_subjects</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.generate_crops.CropGenerator.compute_bounding_box_or_mask" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes bounding box or mask</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>number_subjects</strong> – integer giving the number of subjects to analyze,
+by default it is set to _ALL_SUBJECTS (-1).</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="deep_folding.brainvisa.generate_crops.CropGenerator.crop_files">
+<code class="descname">crop_files</code><span class="sig-paren">(</span><em>number_subjects=-1</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.generate_crops.CropGenerator.crop_files" title="Permalink to this definition">¶</a></dt>
 <dd><p>Crop nii files</p>
 <p>The programm loops over all subjects from the input (source) directory.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -841,14 +702,8 @@ by default it is set to _ALL_SUBJECTS (-1).</td>
 </dd></dl>
 
 <dl class="method">
-<dt id="deep_folding.brainvisa.generate_crops.DatasetCroppedSkeleton.crop_mask">
-<code class="descname">crop_mask</code><span class="sig-paren">(</span><em>file_cropped</em>, <em>verbose</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.generate_crops.DatasetCroppedSkeleton.crop_mask" title="Permalink to this definition">¶</a></dt>
-<dd><p>Crops according to mask</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="deep_folding.brainvisa.generate_crops.DatasetCroppedSkeleton.crop_one_file">
-<code class="descname">crop_one_file</code><span class="sig-paren">(</span><em>subject_id</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.generate_crops.DatasetCroppedSkeleton.crop_one_file" title="Permalink to this definition">¶</a></dt>
+<dt id="deep_folding.brainvisa.generate_crops.CropGenerator.crop_one_file">
+<code class="descname">crop_one_file</code><span class="sig-paren">(</span><em>subject_id</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.generate_crops.CropGenerator.crop_one_file" title="Permalink to this definition">¶</a></dt>
 <dd><p>Crops one file</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -860,65 +715,44 @@ by default it is set to _ALL_SUBJECTS (-1).</td>
 </table>
 </dd></dl>
 
-<dl class="method">
-<dt id="deep_folding.brainvisa.generate_crops.DatasetCroppedSkeleton.dataset_gen_pipe">
-<code class="descname">dataset_gen_pipe</code><span class="sig-paren">(</span><em>number_subjects=-1</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.generate_crops.DatasetCroppedSkeleton.dataset_gen_pipe" title="Permalink to this definition">¶</a></dt>
-<dd><p>Main API to create pickle files</p>
-<dl class="docutils">
-<dt>The programm loops over all subjects from the input (source) directory.</dt>
-<dd># Writes number of subjects and directory names to json file
-dict_to_add = {‘nb_subjects’: len(list_subjects),joblib import Parallel, delayed</dd>
-</dl>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>number_subjects</strong> – integer giving the number of subjects to analyze,
-by default it is set to _ALL_SUBJECTS (-1).</td>
-</tr>
-</tbody>
-</table>
 </dd></dl>
 
-<dl class="method">
-<dt id="deep_folding.brainvisa.generate_crops.DatasetCroppedSkeleton.define_referentials">
-<code class="descname">define_referentials</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.generate_crops.DatasetCroppedSkeleton.define_referentials" title="Permalink to this definition">¶</a></dt>
-<dd><p>Writes MNI 2009 reference file with output voxel size</p>
-<p>It will be used by AimsApplyTransform</p>
+<dl class="class">
+<dt id="deep_folding.brainvisa.generate_crops.FoldLabelCropGenerator">
+<em class="property">class </em><code class="descclassname">deep_folding.brainvisa.generate_crops.</code><code class="descname">FoldLabelCropGenerator</code><span class="sig-paren">(</span><em>src_dir='test/datasets/hcp/skeletons/1mm'</em>, <em>crop_dir='test/datasets/hcp/crops/CINGULATE/mask/1mm'</em>, <em>bbox_dir='test/bbox/1mm'</em>, <em>mask_dir='test/mask/1mm'</em>, <em>list_sulci='F.C.M.ant.'</em>, <em>side='R'</em>, <em>cropping_type='mask'</em>, <em>combine_type=False</em>, <em>parallel=False</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.generate_crops.FoldLabelCropGenerator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#deep_folding.brainvisa.generate_crops.CropGenerator" title="deep_folding.brainvisa.generate_crops.CropGenerator"><code class="xref py py-class docutils literal"><span class="pre">deep_folding.brainvisa.generate_crops.CropGenerator</span></code></a></p>
+<p>Generates cropped skeleton files and corresponding pickle file</p>
 </dd></dl>
 
-<dl class="method">
-<dt id="deep_folding.brainvisa.generate_crops.DatasetCroppedSkeleton.filter_mask">
-<code class="descname">filter_mask</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.generate_crops.DatasetCroppedSkeleton.filter_mask" title="Permalink to this definition">¶</a></dt>
+<dl class="class">
+<dt id="deep_folding.brainvisa.generate_crops.SkeletonCropGenerator">
+<em class="property">class </em><code class="descclassname">deep_folding.brainvisa.generate_crops.</code><code class="descname">SkeletonCropGenerator</code><span class="sig-paren">(</span><em>src_dir='test/datasets/hcp/skeletons/1mm'</em>, <em>crop_dir='test/datasets/hcp/crops/CINGULATE/mask/1mm'</em>, <em>bbox_dir='test/bbox/1mm'</em>, <em>mask_dir='test/mask/1mm'</em>, <em>list_sulci='F.C.M.ant.'</em>, <em>side='R'</em>, <em>cropping_type='mask'</em>, <em>combine_type=False</em>, <em>parallel=False</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.generate_crops.SkeletonCropGenerator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#deep_folding.brainvisa.generate_crops.CropGenerator" title="deep_folding.brainvisa.generate_crops.CropGenerator"><code class="xref py py-class docutils literal"><span class="pre">deep_folding.brainvisa.generate_crops.CropGenerator</span></code></a></p>
+<p>Generates cropped skeleton files and corresponding pickle file</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="deep_folding.brainvisa.generate_crops.crop_bbox">
+<code class="descclassname">deep_folding.brainvisa.generate_crops.</code><code class="descname">crop_bbox</code><span class="sig-paren">(</span><em>file_src: str</em>, <em>file_cropped: str</em>, <em>bbmin: &lt;built-in function array&gt;</em>, <em>bbmax: &lt;built-in function array&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.generate_crops.crop_bbox" title="Permalink to this definition">¶</a></dt>
+<dd><p>Crops according to bounding box</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="deep_folding.brainvisa.generate_crops.crop_mask">
+<code class="descclassname">deep_folding.brainvisa.generate_crops.</code><code class="descname">crop_mask</code><span class="sig-paren">(</span><em>file_src</em>, <em>file_cropped</em>, <em>mask</em>, <em>bbmin</em>, <em>bbmax</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.generate_crops.crop_mask" title="Permalink to this definition">¶</a></dt>
+<dd><p>Crops according to mask</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="deep_folding.brainvisa.generate_crops.filter_mask">
+<code class="descclassname">deep_folding.brainvisa.generate_crops.</code><code class="descname">filter_mask</code><span class="sig-paren">(</span><em>mask: &lt;function Volume at 0x7f5aaac07158&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.generate_crops.filter_mask" title="Permalink to this definition">¶</a></dt>
 <dd><p>Smooths the mask with Gaussian Filter</p>
 </dd></dl>
 
-</dd></dl>
-
 <dl class="function">
-<dt id="deep_folding.brainvisa.generate_crops.dataset_gen_pipe">
-<code class="descclassname">deep_folding.brainvisa.generate_crops.</code><code class="descname">dataset_gen_pipe</code><span class="sig-paren">(</span><em>graph_dir='/neurospin/hcp'</em>, <em>src_dir='/neurospin/dico/data/deep_folding/datasets/hcp'</em>, <em>tgt_dir='/neurospin/dico/data/deep_folding/test'</em>, <em>bbox_dir='/neurospin/dico/data/deep_folding/current/bbox'</em>, <em>mask_dir='/neurospin/dico/data/deep_folding/current/mask'</em>, <em>morphologist_dir='ANALYSIS/3T_morphologist'</em>, <em>side='L'</em>, <em>list_sulci='S.T.s.ter.asc.ant.'</em>, <em>number_subjects=-1</em>, <em>cropping='mask'</em>, <em>out_voxel_size=(1</em>, <em>1</em>, <em>1)</em>, <em>combine_type=False</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.generate_crops.dataset_gen_pipe" title="Permalink to this definition">¶</a></dt>
+<dt id="deep_folding.brainvisa.generate_crops.generate_crops">
+<code class="descclassname">deep_folding.brainvisa.generate_crops.</code><code class="descname">generate_crops</code><span class="sig-paren">(</span><em>src_dir='test/datasets/hcp/skeletons/1mm'</em>, <em>input_type='skeleton'</em>, <em>crop_dir='test/datasets/hcp/crops/CINGULATE/mask/1mm'</em>, <em>bbox_dir='test/bbox/1mm'</em>, <em>mask_dir='test/mask/1mm'</em>, <em>side='R'</em>, <em>list_sulci='F.C.M.ant.'</em>, <em>number_subjects=-1</em>, <em>cropping_type='mask'</em>, <em>combine_type=False</em>, <em>parallel=False</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.generate_crops.generate_crops" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
-
-<dl class="function">
-<dt id="deep_folding.brainvisa.generate_crops.define_njobs">
-<code class="descclassname">deep_folding.brainvisa.generate_crops.</code><code class="descname">define_njobs</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.generate_crops.define_njobs" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns number of cpus used by main loop</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="deep_folding.brainvisa.generate_crops.main">
-<code class="descclassname">deep_folding.brainvisa.generate_crops.</code><code class="descname">main</code><span class="sig-paren">(</span><em>argv</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.generate_crops.main" title="Permalink to this definition">¶</a></dt>
-<dd><p>Reads argument line and creates cropped files and pickle file</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>argv</strong> – a list containing command line arguments</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
 
 <dl class="function">
 <dt id="deep_folding.brainvisa.generate_crops.parse_args">
@@ -939,56 +773,118 @@ by default it is set to _ALL_SUBJECTS (-1).</td>
 </dd></dl>
 
 </div>
-<div class="section" id="deep-folding-brainvisa-generate-foldlabels-module">
-<h2>deep_folding.brainvisa.generate_foldlabels module<a class="headerlink" href="#deep-folding-brainvisa-generate-foldlabels-module" title="Permalink to this headline">¶</a></h2>
-</div>
-<div class="section" id="deep-folding-brainvisa-generate-skeletons-module">
-<h2>deep_folding.brainvisa.generate_skeletons module<a class="headerlink" href="#deep-folding-brainvisa-generate-skeletons-module" title="Permalink to this headline">¶</a></h2>
-</div>
-<div class="section" id="module-deep_folding.brainvisa.load_data">
-<span id="deep-folding-brainvisa-load-data-module"></span><h2>deep_folding.brainvisa.load_data module<a class="headerlink" href="#module-deep_folding.brainvisa.load_data" title="Permalink to this headline">¶</a></h2>
-<p>Scripts that enables to create a dataframe of numpy arrays from .nii.gz or .nii
-images.</p>
+<div class="section" id="module-deep_folding.brainvisa.generate_foldlabels">
+<span id="deep-folding-brainvisa-generate-foldlabels-module"></span><h2>deep_folding.brainvisa.generate_foldlabels module<a class="headerlink" href="#module-deep_folding.brainvisa.generate_foldlabels" title="Permalink to this headline">¶</a></h2>
+<p>Write foldlabels from graph files</p>
+<div class="section" id="typical-usage">
+<h3>Typical usage<a class="headerlink" href="#typical-usage" title="Permalink to this headline">¶</a></h3>
+<p>You can use this program by first entering in the brainvisa environment
+(here brainvisa 5.0.0 installed with singurity) and launching the script
+from the terminal:
+&gt;&gt;&gt; bv bash
+&gt;&gt;&gt; python generate_foldlabels.py</p>
+<dl class="class">
+<dt id="deep_folding.brainvisa.generate_foldlabels.GraphConvert2FoldLabel">
+<em class="property">class </em><code class="descclassname">deep_folding.brainvisa.generate_foldlabels.</code><code class="descname">GraphConvert2FoldLabel</code><span class="sig-paren">(</span><em>src_dir</em>, <em>foldlabel_dir</em>, <em>side</em>, <em>junction</em>, <em>parallel</em>, <em>path_to_graph</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.generate_foldlabels.GraphConvert2FoldLabel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Class to convert graph into foldlabel files</p>
+<p>It contains all information to scan a dataset for graphs
+and writes foldlabels into target directory</p>
+<dl class="method">
+<dt id="deep_folding.brainvisa.generate_foldlabels.GraphConvert2FoldLabel.compute">
+<code class="descname">compute</code><span class="sig-paren">(</span><em>number_subjects</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.generate_foldlabels.GraphConvert2FoldLabel.compute" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loops over subjects and converts graphs into skeletons.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="deep_folding.brainvisa.generate_foldlabels.GraphConvert2FoldLabel.generate_one_foldlabel">
+<code class="descname">generate_one_foldlabel</code><span class="sig-paren">(</span><em>subject: str</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.generate_foldlabels.GraphConvert2FoldLabel.generate_one_foldlabel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates and writes skeleton for one subject.</p>
+</dd></dl>
+
+</dd></dl>
+
 <dl class="function">
-<dt id="deep_folding.brainvisa.load_data.fetch_data">
-<code class="descclassname">deep_folding.brainvisa.load_data.</code><code class="descname">fetch_data</code><span class="sig-paren">(</span><em>cropped_dir</em>, <em>tgt_dir=None</em>, <em>side=None</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.load_data.fetch_data" title="Permalink to this definition">¶</a></dt>
-<dd><p>Creates a dataframe of data with a column for each subject and associated
-np.array. Generation a dataframe of “normal” images and a dataframe of
-“abnormal” images. Saved these this dataframe to pkl format on the target
-directory</p>
+<dt id="deep_folding.brainvisa.generate_foldlabels.generate_foldlabels">
+<code class="descclassname">deep_folding.brainvisa.generate_foldlabels.</code><code class="descname">generate_foldlabels</code><span class="sig-paren">(</span><em>src_dir='/tgcc/hcp/ANALYSIS/3T_morphologist'</em>, <em>foldlabel_dir='test/datasets/hcp/foldlabels/raw'</em>, <em>path_to_graph='t1mri/default_acquisition/default_analysis/folds/3.1/default_session_*'</em>, <em>side='R'</em>, <em>junction='thin'</em>, <em>parallel=False</em>, <em>number_subjects=-1</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.generate_foldlabels.generate_foldlabels" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates foldlabels from graphs</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="deep_folding.brainvisa.generate_foldlabels.parse_args">
+<code class="descclassname">deep_folding.brainvisa.generate_foldlabels.</code><code class="descname">parse_args</code><span class="sig-paren">(</span><em>argv</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.generate_foldlabels.parse_args" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parses command-line arguments</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>cropped_dir</strong> – directory containing cropped images</li>
-<li><strong>tgt_dir</strong> – directory where to save the pickle file</li>
-<li><strong>side</strong> – hemisphere side, either ‘L’ for left or ‘R’ for right hemisphere</li>
-</ul>
-</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>argv</strong> – a list containing command line arguments</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">args</td>
 </tr>
 </tbody>
 </table>
 </dd></dl>
 
+</div>
+</div>
+<div class="section" id="module-deep_folding.brainvisa.generate_skeletons">
+<span id="deep-folding-brainvisa-generate-skeletons-module"></span><h2>deep_folding.brainvisa.generate_skeletons module<a class="headerlink" href="#module-deep_folding.brainvisa.generate_skeletons" title="Permalink to this headline">¶</a></h2>
+<p>Write skeletons from graph files</p>
+<div class="section" id="id1">
+<h3>Typical usage<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<p>You can use this program by first entering in the brainvisa environment
+(here brainvisa 5.0.0 installed with singurity) and launching the script
+from the terminal:
+&gt;&gt;&gt; bv bash
+&gt;&gt;&gt; python generate_skeletons.py</p>
+<dl class="class">
+<dt id="deep_folding.brainvisa.generate_skeletons.GraphConvert2Skeleton">
+<em class="property">class </em><code class="descclassname">deep_folding.brainvisa.generate_skeletons.</code><code class="descname">GraphConvert2Skeleton</code><span class="sig-paren">(</span><em>src_dir</em>, <em>skeleton_dir</em>, <em>side</em>, <em>junction</em>, <em>parallel</em>, <em>path_to_graph</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.generate_skeletons.GraphConvert2Skeleton" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Class to convert all graphs from a folder into skeletons</p>
+<p>It contains all information to scan a dataset for graphs
+and writes skeletons and foldlabels into target directory</p>
+<dl class="method">
+<dt id="deep_folding.brainvisa.generate_skeletons.GraphConvert2Skeleton.compute">
+<code class="descname">compute</code><span class="sig-paren">(</span><em>number_subjects</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.generate_skeletons.GraphConvert2Skeleton.compute" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loops over subjects and converts graphs into skeletons.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="deep_folding.brainvisa.generate_skeletons.GraphConvert2Skeleton.generate_one_skeleton">
+<code class="descname">generate_one_skeleton</code><span class="sig-paren">(</span><em>subject: str</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.generate_skeletons.GraphConvert2Skeleton.generate_one_skeleton" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates and writes skeleton for one subject.</p>
+</dd></dl>
+
+</dd></dl>
+
 <dl class="function">
-<dt id="deep_folding.brainvisa.load_data.is_file_nii">
-<code class="descclassname">deep_folding.brainvisa.load_data.</code><code class="descname">is_file_nii</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.load_data.is_file_nii" title="Permalink to this definition">¶</a></dt>
-<dd><p>Tests if file is nii file</p>
+<dt id="deep_folding.brainvisa.generate_skeletons.generate_skeletons">
+<code class="descclassname">deep_folding.brainvisa.generate_skeletons.</code><code class="descname">generate_skeletons</code><span class="sig-paren">(</span><em>src_dir='/tgcc/hcp/ANALYSIS/3T_morphologist'</em>, <em>skeleton_dir='test/datasets/hcp/skeletons/raw'</em>, <em>path_to_graph='t1mri/default_acquisition/default_analysis/folds/3.1/default_session_*'</em>, <em>side='R'</em>, <em>junction='thin'</em>, <em>parallel=False</em>, <em>number_subjects=-1</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.generate_skeletons.generate_skeletons" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates skeletons from graphs</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="deep_folding.brainvisa.generate_skeletons.parse_args">
+<code class="descclassname">deep_folding.brainvisa.generate_skeletons.</code><code class="descname">parse_args</code><span class="sig-paren">(</span><em>argv</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.generate_skeletons.parse_args" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parses command-line arguments</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>filename</strong> – string giving file name with full path</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>argv</strong> – a list containing command line arguments</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">boolean stating if file is nii file</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#deep_folding.brainvisa.load_data.is_file_nii" title="deep_folding.brainvisa.load_data.is_file_nii">is_file_nii</a></td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">args</td>
 </tr>
 </tbody>
 </table>
 </dd></dl>
 
+</div>
+</div>
+<div class="section" id="deep-folding-brainvisa-load-data-module">
+<h2>deep_folding.brainvisa.load_data module<a class="headerlink" href="#deep-folding-brainvisa-load-data-module" title="Permalink to this headline">¶</a></h2>
 </div>
 <div class="section" id="module-deep_folding.brainvisa.mask_qc">
 <span id="deep-folding-brainvisa-mask-qc-module"></span><h2>deep_folding.brainvisa.mask_qc module<a class="headerlink" href="#module-deep_folding.brainvisa.mask_qc" title="Permalink to this headline">¶</a></h2>
@@ -1036,6 +932,14 @@ directory</p>
 </div>
 <div class="section" id="module-deep_folding.brainvisa">
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-deep_folding.brainvisa" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="deep_folding.brainvisa.exception_handler">
+<code class="descclassname">deep_folding.brainvisa.</code><code class="descname">exception_handler</code><span class="sig-paren">(</span><em>func</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.exception_handler" title="Permalink to this definition">¶</a></dt>
+<dd><p>This code permits to catch SystemExit with exit code 0</p>
+<p>It is a decorator.
+It is for example used when “–help” is given as argument</p>
+</dd></dl>
+
 </div>
 </div>
 
