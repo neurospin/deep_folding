@@ -171,11 +171,14 @@ def get_bounding_boxes(subjects, sulcus):
 
     for sub in subjects:
         log.info(sub)
-        # It substitutes 'subject' in graph_file name
         graph_file = sub['graph_file'] % sub
         # It looks for a graph file .arg
-        sulci_pattern = glob.glob(join(sub['dir'], graph_file))[0]
-
+        list_graph_file = glob.glob(join(sub['dir'], graph_file))
+        if len(list_graph_file) == 0:
+            raise RuntimeError(f"No graph file! "
+                               f"{sub['dir']} doesn't contain {graph_file}")
+        sulci_pattern = list_graph_file[0]
+        
         bbox_min, bbox_max = \
             get_one_bounding_box(sulci_pattern % sub, sulcus)
         if bbox_min is not None:

@@ -61,6 +61,8 @@ from deep_folding.brainvisa.utils.logs import setup_log
 from deep_folding.brainvisa.utils.parallel import define_njobs
 from deep_folding.brainvisa.utils.skeleton import \
     generate_skeleton_from_graph_file
+from deep_folding.brainvisa.utils.quality_checks import \
+    compare_number_aims_files_with_expected
 from pqdm.processes import pqdm
 from deep_folding.config.logs import set_file_logger
 
@@ -72,6 +74,7 @@ from deep_folding.brainvisa.utils.constants import \
 
 # Defines logger
 log = set_file_logger(__file__)
+
 
 def parse_args(argv):
     """Parses command-line arguments
@@ -94,7 +97,7 @@ def parse_args(argv):
     parser.add_argument(
         "-o", "--output_dir", type=str, default=_SKELETON_DIR_DEFAULT,
         help='Output directory where to put skeleton files.'
-            'Default is : ' + _SKELETON_DIR_DEFAULT)
+        'Default is : ' + _SKELETON_DIR_DEFAULT)
     parser.add_argument(
         "-i", "--side", type=str, default=_SIDE_DEFAULT,
         help='Hemisphere side. Default is : ' + _SIDE_DEFAULT)
@@ -165,9 +168,17 @@ class GraphConvert2Skeleton:
     def generate_one_skeleton(self, subject: str):
         """Generates and writes skeleton for one subject.
         """
-        graph_file = glob.glob(
-            f"{self.src_dir}/{subject}*/{self.path_to_graph}/{self.side}{subject}*.arg")[0]
-        skeleton_file = f"{self.skeleton_dir}/{self.side}skeleton_generated_{subject}.nii.gz"
+        graph_path = f"{self.src_dir}/{subject}*/" +\
+                     f"{self.path_to_graph}/{self.side}{subject}*.arg"
+        list_graph_file = glob.glob(graph_path)
+        log.debug(f"list_graph_file = {list_graph_file}")
+        if len(list_graph_file) == 0:
+            raise RuntimeError(f"No graph file! "
+                               f"{graph_path} doesn't exist")
+        graph_file = list_graph_file[0]
+
+        skeleton_file = f"{self.skeleton_dir}/" +\
+                        f"{self.side}skeleton_generated_{subject}.nii.gz"
 
         generate_skeleton_from_graph_file(graph_file,
                                           skeleton_file,
@@ -184,6 +195,7 @@ class GraphConvert2Skeleton:
                 filename).group(0) for filename in filenames]
         list_subjects = select_subjects_int(list_subjects, number_subjects)
 
+        log.info(f"Expected number of subjects = {len(list_subjects)}")
         log.info(f"list_subjects[:5] = {list_subjects[:5]}")
         log.debug(f"list_subjects = {list_subjects}")
 
@@ -200,6 +212,10 @@ class GraphConvert2Skeleton:
                 "without parallelism")
             for sub in list_subjects:
                 self.generate_one_skeleton(sub)
+
+        # Checks if there is expected number of generated files
+        compare_number_aims_files_with_expected(self.skeleton_dir,
+                                                list_subjects)
 
 
 def generate_skeletons(

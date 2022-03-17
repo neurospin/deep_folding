@@ -136,9 +136,7 @@ def get_all_subjects_as_dictionary(src_dir_list,
                             'side': side,
                             'subject': subject}}
                     subjects.append(subject_d)
-            else:
-                raise NotADirectoryError(directory)
 
-    log.info(f"Number of subjects in directories: {len(subjects)}")
+    log.info(f"Number of subjects in directories: {len(subjects)}\n")
 
     return subjects

@@ -12,12 +12,12 @@ _PATH_TO_GRAPH_SUPERVISED_DEFAULT = \
 
 # Default directory in which lies the dataset
 # It points to HCP directory
-_SRC_DIR_DEFAULT = "/tgcc/hcp/ANALYSIS/3T_morphologist"
+_SRC_DIR_DEFAULT = "/neurospin/dico/data/bv_databases/human/hcp/hcp"
 
 # Gives the relative path to the labelled graph .arg
 # in a "morphologist-like" dataset
 _PATH_TO_GRAPH_DEFAULT = \
-    "t1mri/default_acquisition/default_analysis/folds/3.1/default_session_*"
+    "t1mri/BL/default_analysis/folds/3.1"
 
 
 # Default directory to which we write the bounding box results

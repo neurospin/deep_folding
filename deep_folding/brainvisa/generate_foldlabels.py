@@ -61,6 +61,8 @@ from deep_folding.brainvisa.utils.logs import setup_log
 from deep_folding.brainvisa.utils.parallel import define_njobs
 from deep_folding.brainvisa.utils.foldlabel import \
     generate_foldlabel_from_graph_file
+from deep_folding.brainvisa.utils.quality_checks import \
+    compare_number_aims_files_with_expected
 from pqdm.processes import pqdm
 from deep_folding.config.logs import set_file_logger
 
@@ -166,12 +168,21 @@ class GraphConvert2FoldLabel:
     def generate_one_foldlabel(self, subject: str):
         """Generates and writes skeleton for one subject.
         """
-        graph_file = glob.glob(
-            f"{self.src_dir}/{subject}*/"
-            f"{self.path_to_graph}/{self.side}{subject}*.arg")[0]
+        # Gets graph file path
+        graph_path = f"{self.src_dir}/{subject}*/" +\
+                     f"{self.path_to_graph}/{self.side}{subject}*.arg"
+        list_graph_file = glob.glob(graph_path)
+        log.debug(f"list_graph_file = {list_graph_file}")
+        if len(list_graph_file) == 0:
+            raise RuntimeError(f"No graph file! "
+                               f"{graph_path} doesn't exist")
+        graph_file = list_graph_file[0]
+
+        # Gets foldlabel path
         foldlabel_file = \
             f"{self.foldlabel_dir}/{self.side}foldlabel_{subject}.nii.gz"
 
+        # Generates foldlabel
         generate_foldlabel_from_graph_file(graph_file,
                                            foldlabel_file,
                                            self.junction)
@@ -197,6 +208,10 @@ class GraphConvert2FoldLabel:
                 "without parallelism")
             for sub in list_subjects:
                 self.generate_one_foldlabel(sub)
+
+        # Checks if there is expected number of generated files
+        compare_number_aims_files_with_expected(self.foldlabel_dir,
+                                                list_subjects)
 
 def generate_foldlabels(
         src_dir=_SRC_DIR_DEFAULT,

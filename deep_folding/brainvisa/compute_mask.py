@@ -142,7 +142,11 @@ def increment_mask(subjects: list,
         # It substitutes 'subject' in graph_file name
         graph_file = sub['graph_file'] % sub
         # It looks for a graph file .arg
-        sulci_pattern = glob.glob(join(sub['dir'], graph_file))[0]
+        list_graph_file = glob.glob(join(sub['dir'], graph_file))
+        if len(list_graph_file) == 0:
+            raise RuntimeError(f"No graph file! "
+                               f"{sub['dir']} doesn't contain {graph_file}")
+        sulci_pattern = list_graph_file[0]
 
         increment_one_mask(sulci_pattern % sub,
                            mask,
@@ -154,7 +158,7 @@ def write_mask(mask: aims.Volume, mask_file: str):
     """Writes mask on mask file"""
     mask_file_dir = os.path.dirname(mask_file)
     os.makedirs(mask_file_dir, exist_ok=True)
-    log.info(f"Final mask file: {mask_file}")
+    log.info(f"\nFinal mask file: {mask_file}\n")
     aims.write(mask, mask_file)
 
 
@@ -351,7 +355,7 @@ def parse_args(argv: list) -> dict:
     # Sets logger level, fils log handler and prints/logs command line
     new_sulcus = args.new_sulcus if args.new_sulcus else args.sulcus
     setup_log(args,
-              log_dir=f"{args.output_dir}/{args.side}",
+              log_dir=f"{args.output_dir}",
               prog_name=basename(__file__),
               suffix=complete_sulci_name(new_sulcus, args.side))
 
