@@ -37,6 +37,10 @@ import os
 
 from deep_folding.brainvisa.utils.constants import _ALL_SUBJECTS
 
+from deep_folding.config.logs import set_file_logger
+# Defines logger
+log = set_file_logger(__file__)
+
 def get_number_subjects(nb_subjects: str) -> int:
     """Returns nb_subjects as int
     
@@ -116,7 +120,10 @@ def get_all_subjects_as_dictionary(src_dir_list,
     # Main loop: list all subjects of the directories
     # listed in self.src_dir
     for src_dir, graph_file in zip(src_dir_list, graph_file_list):
-        for filename in os.listdir(src_dir):
+        list_src_dir = os.listdir(src_dir)
+        if len(list_src_dir) == 0:
+            raise RuntimeError(f"source directory {src_dir} is empty!")
+        for filename in list_src_dir:
             directory = os.path.join(src_dir, filename)
             if os.path.isdir(directory):
                 if filename != 'ra':
@@ -129,5 +136,9 @@ def get_all_subjects_as_dictionary(src_dir_list,
                             'side': side,
                             'subject': subject}}
                     subjects.append(subject_d)
+            else:
+                raise NotADirectoryError(directory)
+
+    log.info(f"Number of subjects in directories: {len(subjects)}")
 
     return subjects
