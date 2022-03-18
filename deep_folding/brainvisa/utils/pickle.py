@@ -11,6 +11,10 @@ import numpy as np
 import pandas as pd
 from soma import aims
 
+from deep_folding.config.logs import set_file_logger
+
+# Defines logger
+log = set_file_logger(__file__)
 
 def is_file_nii(filename):
     """Tests if file is nii file
@@ -40,6 +44,9 @@ def save_to_pickle(cropped_dir, tgt_dir=None, file_basename=None):
     """
 
     data_dict = dict()
+
+    log.info("Now generating pickle file...")
+    log.debug(f"cropped_dir = {cropped_dir}")
 
     for filename in os.listdir(cropped_dir):
         file_nii = os.path.join(cropped_dir, filename)

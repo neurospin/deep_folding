@@ -49,11 +49,15 @@ from scipy import ndimage
 from soma import aims
 from soma.aimsalgo import MorphoGreyLevel_S16
 
-#import dilate_mask as dl
+from deep_folding.config.logs import set_file_logger
+
+from deep_folding.brainvisa.utils.constants import _MASK_DIR_DEFAULT
+
+# Defines logger
+log = set_file_logger(__file__)
+
 
 _AIMS_BINARY_ONE = 32767
-
-_MASK_DIR_DEFAULT = "/neurospin/dico/data/deep_folding/current/mask/2mm"
 
 
 def compute_bbox_mask(arr):

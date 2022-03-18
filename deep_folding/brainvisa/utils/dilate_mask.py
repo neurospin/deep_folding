@@ -36,6 +36,7 @@
 
 
 import numpy as np
+from soma import aims
 from soma.aimsalgo import MorphoGreyLevel_S16
 
 #import anatomist.api as anatomist

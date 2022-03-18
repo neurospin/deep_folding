@@ -42,7 +42,10 @@ from deep_folding.brainvisa.utils.graph import create_empty_volume_from_graph
 from deep_folding.config.logs import set_file_logger
 
 # junction type 'wide' or 'thin'
-_JUNCTION_DEFAULT = 'thin'
+from deep_folding.brainvisa.utils.constants import _JUNCTION_DEFAULT
+
+# Defines logger
+log = set_file_logger(__file__)
 
 
 def generate_foldlabel_thin_junction(

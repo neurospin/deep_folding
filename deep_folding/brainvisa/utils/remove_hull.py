@@ -48,7 +48,6 @@ import sys
 import dico_toolbox as dtx
 import numpy as np
 import pandas as pd
-import pcpm
 import six
 from joblib import cpu_count
 from pqdm.processes import pqdm
@@ -100,13 +99,8 @@ def remove_hull(arr, padding=_DEFAULT_PADDING, ext=_DEFAULT_PADDING):
     coords = np.argwhere(arr_pad > _EXTERNAL)
 
     for i, j, k, l in coords:
-        if arr_pad[i,
-                   j,
-                   k,
-                   l] != _EXTERNAL and arr_pad[i,
-                                               j,
-                                               k,
-                                               l] != _INTERNAL:
+        if arr_pad[i, j, k,l] != _EXTERNAL \
+           and arr_pad[i, j, k,l] != _INTERNAL:
             local_array = arr_pad[i - ext:i + ext + 1,
                                   j - ext:j + ext + 1, k - ext:k + ext + 1, l]
             if np.any(

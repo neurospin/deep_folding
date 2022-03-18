@@ -45,7 +45,12 @@ from os.path import join
 
 import numpy as np
 
-_BOX_DIR_DEFAULT = "/neurospin/dico/deep_folding_data/data/bbox/"
+from deep_folding.config.logs import set_file_logger
+from deep_folding.brainvisa.utils.constants import _BBOX_DIR_DEFAULT
+
+
+# Defines logger
+log = set_file_logger(__file__)
 
 
 def compute_max(list_bbmin: list, list_bbmax: list) -> tuple:
@@ -80,7 +85,7 @@ def compute_max_box(
         sulci_list,
         side,
         talairach_box=False,
-        src_dir=_BOX_DIR_DEFAULT):
+        src_dir=_BBOX_DIR_DEFAULT):
     """Returns maximal bounding box of a given list of sulci
 
     It reads json files contained in the source directory.

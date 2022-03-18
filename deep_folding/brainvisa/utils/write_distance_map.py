@@ -52,13 +52,15 @@ import os
 import re
 import sys
 
-import numpy as np
-from joblib import cpu_count
 from pqdm.processes import pqdm
-
+from deep_folding.brainvisa.utils.logs import setup_log
 from deep_folding.brainvisa import exception_handler
 from deep_folding.brainvisa.utils.parallel import define_njobs
 
+from deep_folding.config.logs import set_file_logger
+
+# Defines logger
+log = set_file_logger(__file__)
 
 def parse_args(argv):
     """Parses command-line arguments
@@ -80,6 +82,17 @@ def parse_args(argv):
     parser.add_argument(
         "-t", "--tgt_dir", type=str, required=True,
         help='Output directory where to put bucket files.')
+    parser.add_argument(
+        '-v', '--verbose', action='count', default=0,
+        help='Verbose mode: '
+             'If no option is provided then logging.INFO is selected. '
+             'If one option -v (or -vv) or more is provided '
+             'then logging.DEBUG is selected.')
+    # Writes command line argument to target dir for logging
+    setup_log(args,
+              log_dir=f"{args.output_dir}/..",
+              prog_name=os.path.basename(__file__),
+              suffix='right' if args.side == 'R' else 'left')
 
     args = parser.parse_args(argv)
 
@@ -96,7 +109,7 @@ def skel_2_distMap(subject):
     src_dir = "/neurospin/dico/data/deep_folding/datasets/hcp/skeleton/R"
     tgt_dir = "/neurospin/dico/data/deep_folding/datasets/hcp/distance_map/R"
 
-    print(subject)
+    log.info(subject)
     skeleton_filename = f"{src_dir}/Rskeleton_generated_{subject}.nii.gz"
     distMap_filename = build_distMap_filename(subject, tgt_dir)
 
@@ -104,7 +117,7 @@ def skel_2_distMap(subject):
         ' -i ' + skeleton_filename + \
         ' -o ' + distMap_filename + \
         ' -g f -d 0'
-    # print(cmd_distMap)
+    log.debug(cmd_distMap)
     os.system(cmd_distMap)
 
 
@@ -125,7 +138,8 @@ def loop_over_directory(src_dir, tgt_dir):
     # Gets and creates all filenames
     filenames = glob.glob(f"{src_dir}/*.nii.gz")
     subjects = [get_subject_name(filename) for filename in filenames]
-    print(subjects)
+    log.info(f"subjects[:5] = {subjects[:5]}")
+    log.debug(subjects)
     #distMap_filenames = [build_distMap_filename(subject, tgt_dir) for subject in subjects]
 
     # for sub in tqdm(subjects):

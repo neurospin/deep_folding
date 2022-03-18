@@ -268,6 +268,7 @@ class CropGenerator:
                            'list_sulci': self.list_sulci,
                            'bbmin': self.bbmin.tolist(),
                            'bbmax': self.bbmax.tolist(),
+                           'size': (self.bbmax-self.bbmin).tolist(),
                            'crop_dir': self.crop_dir,
                            'cropped_skeleton_dir': self.cropped_samples_dir,
                            'cropping_type': self.cropping_type,
@@ -314,6 +315,9 @@ class CropGenerator:
                         compute_simple_mask(sulci_list=self.list_sulci,
                                             side=self.side,
                                             mask_dir=self.mask_dir)
+                aims.write(
+                    self.mask,
+                    f"{self.crop_dir}/{self.side}mask_{self.input_type}.nii.gz")
             else:
                 raise ValueError(
                     'cropping_type must be either \'bbox\' or \'mask\'')
@@ -338,7 +342,7 @@ class CropGenerator:
 
         # Creation of .pickle file for all subjects
         if number_subjects:
-            save_to_pickle(cropped_dir=self.crop_dir,
+            save_to_pickle(cropped_dir=self.cropped_samples_dir,
                            tgt_dir=self.crop_dir,
                            file_basename=self.file_basename_pickle)
 
@@ -403,6 +407,8 @@ class SkeletonCropGenerator(CropGenerator):
         # Creates pickles file name
         self.file_basename_pickle = self.side + 'skeleton'
 
+        self.input_type = 'skeleton'
+
 
 
 class FoldLabelCropGenerator(CropGenerator):
@@ -464,6 +470,8 @@ class FoldLabelCropGenerator(CropGenerator):
 
         # Creates pickles file name
         self.file_basename_pickle = self.side + 'label'
+
+        self.input_type = 'foldlabel'
 
 def parse_args(argv):
     """Function parsing command-line arguments
@@ -544,7 +552,7 @@ def parse_args(argv):
     setup_log(args,
               log_dir=f"{args.output_dir}",
               prog_name=basename(__file__),
-              suffix='right' if args.side == 'R' else 'left')
+              suffix=f"right_{args.input_type}" if args.side == 'R' else 'left')
 
     params['src_dir'] = args.src_dir
     params['input_type'] = args.input_type
@@ -587,6 +595,20 @@ def generate_crops(
             cropping_type=cropping_type,
             combine_type=combine_type,
             parallel=parallel)
+    elif input_type == "foldlabel":
+        crop = FoldLabelCropGenerator(
+            src_dir=src_dir,
+            crop_dir=crop_dir,
+            bbox_dir=bbox_dir,
+            mask_dir=mask_dir,
+            side=side,
+            list_sulci=list_sulci,
+            cropping_type=cropping_type,
+            combine_type=combine_type,
+            parallel=parallel)
+    else:
+        raise ValueError(
+            "input_type: shall be either 'skeleton' or 'foldlabel'")
     crop.compute(number_subjects=number_subjects)
 
 
