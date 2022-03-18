@@ -47,13 +47,18 @@ We then define the parameters to launch the computation of the bounding box:
    # We change the following variable with our manually labelled dataset.
    # This one is the one used at Neurospin:
    SRC_DIR_SUPERVISED=/neurospin/dico/data/bv_databases/human/pclean/all
+   
+   # Global output directory where to store the files
+   # We change this to the desired output directory
+   OUTPUT_DIR=/neurospin/dico/data/deep_folding/test
+   
    # Hemisphere side
    SIDE=R
    # Output voxel size
-   VOXEL_SIZE=1.0
+   VOXEL_SIZE=2.0
    # Folder in which to write the results
    # Note that bounding bpxes will be written in the subfolder $SIDE
-   BBOX_DIR=/neurospin/dico/data/deep_folding/test/bbox/${VOXEL_SIZE}mm
+   BBOX_DIR=${OUTPUT_DIR}/bbox/${VOXEL_SIZE}mm
    # sulcus name (without the _left or _right extension)
    SULCUS=F.C.M.ant.
    # Relative path of graph in the folder hierarchy of the subject
@@ -95,7 +100,7 @@ We first define a mask folder to put the results of the mask:
 .. code-block:: shell
 
    # Folder in which to write the mask results
-   MASK_DIR=/neurospin/dico/data/deep_folding/test/bbox/${VOXEL_SIZE}mm
+   MASK_DIR=${OUTPUT_DIR}/bbox/${VOXEL_SIZE}mm
 
 We then compute the mask:
 
@@ -109,3 +114,88 @@ This will create in the folder $MASK_DIR four files
 * ${SULCUS}_${SIDE}.nii.gz: a nifti file (and the header *.minf), in the subfolder '/R' or '/L' (depending on the side). This is the actual mask
 * command_line_${SULCUS}_${SIDE}.sh: a bash file to reproduce the results (to be launched from deep_folding/brainvisa) 
 * log_${SULCUS}_${SIDE}.log: a log file that contains the log of the command
+
+
+Generate skeletons and foldlabels in the native space
+=====================================================
+
+We now generate skeletons and foldlabels from graph for the unsupervised target data set. Such a dataset can be for example the HCP database analyzed using morphologist.
+
+We define relevant directories:
+
+.. code-block:: shell
+
+   # We change the following variable with the unsupervised dataset.
+   # This variable points directly to the morphologist directory containing the subjects as subdirectories.
+   # This one is the HCP dataset used at Neurospin:
+   SRC_DIR_UNSUPERVISED=/neurospin/dico/data/bv_databases/human/hcp/hcp
+   
+   # Output directory where to put raw skeletons:
+   SKELETON_DIR=${OUTPUT_DIR}/hcp/skeletons/raw
+   
+   # Output directory where to put raw foldlabels:
+   FOLDLABEL_DIR=${OUTPUT_DIR}/hcp/foldlabels/raw
+   
+   # Relative path to graph for our HCP dataset
+   PATH_TO_GRAPH_HCP=t1mri/BL/default_analysis/folds/3.1
+
+We generate raw skeletons from graph, without resampling at this stage. Note the option '-a' that tells the program to parallelize computation. If the program fails, remove the option '-a' and add the option '-v' (verbose mode) to get more debug outputs:
+
+.. code-block:: shell
+
+    python3 generate_skeletons.py -s $SRC_DIR_UNSUPERVISED -o $SKELETON_DIR -i $SIDE -p $PATH_TO_GRAPH_HCP -a
+
+In the same way, we generate raw foldlabel files:
+
+.. code-block:: shell
+
+    python3 generate_foldlabels.py -s $SRC_DIR_UNSUPERVISED -o $FOLDLABEL_DIR -i $SIDE -p $PATH_TO_GRAPH_HCP -a
+  
+Resample skeletons and foldlabels in the native space
+=====================================================
+ 
+We will now resample skeletons and foldlabels with the desired voxel size and in the ICBM2009c template. To avoid having to read graph files several times, we first compute the linear tranformation from the native space to the ICBM2009c space:
+
+We first define the transform output directory where to store transform files, as well as the output directories where to store resampled skeleton and foldlabels files:
+
+.. code-block:: shell
+
+    # Output directory where to put transform files:
+    TRANSFORM_DIR=${OUTPUT_DIR}/datasets/hcp/transforms
+
+    # Output directories where to put resamples skeleton and foldlabels files:
+    RESAMPLED_SKELETON_DIR=${OUTPUT_DIR}/datasets/hcp/skeletons/{VOXEL_SIZE}mm
+    RESAMPLED_FOLDLABEL_DIR=${OUTPUT_DIR}/datasets/hcp/foldlabels/{VOXEL_SIZE}mm
+  
+We then generate transform files for the whole dataset:
+ 
+.. code-block:: shell
+
+    python3 generate_ICBM2009c_transforms.py -s $SRC_DIR_UNSUPERVISED -o $TRANSFORM_DIR -i $SIDE -p $PATH_TO_GRAPH_HCP -a
+ 
+Using these transform files, we resample skeletons and foldlabels using resample_files.py:
+ 
+.. code-block:: shell
+
+    python3 resample_files.py -s $SKELETON_DIR -o $RESAMPLED_SKELETON_DIR -i $SIDE -y skeleton -t $TRANSFORM_DIR -x $VOXEL_SIZE -a
+    python3 resample_files.py -s $FOLDLABEL_DIR -o $RESAMPLED_FOLDLABEL_DIR -i $SIDE -y foldlabel -t $TRANSFORM_DIR -x $VOXEL_SIZE -a
+  
+Crop generation
+===============
+
+We can now generate crops quickly as it is simply a mask or a crop of the resampled volume. We can combine sulci by just adding suylci in the sulcus list (see the help command for more information). We are now generating a crop based on the mask of a single sulcus named $SULCUS.
+
+We first define the relevant output crop directory:
+
+.. code-block:: shell
+
+    CROP_DIR=${OUTPUT_DIR}/datasets/hcp/crops/${VOXEL_SIZE}mm/${SULCUS}/mask
+
+We then generate skeleton crops and foldlabel crops. The effective mask is saved as ${SIDE}mask.nii.gz in the crop directory:
+
+.. code-block:: shell
+
+    python3 generate_crops.py -s $RESAMPLED_SKELETON_DIR -o $CROP_DIR -i $SIDE -y skeleton -k $MASK_DIR -u $SULCUS -c mask -a
+    python3 generate_crops.py -s $RESAMPLED_SKELETON_DIR -o $CROP_DIR -i $SIDE -y foldlabel -k $MASK_DIR -u $SULCUS -c mask -a
+  
+ 
