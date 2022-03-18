@@ -75,9 +75,10 @@ from deep_folding.brainvisa.utils.logs import setup_log
 from deep_folding.brainvisa.utils.parallel import define_njobs
 from deep_folding.brainvisa.utils.mask import compute_centered_mask
 from deep_folding.brainvisa.utils.mask import compute_simple_mask
-from deep_folding.brainvisa.utils.resample import resample
 from deep_folding.brainvisa.utils.subjects import get_number_subjects
 from deep_folding.brainvisa.utils.subjects import select_subjects_int
+from deep_folding.brainvisa.utils.quality_checks import \
+    compare_number_aims_files_with_expected
 from deep_folding.brainvisa.utils.sulcus import complete_sulci_name
 from deep_folding.config.logs import set_file_logger
 from pqdm.processes import pqdm
@@ -250,6 +251,10 @@ class CropGenerator:
             list_subjects = select_subjects_int(list_all_subjects,
                                                 number_subjects)
 
+            log.info(f"Expected number of subjects = {len(list_subjects)}")
+            log.info(f"list_subjects[:5] = {list_subjects[:5]}")
+            log.debug(f"list_subjects = {list_subjects}")
+
             # Creates target and cropped directory
             create_folder(self.crop_dir)
             create_folder(self.cropped_samples_dir)
@@ -270,10 +275,6 @@ class CropGenerator:
                            }
             self.json.update(dict_to_add=dict_to_add)
 
-            # Performs cropping for each file in a parallelized way
-            log.info(f"list_subjects[:5] = {list_subjects[:5]}")
-            log.debug(f"list_subjects = {list_subjects}")
-
             if self.parallel:
                 log.info(
                     "PARALLEL MODE: subjects are in parallel")
@@ -283,6 +284,10 @@ class CropGenerator:
                     "SERIAL MODE: subjects are scanned serially")
                 for sub in list_subjects:
                     self.crop_one_file(sub)
+
+        # Checks if there is expected number of generated files
+        compare_number_aims_files_with_expected(self.cropped_samples_dir,
+                                                list_subjects)
 
     def compute_bounding_box_or_mask(self, number_subjects):
         """Computes bounding box or mask
@@ -356,7 +361,7 @@ class SkeletonCropGenerator(CropGenerator):
 
         Args:
             src_dir: folder containing generated skeletons or labels
-            crop_dir: name of output directory for crops with full path
+            crop_dir: name of output dire/neurospin/dico/data/deep_folding/currentctory for crops with full path
             bbox_dir: directory containing bbox json files
                     (generated using compute_bounding_box.py)
             mask_dir: directory containing mask files

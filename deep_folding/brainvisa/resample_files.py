@@ -70,6 +70,8 @@ from deep_folding.brainvisa.utils.subjects import get_number_subjects
 from deep_folding.brainvisa.utils.subjects import select_subjects_int
 from deep_folding.brainvisa.utils.folder import create_folder
 from deep_folding.brainvisa.utils.logs import setup_log
+from deep_folding.brainvisa.utils.quality_checks import \
+    compare_number_aims_files_with_expected
 from pqdm.processes import pqdm
 from deep_folding.config.logs import set_file_logger
 from soma import aims
@@ -254,6 +256,7 @@ class FileResampler:
             # Gives the possibility to list only the first number_subjects
             list_subjects = select_subjects_int(
                 list_all_subjects, number_subjects)
+            log.info(f"Expected number of subjects = {len(list_subjects)}")
             log.info(f"list_subjects[:5] = {list_subjects[:5]}")
             log.debug(f"list_subjects = {list_subjects}")
 
@@ -273,6 +276,10 @@ class FileResampler:
                     "SERIAL MODE: subjects are scanned serially")
                 for sub in list_subjects:
                     self.resample_one_subject_wrapper(sub)
+
+            # Checks if there is expected number of generated files
+            compare_number_aims_files_with_expected(self.resampled_dir,
+                                                    list_subjects)
 
 
 class SkeletonResampler(FileResampler):
