@@ -286,9 +286,9 @@ class CropGenerator:
                 for sub in list_subjects:
                     self.crop_one_file(sub)
 
-        # Checks if there is expected number of generated files
-        compare_number_aims_files_with_expected(self.cropped_samples_dir,
-                                                list_subjects)
+            # Checks if there is expected number of generated files
+            compare_number_aims_files_with_expected(self.cropped_samples_dir,
+                                                    list_subjects)
 
     def compute_bounding_box_or_mask(self, number_subjects):
         """Computes bounding box or mask
