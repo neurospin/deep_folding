@@ -19,7 +19,6 @@ _SRC_DIR_DEFAULT = "/neurospin/dico/data/bv_databases/human/hcp/hcp"
 _PATH_TO_GRAPH_DEFAULT = \
     "t1mri/BL/default_analysis/folds/3.1"
 
-
 # Default directory to which we write the bounding box results
 _BBOX_DIR_DEFAULT = "test/bbox/1mm"
 
@@ -34,6 +33,9 @@ _SKELETON_DIR_DEFAULT = "test/datasets/hcp/skeletons/raw"
 
 # Default directory where we put foldlabels
 _FOLDLABEL_DIR_DEFAULT = "test/datasets/hcp/foldlabels/raw"
+
+# Default directory where we put distmaps
+_DISTMAPS_DIR_DEFAULT = "test/datasets/hcp/distmaps/raw"
 
 # Default directory where we put transform files to ICBM2009c
 _TRANSFORM_DIR_DEFAULT = "test/datasets/hcp/transforms"
@@ -61,4 +63,4 @@ _JUNCTION_DEFAULT = 'thin'
 _CROPPING_TYPE_DEFAULT = 'mask'  # crops according to a mask by default
 
 # Combines sulci using ordering (if true, ordering matters)
-_COMBINE_TYPE_DEFAULT = False 
+_COMBINE_TYPE_DEFAULT = False
