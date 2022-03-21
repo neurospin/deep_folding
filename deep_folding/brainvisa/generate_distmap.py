@@ -69,8 +69,7 @@ from deep_folding.config.logs import set_file_logger
 # Import constants
 from deep_folding.brainvisa.utils.constants import \
     _ALL_SUBJECTS, _SKELETON_DIR_DEFAULT,\
-    _DISTMAPS_DIR_DEFAULT, _SIDE_DEFAULT, \
-    _PATH_TO_SKELETON_DEFAULT
+    _DISTMAPS_DIR_DEFAULT, _SIDE_DEFAULT
 
 # Defines logger
 log = set_file_logger(__file__)
@@ -162,7 +161,7 @@ class SkelConvert2DistMap:
         skeleton_file = list_skel_file[0]
 
         distmap_file = f"{self.distmap_dir}/" +\
-                        f"{self.side}distamp_generated_{subject}.nii.gz"
+                        f"{self.side}distmap_generated_{subject}.nii.gz"
 
         generate_distmap_from_skeleton_file(skeleton_file,
                                             distmap_file)

@@ -48,9 +48,8 @@ log = set_file_logger(__file__)
 def generate_distmap_from_skeleton_file(skeleton_file: str,
                                       distmap_file: str):
     """Generates distmap from skeleton file"""
-    cmd_distMap = 'VipDistanceMap' + \
+    cmd_distMap = 'AimsChamferDistanceMap' + \
         ' -i ' + skeleton_file + \
-        ' -o ' + distmap_file + \
-        ' -g f -d 0'
+        ' -o ' + distmap_file
     log.debug(cmd_distMap)
     os.system(cmd_distMap)
