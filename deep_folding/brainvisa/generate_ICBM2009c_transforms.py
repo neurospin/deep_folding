@@ -52,7 +52,6 @@ import re
 import sys
 from os.path import abspath
 from os.path import basename
-from os.path import dirname
 
 from deep_folding.brainvisa import exception_handler
 from deep_folding.brainvisa.utils.folder import create_folder
