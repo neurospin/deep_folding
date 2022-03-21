@@ -140,7 +140,7 @@ tuple (bbmin, bbmax) with</p>
 
 <dl class="function">
 <dt id="deep_folding.brainvisa.utils.bbox.compute_max_box">
-<code class="descclassname">deep_folding.brainvisa.utils.bbox.</code><code class="descname">compute_max_box</code><span class="sig-paren">(</span><em>sulci_list</em>, <em>side</em>, <em>talairach_box=False</em>, <em>src_dir='/neurospin/dico/deep_folding_data/data/bbox/'</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.utils.bbox.compute_max_box" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">deep_folding.brainvisa.utils.bbox.</code><code class="descname">compute_max_box</code><span class="sig-paren">(</span><em>sulci_list</em>, <em>side</em>, <em>talairach_box=False</em>, <em>src_dir='test/bbox/1mm'</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.utils.bbox.compute_max_box" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns maximal bounding box of a given list of sulci</p>
 <p>It reads json files contained in the source directory.
 They are listed in subdirectory ‘L’ or ‘R’ according t hemisphere
@@ -332,7 +332,7 @@ a specified hemisphere.</p>
 
 <dl class="function">
 <dt id="deep_folding.brainvisa.utils.mask.compute_centered_mask">
-<code class="descclassname">deep_folding.brainvisa.utils.mask.</code><code class="descname">compute_centered_mask</code><span class="sig-paren">(</span><em>sulci_list</em>, <em>side</em>, <em>mask_dir='/neurospin/dico/data/deep_folding/current/mask/2mm'</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.utils.mask.compute_centered_mask" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">deep_folding.brainvisa.utils.mask.</code><code class="descname">compute_centered_mask</code><span class="sig-paren">(</span><em>sulci_list</em>, <em>side</em>, <em>mask_dir='test/mask/1mm'</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.utils.mask.compute_centered_mask" title="Permalink to this definition">¶</a></dt>
 <dd><p>Function returning mask combining mask over several sulci</p>
 <p>It reads mask files in the source mask directory and combines them.
 They are listed in subdirectory ‘L’ or ‘R’ according the hemisphere</p>
@@ -361,7 +361,7 @@ bbmax: an array of maximum coordinates of max_box around the mask</p>
 
 <dl class="function">
 <dt id="deep_folding.brainvisa.utils.mask.compute_simple_mask">
-<code class="descclassname">deep_folding.brainvisa.utils.mask.</code><code class="descname">compute_simple_mask</code><span class="sig-paren">(</span><em>sulci_list</em>, <em>side</em>, <em>mask_dir='/neurospin/dico/data/deep_folding/current/mask/2mm'</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.utils.mask.compute_simple_mask" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">deep_folding.brainvisa.utils.mask.</code><code class="descname">compute_simple_mask</code><span class="sig-paren">(</span><em>sulci_list</em>, <em>side</em>, <em>mask_dir='test/mask/1mm'</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.utils.mask.compute_simple_mask" title="Permalink to this definition">¶</a></dt>
 <dd><p>Function returning mask combining mask over several sulci</p>
 <p>It reads mask files in the source mask directory and combines them.
 They are listed in subdirectory ‘L’ or ‘R’ according the hemisphere</p>
@@ -410,7 +410,7 @@ for parallel computing</p>
 
 <dl class="function">
 <dt id="deep_folding.brainvisa.utils.referentials.generate_ref_volume_ICBM2009c">
-<code class="descclassname">deep_folding.brainvisa.utils.referentials.</code><code class="descname">generate_ref_volume_ICBM2009c</code><span class="sig-paren">(</span><em>out_voxel_size: tuple</em><span class="sig-paren">)</span> &#x2192; &lt;function Volume at 0x7f43eb6122f0&gt;<a class="headerlink" href="#deep_folding.brainvisa.utils.referentials.generate_ref_volume_ICBM2009c" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">deep_folding.brainvisa.utils.referentials.</code><code class="descname">generate_ref_volume_ICBM2009c</code><span class="sig-paren">(</span><em>out_voxel_size: tuple</em><span class="sig-paren">)</span> &#x2192; &lt;function Volume at 0x7fdc73bf5a60&gt;<a class="headerlink" href="#deep_folding.brainvisa.utils.referentials.generate_ref_volume_ICBM2009c" title="Permalink to this definition">¶</a></dt>
 <dd><p>Defines MNI 2009 reference aims volume with output voxel size</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -566,7 +566,7 @@ This function removes the hull in place</p>
 <p>Resample a volume that contains discret values</p>
 <dl class="function">
 <dt id="deep_folding.brainvisa.utils.resample.resample">
-<code class="descclassname">deep_folding.brainvisa.utils.resample.</code><code class="descname">resample</code><span class="sig-paren">(</span><em>input_image: typing.Union[str, Volume], transformation: typing.Union[str, soma.aims.aims.AffineTransformation3d], output_vs: tuple = None, background: int = 0, values: &lt;built-in function array&gt; = None, verbose: bool = False</em><span class="sig-paren">)</span> &#x2192; &lt;function Volume at 0x7f43eb6122f0&gt;<a class="headerlink" href="#deep_folding.brainvisa.utils.resample.resample" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">deep_folding.brainvisa.utils.resample.</code><code class="descname">resample</code><span class="sig-paren">(</span><em>input_image: typing.Union[str, Volume], transformation: typing.Union[str, soma.aims.aims.AffineTransformation3d], output_vs: tuple = None, background: int = 0, values: &lt;built-in function array&gt; = None, verbose: bool = False</em><span class="sig-paren">)</span> &#x2192; &lt;function Volume at 0x7fdc73bf5a60&gt;<a class="headerlink" href="#deep_folding.brainvisa.utils.resample.resample" title="Permalink to this definition">¶</a></dt>
 <dd><p>Transforms and resamples a volume that has discret values</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
