@@ -150,7 +150,7 @@ class GraphConvert2Skeleton:
     """Class to convert all graphs from a folder into skeletons
 
     It contains all information to scan a dataset for graphs
-    and writes skeletons and foldlabels into target directory
+    and writes skeletons into target directory
     """
 
     def __init__(self, src_dir, skeleton_dir,
