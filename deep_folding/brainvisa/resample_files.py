@@ -178,7 +178,8 @@ def resample_one_distmap(input_image,
                 ' -i ' + input_image + \
                 ' -o ' + resampled_dir + \
                 ' -m ' + transformation + \
-                ' -r ' + ref_file
+                ' -r ' + ref_file + \
+                ' -t linear'
     print(cmd_normalize)
     os.system(cmd_normalize)
 
