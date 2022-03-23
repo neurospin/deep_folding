@@ -224,7 +224,8 @@ class FileResampler:
         if os.path.exists(src_file):
             resampled = self.resample_one_subject(
                 src_file=src_file,
-                out_voxel_size=self.out_voxel)
+                out_voxel_size=self.out_voxel,
+                transform_file=transform_file)
             aims.write(resampled, resampled_file)
         else:
             raise FileNotFoundError(f"{src_file} not found")
