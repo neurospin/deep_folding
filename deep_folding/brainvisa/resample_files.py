@@ -192,8 +192,7 @@ class FileResampler:
     @staticmethod
     def resample_one_subject(src_file: str,
                              out_voxel_size: float,
-                             transform_file: str,
-                             resampled_file=None):
+                             transform_file: str):
         """Resamples skeleton
 
         This static method is called by resample_one_subject_wrapper
@@ -225,9 +224,7 @@ class FileResampler:
         if os.path.exists(src_file):
             resampled = self.resample_one_subject(
                 src_file=src_file,
-                out_voxel_size=self.out_voxel_size,
-                transform_file=transform_file,
-                resampled_file=resampled_file)
+                out_voxel_size=self.out_voxel)
             aims.write(resampled, resampled_file)
         else:
             raise FileNotFoundError(f"{src_file} not found")
@@ -326,9 +323,9 @@ class SkeletonResampler(FileResampler):
 
         This static method is called by resample_one_subject_wrapper
         from parent class FileResampler"""
-        resampled = resample_one_skeleton(input_image=src_file,
-                                          out_voxel_size=out_voxel_size,
-                                          transformation=transform_file)
+        return resample_one_skeleton(input_image=src_file,
+                                     out_voxel_size=out_voxel_size,
+                                     transformation=transform_file)
 
 
 class FoldLabelResampler(FileResampler):
@@ -372,9 +369,9 @@ class FoldLabelResampler(FileResampler):
     def resample_one_subject(src_file: str,
                              out_voxel_size: float,
                              transform_file: str):
-        resampled = resample_one_foldlabel(input_image=src_file,
-                                           out_voxel_size=out_voxel_size,
-                                           transformation=transform_file)
+        return resample_one_foldlabel(input_image=src_file,
+                                      out_voxel_size=out_voxel_size,
+                                      transformation=transform_file)
 
 
 def parse_args(argv):
@@ -393,12 +390,11 @@ def parse_args(argv):
         description='Generates resampled files (skeletons, foldlabels,...)')
     parser.add_argument(
         "-s", "--src_dir", type=str, default=_SKELETON_DIR_DEFAULT,
-        help='Source directory where inputs files (skeletons, labels, '\
-             'distmaps) lie. '
+        help='Source directory where inputs files (skeletons or labels) lie. '
              'Default is : ' + _SKELETON_DIR_DEFAULT)
     parser.add_argument(
         "-y", "--input_type", type=str, default=_INPUT_TYPE_DEFAULT,
-        help='Input type: \'skeleton\', \'foldlabel\', \'distmap\' '
+        help='Input type: \'skeleton\', \'foldlabel\' '
              'Default is : ' + _INPUT_TYPE_DEFAULT)
     parser.add_argument(
         "-o", "--output_dir", type=str, default=_RESAMPLED_SKELETON_DIR_DEFAULT,
@@ -479,8 +475,7 @@ def resample_files(
             parallel=parallel)
     else:
         raise ValueError(
-            "input_type: shall be either 'skeleton', 'foldlabel' or " \
-            "distmap")
+            "input_type: shall be either 'skeleton' or 'foldlabel'")
 
     resampler.compute(number_subjects=number_subjects)
 
