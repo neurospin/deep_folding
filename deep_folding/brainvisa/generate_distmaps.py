@@ -33,7 +33,9 @@
 # The fact that you are presently reading this means that you have had
 # knowledge of the CeCILL license version 2 and that you accept its terms.
 
-"""Write skeletons from graph files
+"""Write distance maps from skeleton files
+
+   Note: the generation of distance maps should be performed for each resolution
 
   Typical usage
   -------------
@@ -41,7 +43,7 @@
   (here brainvisa 5.0.0 installed with singurity) and launching the script
   from the terminal:
   >>> bv bash
-  >>> python generate_skeletons.py
+  >>> python generate_distmap.py
 
 
 """
@@ -59,8 +61,8 @@ from deep_folding.brainvisa.utils.subjects import get_number_subjects
 from deep_folding.brainvisa.utils.subjects import select_subjects_int
 from deep_folding.brainvisa.utils.logs import setup_log
 from deep_folding.brainvisa.utils.parallel import define_njobs
-from deep_folding.brainvisa.utils.skeleton import \
-    generate_skeleton_from_graph_file
+from deep_folding.brainvisa.utils.distmap import \
+    generate_distmap_from_skeleton_file
 from deep_folding.brainvisa.utils.quality_checks import \
     compare_number_aims_files_with_expected
 from pqdm.processes import pqdm
@@ -68,9 +70,8 @@ from deep_folding.config.logs import set_file_logger
 
 # Import constants
 from deep_folding.brainvisa.utils.constants import \
-    _ALL_SUBJECTS, _SRC_DIR_DEFAULT,\
-    _SKELETON_DIR_DEFAULT, _SIDE_DEFAULT, \
-    _JUNCTION_DEFAULT, _PATH_TO_GRAPH_DEFAULT
+    _ALL_SUBJECTS, _SKELETON_DIR_DEFAULT,\
+    _DISTMAPS_DIR_DEFAULT, _SIDE_DEFAULT
 
 # Defines logger
 log = set_file_logger(__file__)
@@ -89,27 +90,18 @@ def parse_args(argv):
     # Parse command line arguments
     parser = argparse.ArgumentParser(
         prog=basename(__file__),
-        description='Generates skeleton files from graphs')
+        description='Generates distance maps files from skeleton files')
     parser.add_argument(
-        "-s", "--src_dir", type=str, default=_SRC_DIR_DEFAULT,
-        help='Source directory where the graph data lies. '
-             'Default is : ' + _SRC_DIR_DEFAULT)
+        "-s", "--src_dir", type=str, default=_SKELETON_DIR_DEFAULT,
+        help='Source directory where the skeleton data lies. '
+             'Default is : ' + _SKELETON_DIR_DEFAULT)
     parser.add_argument(
-        "-o", "--output_dir", type=str, default=_SKELETON_DIR_DEFAULT,
-        help='Output directory where to put skeleton files.'
+        "-o", "--output_dir", type=str, default=_DISTMAPS_DIR_DEFAULT,
+        help='Output directory where to put distmap files.'
         'Default is : ' + _SKELETON_DIR_DEFAULT)
     parser.add_argument(
         "-i", "--side", type=str, default=_SIDE_DEFAULT,
         help='Hemisphere side. Default is : ' + _SIDE_DEFAULT)
-    parser.add_argument(
-        "-p", "--path_to_graph", type=str,
-        default=_PATH_TO_GRAPH_DEFAULT,
-        help='Relative path to graph. '
-             'Default is ' + _PATH_TO_GRAPH_DEFAULT)
-    parser.add_argument(
-        "-j", "--junction", type=str, default=_JUNCTION_DEFAULT,
-        help='junction rendering (either \'wide\' or \'thin\') '
-             f"Default is {_JUNCTION_DEFAULT}")
     parser.add_argument(
         "-a", "--parallel", default=False, action='store_true',
         help='if set (-a), launches computation in parallel')
@@ -135,10 +127,8 @@ def parse_args(argv):
     params = {}
 
     params['src_dir'] = abspath(args.src_dir)
-    params['skeleton_dir'] = abspath(args.output_dir)
-    params['path_to_graph'] = args.path_to_graph
+    params['output_dir'] = abspath(args.output_dir)
     params['side'] = args.side
-    params['junction'] = args.junction
     params['parallel'] = args.parallel
     # Checks if nb_subjects is either the string "all" or a positive integer
     params['nb_subjects'] = get_number_subjects(args.nb_subjects)
@@ -146,55 +136,45 @@ def parse_args(argv):
     return params
 
 
-class GraphConvert2Skeleton:
-    """Class to convert all graphs from a folder into skeletons
+class SkelConvert2DistMap:
+    """Class to convert all skeletons from a folder into distance maps
 
-    It contains all information to scan a dataset for graphs
-    and writes skeletons into target directory
+    It contains all information to scan a dataset for skeletons
+    and writes distance maps into target directory
     """
 
-    def __init__(self, src_dir, skeleton_dir,
-                 side, junction, parallel,
-                 path_to_graph):
+    def __init__(self, src_dir, distmaps_dir,
+                 side, parallel):
         self.src_dir = src_dir
-        self.skeleton_dir = skeleton_dir
+        self.distmap_dir = distmaps_dir
         self.side = side
-        self.junction = junction
         self.parallel = parallel
-        self.path_to_graph = path_to_graph
-        self.skeleton_dir = f"{self.skeleton_dir}/{self.side}"
-        create_folder(abspath(self.skeleton_dir))
+        self.distmap_dir = f"{self.distmap_dir}/{self.side}"
 
-    def generate_one_skeleton(self, subject: str):
-        """Generates and writes skeleton for one subject.
+        create_folder(abspath(self.distmap_dir))
+
+    def generate_one_distmap(self, subject: str):
+        """Generates and writes distmap for one subject.
         """
-        graph_path = f"{self.src_dir}/{subject}*/" +\
-                     f"{self.path_to_graph}/{self.side}{subject}*.arg"
-        list_graph_file = glob.glob(graph_path)
-        log.debug(f"list_graph_file = {list_graph_file}")
-        if len(list_graph_file) == 0:
-            raise RuntimeError(f"No graph file! "
-                               f"{graph_path} doesn't exist")
-        graph_file = list_graph_file[0]
+        skeleton_file = glob.glob(f"{self.src_dir}/{self.side}/" +\
+                                  f"*{subject}.nii.gz")[0]
 
-        skeleton_file = f"{self.skeleton_dir}/" +\
-                        f"{self.side}skeleton_generated_{subject}.nii.gz"
+        distmap_file = f"{self.distmap_dir}/" +\
+                        f"{self.side}distmap_generated_{subject}.nii.gz"
 
-        generate_skeleton_from_graph_file(graph_file,
-                                          skeleton_file,
-                                          self.junction)
+        generate_distmap_from_skeleton_file(skeleton_file,
+                                            distmap_file)
 
     def compute(self, number_subjects):
-        """Loops over subjects and converts graphs into skeletons.
+        """Loops over subjects and converts graphs into distmaps.
         """
         # Gets list fo subjects
-        filenames = glob.glob(f"{self.src_dir}/*/")
+        filenames = glob.glob(f"{self.src_dir}/{self.side}/*.nii.gz")
         list_subjects = [
             re.search(
                 '([ae\\d]{5,6})',
                 filename).group(0) for filename in filenames]
         list_subjects = select_subjects_int(list_subjects, number_subjects)
-
         log.info(f"Expected number of subjects = {len(list_subjects)}")
         log.info(f"list_subjects[:5] = {list_subjects[:5]}")
         log.debug(f"list_subjects = {list_subjects}")
@@ -204,37 +184,33 @@ class GraphConvert2Skeleton:
             log.info(
                 "PARALLEL MODE: subjects are computed in parallel.")
             pqdm(list_subjects,
-                 self.generate_one_skeleton,
+                 self.generate_one_distmap,
                  n_jobs=define_njobs())
         else:
             log.info(
                 "SERIAL MODE: subjects are scanned serially, "
                 "without parallelism")
             for sub in list_subjects:
-                self.generate_one_skeleton(sub)
+                self.generate_one_distmap(sub)
 
         # Checks if there is expected number of generated files
-        compare_number_aims_files_with_expected(self.skeleton_dir,
+        compare_number_aims_files_with_expected(self.distmap_dir,
                                                 list_subjects)
 
 
-def generate_skeletons(
-        src_dir=_SRC_DIR_DEFAULT,
-        skeleton_dir=_SKELETON_DIR_DEFAULT,
-        path_to_graph=_PATH_TO_GRAPH_DEFAULT,
+def generate_distmaps(
+        src_dir=_SKELETON_DIR_DEFAULT,
+        distmaps_dir=_DISTMAPS_DIR_DEFAULT,
         side=_SIDE_DEFAULT,
-        junction=_JUNCTION_DEFAULT,
         parallel=False,
         number_subjects=_ALL_SUBJECTS):
-    """Generates skeletons from graphs"""
+    """Generates distmaps from skeletons"""
 
     # Initialization
-    conversion = GraphConvert2Skeleton(
+    conversion = SkelConvert2DistMap(
         src_dir=src_dir,
-        skeleton_dir=skeleton_dir,
-        path_to_graph=path_to_graph,
+        distmaps_dir=distmaps_dir,
         side=side,
-        junction=junction,
         parallel=parallel
     )
     # Actual generation of skeletons from graphs
@@ -243,7 +219,7 @@ def generate_skeletons(
 
 @exception_handler
 def main(argv):
-    """Reads argument line and generates skeleton from graph
+    """Reads argument line and generates distmaps from skeletons
 
     Args:
         argv: a list containing command line arguments
@@ -252,12 +228,10 @@ def main(argv):
     params = parse_args(argv)
 
     # Actual API
-    generate_skeletons(
+    generate_distmaps(
         src_dir=params['src_dir'],
-        skeleton_dir=params['skeleton_dir'],
-        path_to_graph=params['path_to_graph'],
+        distmaps_dir=params['output_dir'],
         side=params['side'],
-        junction=params['junction'],
         parallel=params['parallel'],
         number_subjects=params['nb_subjects'])
 

@@ -35,7 +35,7 @@
 
 """Resample skeletons
 
-The aim of this script is to resample skeletons.
+The aim of this script is to resample skeletons and foldlabel.
 
   Typical usage
   -------------
@@ -131,7 +131,7 @@ def resample_one_foldlabel(input_image,
     Args
     ----
         input_image: either string or aims.Volume
-            either path to skeleton or skeleton aims Volume
+            either path to foldlabel or foldlabel aims Volume
         out_voxel_size: tuple
             Output voxel size (default: None, no resampling)
         transformation: string or aims.Volume
@@ -142,10 +142,7 @@ def resample_one_foldlabel(input_image,
             Transformed or resampled volume
     """
 
-    # We have given values with ascendent priority
-    # Higher values have more priority than smaller values
-
-    # Normalization and resampling of skeleton images
+    # Normalization and resampling of foldlabel images
     resampled = resample(input_image=input_image,
                          output_vs=out_voxel_size,
                          transformation=transformation)
@@ -164,7 +161,7 @@ class FileResampler:
         """Inits with list of directories
 
         Args:
-            src_dir: folder containing generated skeletons or labels
+            src_dir: folder containing generated skeletons, labels or distmaps
             resampled_dir: name of target (output) directory,
             transform_dir: directory containing transform files to ICBM2009c
             side: either 'L' or 'R', hemisphere side
