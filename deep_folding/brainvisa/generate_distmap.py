@@ -154,11 +154,8 @@ class SkelConvert2DistMap:
     def generate_one_distmap(self, subject: str):
         """Generates and writes distmap for one subject.
         """
-        list_skel_file = glob.glob(f"{self.src_dir}/{self.side}/*.nii.gz")
-        log.debug(f"list_skel_file = {list_skel_file}")
-        if len(list_skel_file) == 0:
-            raise RuntimeError(f"No skel file! ")
-        skeleton_file = list_skel_file[0]
+        skeleton_file = glob.glob(f"{self.src_dir}/{self.side}/" +\
+                                  f"*{subject}.nii.gz")[0]
 
         distmap_file = f"{self.distmap_dir}/" +\
                         f"{self.side}distmap_generated_{subject}.nii.gz"
@@ -185,7 +182,7 @@ class SkelConvert2DistMap:
             log.info(
                 "PARALLEL MODE: subjects are computed in parallel.")
             pqdm(list_subjects,
-                 self.generate_one_skeleton,
+                 self.generate_one_distmap,
                  n_jobs=define_njobs())
         else:
             log.info(

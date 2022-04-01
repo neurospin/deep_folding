@@ -87,9 +87,6 @@ from deep_folding.brainvisa.utils.constants import \
 # Defines logger
 log = set_file_logger(__file__)
 
-# temporary directory
-temp_dir = tempfile.mkdtemp()
-
 
 def resample_one_skeleton(input_image,
                           out_voxel_size,
@@ -169,15 +166,36 @@ def resample_one_distmap(input_image,
     Returns:
             Save transformed or resampled volume
     """
+    # temporary directory
+    temp_dir = tempfile.mkdtemp()
+
+    # transformation to native space of graph to ICBM template
+    graph_to_icbm = aims.read(transformation)
+
+    in_vol = aims.read(input_image)
+    in_voxel_size = in_vol.header()['voxel_size']
+
+    # definition of translation (half added voxels -> origin is in top left
+    # corner)
+    translation = (100 * in_voxel_size[0], 100 * in_voxel_size[1], 100 * in_voxel_size[2])
+    distmap_to_padded_distmap = aims.AffineTransformation3d()
+    distmap_to_padded_distmap.setTranslation(translation)
+
+    # combination of translation with graph_to_icbm transformation
+    padded_distmap_to_icbm = graph_to_icbm * distmap_to_padded_distmap.inverse()
+
+    transfo_file = f"{temp_dir}/padded_distmap_to_icbm.trm"
+    aims.write(padded_distmap_to_icbm, transfo_file)
+
     ref_vol = generate_ref_volume_ICBM2009c(out_voxel_size)
-    ref_file = f"{temp_dir}/file_ref.nii.gz"
+    ref_file = f"{temp_dir}/ref_vol.nii.gz"
     aims.write(ref_vol, ref_file)
 
     # Normalization and resampling of skeleton images
     cmd_normalize = 'AimsApplyTransform' + \
                 ' -i ' + input_image + \
                 ' -o ' + resampled_dir + \
-                ' -m ' + transformation + \
+                ' -m ' + transfo_file + \
                 ' -r ' + ref_file + \
                 ' -t linear'
     print(cmd_normalize)
@@ -255,6 +273,7 @@ class FileResampler:
 
         # Output resampled file name
         resampled_file = self.resampled_file % subject
+        print(resampled_file)
 
         # Performs the resampling
         if os.path.exists(src_file):
@@ -356,7 +375,8 @@ class SkeletonResampler(FileResampler):
     @staticmethod
     def resample_one_subject(src_file: str,
                              out_voxel_size: float,
-                             transform_file: str):
+                             transform_file: str,
+                             resampled_file=None):
         """Resamples skeleton
 
         This static method is called by resample_one_subject_wrapper
@@ -364,7 +384,7 @@ class SkeletonResampler(FileResampler):
         resampled = resample_one_skeleton(input_image=src_file,
                                           out_voxel_size=out_voxel_size,
                                           transformation=transform_file)
-        aims.write(resampled, self.resampled_file)
+        aims.write(resampled, resampled_file)
 
 
 class FoldLabelResampler(FileResampler):

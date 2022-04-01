@@ -156,7 +156,7 @@ class CropGenerator:
         """Inits with list of directories and list of sulci
 
         Args:
-            src_dir: folder containing generated skeletons or labels
+            src_dir: folder containing generated skeletons, labels or distmaps
             crop_dir: name of output directory for crops with full path
             bbox_dir: directory containing bbox json files
                     (generated using compute_bounding_box.py)
@@ -473,6 +473,69 @@ class FoldLabelCropGenerator(CropGenerator):
 
         self.input_type = 'foldlabel'
 
+
+class DistMapCropGenerator(CropGenerator):
+    """Generates cropped skeleton files and corresponding pickle file
+    """
+
+    def __init__(self,
+                 src_dir=_RESAMPLED_SKELETON_DIR_DEFAULT,
+                 crop_dir=_CROP_DIR_DEFAULT,
+                 bbox_dir=_BBOX_DIR_DEFAULT,
+                 mask_dir=_MASK_DIR_DEFAULT,
+                 list_sulci=_SULCUS_DEFAULT,
+                 side=_SIDE_DEFAULT,
+                 cropping_type=_CROPPING_TYPE_DEFAULT,
+                 combine_type=_COMBINE_TYPE_DEFAULT,
+                 parallel=False):
+        """Inits with list of directories and list of sulci
+        Args:
+            src_dir: folder containing generated skeletons, labels or distmaps
+            crop_dir: name of output directory for crops with full path
+            bbox_dir: directory containing bbox json files
+                    (generated using compute_bounding_box.py)
+            mask_dir: directory containing mask files
+                    (generated using compute_mask.py)
+            list_sulci: list of sulcus names
+            side: hemisphere side (either L for left, or R for right hemisphere)
+            cropping_type: cropping type, either mask, or bbox
+            combine_type: if True, combines sulci (in this case, order matters)
+            parallel: if True, parallel computation
+        """
+        super(DistMapCropGenerator, self).__init__(
+            src_dir=src_dir, crop_dir=crop_dir,
+            bbox_dir=bbox_dir, mask_dir=mask_dir,
+            list_sulci=list_sulci, side=side,
+            cropping_type=cropping_type, combine_type=combine_type,
+            parallel=parallel
+        )
+
+        # Directory where to store cropped skeleton files
+        self.cropped_samples_dir = join(self.crop_dir, self.side + 'distmaps')
+
+        # Names of files in function of dictionary: keys -> 'subject' and 'side'
+        # Generated skeleton from folding graphs
+        self.src_file = join(
+            self.src_dir,
+            '%(side)sresampled_distmap_%(subject)s.nii.gz')
+
+        # Names of files in function of dictionary: keys -> 'subject' and
+        # 'side'
+        self.cropped_file = '%(subject)s_cropped_distmap.nii.gz'
+
+        # subjects are detected as the nifti file names under src_dir
+        self.expr = '^.resampled_distmap_([0-9a-zA-Z]*).nii.gz$'
+
+        # Creates json log class
+        json_file = join(self.crop_dir, self.side + 'distmap.json')
+        self.json = LogJson(json_file)
+
+        # Creates pickles file name
+        self.file_basename_pickle = self.side + 'distmap'
+
+        self.input_type = 'distmap'
+
+
 def parse_args(argv):
     """Function parsing command-line arguments
 
@@ -495,7 +558,7 @@ def parse_args(argv):
              'Default is : ' + _RESAMPLED_SKELETON_DIR_DEFAULT)
     parser.add_argument(
         "-y", "--input_type", type=str, default=_INPUT_TYPE_DEFAULT,
-        help='Input type: \'skeleton\', \'foldlabel\' '
+         help='Input type: \'skeleton\', \'foldlabel\', \'distmap\' '
              'Default is : ' + _INPUT_TYPE_DEFAULT)
     parser.add_argument(
         "-o", "--output_dir", type=str, default=_CROP_DIR_DEFAULT,
@@ -606,9 +669,20 @@ def generate_crops(
             cropping_type=cropping_type,
             combine_type=combine_type,
             parallel=parallel)
+    elif input_type == "distmap":
+        crop = DistMapCropGenerator(
+            src_dir=src_dir,
+            crop_dir=crop_dir,
+            bbox_dir=bbox_dir,
+            mask_dir=mask_dir,
+            side=side,
+            list_sulci=list_sulci,
+            cropping_type=cropping_type,
+            combine_type=combine_type,
+            parallel=parallel)
     else:
         raise ValueError(
-            "input_type: shall be either 'skeleton' or 'foldlabel'")
+            "input_type: shall be either 'skeleton' or 'foldlabel' or 'distmap'")
     crop.compute(number_subjects=number_subjects)
 
 
