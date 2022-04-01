@@ -489,6 +489,7 @@ class DistMapCropGenerator(CropGenerator):
                  combine_type=_COMBINE_TYPE_DEFAULT,
                  parallel=False):
         """Inits with list of directories and list of sulci
+
         Args:
             src_dir: folder containing generated skeletons, labels or distmaps
             crop_dir: name of output directory for crops with full path
@@ -558,7 +559,7 @@ def parse_args(argv):
              'Default is : ' + _RESAMPLED_SKELETON_DIR_DEFAULT)
     parser.add_argument(
         "-y", "--input_type", type=str, default=_INPUT_TYPE_DEFAULT,
-         help='Input type: \'skeleton\', \'foldlabel\', \'distmap\' '
+        help='Input type: \'skeleton\', \'foldlabel\', \'distmap\' '
              'Default is : ' + _INPUT_TYPE_DEFAULT)
     parser.add_argument(
         "-o", "--output_dir", type=str, default=_CROP_DIR_DEFAULT,
@@ -682,7 +683,7 @@ def generate_crops(
             parallel=parallel)
     else:
         raise ValueError(
-            "input_type: shall be either 'skeleton' or 'foldlabel' or 'distmap'")
+            "input_type: shall be either 'skeleton', 'foldlabel' or 'distmap'")
     crop.compute(number_subjects=number_subjects)
 
 

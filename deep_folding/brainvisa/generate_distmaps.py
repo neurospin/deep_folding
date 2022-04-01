@@ -35,6 +35,8 @@
 
 """Write distance maps from skeleton files
 
+   Note: the generation of distance maps should be performed for each resolution
+
   Typical usage
   -------------
   You can use this program by first entering in the brainvisa environment
