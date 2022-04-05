@@ -41,7 +41,7 @@
   (here brainvisa 5.0.0 installed with singurity) and launching the script
   from the terminal:
   >>> bv bash
-  >>> python augmentations_tools.py
+  >>> python generate_numpy_array.py
 
 
 """
@@ -62,7 +62,7 @@ from soma import aims
 
 
 def generate_np_array(src_dir):
-    """
+    """Creates a numpy array of all nii.gz files from a given folder
     """
     list_arr_id = []
     list_arr_file = []
