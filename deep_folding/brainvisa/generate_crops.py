@@ -518,14 +518,14 @@ class DistMapCropGenerator(CropGenerator):
         # Generated skeleton from folding graphs
         self.src_file = join(
             self.src_dir,
-            '%(side)sdistmap_generated_%(subject)s.nii.gz')
+            '%(side)sresampled_distmap_%(subject)s.nii.gz')
 
         # Names of files in function of dictionary: keys -> 'subject' and
         # 'side'
         self.cropped_file = '%(subject)s_cropped_distmap.nii.gz'
 
         # subjects are detected as the nifti file names under src_dir
-        self.expr = '^.distmap_generated_([0-9a-zA-Z]*).nii.gz$'
+        self.expr = '^.resampled_distmap_([0-9a-zA-Z]*).nii.gz$'
 
         # Creates json log class
         json_file = join(self.crop_dir, self.side + 'distmap.json')
@@ -535,6 +535,7 @@ class DistMapCropGenerator(CropGenerator):
         self.file_basename_pickle = self.side + 'distmap'
 
         self.input_type = 'distmap'
+
 
 def parse_args(argv):
     """Function parsing command-line arguments
