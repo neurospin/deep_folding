@@ -34,6 +34,8 @@ import argparse
 import glob
 import os
 import sys
+import numpy as np
+import dico_toolbox as dtx
 
 import six
 from deep_folding.brainvisa.utils.remove_hull import convert_volume_to_bucket
@@ -41,7 +43,7 @@ from soma import aims
 from tqdm import tqdm
 
 
-def read_convert_write(vol_filename, bucket_filename):
+def read_convert_write(vol_filename, bucket_filename, mask_dir=None):
     """Reads volume, converts and writes back bucket.
 
     Args:
@@ -49,7 +51,21 @@ def read_convert_write(vol_filename, bucket_filename):
         bucket_filename [str]: path to output bucket file
     """
     vol = aims.read(vol_filename)
-    bucket_map, _ = convert_volume_to_bucket(vol)
+    if mask_dir:
+        vol_arr = np.asarray(vol)
+        mask = aims.read(mask_dir)
+        mask_arr = np.asarray(mask)
+        # Apply mask
+        vol_arr[mask_arr==0] = 10
+
+        # Threshold distmap
+        vol_arr[vol_arr<=1] = 1
+        vol_arr[vol_arr>1] = 0
+        bucket_map = dtx.convert.volume_to_bucketMap_aims(vol_arr)
+
+    else:
+        bucket_map, _ = convert_volume_to_bucket(vol)
+
     aims.write(bucket_map, bucket_filename)
 
 
@@ -73,6 +89,9 @@ def parse_args(argv):
     parser.add_argument(
         "-t", "--tgt_dir", type=str, required=True,
         help='Output directory where to put bucket files.')
+    parser.add_argument(
+        "-m", "--mask_dir", type=str, required=False,
+            help='Mask directory.')
 
     args = parser.parse_args(argv)
 
@@ -91,7 +110,7 @@ def build_bucket_filename(subject, tgt_dir):
     return f"{tgt_dir}/{subject}.bck"
 
 
-def loop_over_directory(src_dir, tgt_dir):
+def loop_over_directory(src_dir, tgt_dir, mask_dir):
     """Loops conversion over input directory
     """
     # Gets and creates all filenames
@@ -110,7 +129,8 @@ def loop_over_directory(src_dir, tgt_dir):
     for vol_filename, bucket_filename in tqdm(
             zip(filenames, bucket_filenames), total=len(filenames)):
         read_convert_write(vol_filename=vol_filename,
-                           bucket_filename=bucket_filename)
+                           bucket_filename=bucket_filename,
+                           mask_dir=mask_dir)
 
 
 def main(argv):
@@ -125,7 +145,7 @@ def main(argv):
     try:
         # Parsing arguments
         args = parse_args(argv)
-        loop_over_directory(args.src_dir, args.tgt_dir)
+        loop_over_directory(args.src_dir, args.tgt_dir, args.mask_dir)
     except SystemExit as exc:
         if exc.code != 0:
             six.reraise(*sys.exc_info())
