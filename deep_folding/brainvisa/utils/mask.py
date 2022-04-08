@@ -102,7 +102,7 @@ def compute_simple_mask(sulci_list, side, mask_dir=_MASK_DIR_DEFAULT):
     mask_result = list_masks[0]
     if len(list_masks)==1:
         print(f"only one sulcus: {sulci_list[0]}")
-        arr_result = np.asarray(dl.dilate(mask_result, radius=10))
+        arr_result = np.asarray(dl.dilate(mask_result, radius=5))
         np.asarray(mask_result)[:] = arr_result
 
     else:
