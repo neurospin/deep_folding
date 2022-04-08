@@ -67,7 +67,7 @@ import numpy as np
 from numpy import save
 import scipy.ndimage
 from deep_folding.brainvisa import exception_handler
-from deep_folding.brainvisa.utils.pickle import save_to_pickle
+from deep_folding.brainvisa.utils.save_data import save_to_numpy
 from deep_folding.brainvisa.utils.bbox import compute_max_box
 from deep_folding.brainvisa.utils.folder import create_folder
 from deep_folding.brainvisa.utils.logs import LogJson
@@ -91,7 +91,7 @@ from deep_folding.brainvisa.utils.constants import \
     _CROP_DIR_DEFAULT,\
     _SIDE_DEFAULT, _CROPPING_TYPE_DEFAULT,\
     _COMBINE_TYPE_DEFAULT, _INPUT_TYPE_DEFAULT,\
-    _SULCUS_DEFAULT
+    _SULCUS_DEFAULT, _NO_MASK_DEFAULT
 
 # Defines logger
 log = set_file_logger(__file__)
@@ -123,14 +123,17 @@ def filter_mask(mask: aims.Volume):
     arr[:] = (arr_filter > 0.001).astype(int)
 
 
-def crop_mask(file_src, file_cropped, mask, bbmin, bbmax):
+def crop_mask(file_src, file_cropped, mask, bbmin, bbmax, no_mask=_NO_MASK_DEFAULT):
     """Crops according to mask"""
     vol = aims.read(file_src)
 
     arr = np.asarray(vol)
 
     arr_mask = np.asarray(mask)
-    arr[arr_mask == 0] = 0
+    if no_mask:
+        pass
+    else:
+        arr[arr_mask == 0] = 0
 
     log.debug(f"bbmin = {bbmin.tolist()}")
     log.debug(f"size = {(bbmax-bbmin).tolist()}")
@@ -152,7 +155,8 @@ class CropGenerator:
                  side=_SIDE_DEFAULT,
                  cropping_type=_CROPPING_TYPE_DEFAULT,
                  combine_type=_COMBINE_TYPE_DEFAULT,
-                 parallel=False):
+                 parallel=False,
+                 no_mask=_NO_MASK_DEFAULT):
         """Inits with list of directories and list of sulci
 
         Args:
@@ -179,6 +183,8 @@ class CropGenerator:
         self.cropping_type = cropping_type
         self.combine_type = combine_type
         self.parallel = parallel
+        self.no_mask = no_mask
+        print(self.no_mask)
 
         # Names of files in function of dictionary: keys -> 'subject' and 'side'
         # Generated skeleton from folding graphs
@@ -218,7 +224,7 @@ class CropGenerator:
                           self.bbmin, self.bbmax)
             else:
                 crop_mask(file_src, file_cropped,
-                          self.mask, self.bbmin, self.bbmax)
+                          self.mask, self.bbmin, self.bbmax, self.no_mask)
         else:
             raise FileNotFoundError(f"{file_src} not found")
 
@@ -272,7 +278,8 @@ class CropGenerator:
                            'crop_dir': self.crop_dir,
                            'cropped_skeleton_dir': self.cropped_samples_dir,
                            'cropping_type': self.cropping_type,
-                           'combine_type': self.combine_type
+                           'combine_type': self.combine_type,
+                           'no_mask': self.no_mask
                            }
             self.json.update(dict_to_add=dict_to_add)
 
@@ -342,7 +349,7 @@ class CropGenerator:
 
         # Creation of .pickle file for all subjects
         if number_subjects:
-            save_to_pickle(cropped_dir=self.cropped_samples_dir,
+            save_to_numpy(cropped_dir=self.cropped_samples_dir,
                            tgt_dir=self.crop_dir,
                            file_basename=self.file_basename_pickle)
 
@@ -360,7 +367,8 @@ class SkeletonCropGenerator(CropGenerator):
                  side=_SIDE_DEFAULT,
                  cropping_type=_CROPPING_TYPE_DEFAULT,
                  combine_type=_COMBINE_TYPE_DEFAULT,
-                 parallel=False):
+                 parallel=False,
+                 no_mask=_NO_MASK_DEFAULT):
         """Inits with list of directories and list of sulci
 
         Args:
@@ -381,7 +389,7 @@ class SkeletonCropGenerator(CropGenerator):
             bbox_dir=bbox_dir, mask_dir=mask_dir,
             list_sulci=list_sulci, side=side,
             cropping_type=cropping_type, combine_type=combine_type,
-            parallel=parallel
+            parallel=parallel, no_mask=no_mask
         )
 
         # Directory where to store cropped skeleton files
@@ -424,7 +432,8 @@ class FoldLabelCropGenerator(CropGenerator):
                  side=_SIDE_DEFAULT,
                  cropping_type=_CROPPING_TYPE_DEFAULT,
                  combine_type=_COMBINE_TYPE_DEFAULT,
-                 parallel=False):
+                 parallel=False,
+                 no_mask=_NO_MASK_DEFAULT):
         """Inits with list of directories and list of sulci
 
         Args:
@@ -445,7 +454,7 @@ class FoldLabelCropGenerator(CropGenerator):
             bbox_dir=bbox_dir, mask_dir=mask_dir,
             list_sulci=list_sulci, side=side,
             cropping_type=cropping_type, combine_type=combine_type,
-            parallel=parallel
+            parallel=parallel, no_mask=no_mask
         )
 
         # Directory where to store cropped skeleton files
@@ -487,9 +496,9 @@ class DistMapCropGenerator(CropGenerator):
                  side=_SIDE_DEFAULT,
                  cropping_type=_CROPPING_TYPE_DEFAULT,
                  combine_type=_COMBINE_TYPE_DEFAULT,
-                 parallel=False):
+                 parallel=False,
+                 no_mask=_NO_MASK_DEFAULT):
         """Inits with list of directories and list of sulci
-
         Args:
             src_dir: folder containing generated skeletons, labels or distmaps
             crop_dir: name of output directory for crops with full path
@@ -508,7 +517,7 @@ class DistMapCropGenerator(CropGenerator):
             bbox_dir=bbox_dir, mask_dir=mask_dir,
             list_sulci=list_sulci, side=side,
             cropping_type=cropping_type, combine_type=combine_type,
-            parallel=parallel
+            parallel=parallel, no_mask=no_mask
         )
 
         # Directory where to store cropped skeleton files
@@ -559,7 +568,7 @@ def parse_args(argv):
              'Default is : ' + _RESAMPLED_SKELETON_DIR_DEFAULT)
     parser.add_argument(
         "-y", "--input_type", type=str, default=_INPUT_TYPE_DEFAULT,
-        help='Input type: \'skeleton\', \'foldlabel\', \'distmap\' '
+         help='Input type: \'skeleton\', \'foldlabel\', \'distmap\' '
              'Default is : ' + _INPUT_TYPE_DEFAULT)
     parser.add_argument(
         "-o", "--output_dir", type=str, default=_CROP_DIR_DEFAULT,
@@ -602,6 +611,9 @@ def parse_args(argv):
         "-m", "--combine_type", type=bool, default=_COMBINE_TYPE_DEFAULT,
         help='Whether use specific combination of masks or not')
     parser.add_argument(
+        "-p", "--no_mask", type=bool, default=_NO_MASK_DEFAULT,
+        help='Whether apply mask')
+    parser.add_argument(
         '-v', '--verbose', action='count', default=0,
         help='Verbose mode: '
              'If no option is provided then logging.INFO is selected. '
@@ -628,6 +640,7 @@ def parse_args(argv):
     params['cropping_type'] = args.cropping_type
     params['combine_type'] = args.combine_type
     params['parallel'] = args.parallel
+    params['no_mask'] = args.no_mask
 
     # Checks if nb_subjects is either the string "all" or a positive integer
     params['nb_subjects'] = get_number_subjects(args.nb_subjects)
@@ -646,7 +659,8 @@ def generate_crops(
         number_subjects=_ALL_SUBJECTS,
         cropping_type=_CROPPING_TYPE_DEFAULT,
         combine_type=_COMBINE_TYPE_DEFAULT,
-        parallel=False):
+        parallel=False,
+        no_mask=True):
 
     if input_type == "skeleton":
         crop = SkeletonCropGenerator(
@@ -658,7 +672,8 @@ def generate_crops(
             list_sulci=list_sulci,
             cropping_type=cropping_type,
             combine_type=combine_type,
-            parallel=parallel)
+            parallel=parallel,
+            no_mask=no_mask)
     elif input_type == "foldlabel":
         crop = FoldLabelCropGenerator(
             src_dir=src_dir,
@@ -669,7 +684,8 @@ def generate_crops(
             list_sulci=list_sulci,
             cropping_type=cropping_type,
             combine_type=combine_type,
-            parallel=parallel)
+            parallel=parallel,
+            no_mask=no_mask)
     elif input_type == "distmap":
         crop = DistMapCropGenerator(
             src_dir=src_dir,
@@ -680,10 +696,11 @@ def generate_crops(
             list_sulci=list_sulci,
             cropping_type=cropping_type,
             combine_type=combine_type,
-            parallel=parallel)
+            parallel=parallel,
+            no_mask=no_mask)
     else:
         raise ValueError(
-            "input_type: shall be either 'skeleton', 'foldlabel' or 'distmap'")
+            "input_type: shall be either 'skeleton' or 'foldlabel' or 'distmap'")
     crop.compute(number_subjects=number_subjects)
 
 
@@ -710,7 +727,8 @@ def main(argv):
         cropping_type=params['cropping_type'],
         combine_type=params['combine_type'],
         parallel=params['parallel'],
-        number_subjects=params['nb_subjects'])
+        number_subjects=params['nb_subjects'],
+        no_mask=params['no_mask'])
 
 
 ######################################################################

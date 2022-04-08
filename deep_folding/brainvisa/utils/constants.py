@@ -64,3 +64,6 @@ _CROPPING_TYPE_DEFAULT = 'mask'  # crops according to a mask by default
 
 # Combines sulci using ordering (if true, ordering matters)
 _COMBINE_TYPE_DEFAULT = False
+
+# Whether applying mask or not on cropped file
+_NO_MASK_DEFAULT = False
