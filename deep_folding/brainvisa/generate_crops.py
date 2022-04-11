@@ -140,6 +140,11 @@ def crop_mask(file_src, file_cropped, mask, bbmin, bbmax, no_mask=_NO_MASK_DEFAU
     # Crops volume according to mask bounding box
     vol_cropped = aims.VolumeView(vol, bbmin, bbmax-bbmin)
     aims.write(vol_cropped, file_cropped)
+    # Crops mask according to mask bounding box
+    file_mask = os.path.dirname(os.path.dirname(file_cropped))
+    mask_cropped = aims.VolumeView(mask, bbmin, bbmax-bbmin)
+    aims.write(mask_cropped,
+        f"{file_mask}/mask_cropped.nii.gz")
 
 
 class CropGenerator:
