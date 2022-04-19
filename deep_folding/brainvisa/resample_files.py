@@ -110,13 +110,18 @@ def resample_one_skeleton(input_image,
     # for the bottom value (30) and the simple surface value (60)
     # with respect to the natural order
     # We don't give background, which is the interior 0
-    values = np.array([11, 60, 30, 10, 20, 40, 50, 70, 80, 90])
+    values = np.array([11, 60, 30, 10, 20, 40, 50, 70, 80, 90, 100, 110])
 
+    print(f"input_image = {input_image}")
+    print(f"our voxel size = {out_voxel_size}")
+    print(f"transformation = {transformation}")
+    print(f"values = {values}")
     # Normalization and resampling of skeleton images
     resampled = resample(input_image=input_image,
                          output_vs=out_voxel_size,
                          transformation=transformation,
                          values=values)
+    print(f"resampled type = {type(resampled)}")
     return resampled
 
 
@@ -278,6 +283,8 @@ class FileResampler:
                 src_file=src_file,
                 out_voxel_size=self.out_voxel_size,
                 transform_file=transform_file)
+            print(f"resampled type = {type(resampled)}")
+            print(f"resampled file = {resampled_file}")
             aims.write(resampled, resampled_file)
         else:
             raise FileNotFoundError(f"{src_file} not found")
@@ -306,7 +313,7 @@ class FileResampler:
             list_subjects = select_subjects_int(
                 list_all_subjects, number_subjects)
             log.info(f"Expected number of subjects = {len(list_subjects)}")
-            log.info(f"list_subjects[:5] = {list_subjects[:5]}")
+            log.info(f"list_subjects = {list_subjects}")
             log.debug(f"list_subjects = {list_subjects}")
 
             # Creates target directories
@@ -371,8 +378,7 @@ class SkeletonResampler(FileResampler):
     @staticmethod
     def resample_one_subject(src_file: str,
                              out_voxel_size: float,
-                             transform_file: str,
-                             resampled_file=None):
+                             transform_file: str):
         """Resamples skeleton
 
         This static method is called by resample_one_subject_wrapper
@@ -380,7 +386,7 @@ class SkeletonResampler(FileResampler):
         resampled = resample_one_skeleton(input_image=src_file,
                                           out_voxel_size=out_voxel_size,
                                           transformation=transform_file)
-        aims.write(resampled, resampled_file)
+        return resampled
 
 
 class FoldLabelResampler(FileResampler):
