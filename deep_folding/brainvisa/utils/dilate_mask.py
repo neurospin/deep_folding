@@ -54,8 +54,9 @@ def dilate(mask, radius=10.):
     # vol.copyHeaderFrom(hdr)
     arr = np.asarray(mask)
     # Thresholding and binarization of mask
-    arr[arr < 10] = 0
-    arr[arr >= 10] = _AIMS_BINARY_ONE
+    ## For precentral, threshold is set to 2
+    arr[arr < 2] = 0
+    arr[arr >= 2] = _AIMS_BINARY_ONE
     # Dilates initial volume of 10 mm
     morpho = MorphoGreyLevel_S16()
     dilate = morpho.doDilation(mask, radius)
