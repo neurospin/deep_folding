@@ -48,6 +48,7 @@
 
 import argparse
 import glob
+import os
 import re
 import sys
 from os.path import abspath
@@ -188,11 +189,8 @@ class GraphConvert2Skeleton:
         """Loops over subjects and converts graphs into skeletons.
         """
         # Gets list fo subjects
-        filenames = glob.glob(f"{self.src_dir}/*/")
-        list_subjects = [
-            re.search(
-                '([ae\\d]{5,6})',
-                filename).group(0) for filename in filenames]
+        filenames = glob.glob(f"{self.src_dir}/*[!.minf]")
+        list_subjects = [os.path.basename(filename) for filename in filenames]
         list_subjects = select_subjects_int(list_subjects, number_subjects)
 
         log.info(f"Expected number of subjects = {len(list_subjects)}")
