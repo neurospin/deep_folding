@@ -48,8 +48,8 @@
 
 import argparse
 import glob
-import re
 import sys
+import re
 from os.path import abspath
 from os.path import basename
 
@@ -183,13 +183,13 @@ class GraphGenerateTransform:
         """Loops over subjects to generate transforms to ICBM2009c from graphs.
         """
         # Gets list fo subjects
-        filenames = glob.glob(f"{self.src_dir}/*/")
+        log.debug(f"src_dir = {self.src_dir}")
+        filenames = glob.glob(f"{self.src_dir}/*[!.minf]")
         log.info(f"filenames[:5] = {filenames[:5]}")
 
-        list_subjects = [
-            re.search(
-                '([ae\\d]{5,6})',
-                filename).group(0) for filename in filenames]
+        list_subjects = [basename(filename) for filename in filenames 
+                         if not re.search('.minf$', filename)]
+
         list_subjects = select_subjects_int(list_subjects, number_subjects)
 
         log.info(f"Expected number of subjects = {len(list_subjects)}")
