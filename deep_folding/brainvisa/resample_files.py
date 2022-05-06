@@ -423,7 +423,7 @@ class FoldLabelResampler(FileResampler):
             f'%(side)sresampled_foldlabel_%(subject)s.nii.gz')
 
         # subjects are detected as the nifti file names under src_dir
-        self.expr = '^.foldlabel_([0-9a-zA-Z]*).nii.gz$'
+        self.expr = '^.foldlabel_(.*).nii.gz$'
 
     @staticmethod
     def resample_one_subject(src_file: str,
