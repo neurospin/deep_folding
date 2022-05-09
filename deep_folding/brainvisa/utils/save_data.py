@@ -53,7 +53,7 @@ def save_to_pickle(cropped_dir, tgt_dir=None, file_basename=None):
         if is_file_nii(file_nii):
             aimsvol = aims.read(file_nii)
             sample = np.asarray(aimsvol)
-            subject = re.search('([ae\\d]{5,6})', file_nii).group(1)
+            subject = re.search('(.*)_cropped_(.*)', file_nii).group(1)
             data_dict[subject] = [sample]
 
     dataframe = pd.DataFrame.from_dict(data_dict)
@@ -85,7 +85,7 @@ def save_to_numpy(cropped_dir, tgt_dir=None, file_basename=None):
         if is_file_nii(file_nii):
             aimsvol = aims.read(file_nii)
             sample = np.asarray(aimsvol)
-            subject = re.search('([ae\\d]{5,6})', file_nii).group(1)
+            subject = re.search('(.*)_cropped_(.*)', file_nii).group(1)
             list_sample_id.append(subject)
             list_sample_file.append(sample)
 

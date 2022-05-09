@@ -38,6 +38,7 @@
 """
 
 import glob
+import re
 
 from deep_folding.config.logs import set_file_logger
 # Defines logger
@@ -48,7 +49,10 @@ def compare_number_aims_files_with_expected(output_dir: str,
                                             list_subjects: list):
     """Compares number of generated files and expected number"""
 
-    generated_files = glob.glob(f"{output_dir}/*[!.minf]")
+    all_files = glob.glob(f"{output_dir}/*")
+
+    generated_files = [f for f in all_files 
+                         if not re.search('.minf$', f)]
     log.debug(f"Output directory = {output_dir}")
     log.debug(f"Generated_files = {generated_files}")
 

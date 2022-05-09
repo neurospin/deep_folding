@@ -270,7 +270,7 @@ class FileResampler:
 
         # Output resampled file name
         resampled_file = self.resampled_file % subject
-        print(resampled_file)
+        log.debug(f"resampled_file = {resampled_file}")
 
         # Performs the resampling
         if os.path.exists(src_file):
@@ -294,10 +294,16 @@ class FileResampler:
 
         if number_subjects:
 
+            log.debug(f"src_dir = {self.src_dir}")
+            log.debug(f"reg exp = {self.expr}")
+            
             if os.path.isdir(self.src_dir):
+                src_files = glob.glob(f"{self.src_dir}/*.nii.gz")
+                log.debug(f"list src files = {src_files}")
+
                 list_all_subjects = \
                     [re.search(self.expr, os.path.basename(dI))[1]
-                     for dI in glob.glob(f"{self.src_dir}/*.nii.gz")]
+                     for dI in src_files]
             else:
                 raise NotADirectoryError(
                     f"{self.src_dir} doesn't exist or is not a directory")
@@ -366,7 +372,7 @@ class SkeletonResampler(FileResampler):
             f'%(side)sresampled_skeleton_%(subject)s.nii.gz')
 
         # subjects are detected as the nifti file names under src_dir
-        self.expr = '^.skeleton_generated_([0-9a-zA-Z]*).nii.gz$'
+        self.expr = '^.skeleton_generated_(.*).nii.gz$'
 
     @staticmethod
     def resample_one_subject(src_file: str,
@@ -377,10 +383,9 @@ class SkeletonResampler(FileResampler):
 
         This static method is called by resample_one_subject_wrapper
         from parent class FileResampler"""
-        resampled = resample_one_skeleton(input_image=src_file,
+        return resample_one_skeleton(input_image=src_file,
                                           out_voxel_size=out_voxel_size,
                                           transformation=transform_file)
-        aims.write(resampled, resampled_file)
 
 
 class FoldLabelResampler(FileResampler):
@@ -418,7 +423,7 @@ class FoldLabelResampler(FileResampler):
             f'%(side)sresampled_foldlabel_%(subject)s.nii.gz')
 
         # subjects are detected as the nifti file names under src_dir
-        self.expr = '^.foldlabel_([0-9a-zA-Z]*).nii.gz$'
+        self.expr = '^.foldlabel_(.*).nii.gz$'
 
     @staticmethod
     def resample_one_subject(src_file: str,
