@@ -411,7 +411,7 @@ class SkeletonCropGenerator(CropGenerator):
         self.cropped_file = '%(subject)s_cropped_skeleton.nii.gz'
 
         # subjects are detected as the nifti file names under src_dir
-        self.expr = '^.resampled_skeleton_([0-9a-zA-Z]*).nii.gz$'
+        self.expr = '^.resampled_skeleton_(.*).nii.gz$'
 
         # Creates json log class
         json_file = join(self.crop_dir, self.side + 'skeleton.json')
@@ -476,7 +476,7 @@ class FoldLabelCropGenerator(CropGenerator):
         self.cropped_file = '%(subject)s_cropped_foldlabel.nii.gz'
 
         # subjects are detected as the nifti file names under src_dir
-        self.expr = '^.resampled_foldlabel_([0-9a-zA-Z]*).nii.gz$'
+        self.expr = '^.resampled_foldlabel_(.*).nii.gz$'
 
         # Creates json log class
         json_file = join(self.crop_dir, self.side + 'foldlabel.json')
@@ -539,7 +539,7 @@ class DistMapCropGenerator(CropGenerator):
         self.cropped_file = '%(subject)s_cropped_distmap.nii.gz'
 
         # subjects are detected as the nifti file names under src_dir
-        self.expr = '^.resampled_distmap_([0-9a-zA-Z]*).nii.gz$'
+        self.expr = '^.resampled_distmap_(.*).nii.gz$'
 
         # Creates json log class
         json_file = join(self.crop_dir, self.side + 'distmap.json')
