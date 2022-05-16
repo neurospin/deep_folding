@@ -33,12 +33,12 @@
 # The fact that you are presently reading this means that you have had
 # knowledge of the CeCILL license version 2 and that you accept its terms.
 
-"""Creating pickle file from T1 MRI datas
+"""Creating npy file from T1 MRI datas
 
 The aim of this script is to create dataset of cropped skeletons from MRIs
-saved in a .pickle file.
+saved in a .npy file.
 We read resampled skeleton files
-Several steps are required: crop and .pickle generation
+Several steps are required: crop and .npy generation
 
   Typical usage
   -------------
@@ -144,11 +144,11 @@ def crop_mask(file_src, file_cropped, mask, bbmin, bbmax, no_mask=_NO_MASK_DEFAU
     file_mask = os.path.dirname(os.path.dirname(file_cropped))
     mask_cropped = aims.VolumeView(mask, bbmin, bbmax-bbmin)
     aims.write(mask_cropped,
-        f"{file_mask}/mask_cropped.nii.gz")
+               f"{file_mask}/mask_cropped.nii.gz")
 
 
 class CropGenerator:
-    """Generates cropped skeleton files and corresponding pickle file
+    """Generates cropped skeleton files and corresponding npy file
     """
 
     def __init__(self,
@@ -335,7 +335,7 @@ class CropGenerator:
                     'cropping_type must be either \'bbox\' or \'mask\'')
 
     def compute(self, number_subjects=_ALL_SUBJECTS):
-        """Main API to create pickle files
+        """Main API to create numpy files
 
         The programm loops over all subjects from the input (source) directory.
 
@@ -352,15 +352,15 @@ class CropGenerator:
         # Generate cropped files
         self.crop_files(number_subjects=number_subjects)
 
-        # Creation of .pickle file for all subjects
+        # Creation of .npy file containing all subjects
         if number_subjects:
             save_to_numpy(cropped_dir=self.cropped_samples_dir,
-                           tgt_dir=self.crop_dir,
-                           file_basename=self.file_basename_pickle)
+                          tgt_dir=self.crop_dir,
+                          file_basename=self.file_basename_npy)
 
 
 class SkeletonCropGenerator(CropGenerator):
-    """Generates cropped skeleton files and corresponding pickle file
+    """Generates cropped skeleton files and corresponding npy file
     """
 
     def __init__(self,
@@ -417,15 +417,14 @@ class SkeletonCropGenerator(CropGenerator):
         json_file = join(self.crop_dir, self.side + 'skeleton.json')
         self.json = LogJson(json_file)
 
-        # Creates pickles file name
-        self.file_basename_pickle = self.side + 'skeleton'
+        # Creates npys file name
+        self.file_basename_npy = self.side + 'skeleton'
 
         self.input_type = 'skeleton'
 
 
-
 class FoldLabelCropGenerator(CropGenerator):
-    """Generates cropped skeleton files and corresponding pickle file
+    """Generates cropped skeleton files and corresponding npy file
     """
 
     def __init__(self,
@@ -482,14 +481,14 @@ class FoldLabelCropGenerator(CropGenerator):
         json_file = join(self.crop_dir, self.side + 'foldlabel.json')
         self.json = LogJson(json_file)
 
-        # Creates pickles file name
-        self.file_basename_pickle = self.side + 'label'
+        # Creates npys file name
+        self.file_basename_npy = self.side + 'label'
 
         self.input_type = 'foldlabel'
 
 
 class DistMapCropGenerator(CropGenerator):
-    """Generates cropped skeleton files and corresponding pickle file
+    """Generates cropped skeleton files and corresponding npy file
     """
 
     def __init__(self,
@@ -545,8 +544,8 @@ class DistMapCropGenerator(CropGenerator):
         json_file = join(self.crop_dir, self.side + 'distmap.json')
         self.json = LogJson(json_file)
 
-        # Creates pickles file name
-        self.file_basename_pickle = self.side + 'distmap'
+        # Creates npys file name
+        self.file_basename_npy = self.side + 'distmap'
 
         self.input_type = 'distmap'
 
@@ -564,7 +563,7 @@ def parse_args(argv):
     # Parse command line arguments
     parser = argparse.ArgumentParser(
         prog=basename(__file__),
-        description='Generates cropped and pickle files')
+        description='Generates cropped and npy files')
     parser.add_argument(
         "-s", "--src_dir", type=str, default=_RESAMPLED_SKELETON_DIR_DEFAULT,
         help='Source directory where input files lie. '
@@ -573,8 +572,8 @@ def parse_args(argv):
              'Default is : ' + _RESAMPLED_SKELETON_DIR_DEFAULT)
     parser.add_argument(
         "-y", "--input_type", type=str, default=_INPUT_TYPE_DEFAULT,
-         help='Input type: \'skeleton\', \'foldlabel\', \'distmap\' '
-             'Default is : ' + _INPUT_TYPE_DEFAULT)
+        help='Input type: \'skeleton\', \'foldlabel\', \'distmap\' '
+        'Default is : ' + _INPUT_TYPE_DEFAULT)
     parser.add_argument(
         "-o", "--output_dir", type=str, default=_CROP_DIR_DEFAULT,
         help='Output directory where to store the cropped files. '
@@ -711,7 +710,7 @@ def generate_crops(
 
 @exception_handler
 def main(argv):
-    """Reads argument line and creates cropped files and pickle file
+    """Reads argument line and creates cropped files and npy file
 
     Args:
         argv: a list containing command line arguments
