@@ -66,6 +66,8 @@ import numpy as np
 from deep_folding.brainvisa import exception_handler
 from deep_folding.brainvisa.utils.parallel import define_njobs
 from deep_folding.brainvisa.utils.resample import resample
+from deep_folding.brainvisa.utils.referentials import \
+    generate_ref_volume_ICBM2009c
 from deep_folding.brainvisa.utils.subjects import get_number_subjects
 from deep_folding.brainvisa.utils.subjects import select_subjects_int
 from deep_folding.brainvisa.utils.folder import create_folder
