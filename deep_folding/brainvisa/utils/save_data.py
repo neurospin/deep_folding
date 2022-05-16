@@ -94,6 +94,10 @@ def save_to_numpy(cropped_dir, tgt_dir=None, file_basename=None):
     subject_df.to_csv(os.path.join(tgt_dir, file_basename+'_subject.csv'),
                       index=False)
 
+    # Writes subject ID to npy file (per retrocompatibility)
+    list_sample_id = np.array(list_sample_id)
+    np.save(os.path.join(tgt_dir, 'sub_id.npy'), list_sample_id)
+
     # Writes volumes as numpy arrays
     list_sample_file = np.array(list_sample_file)
     np.save(os.path.join(tgt_dir, file_basename+'.npy'), list_sample_file)
