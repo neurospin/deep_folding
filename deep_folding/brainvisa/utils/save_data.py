@@ -66,13 +66,13 @@ def save_to_pickle(cropped_dir, tgt_dir=None, file_basename=None):
 def save_to_numpy(cropped_dir, tgt_dir=None, file_basename=None):
     """
     Creates a dataframe of data with a column for each subject and associated
-    np.array. Saved these this dataframe to pkl format on the target
+    np.array. Saved these this dataframe to npy format on the target
     directory
 
     Args:
         cropped_dir: directory containing cropped images
-        tgt_dir: directory where to save the pickle file
-        file_basename: final file name = file_basename.pkl
+        tgt_dir: directory where to save the numpy array file
+        file_basename: final file name = file_basename.npy
     """
     list_sample_id = []
     list_sample_file = []
@@ -86,13 +86,17 @@ def save_to_numpy(cropped_dir, tgt_dir=None, file_basename=None):
             aimsvol = aims.read(file_nii)
             sample = np.asarray(aimsvol)
             subject = re.search('(.*)_cropped_(.*)', file_nii).group(1)
-            list_sample_id.append(subject)
+            list_sample_id.append(os.path.basename(subject))
             list_sample_file.append(sample)
 
-    list_sample_id = np.array(list_sample_id)
+    # Writes subject ID csv file
+    subject_df = pd.DataFrame(list_sample_id, columns=["Subject"])
+    subject_df.to_csv(os.path.join(tgt_dir, file_basename+'_subject.csv'),
+                      index=False)
+
+    # Writes volumes as numpy arrays
     list_sample_file = np.array(list_sample_file)
-    np.save(os.path.join(tgt_dir, 'sub_id.npy'), list_sample_id)
-    np.save(os.path.join(tgt_dir, 'distmap_1mm.npy'), list_sample_file)
+    np.save(os.path.join(tgt_dir, file_basename+'.npy'), list_sample_file)
 
 
 if __name__ == '__main__':
