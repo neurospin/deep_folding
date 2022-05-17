@@ -53,17 +53,18 @@ from glob import glob
 
 import numpy as np
 import pandas as pd
+import json
 from deep_folding.brainvisa.utils.bbox import compute_max_box
 from deep_folding.brainvisa.utils.sulcus import complete_sulci_name
 from soma import aims
 
-_DEFAULT_DATA_DIR = '/neurospin/hcp/ANALYSIS/3T_morphologist/'
-_DEFAULT_SAVING_DIR = '/neurospin/dico/lguillon/mic21/anomalies_set/dataset/'
+_DEFAULT_DATA_DIR = '/neurospin/dico/data/bv_databases/human/hcp/hcp'
+_DEFAULT_SAVING_DIR = '/neurospin/dico/lguillon/distmap/benchmark/deletion/'
 _DEFAULT_BBOX_DIR = '/neurospin/dico/data/deep_folding/data/bbox/'
 
 
 class Benchmark():
-    """Generates benchmark of altered skeletons
+    """Generates benchmark of altered graphs
     """
 
     def __init__(self, b_num, side, ss_size, sulci_list, saving_dir,
@@ -84,12 +85,13 @@ class Benchmark():
         self.ss_size = ss_size
         self.sulci_list = sulci_list
         self.sulci_list = complete_sulci_name(self.sulci_list, self.side)
-        self.data_dir = data_dir
+        self.src_dir = data_dir
         self.saving_dir = saving_dir
+        self.path_to_graph = "t1mri/BL/default_analysis/folds/3.1/deepcnn_auto"
         self.abnormality_test = []
-        self.bbmin, self.bbmax = compute_max_box(
-            self.sulci_list, side, talairach_box=True, src_dir=bbox_dir)
-        print(self.bbmin, self.bbmax)
+        # self.bbmin, self.bbmax = compute_max_box(
+        #      self.sulci_list, side, src_dir=bbox_dir)
+        #print(self.bbmin, self.bbmax)
         self.cpt_skel_1 = 't1mri/default_acquisition/default_analysis/segmentation'
         self.cpt_skel_2 = 'skeleton_'
         self.cpt_skel_3 = '.nii.gz'
@@ -104,30 +106,71 @@ class Benchmark():
         """
         cpt_arg_1 = 't1mri/default_acquisition/default_analysis/folds/3.1/default_session_auto'
         cpt_arg_2 = '_default_session_auto.arg'
-
-        if os.path.isdir(os.path.join(self.data_dir, str(sub) + '/')):
+        print(os.path.join(self.src_dir, str(sub) + '/'))
+        if os.path.isdir(os.path.join(self.src_dir, str(sub) + '/')):
+            print('ici')
             self.surfaces = dict()
-            graph_file = os.path.join(self.data_dir, str(sub), cpt_arg_1,
-                                      self.side + str(sub) + cpt_arg_2)
-            skel_file = os.path.join(
-                self.data_dir,
-                str(sub),
-                self.cpt_skel_1,
-                self.side +
-                self.cpt_skel_2 +
-                str(sub) +
-                self.cpt_skel_3)
+            # graph_file = os.path.join(self.data_dir, str(sub), cpt_arg_1,
+            #                           self.side + str(sub) + cpt_arg_2)
+            graph_file = f"{self.src_dir}/{sub}/" +\
+                         f"{self.path_to_graph}/{self.side}{sub}_deepcnn_auto.arg"
+            # skel_file = os.path.join(
+            #     self.data_dir,
+            #     str(sub),
+            #     self.cpt_skel_1,
+            #     self.side +
+            #     self.cpt_skel_2 +
+            #     str(sub) +
+            #     self.cpt_skel_3)
             graph = aims.read(graph_file)
-            self.skel = aims.read(skel_file)
+            voxel_size = graph['voxel_size'][:3]
+            # transformation to native space of graph to ICBM template
+            g_to_icbm_template = aims.GraphManip.getICBM2009cTemplateTransform(
+                                            graph)
+            with open("/neurospin/dico/data/deep_folding/current/datasets/hcp/crops/1mm/SC/no_mask/Rdistmap.json") as json_file:
+                sulcus = json.load(json_file)
+                self.bbmin = sulcus['bbmin']
+                self.bbmax = sulcus['bbmax']
+            print(sulcus)
+            bbox_min = None
+            bbox_max = None
+            # self.skel = aims.read(skel_file)
 
             for v in graph.vertices():
                 if 'label' in v:
-                    bbmin_surface = v['Tal_boundingbox_min']
-                    bbmax_surface = v['Tal_boundingbox_max']
-                    bck_map = v['aims_ss']
+                    #print(v['label'])
+                    # bbmin_surface = v['Tal_boundingbox_min']
+                    # bbmax_surface = v['Tal_boundingbox_max']
+                    bbmin_surface = v['boundingbox_min']
+                    bbmax_surface = v['boundingbox_max']
+                    # print([g_to_icbm_template.transform(np.array(voxel) * voxel_size)
+                    #         for voxel in bbmin_surface])
+                    for bucket_name in ('aims_ss', 'aims_bottom', 'aims_other'):
+                        bucket = v.get(bucket_name)
+                        if bucket is not None:
+                            voxels = np.asarray(
+                                [g_to_icbm_template.transform(np.array(voxel) * voxel_size)
+                                 for voxel in bucket[0].keys()])
 
-                    if all([a >= b for (a, b) in zip(bbmin_surface, self.bbmin)]) and all(
-                            [a <= b for (a, b) in zip(bbmax_surface, self.bbmax)]):
+                            if voxels.shape == (0, ):
+                                continue
+                            bbox_min = np.min(np.vstack(
+                                ([bbox_min] if bbox_min is not None else [])
+                                + [voxels]), axis=0)
+                            bbox_max = np.max(np.vstack(
+                                ([bbox_max] if bbox_max is not None else [])
+                                + [voxels]), axis=0)
+
+
+                    bck_map = v['aims_ss']
+                    # print(bbmin_surface, bbmax_surface)
+                    # print('la',bbox_min, bbox_max)
+
+                    if all([a >= b for (a, b) in zip(bbox_min, self.bbmin)]) and all(
+                            [a <= b for (a, b) in zip(bbox_max, self.bbmax)]):
+                        print(sub, v['label'])
+                        print(self.bbmin, self.bbmax)
+                        print('la',bbox_min, bbox_max)
                         for bucket in bck_map:
                             if bucket.size() > self.ss_size:  # In order to keep only large enough simple surfaces
                                 self.surfaces[len(self.surfaces)] = v
@@ -256,9 +299,9 @@ def get_sub_list(subjects_list):
         # Selection of right handed subjects only
         right_handed = pd.read_csv(
             '/neurospin/dico/lguillon/hcp_info/right_handed.csv')
-        subjects_list = list(right_handed['Subject'].astype(str))
+        subjects_list = list(right_handed['subjects'].astype(str))
         # Check whether subjects' files exist
-        hcp_sub = os.listdir('/neurospin/hcp/ANALYSIS/3T_morphologist/')
+        hcp_sub = os.listdir('/neurospin/dico/data/bv_databases/human/hcp/hcp/')
         subjects_list = [sub for sub in subjects_list if sub in hcp_sub]
 
         random.shuffle(subjects_list)
@@ -289,27 +332,28 @@ def generate(b_num, side, ss_size, sulci_list, mode='suppress', bench_size=150,
         print(sub)
         save_sub = sub
         if mode in ['suppress', 'add', 'mix']:
+            print(mode)
             benchmark.get_simple_surfaces(sub)
-            if benchmark.surfaces and len(benchmark.surfaces.keys()) > 0:
-                if mode == 'suppress' or (
-                        mode == 'mix' and i < bench_size / 2):
-                    # Suppression of simple surfaces
-                    save_sub = benchmark.delete_ss(sub)
-                elif mode == 'add' or (mode == 'mix' and i >= bench_size / 2):
-                    # Addition of simple surfaces
-                    save_sub = benchmark.add_ss(subjects_list, i)
-                    givers.append(sub)
-                benchmark.save_file(save_sub)
-                # Addition of modified graph to abnormality_test set
-                abnormality_test.append(save_sub)
-        elif mode == 'random' or mode == 'asymmetry':
-            benchmark.random_skel(sub)
-            benchmark.save_file(save_sub)
-            # Addition of modified graph to abnormality_test set
-            abnormality_test.append(save_sub)
-        if len(abnormality_test) == bench_size:
-            break
-    benchmark.save_lists(abnormality_test, givers, subjects_list)
+    #         if benchmark.surfaces and len(benchmark.surfaces.keys()) > 0:
+    #             if mode == 'suppress' or (
+    #                     mode == 'mix' and i < bench_size / 2):
+    #                 # Suppression of simple surfaces
+    #                 save_sub = benchmark.delete_ss(sub)
+    #             elif mode == 'add' or (mode == 'mix' and i >= bench_size / 2):
+    #                 # Addition of simple surfaces
+    #                 save_sub = benchmark.add_ss(subjects_list, i)
+    #                 givers.append(sub)
+    #             benchmark.save_file(save_sub)
+    #             # Addition of modified graph to abnormality_test set
+    #             abnormality_test.append(save_sub)
+    #     elif mode == 'random' or mode == 'asymmetry':
+    #         benchmark.random_skel(sub)
+    #         benchmark.save_file(save_sub)
+    #         # Addition of modified graph to abnormality_test set
+    #         abnormality_test.append(save_sub)
+    #     if len(abnormality_test) == bench_size:
+    #         break
+    # benchmark.save_lists(abnormality_test, givers, subjects_list)
 
 
 ######################################################################
@@ -320,9 +364,8 @@ if __name__ == '__main__':
     generate(
         333,
         'R',
-        1000,
+        500,
         sulci_list=[
-            'S.T.s.ter.asc.post.',
-            'S.T.s.ter.asc.ant.'],
+            'S.C.'],
         mode='suppress',
         bench_size=4)

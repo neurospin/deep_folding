@@ -188,7 +188,7 @@ class GraphGenerateTransform:
 
         list_subjects = [
             re.search(
-                '([ae\\d]{5,6})',
+                '(sub-\d{12})',
                 filename).group(0) for filename in filenames]
         list_subjects = select_subjects_int(list_subjects, number_subjects)
 

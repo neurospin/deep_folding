@@ -135,7 +135,11 @@ def crop_mask(file_src, file_cropped, mask, bbmin, bbmax, no_mask=_NO_MASK_DEFAU
     else:
         arr[arr_mask == 0] = 0
 
+    #bbmin = np.array([14, 89, 24])
+    #bbmax = np.array([92, 152, 112])
+
     log.debug(f"bbmin = {bbmin.tolist()}")
+    log.debug(f"bbmax = {bbmax.tolist()}")
     log.debug(f"size = {(bbmax-bbmin).tolist()}")
     # Crops volume according to mask bounding box
     vol_cropped = aims.VolumeView(vol, bbmin, bbmax-bbmin)
@@ -539,7 +543,7 @@ class DistMapCropGenerator(CropGenerator):
         self.cropped_file = '%(subject)s_cropped_distmap.nii.gz'
 
         # subjects are detected as the nifti file names under src_dir
-        self.expr = '^.resampled_distmap_([0-9a-zA-Z]*).nii.gz$'
+        self.expr = '^.resampled_distmap_(sub-\d{12}).nii.gz$'
 
         # Creates json log class
         json_file = join(self.crop_dir, self.side + 'distmap.json')

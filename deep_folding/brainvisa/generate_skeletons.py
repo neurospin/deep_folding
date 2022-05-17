@@ -179,7 +179,7 @@ class GraphConvert2Skeleton:
 
         skeleton_file = f"{self.skeleton_dir}/" +\
                         f"{self.side}skeleton_generated_{subject}.nii.gz"
-
+        print(subject, graph_file, skeleton_file)
         generate_skeleton_from_graph_file(graph_file,
                                           skeleton_file,
                                           self.junction)
@@ -191,7 +191,7 @@ class GraphConvert2Skeleton:
         filenames = glob.glob(f"{self.src_dir}/*/")
         list_subjects = [
             re.search(
-                '([ae\\d]{5,6})',
+                '(sub-\d{12})',
                 filename).group(0) for filename in filenames]
         list_subjects = select_subjects_int(list_subjects, number_subjects)
 

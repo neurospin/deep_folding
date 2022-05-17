@@ -16,10 +16,10 @@ def array_to_ana(ana_a, img, sub_id, phase, status):
     name of the volume displayed in Anatomist window.
     Returns volume displayable by Anatomist
     """
-    #vol_img = aims.Volume(img)
-    vol_img = img
+    vol_img = aims.Volume(img)
+    #vol_img = img
     a_vol_img = ana_a.toAObject(vol_img)
-    vol_img.header()['voxel_size'] = [2, 2, 2]
+    vol_img.header()['voxel_size'] = [1, 1, 1]
     a_vol_img.setName(status+'_'+ str(sub_id)+'_'+str(phase)) # display name
     a_vol_img.setChanged()
     a_vol_img.notifyObservers()
@@ -34,7 +34,7 @@ def main():
     Number of columns and view (Sagittal, coronal, frontal) can be specified.
     (It's better to choose an even number for number of columns to display)
     """
-    buckets = True
+    buckets = False
 
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -55,10 +55,19 @@ def main():
         sub_id = id_arr[0][k]
         phase = phase_arr[0][k]
         input = input_arr[0][k]
+        print(input.shape)
         output = output_arr[0][k].astype(float)
         if buckets:
-            input = dtx.convert.volume_to_bucketMap_aims(input, voxel_size=(2,2,2))
-            output = dtx.convert.volume_to_bucketMap_aims(output, voxel_size=(2,2,2))
+            if len(np.unique(input))==2:
+                input = dtx.convert.volume_to_bucketMap_aims(input, voxel_size=(2,2,2))
+                output = dtx.convert.volume_to_bucketMap_aims(output, voxel_size=(2,2,2))
+            else:
+                input[input>0.5] = 1
+                input[input<=0.5] = 0
+                output[output>0.5] = 1
+                output[output<=0.5] = 0
+                input = dtx.convert.volume_to_bucketMap_aims(input, voxel_size=(1,1,1))
+                output = dtx.convert.volume_to_bucketMap_aims(output, voxel_size=(1,1,1))
 
         for img, entry in [(input, 'input'), (output, 'output')]:
             globals()['block%s%s%s' % (sub_id, phase, entry)] = a.createWindow('3D', block=block)
