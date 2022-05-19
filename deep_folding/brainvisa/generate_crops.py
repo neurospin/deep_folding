@@ -488,6 +488,7 @@ class FoldLabelCropGenerator(CropGenerator):
 
         # Creates npys file name
         self.file_basename_npy = self.side + 'label'
+        self.file_basename_pickle = self.side + 'label'
 
         self.input_type = 'foldlabel'
 
@@ -551,6 +552,7 @@ class DistMapCropGenerator(CropGenerator):
 
         # Creates npys file name
         self.file_basename_npy = self.side + 'distmap'
+        self.file_basename_pickle = self.side + 'distmap'
 
         self.input_type = 'distmap'
 
