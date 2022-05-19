@@ -68,6 +68,7 @@ from numpy import save
 import scipy.ndimage
 from deep_folding.brainvisa import exception_handler
 from deep_folding.brainvisa.utils.save_data import save_to_numpy
+from deep_folding.brainvisa.utils.save_data import save_to_pickle
 from deep_folding.brainvisa.utils.bbox import compute_max_box
 from deep_folding.brainvisa.utils.folder import create_folder
 from deep_folding.brainvisa.utils.logs import LogJson
@@ -357,6 +358,9 @@ class CropGenerator:
             save_to_numpy(cropped_dir=self.cropped_samples_dir,
                           tgt_dir=self.crop_dir,
                           file_basename=self.file_basename_npy)
+            save_to_pickle(cropped_dir=self.cropped_samples_dir,
+                           tgt_dir=self.crop_dir,
+                           file_basename=self.file_basename_pickle)
 
 
 class SkeletonCropGenerator(CropGenerator):
@@ -419,6 +423,7 @@ class SkeletonCropGenerator(CropGenerator):
 
         # Creates npys file name
         self.file_basename_npy = self.side + 'skeleton'
+        self.file_basename_pickle = self.side + 'skeleton'
 
         self.input_type = 'skeleton'
 
