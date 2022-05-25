@@ -41,6 +41,7 @@ The first column on each row is the subject ID.
 
 import argparse
 import os
+import glob
 import random
 import csv
 import sys
@@ -89,7 +90,8 @@ def split_train_test(src_dir, tgt_dir, nb_test_subjects):
     """
 
     # Lists all subjects
-    subjects = os.listdir(src_dir)
+    subjects = glob.glob(f"{src_dir}/*[!.minf]")
+    subjects = [os.path.basename(sub) for sub in subjects]
 
     # Makes the random split on list
 

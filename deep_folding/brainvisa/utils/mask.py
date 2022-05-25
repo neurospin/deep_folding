@@ -148,6 +148,8 @@ def compute_centered_mask(sulci_list, side, mask_dir=_MASK_DIR_DEFAULT):
         list_masks.append(aims.read(mask_file))
 
     # Threshold and dilation of first mask
+    eligible_mask_1 = np.asarray(list_masks[0])
+    eligible_mask_1[eligible_mask_1 < 10] = 0
     eligible_mask_1 = dl.dilate(list_masks[0])
     aims.write(eligible_mask_1, '/tmp/eligible_mask_1.nii.gz')
 
