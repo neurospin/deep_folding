@@ -80,7 +80,7 @@ def save_to_numpy(cropped_dir, tgt_dir=None, file_basename=None):
     log.info("Now generating numpy array...")
     log.debug(f"cropped_dir = {cropped_dir}")
 
-    for filename in os.listdir(cropped_dir):
+    for filename in sorted(os.listdir(cropped_dir)):
         file_nii = os.path.join(cropped_dir, filename)
         if is_file_nii(file_nii):
             aimsvol = aims.read(file_nii)
@@ -93,6 +93,7 @@ def save_to_numpy(cropped_dir, tgt_dir=None, file_basename=None):
     subject_df = pd.DataFrame(list_sample_id, columns=["Subject"])
     subject_df.to_csv(os.path.join(tgt_dir, file_basename+'_subject.csv'),
                       index=False)
+    log.info(f"5 first saved subjects are: {subject_df.head()}")
 
     # Writes subject ID to npy file (per retrocompatibility)
     list_sample_id = np.array(list_sample_id)
