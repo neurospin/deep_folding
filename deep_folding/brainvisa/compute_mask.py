@@ -127,6 +127,9 @@ def increment_one_mask(graph_filename, mask, sulcus, voxel_size_out):
                 for i, j, k in voxels:
                     arr_one[i, j, k, 0] += 1
 
+    # Guarantees that array is one 1 even if vosel is present twice
+    arr_one = (arr_one >= 1).astype(np.int16)
+
     # Puts in aims volume the array of one mask
     vol_one = aims.Volume(arr_one)
     vol_one.copyHeaderFrom(mask.header())
