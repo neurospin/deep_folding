@@ -99,7 +99,7 @@ def parse_args(argv):
 
 
 def get_basename_without_extension(filename):
-    "Returns file basename without extension"
+    """Returns file basename without extension"""
     basename = os.path.basename(filename)
     without_extension = basename.split('.')[0]
     return without_extension

@@ -102,7 +102,7 @@ def compute_simple_mask(sulci_list, side, mask_dir=_MASK_DIR_DEFAULT):
     mask_result = list_masks[0]
     if len(list_masks)==1:
         print(f"only one sulcus: {sulci_list[0]}")
-        arr_result = np.asarray(dl.dilate(mask_result, radius=5))
+        arr_result = np.asarray(dl.dilate(mask_result, radius=1))
         np.asarray(mask_result)[:] = arr_result
 
     else:
@@ -118,7 +118,7 @@ def compute_simple_mask(sulci_list, side, mask_dir=_MASK_DIR_DEFAULT):
 
     # Computes the mask bounding box
     bbmin, bbmax = compute_bbox_mask(arr_result)
-    aims.write(mask_result, '/neurospin/dico/data/deep_folding/current/datasets/hcp/crops/1mm/precentral/mask/test.nii.gz')
+    # aims.write(mask_result, '/neurospin/dico/data/deep_folding/current/datasets/hcp/crops/1mm/precentral/mask/test.nii.gz')
     return mask_result, bbmin, bbmax
 
 
