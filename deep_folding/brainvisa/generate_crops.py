@@ -249,6 +249,7 @@ class CropGenerator:
             if os.path.isdir(self.src_dir):
                 files = glob.glob(f"{self.src_dir}/*.nii.gz")
                 log.debug(f"Nifti files in {self.src_dir} = {files}")
+                log.debug(f"Regular expresson is: {self.expr}")
                 if len(files):
                     list_all_subjects = [
                         re.search(self.expr, basename(dI))[1]
