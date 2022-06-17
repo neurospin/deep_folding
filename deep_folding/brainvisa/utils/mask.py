@@ -63,7 +63,12 @@ _AIMS_BINARY_ONE = 32767
 def compute_bbox_mask(arr):
 
     # Gets location of bounding box as slices
-    loc = ndimage.find_objects(arr)[0]
+    objects_in_image = ndimage.find_objects(arr)
+    print(f"ndimage.find_objects(arr) = {objects_in_image}")
+    if not objects_in_image:
+        raise ValueError("There are only 0s in array!!!")
+
+    loc = objects_in_image[0]
     bbmin = []
     bbmax = []
 
@@ -120,6 +125,66 @@ def compute_simple_mask(sulci_list, side, mask_dir=_MASK_DIR_DEFAULT):
     bbmin, bbmax = compute_bbox_mask(arr_result)
     # aims.write(mask_result, '/neurospin/dico/data/deep_folding/current/datasets/hcp/crops/1mm/precentral/mask/test.nii.gz')
     return mask_result, bbmin, bbmax
+
+
+def intersect_binary(a, b):
+    """returns intersection of two binary arrays"""
+    return ((a+b)> 1).astype(np.int16)
+
+def compute_intersection_mask(sulci_list, side, mask_dir=_MASK_DIR_DEFAULT):
+    """Function returning mask making intersection of masks over several sulci
+
+    It reads mask files in the source mask directory and combines them.
+    They are listed in subdirectory 'L' or 'R' according the hemisphere
+
+    Args:
+        sulci_list: a list of sulci
+        side: a string corresponding to the hemisphere, whether 'L' or 'R'
+        mask_dir: path to source directory containing masks
+
+    Returns:
+        mask_result: AIMS volume containing combined mask
+        bbmin: an array of minimum coordinates of min box around the mask
+        bbmax: an array of maximum coordinates of max_box around the mask
+    """
+
+    # Initializes and fills list of masks, each repreented as an aims volume
+    list_masks = []
+
+    for sulcus in sulci_list:
+        mask_file = join(mask_dir, side, sulcus + '.nii.gz')
+        list_masks.append(aims.read(mask_file))
+
+    # Computes the mask being a combination of all masks
+    mask_result = list_masks[0]
+    if len(list_masks)==1:
+        print(f"only one sulcus: {sulci_list[0]}")
+        arr_result = np.asarray(dl.dilate(mask_result, radius=5))
+        np.asarray(mask_result)[:] = arr_result
+
+    else:
+        arr_result = np.asarray(mask_result)
+        arr_result = (arr_result > 0).astype(np.int16)
+        print(f"first sulcus: {sulci_list[0]}")
+        for k, mask in enumerate(list_masks[1:]):
+            print(f"sulcus {sulci_list[k+1]}")
+            arr = np.asarray(mask)
+            arr = (arr > 0).astype(np.int16)
+            arr_result = intersect_binary(arr_result, arr)
+
+        np.asarray(mask_result)[:] = arr_result
+        #ATTENTION: threshold in dl.dilate is set to 2
+        arr_result = np.asarray(dl.dilate(mask_result*2, radius=6))
+        np.asarray(mask_result)[:] = arr_result
+        print(f"np.unique(mask_result) = {np.unique(np.asarray(mask_result), return_counts=True)}")
+
+    print(f"np.unique after intersection = {np.unique(arr_result, return_counts=True)}")
+    print(f"Shape after intersection = {arr_result.shape}")
+
+    # Computes the mask bounding box
+    bbmin, bbmax = compute_bbox_mask(arr_result)
+    return mask_result, bbmin, bbmax
+
 
 
 def compute_centered_mask(sulci_list, side, mask_dir=_MASK_DIR_DEFAULT):
