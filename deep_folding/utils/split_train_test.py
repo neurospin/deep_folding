@@ -47,11 +47,22 @@ import csv
 import sys
 import six
 
+from deep_folding.config.logs import set_file_logger
+
+# Defines logger
+log = set_file_logger(__file__)
+
 _SRC_DIR_DEFAULT = "/host/tgcc/hcp/ANALYSIS/3T_morphologist"
 _TGT_DIR_DEFAULT = "."
 _NB_TEST_SUBJECTS_DEFAULT = 150
 _SEED = 1
 
+def get_basename_without_extension(filename):
+    """Returns file basename without extension"""
+    basename = os.path.basename(filename)
+    
+    without_extension = basename.split('.')[0]
+    return without_extension
 
 def parse_args(argv):
     """Function parsing command-line arguments
@@ -91,7 +102,7 @@ def split_train_test(src_dir, tgt_dir, nb_test_subjects):
 
     # Lists all subjects
     subjects = glob.glob(f"{src_dir}/*[!.minf]")
-    subjects = [os.path.basename(sub) for sub in subjects]
+    subjects = [get_basename_without_extension(sub) for sub in subjects]
 
     # Makes the random split on list
 

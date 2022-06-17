@@ -118,7 +118,7 @@ def compute_simple_mask(sulci_list, side, mask_dir=_MASK_DIR_DEFAULT):
 
     # Computes the mask bounding box
     bbmin, bbmax = compute_bbox_mask(arr_result)
-    aims.write(mask_result, '/neurospin/dico/data/deep_folding/current/datasets/hcp/crops/1mm/precentral/mask/test.nii.gz')
+    # aims.write(mask_result, '/neurospin/dico/data/deep_folding/current/datasets/hcp/crops/1mm/precentral/mask/test.nii.gz')
     return mask_result, bbmin, bbmax
 
 
