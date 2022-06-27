@@ -76,6 +76,7 @@ from deep_folding.brainvisa.utils.logs import setup_log
 from deep_folding.brainvisa.utils.parallel import define_njobs
 from deep_folding.brainvisa.utils.mask import compute_centered_mask
 from deep_folding.brainvisa.utils.mask import compute_simple_mask
+from deep_folding.brainvisa.utils.mask import compute_intersection_mask
 from deep_folding.brainvisa.utils.subjects import get_number_subjects
 from deep_folding.brainvisa.utils.subjects import select_subjects_int
 from deep_folding.brainvisa.utils.quality_checks import \
@@ -332,9 +333,17 @@ class CropGenerator:
                 aims.write(
                     self.mask,
                     f"{self.crop_dir}/{self.side}mask_{self.input_type}.nii.gz")
+            elif self.cropping_type == 'mask_intersect':
+                self.mask, self.bbmin, self.bbmax = \
+                    compute_intersection_mask(sulci_list=self.list_sulci,
+                                        side=self.side,
+                                        mask_dir=self.mask_dir)
+                aims.write(
+                    self.mask,
+                    f"{self.crop_dir}/{self.side}mask_{self.input_type}.nii.gz")
             else:
                 raise ValueError(
-                    'cropping_type must be either \'bbox\' or \'mask\'')
+                    'cropping_type must be either \'bbox\' or \'mask\' or \'mask_intersect\'')
 
     def compute(self, number_subjects=_ALL_SUBJECTS):
         """Main API to create numpy files
@@ -390,7 +399,7 @@ class SkeletonCropGenerator(CropGenerator):
                     (generated using compute_mask.py)
             list_sulci: list of sulcus names
             side: hemisphere side (either L for left, or R for right hemisphere)
-            cropping_type: cropping type, either mask, or bbox
+            cropping_type: cropping type, either mask, or bbox, or mask_intersect
             combine_type: if True, combines sulci (in this case, order matters)
             parallel: if True, parallel computation
         """
@@ -455,7 +464,7 @@ class FoldLabelCropGenerator(CropGenerator):
                     (generated using compute_mask.py)
             list_sulci: list of sulcus names
             side: hemisphere side (either L for left, or R for right hemisphere)
-            cropping_type: cropping type, either mask, or bbox
+            cropping_type: cropping type, either mask, or bbox, or mask_intersect
             combine_type: if True, combines sulci (in this case, order matters)
             parallel: if True, parallel computation
         """
@@ -519,7 +528,7 @@ class DistMapCropGenerator(CropGenerator):
                     (generated using compute_mask.py)
             list_sulci: list of sulcus names
             side: hemisphere side (either L for left, or R for right hemisphere)
-            cropping_type: cropping type, either mask, or bbox
+            cropping_type: cropping type, either mask, or bbox, or mask_intersect
             combine_type: if True, combines sulci (in this case, order matters)
             parallel: if True, parallel computation
         """
@@ -618,6 +627,7 @@ def parse_args(argv):
              'Type of cropping: '
              'bbox: for bounding box cropping'
              'mask: selection based on a mask'
+             'mask_intersect: selection based on intersect of masks'
              'Default is : ' + _CROPPING_TYPE_DEFAULT)
     parser.add_argument(
         "-m", "--combine_type", type=bool, default=_COMBINE_TYPE_DEFAULT,
