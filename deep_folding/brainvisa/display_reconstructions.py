@@ -1,25 +1,31 @@
 """ The aim of this script is to display saved model outputs thanks to Anatomist.
 Model outputs are stored as numpy arrays.
 """
-
 import argparse
-
 import anatomist.api as anatomist
 import dico_toolbox as dtx
 import numpy as np
 from soma import aims
 
 
-def array_to_ana(ana_a, img, sub_id, phase, status):
+_VOXEL_SIZE = 2
+_BUCKET = False
+
+
+def array_to_ana(ana_a, img, sub_id, phase, status, bucket, vs):
     """
     Transforms output tensor into volume readable by Anatomist and defines
     name of the volume displayed in Anatomist window.
-    Returns volume displayable by Anatomist
+    Returns volume displayable by Anatomist either on the skeleton mode,
+    that can be viewed in consecutive 2D slices, or on 3D buckets.
     """
-    #vol_img = aims.Volume(img)
-    vol_img = img
+    if bucket:
+        vol_img = img
+        vol_img.header()['voxel_size'] = list(vs)
+    else:
+        vol_img = aims.Volume(img)
+
     a_vol_img = ana_a.toAObject(vol_img)
-    vol_img.header()['voxel_size'] = [2, 2, 2]
     a_vol_img.setName(status+'_'+ str(sub_id)+'_'+str(phase)) # display name
     a_vol_img.setChanged()
     a_vol_img.notifyObservers()
@@ -34,15 +40,27 @@ def main():
     Number of columns and view (Sagittal, coronal, frontal) can be specified.
     (It's better to choose an even number for number of columns to display)
     """
-    buckets = True
 
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--root_dir",
         type=str,
         help='directory where model outputs are stored')
+    parser.add_argument(
+        "--voxel_size",
+        type=int,
+        default=_VOXEL_SIZE,
+        help='voxel size for visualizing buckets')
+    parser.add_argument(
+        "--bucket",
+        type=bool,
+        default=_BUCKET,
+        help='True if bucket visualization, else skeleton')
     args = parser.parse_args()
     root_dir = args.root_dir
+    bucket = args.bucket
+    vs = args.voxel_size
+    vox_size = (vs, vs, vs)
 
     a = anatomist.Anatomist()
     block = a.AWindowsBlock(a, 12)  # Parameter 6 corresponds to the number of columns displayed. Can be changed.
@@ -56,19 +74,22 @@ def main():
         phase = phase_arr[0][k]
         input = input_arr[0][k]
         output = output_arr[0][k].astype(float)
-        if buckets:
-            input = dtx.convert.volume_to_bucketMap_aims(input, voxel_size=(2,2,2))
-            output = dtx.convert.volume_to_bucketMap_aims(output, voxel_size=(2,2,2))
+        if bucket:
+            input = dtx.convert.volume_to_bucketMap_aims(input, voxel_size=vox_size)
+            output = dtx.convert.volume_to_bucketMap_aims(output, voxel_size=vox_size)
+            view = '3D'
+        else:
+            view='Axial'
 
         for img, entry in [(input, 'input'), (output, 'output')]:
-            globals()['block%s%s%s' % (sub_id, phase, entry)] = a.createWindow('3D', block=block)
+            globals()['block%s%s%s' % (sub_id, phase, entry)] = a.createWindow(view, block=block)
 
             globals()[
                 'img%s%s%s' %
                 (sub_id, phase, entry)], globals()[
                 'a_img%s%s%s' %
                 (sub_id, phase, entry)] = array_to_ana(
-                a, img, sub_id, phase, status=entry)
+                a, img, sub_id, phase, status=entry, bucket=bucket, vs=vox_size)
 
             globals()[
                 'block%s%s%s' %
