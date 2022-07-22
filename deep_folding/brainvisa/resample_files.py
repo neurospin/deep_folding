@@ -361,6 +361,8 @@ class SkeletonResampler(FileResampler):
             side: either 'L' or 'R', hemisphere side
             out_voxel_size: float giving voxel size in mm
             parallel: does parallel computation if True
+            src_filename : name of skeleton files (format : "<SIDE><src_filename><SUBJECT>.nii.gz")
+            output_filename : name of generated files (format : "<SIDE><output_filename><SUBJECT>.nii.gz")
         """
         super(SkeletonResampler, self).__init__(
             src_dir=src_dir, resampled_dir=resampled_dir,
@@ -415,6 +417,8 @@ class FoldLabelResampler(FileResampler):
             side: either 'L' or 'R', hemisphere side
             out_voxel_size: float giving voxel size in mm
             parallel: does parallel computation if True
+            src_filename : name of fold label files (format : "<SIDE><src_filename><SUBJECT>.nii.gz")
+            output_filename : name of generated files (format : "<SIDE><output_filename><SUBJECT>.nii.gz")
         """
         super(FoldLabelResampler, self).__init__(
             src_dir=src_dir, resampled_dir=resampled_dir,
