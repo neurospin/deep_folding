@@ -84,6 +84,11 @@ from deep_folding.brainvisa.utils.constants import \
     _TRANSFORM_DIR_DEFAULT, _RESAMPLED_SKELETON_DIR_DEFAULT,\
     _SIDE_DEFAULT, _VOXEL_SIZE_DEFAULT
 
+_SKELETON_FILENAME = "skeleton_generated_"
+_FOLDLABEL_FILENAME = "foldlabel_"
+_RESAMPLED_SKELETON_FILENAME = "resampled_skeleton_"
+_RESAMPELD_FOLDLABEL_FILENAME = "resampled_foldlabel_"
+
 # Defines logger
 log = set_file_logger(__file__)
 
@@ -344,7 +349,8 @@ class SkeletonResampler(FileResampler):
     """
 
     def __init__(self, src_dir, resampled_dir, transform_dir,
-                 side, out_voxel_size, parallel
+                 side, out_voxel_size, parallel, src_filename,
+                 output_filename
                  ):
         """Inits with list of directories
 
@@ -355,6 +361,8 @@ class SkeletonResampler(FileResampler):
             side: either 'L' or 'R', hemisphere side
             out_voxel_size: float giving voxel size in mm
             parallel: does parallel computation if True
+            src_filename : name of skeleton files (format : "<SIDE><src_filename><SUBJECT>.nii.gz")
+            output_filename : name of generated files (format : "<SIDE><output_filename><SUBJECT>.nii.gz")
         """
         super(SkeletonResampler, self).__init__(
             src_dir=src_dir, resampled_dir=resampled_dir,
@@ -363,19 +371,21 @@ class SkeletonResampler(FileResampler):
 
         # Names of files in function of dictionary: keys -> 'subject' and 'side'
         # Src directory contains either 'R' or 'L' a subdirectory
-        self.src_file = join(
-            self.src_dir,
-            '%(side)sskeleton_generated_%(subject)s.nii.gz')
+        #self.src_file = join(
+        #    self.src_dir,
+        #    '%(side)sskeleton_generated_%(subject)s.nii.gz')
+        self.src_file = join(self.src_dir,
+                             f'%(side)s' + src_filename + '%(subject)s.nii.gz')
 
         # Names of files in function of dictionary: keys -> 'subject' and
         # 'side'
         self.resampled_file = join(
             self.resampled_dir,
-            f'%(side)sresampled_skeleton_%(subject)s.nii.gz')
+            f'%(side)s' + output_filename + '%(subject)s.nii.gz')
 
         # subjects are detected as the nifti file names under src_dir
-        self.expr = '^.skeleton_generated_(.*).nii.gz$'
-
+        self.expr = '^.' + src_filename + '(.*).nii.gz$'
+        
     @staticmethod
     def resample_one_subject(src_file: str,
                              out_voxel_size: float,
@@ -395,7 +405,8 @@ class FoldLabelResampler(FileResampler):
     """
 
     def __init__(self, src_dir, resampled_dir, transform_dir,
-                 side, out_voxel_size, parallel
+                 side, out_voxel_size, parallel, src_filename,
+                 output_filename
                  ):
         """Inits with list of directories
 
@@ -406,6 +417,8 @@ class FoldLabelResampler(FileResampler):
             side: either 'L' or 'R', hemisphere side
             out_voxel_size: float giving voxel size in mm
             parallel: does parallel computation if True
+            src_filename : name of fold label files (format : "<SIDE><src_filename><SUBJECT>.nii.gz")
+            output_filename : name of generated files (format : "<SIDE><output_filename><SUBJECT>.nii.gz")
         """
         super(FoldLabelResampler, self).__init__(
             src_dir=src_dir, resampled_dir=resampled_dir,
@@ -416,16 +429,16 @@ class FoldLabelResampler(FileResampler):
         # Src directory contains either 'R' or 'L' a subdirectory
         self.src_file = join(
             self.src_dir,
-            '%(side)sfoldlabel_%(subject)s.nii.gz')
+            '%(side)s' + src_filename + '%(subject)s.nii.gz')
 
         # Names of files in function of dictionary: keys -> 'subject' and
         # 'side'
         self.resampled_file = join(
             self.resampled_dir,
-            f'%(side)sresampled_foldlabel_%(subject)s.nii.gz')
+            f'%(side)s' + output_filename + '%(subject)s.nii.gz')
 
         # subjects are detected as the nifti file names under src_dir
-        self.expr = '^.foldlabel_(.*).nii.gz$'
+        self.expr = '^.' + src_filename + '(.*).nii.gz$'
 
     @staticmethod
     def resample_one_subject(src_file: str,
@@ -481,6 +494,16 @@ def parse_args(argv):
         help='Voxel size of bounding box. '
              'Default is : None')
     parser.add_argument(
+        "-f", "--src_filename", type=str, default=None,
+        help='Filename of sources files. '
+             'Format is : "<SIDE><src_filename><SUBJECT>.nii.gz" '
+             'Default is : ' + _SKELETON_FILENAME)
+    parser.add_argument(
+        "-e", "--output_filename", type=str, default=None,
+        help='Filename of output files. '
+             'Format is : "<SIDE><output_filename><SUBJECT>.nii.gz" '
+             'Default is : ' + _RESAMPLED_SKELETON_FILENAME)
+    parser.add_argument(
         '-v', '--verbose', action='count', default=0,
         help='Verbose mode: '
         'If no option is provided then logging.INFO is selected. '
@@ -505,7 +528,8 @@ def parse_args(argv):
     params['parallel'] = args.parallel
     # Checks if nb_subjects is either the string "all" or a positive integer
     params['nb_subjects'] = get_number_subjects(args.nb_subjects)
-
+    params['src_filename'] = args.src_filename
+    params['output_filename'] = args.output_filename
     return params
 
 
@@ -517,24 +541,34 @@ def resample_files(
         side=_SIDE_DEFAULT,
         out_voxel_size=_VOXEL_SIZE_DEFAULT,
         parallel=False,
-        number_subjects=_ALL_SUBJECTS):
+        number_subjects=_ALL_SUBJECTS,
+        src_filename=_SKELETON_FILENAME,
+        output_filename=_RESAMPLED_SKELETON_FILENAME):
 
     if input_type == "skeleton":
+        src_filename = _SKELETON_FILENAME if src_filename is None else src_filename
+        output_filename = _RESAMPLED_SKELETON_FILENAME if output_filename is None else output_filename
         resampler = SkeletonResampler(
             src_dir=src_dir,
             resampled_dir=resampled_dir,
             transform_dir=transform_dir,
             side=side,
             out_voxel_size=out_voxel_size,
-            parallel=parallel)
+            parallel=parallel,
+            src_filename=src_filename,
+            output_filename=output_filename)
     elif input_type == "foldlabel":
+        src_filename = _FOLDLABEL_FILENAME if src_filename is None else src_filename
+        output_filename = _RESAMPLED_FOLDLABEL_FILENAME if output_filename is None else output_filename
         resampler = FoldLabelResampler(
             src_dir=src_dir,
             resampled_dir=resampled_dir,
             transform_dir=transform_dir,
             side=side,
             out_voxel_size=out_voxel_size,
-            parallel=parallel)
+            parallel=parallel,
+            src_filename=src_filename,
+            output_filename=output_filename)
     else:
         raise ValueError(
             "input_type: shall be either 'skeleton' or 'foldlabel'")
@@ -562,7 +596,10 @@ def main(argv):
         side=params['side'],
         number_subjects=params['nb_subjects'],
         out_voxel_size=params['out_voxel_size'],
-        parallel=params['parallel'])
+        parallel=params['parallel'],
+        src_filename=params['src_filename'],
+        output_filename=params['output_filename']
+    )
 
 
 ######################################################################
