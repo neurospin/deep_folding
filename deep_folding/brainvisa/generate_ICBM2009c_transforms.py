@@ -150,12 +150,13 @@ class GraphGenerateTransform:
 
     def __init__(self, src_dir, transform_dir,
                  side, parallel,
-                 path_to_graph):
+                 path_to_graph, bids):
         self.src_dir = src_dir
         self.transform_dir = transform_dir
         self.side = side
         self.parallel = parallel
         self.path_to_graph = path_to_graph
+        self.bids = bids
         self.transform_dir = f"{self.transform_dir}/{self.side}"
         create_folder(abspath(self.transform_dir))
 
@@ -169,15 +170,35 @@ class GraphGenerateTransform:
         if len(list_graph_file) == 0:
             raise RuntimeError(f"No graph file! "
                                f"{graph_path} doesn't exist")
-        graph_file = list_graph_file[0]
-        transform_file = (
-            f"{self.transform_dir}/"
-            f"{self.side}transform_to_ICBM2009c_{subject}.trm")
+        if self.bids:
+            for graph_file in list_graph_file:
+                transform_file = (
+                    f"{self.transform_dir}/"
+                    f"{self.side}transform_to_ICBM2009c_{subject}")
+                session = re.search("ses-([^_/]+)", graph_file)
+                acquisition = re.search("acq-([^_/]+)", graph_file)
+                run = re.search("run-([^_/]+)", graph_file)
+                if session:
+                    transform_file += session[0]
+                if acquisition:
+                    transform_file += acquisition[0]
+                if run:
+                    transform_file += run[0]
+                transform_file += ".trm"
+                graph = aims.read(graph_file)
+                g_to_icbm_template = aims.GraphManip.getICBM2009cTemplateTransform(
+                    graph)
+                aims.write(g_to_icbm_template, transform_file)
+        else:
+            graph_file = list_graph_file[0]
+            transform_file = (
+                f"{self.transform_dir}/"
+                f"{self.side}transform_to_ICBM2009c_{subject}.trm")
 
-        graph = aims.read(graph_file)
-        g_to_icbm_template = aims.GraphManip.getICBM2009cTemplateTransform(
-            graph)
-        aims.write(g_to_icbm_template, transform_file)
+            graph = aims.read(graph_file)
+            g_to_icbm_template = aims.GraphManip.getICBM2009cTemplateTransform(
+                graph)
+            aims.write(g_to_icbm_template, transform_file)
 
     def compute(self, number_subjects):
         """Loops over subjects to generate transforms to ICBM2009c from graphs.
@@ -220,6 +241,7 @@ def generate_ICBM2009c_transforms(
         transform_dir=_TRANSFORM_DIR_DEFAULT,
         path_to_graph=_PATH_TO_GRAPH_DEFAULT,
         side=_SIDE_DEFAULT,
+        bids=False,
         parallel=False,
         number_subjects=_ALL_SUBJECTS):
     """Generates skeletons from graphs"""
@@ -230,6 +252,7 @@ def generate_ICBM2009c_transforms(
         transform_dir=transform_dir,
         path_to_graph=path_to_graph,
         side=side,
+        bids=bids,
         parallel=parallel
     )
     # Actual generation of skeletons from graphs

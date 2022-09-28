@@ -155,13 +155,14 @@ class GraphConvert2Skeleton:
 
     def __init__(self, src_dir, skeleton_dir,
                  side, junction, parallel,
-                 path_to_graph):
+                 path_to_graph, bids):
         self.src_dir = src_dir
         self.skeleton_dir = skeleton_dir
         self.side = side
         self.junction = junction
         self.parallel = parallel
         self.path_to_graph = path_to_graph
+        self.bids = bids
         self.skeleton_dir = f"{self.skeleton_dir}/{self.side}"
         create_folder(abspath(self.skeleton_dir))
 
@@ -175,14 +176,33 @@ class GraphConvert2Skeleton:
         if len(list_graph_file) == 0:
             raise RuntimeError(f"No graph file! "
                                f"{graph_path} doesn't exist")
-        graph_file = list_graph_file[0]
+        if self.bids:
+            for graph_file in list_graph_file:
+                skeleton_file = f"{self.skeleton_dir}/" + \
+                                f"{self.side}skeleton_generated_{subject}"
+                session = re.search("ses-([^_/]+)", graph_file)
+                acquisition = re.search("acq-([^_/]+)", graph_file)
+                run = re.search("run-([^_/]+)", graph_file)
+                if session:
+                    skeleton_file += f"_{session[0]}"
+                if acquisition:
+                    skeleton_file += f"_{acquisition[0]}"
+                if run:
+                    skeleton_file += f"_{run[0]}"
+                skeleton_file += ".nii.gz"
 
-        skeleton_file = f"{self.skeleton_dir}/" +\
-                        f"{self.side}skeleton_generated_{subject}.nii.gz"
+                generate_skeleton_from_graph_file(graph_file,
+                                                  skeleton_file,
+                                                  self.junction)
+        else:
+            graph_file = list_graph_file[0]
 
-        generate_skeleton_from_graph_file(graph_file,
-                                          skeleton_file,
-                                          self.junction)
+            skeleton_file = f"{self.skeleton_dir}/" +\
+                            f"{self.side}skeleton_generated_{subject}.nii.gz"
+
+            generate_skeleton_from_graph_file(graph_file,
+                                              skeleton_file,
+                                              self.junction)
 
     def compute(self, number_subjects):
         """Loops over subjects and converts graphs into skeletons.
@@ -222,6 +242,7 @@ def generate_skeletons(
         path_to_graph=_PATH_TO_GRAPH_DEFAULT,
         side=_SIDE_DEFAULT,
         junction=_JUNCTION_DEFAULT,
+        bids=False,
         parallel=False,
         number_subjects=_ALL_SUBJECTS):
     """Generates skeletons from graphs"""
@@ -232,6 +253,7 @@ def generate_skeletons(
         skeleton_dir=skeleton_dir,
         path_to_graph=path_to_graph,
         side=side,
+        bids=bids,
         junction=junction,
         parallel=parallel
     )
