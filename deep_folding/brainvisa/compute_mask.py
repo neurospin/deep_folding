@@ -208,9 +208,7 @@ class MaskAroundSulcus:
         self.side = side
         self.sulcus = complete_sulci_name(sulcus, side)
         self.new_sulcus = complete_sulci_name(self.new_sulcus, side)
-        self.out_voxel_size = (out_voxel_size,
-                               out_voxel_size,
-                               out_voxel_size)
+        self.out_voxel_size = out_voxel_size #(out_voxel_size, out_voxel_size, out_voxel_size)
 
         # Initiliazes mask
         self.mask = aims.Volume()
@@ -344,7 +342,7 @@ def parse_args(argv: list) -> dict:
              'If one option -v (or -vv) or more is provided '
              'then logging.DEBUG is selected.')
     parser.add_argument(
-        "-x", "--out_voxel_size", type=float, default=_VOXEL_SIZE_DEFAULT,
+        "-x", "--out_voxel_size", nargs='+', type=float, default=_VOXEL_SIZE_DEFAULT,
         help='Voxel size of mask. '
              'Default is : ' + str(_VOXEL_SIZE_DEFAULT))
 
@@ -366,7 +364,7 @@ def parse_args(argv: list) -> dict:
     params['sulcus'] = args.sulcus  # sulcus is a string
     params['new_sulcus'] = args.new_sulcus  # sulcus is a string
     params['side'] = args.side
-    params['out_voxel_size'] = args.out_voxel_size
+    params['out_voxel_size'] = tuple(args.out_voxel_size)
 
     # Checks if nb_subjects is either the string "all" or a positive integer
     params['nb_subjects'] = get_number_subjects(args.nb_subjects)

@@ -193,7 +193,7 @@ class GraphConvert2FoldLabel:
         filenames = glob.glob(f"{self.src_dir}/*/")
         list_subjects = [
             re.search(
-                '([ae\\d]{5,6})',
+                '(prm\d{1,6})',
                 filename).group(0) for filename in filenames]
         list_subjects = select_subjects_int(list_subjects, number_subjects)
 

@@ -76,7 +76,7 @@ def resample(input_image: Union[str, aims.Volume],
     ##################################
 
     if output_vs:
-        output_vs = np.array(output_vs)
+        output_vs = np.array(output_vs)  #np.asarray(output_vs)
         hdr = aims.StandardReferentials.icbm2009cTemplateHeader()
         # New volume dimensions
         resampling_ratio = np.array(hdr['voxel_size'][:3]) / output_vs

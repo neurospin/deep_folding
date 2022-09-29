@@ -54,6 +54,7 @@ def generate_ref_volume_ICBM2009c(out_voxel_size: tuple) -> aims.Volume:
             
     """
     hdr = aims.StandardReferentials.icbm2009cTemplateHeader()
+    print(f"out_voxel_size= {out_voxel_size}")
     voxel_size = np.concatenate((out_voxel_size, [1]))
     resampling_ratio = np.array(hdr['voxel_size']) / voxel_size
 

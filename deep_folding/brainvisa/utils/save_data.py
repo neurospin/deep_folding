@@ -53,7 +53,7 @@ def save_to_pickle(cropped_dir, tgt_dir=None, file_basename=None):
         if is_file_nii(file_nii):
             aimsvol = aims.read(file_nii)
             sample = np.asarray(aimsvol)
-            subject = re.search('([ae\\d]{5,6})', file_nii).group(1)
+            subject = re.search('(prm\d{1,6})', file_nii).group(1)
             data_dict[subject] = [sample]
 
     dataframe = pd.DataFrame.from_dict(data_dict)
@@ -61,6 +61,25 @@ def save_to_pickle(cropped_dir, tgt_dir=None, file_basename=None):
     file_pickle_basename = file_basename + '.pkl'
     file_pickle = os.path.join(tgt_dir, file_pickle_basename)
     dataframe.to_pickle(file_pickle)
+
+
+def quality_checks(csv_file_path, npy_array_file_path, cropped_dir):
+    """Checks that the numpy arrays are equal to subject nifti files.
+    
+    This is to check that the subjects list in csv file
+    match the order set in numpy arrays"""
+    arr = np.load(npy_array_file_path, mmap_mode='r')
+    subjects = pd.read_csv(csv_file_path)
+    log.info(f"subjects.head() = {subjects.head()}")
+    for index, row in subjects.iterrows():
+        sub = row['Subject']
+        subject_file = glob.glob(f"{cropped_dir}/{sub}*.nii.gz")[0]
+        vol = aims.read(subject_file)
+        arr_ref = np.asarray(vol)
+        arr_from_array = arr[index,...]
+        if not np.array_equal(arr_ref, arr_from_array):
+            raise ValueError(f"For subject = {sub} and index = {index}\n"
+                              "arrays don't match")
 
 
 def save_to_numpy(cropped_dir, tgt_dir=None, file_basename=None):
@@ -85,7 +104,7 @@ def save_to_numpy(cropped_dir, tgt_dir=None, file_basename=None):
         if is_file_nii(file_nii):
             aimsvol = aims.read(file_nii)
             sample = np.asarray(aimsvol)
-            subject = re.search('([ae\\d]{5,6})', file_nii).group(1)
+            subject = re.search('(prm\d{1,6})', file_nii).group(1)
             list_sample_id.append(subject)
             list_sample_file.append(sample)
 

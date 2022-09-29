@@ -68,6 +68,7 @@ from numpy import save
 import scipy.ndimage
 from deep_folding.brainvisa import exception_handler
 from deep_folding.brainvisa.utils.save_data import save_to_numpy
+from deep_folding.brainvisa.utils.save_data import save_to_pickle
 from deep_folding.brainvisa.utils.bbox import compute_max_box
 from deep_folding.brainvisa.utils.folder import create_folder
 from deep_folding.brainvisa.utils.logs import LogJson
@@ -128,7 +129,8 @@ def crop_mask(file_src, file_cropped, mask, bbmin, bbmax, no_mask=_NO_MASK_DEFAU
     vol = aims.read(file_src)
 
     arr = np.asarray(vol)
-
+    """arr_mask = np.asarray(dl.dilate(mask, radius=5))
+    np.asarray(mask)[:] = arr_mask"""
     arr_mask = np.asarray(mask)
     if no_mask:
         pass
@@ -355,6 +357,9 @@ class CropGenerator:
         # Creation of .pickle file for all subjects
         if number_subjects:
             save_to_numpy(cropped_dir=self.cropped_samples_dir,
+                           tgt_dir=self.crop_dir,
+                           file_basename=self.file_basename_pickle)
+            save_to_pickle(cropped_dir=self.cropped_samples_dir,
                            tgt_dir=self.crop_dir,
                            file_basename=self.file_basename_pickle)
 

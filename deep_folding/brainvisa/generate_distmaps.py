@@ -172,7 +172,7 @@ class SkelConvert2DistMap:
         filenames = glob.glob(f"{self.src_dir}/{self.side}/*.nii.gz")
         list_subjects = [
             re.search(
-                '([ae\\d]{5,6})',
+                '(prm\d{1,6})',
                 filename).group(0) for filename in filenames]
         list_subjects = select_subjects_int(list_subjects, number_subjects)
         log.info(f"Expected number of subjects = {len(list_subjects)}")

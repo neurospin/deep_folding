@@ -241,13 +241,11 @@ class FileResampler:
             self.transform_dir,
             '%(side)stransform_to_ICBM2009c_%(subject)s.trm')
 
-        self.out_voxel_size = (out_voxel_size,
-                               out_voxel_size,
-                               out_voxel_size)
+        self.out_voxel_size = out_voxel_size  #(out_voxel_size, out_voxel_size, out_voxel_size)
 
     @staticmethod
     def resample_one_subject(src_file: str,
-                             out_voxel_size: float,
+                             out_voxel_size: tuple,
                              transform_file: str):
         """Resamples skeleton
 
@@ -377,7 +375,7 @@ class SkeletonResampler(FileResampler):
 
     @staticmethod
     def resample_one_subject(src_file: str,
-                             out_voxel_size: float,
+                             out_voxel_size: tuple,
                              transform_file: str):
         """Resamples skeleton
 
@@ -428,7 +426,7 @@ class FoldLabelResampler(FileResampler):
 
     @staticmethod
     def resample_one_subject(src_file: str,
-                             out_voxel_size: float,
+                             out_voxel_size: tuple,
                              transform_file: str):
         return resample_one_foldlabel(input_image=src_file,
                                       out_voxel_size=out_voxel_size,
@@ -476,7 +474,7 @@ def parse_args(argv):
         help='Number of subjects to take into account, or \'all\'. '
              '0 subject is allowed, for debug purpose.')
     parser.add_argument(
-        "-x", "--out_voxel_size", type=float, default=_VOXEL_SIZE_DEFAULT,
+        "-x", "--out_voxel_size", nargs='+', type=float, default=_VOXEL_SIZE_DEFAULT,
         help='Voxel size of bounding box. '
              'Default is : None')
     parser.add_argument(
@@ -500,7 +498,8 @@ def parse_args(argv):
     params['resampled_dir'] = args.output_dir
     params['transform_dir'] = args.transform_dir
     params['side'] = args.side
-    params['out_voxel_size'] = args.out_voxel_size
+    params['out_voxel_size'] = tuple(args.out_voxel_size)
+    print(f"out_voxel_size = {params['out_voxel_size']}")
     params['parallel'] = args.parallel
     # Checks if nb_subjects is either the string "all" or a positive integer
     params['nb_subjects'] = get_number_subjects(args.nb_subjects)
@@ -560,7 +559,7 @@ def main(argv):
         transform_dir=params['transform_dir'],
         side=params['side'],
         number_subjects=params['nb_subjects'],
-        out_voxel_size=params['out_voxel_size'],
+        out_voxel_size=params['out_voxel_size'], 
         parallel=params['parallel'])
 
 
