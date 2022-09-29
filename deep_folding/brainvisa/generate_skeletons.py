@@ -176,33 +176,27 @@ class GraphConvert2Skeleton:
         if len(list_graph_file) == 0:
             raise RuntimeError(f"No graph file! "
                                f"{graph_path} doesn't exist")
+        for graph_file in list_graph_file:
+            skeleton_file = self.get_skeleton_filename(subject)
+            generate_skeleton_from_graph_file(graph_file, skeleton_file, self.junction)
+            if not self.bids:
+                break
+
+    def get_skeleton_filename(self, subject):
+        skeleton_file = f"{self.skeleton_dir}/" + \
+                        f"{self.side}skeleton_generated_{subject}"
         if self.bids:
-            for graph_file in list_graph_file:
-                skeleton_file = f"{self.skeleton_dir}/" + \
-                                f"{self.side}skeleton_generated_{subject}"
-                session = re.search("ses-([^_/]+)", graph_file)
-                acquisition = re.search("acq-([^_/]+)", graph_file)
-                run = re.search("run-([^_/]+)", graph_file)
-                if session:
-                    skeleton_file += f"_{session[0]}"
-                if acquisition:
-                    skeleton_file += f"_{acquisition[0]}"
-                if run:
-                    skeleton_file += f"_{run[0]}"
-                skeleton_file += ".nii.gz"
-
-                generate_skeleton_from_graph_file(graph_file,
-                                                  skeleton_file,
-                                                  self.junction)
-        else:
-            graph_file = list_graph_file[0]
-
-            skeleton_file = f"{self.skeleton_dir}/" +\
-                            f"{self.side}skeleton_generated_{subject}.nii.gz"
-
-            generate_skeleton_from_graph_file(graph_file,
-                                              skeleton_file,
-                                              self.junction)
+            session = re.search("ses-([^_/]+)", graph_file)
+            acquisition = re.search("acq-([^_/]+)", graph_file)
+            run = re.search("run-([^_/]+)", graph_file)
+            if session:
+                skeleton_file += f"_{session[0]}"
+            if acquisition:
+                skeleton_file += f"_{acquisition[0]}"
+            if run:
+                skeleton_file += f"_{run[0]}"
+        skeleton_file += ".nii.gz"
+        return skeleton_file
 
     def compute(self, number_subjects):
         """Loops over subjects and converts graphs into skeletons.
