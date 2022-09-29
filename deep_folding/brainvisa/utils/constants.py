@@ -46,6 +46,12 @@ _RESAMPLED_SKELETON_DIR_DEFAULT = "test/datasets/hcp/skeletons/1mm"
 # Default directory where we put crops
 _CROP_DIR_DEFAULT = "test/datasets/hcp/crops/CINGULATE/mask/1mm"
 
+# Dilation size
+_DILATION_DEFAULT = 5.0
+
+# Threshold value
+_THRESHOLD_DEFAULT = 0.0
+
 # hemisphere 'L' or 'R'
 _SIDE_DEFAULT = 'R'
 
