@@ -171,7 +171,7 @@ class GraphGenerateTransform:
             raise RuntimeError(f"No graph file! "
                                f"{graph_path} doesn't exist")
         for graph_file in list_graph_file:
-            transform_file = self.get_transform_filename(subject)
+            transform_file = self.get_transform_filename(subject, graph_file)
             graph = aims.read(graph_file)
             g_to_icbm_template = aims.GraphManip.getICBM2009cTemplateTransform(
                 graph)
@@ -179,7 +179,7 @@ class GraphGenerateTransform:
             if not self.bids:
                 break
 
-    def get_transform_filename(self, subject):
+    def get_transform_filename(self, subject, graph_file):
         transform_file = (
             f"{self.transform_dir}/"
             f"{self.side}transform_to_ICBM2009c_{subject}")
@@ -188,11 +188,11 @@ class GraphGenerateTransform:
             acquisition = re.search("acq-([^_/]+)", graph_file)
             run = re.search("run-([^_/]+)", graph_file)
             if session:
-                transform_file += session[0]
+                transform_file += f"_{session[0]}"
             if acquisition:
-                transform_file += acquisition[0]
+                transform_file += f"_{acquisition[0]}"
             if run:
-                transform_file += run[0]
+                transform_file += f"_{run[0]}"
         transform_file += ".trm"
         return transform_file
 

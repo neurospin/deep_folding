@@ -177,12 +177,12 @@ class GraphConvert2Skeleton:
             raise RuntimeError(f"No graph file! "
                                f"{graph_path} doesn't exist")
         for graph_file in list_graph_file:
-            skeleton_file = self.get_skeleton_filename(subject)
+            skeleton_file = self.get_skeleton_filename(subject, graph_file)
             generate_skeleton_from_graph_file(graph_file, skeleton_file, self.junction)
             if not self.bids:
                 break
 
-    def get_skeleton_filename(self, subject):
+    def get_skeleton_filename(self, subject, graph_file):
         skeleton_file = f"{self.skeleton_dir}/" + \
                         f"{self.side}skeleton_generated_{subject}"
         if self.bids:
