@@ -226,8 +226,12 @@ class GraphConvert2Skeleton:
                 self.generate_one_skeleton(sub)
 
         # Checks if there is expected number of generated files
-        compare_number_aims_files_with_expected(self.skeleton_dir,
-                                                list_subjects)
+        if self.bids:
+            list_graphs = [g for g in glob.glob(f"{self.src_dir}/*/{self.path_to_graph}")
+                           if not re.search('.minf$', g)]
+            compare_number_aims_files_with_expected(self.skeleton_dir, list_graphs)
+        else:
+            compare_number_aims_files_with_expected(self.skeleton_dir, list_subjects)
 
 
 def generate_skeletons(
