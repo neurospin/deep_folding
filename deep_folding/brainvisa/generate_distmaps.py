@@ -196,9 +196,7 @@ class SkelConvert2DistMap:
         if self.parallel:
             log.info(
                 "PARALLEL MODE: subjects are computed in parallel.")
-            # pqdm(list_subjects,
-            #      self.generate_one_distmap,
-            #      n_jobs=define_njobs())
+
             pqdm(list_subjects,
                  self.generate_one_distmap,
                  n_jobs=20)

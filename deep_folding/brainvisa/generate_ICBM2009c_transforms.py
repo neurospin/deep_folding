@@ -162,8 +162,8 @@ class GraphGenerateTransform:
     def generate_one_transform(self, subject: str):
         """Generates and writes ICBM2009c transform for one subject.
         """
-        graph_path = f"{self.src_dir}/{subject}/" +\
-                     f"{self.path_to_graph}/{self.side}{subject}.arg"
+        graph_path = f"{self.src_dir}/{subject}*/" +\
+                     f"{self.path_to_graph}/{self.side}{subject}*.arg"
         print(graph_path)
         list_graph_file = glob.glob(graph_path)
         log.debug(f"list_graph_file = {list_graph_file}")
@@ -189,7 +189,7 @@ class GraphGenerateTransform:
 
         list_subjects = [
             re.search(
-                '([a-z]{2}\d{6})',
+                '([ae\\d]{5,6})',
                 filename).group(0) for filename in filenames]
         list_subjects = select_subjects_int(list_subjects, number_subjects)
 
