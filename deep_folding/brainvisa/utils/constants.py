@@ -3,7 +3,7 @@ _ALL_SUBJECTS = -1
 
 # Default directory in which lies the manually segmented database
 _SUPERVISED_SRC_DIR_DEFAULT = \
-    "/neurospin/dico/data/bv_databases/human/pclean/all"
+    "/neurospin/dico/data/bv_databases/human/manually_labeled/pclean/all"
 
 # Gives the relative path to the manually labelled graph .arg
 # in the supervised database

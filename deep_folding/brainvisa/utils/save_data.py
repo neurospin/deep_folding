@@ -79,24 +79,34 @@ def save_to_numpy(cropped_dir, tgt_dir=None, file_basename=None):
 
     log.info("Now generating numpy array...")
     log.debug(f"cropped_dir = {cropped_dir}")
-
+    #list_sub = np.load('/neurospin/dico/lguillon/distmap/data/test_list.csv')
+    #list_sub = pd.read_csv('/neurospin/dico/lguillon/distmap/data/test_list.csv').subjects.astype(str).values
     for filename in os.listdir(cropped_dir):
+        #print(list_sub)
+        #for filename in list_sub:
+        print(filename)
         file_nii = os.path.join(cropped_dir, filename)
+        #file_nii = os.path.join(cropped_dir, filename+ '_cropped_skeleton.nii.gz')
+        #file_nii = os.path.join(cropped_dir, 'Rdistmap_generated_' + filename+ '.nii.gz')
+        #file_nii = os.path.join(cropped_dir, 'Ldistmap_generated_' + filename+ '.nii.gz')
+        #print(file_nii)
+
         if is_file_nii(file_nii):
             aimsvol = aims.read(file_nii)
             sample = np.asarray(aimsvol)
-            subject = re.search('(sub-\d{12})', file_nii).group(1)
+            subject = re.search('(\d{6})', file_nii).group(1)
             list_sample_id.append(subject)
             list_sample_file.append(sample)
 
     list_sample_id = np.array(list_sample_id)
     list_sample_file = np.array(list_sample_file)
-    np.save(os.path.join(tgt_dir, 'sub_id.npy'), list_sample_id)
-    np.save(os.path.join(tgt_dir, 'distmap_1mm.npy'), list_sample_file)
+    # np.save(os.path.join(tgt_dir, 'sub_id_distmap.npy'), list_sample_id)
+    # np.save(os.path.join(tgt_dir, 'del_1000_distmap.npy'), list_sample_file)
+    np.save(os.path.join(tgt_dir, 'sub_id_skel_all.npy'), list_sample_id)
+    np.save(os.path.join(tgt_dir, 'skel_all.npy'), list_sample_file)
 
 
 if __name__ == '__main__':
     save_to_numpy(
-        cropped_dir='/neurospin/dico/data/deep_folding/current/datasets/euaims/crops/SC/no_mask/Rdistmaps/',
-        tgt_dir='/neurospin/dico/data/deep_folding/current/datasets/euaims/crops/SC/no_mask/Rdistmaps',
-        file_basename='Rlabels')
+        cropped_dir='/neurospin/dico/data/deep_folding/current/datasets/hcp/crops/1mm/SC/no_mask/Rcrops/',
+        tgt_dir='/neurospin/dico/data/deep_folding/current/datasets/hcp/crops/1mm/SC/no_mask/Rcrops')

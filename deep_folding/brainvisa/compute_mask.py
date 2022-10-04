@@ -191,6 +191,7 @@ class MaskAroundSulcus:
 
         # Transforms input source dir to a list of strings
         self.src_dir = [src_dir] if isinstance(src_dir, str) else src_dir
+        print(self.src_dir)
 
         # manually labelled graph file relative to the subject directory
         # we use the '*' glob to take into account different naming conventions
@@ -279,7 +280,7 @@ def compute_mask(src_dir=_SUPERVISED_SRC_DIR_DEFAULT,
     Returns:
         aims volume containing the mask
     """
-
+    print(src_dir)
     mask = MaskAroundSulcus(src_dir=src_dir,
                             mask_dir=mask_dir,
                             path_to_graph=path_to_graph,

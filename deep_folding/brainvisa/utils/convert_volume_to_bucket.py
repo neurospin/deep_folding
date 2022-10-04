@@ -62,6 +62,7 @@ def read_convert_write(vol_filename, bucket_filename, mask_dir=None):
         vol_arr[vol_arr<=1] = 1
         vol_arr[vol_arr>1] = 0
         bucket_map = dtx.convert.volume_to_bucketMap_aims(vol_arr)
+        bucket_map = dtx.convert.bucket_to_mesh(bucket_map[0])
 
     else:
         bucket_map, _ = convert_volume_to_bucket(vol)
@@ -107,7 +108,7 @@ def get_basename_without_extension(filename):
 
 def build_bucket_filename(subject, tgt_dir):
     """Returns bucket filename"""
-    return f"{tgt_dir}/{subject}.bck"
+    return f"{tgt_dir}/{subject}.mesh"
 
 
 def loop_over_directory(src_dir, tgt_dir, mask_dir):

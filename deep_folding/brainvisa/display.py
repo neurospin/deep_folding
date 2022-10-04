@@ -19,7 +19,7 @@ def array_to_ana(ana_a, img, sub_id, phase, status):
     vol_img = aims.Volume(img)
     #vol_img = img
     a_vol_img = ana_a.toAObject(vol_img)
-    vol_img.header()['voxel_size'] = [1, 1, 1]
+    #vol_img.header()['voxel_size'] = [1, 1, 1]
     a_vol_img.setName(status+'_'+ str(sub_id)+'_'+str(phase)) # display name
     a_vol_img.setChanged()
     a_vol_img.notifyObservers()
