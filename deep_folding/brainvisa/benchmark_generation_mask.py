@@ -47,28 +47,33 @@ be considered as abnormal).
 # Imports and global variables definitions
 ######################################################################
 
-import os
-import random
-from glob import glob
-
-import numpy as np
-import pandas as pd
-import json
-from deep_folding.brainvisa.utils.bbox import compute_max_box
-from deep_folding.brainvisa.utils.sulcus import complete_sulci_name
 from soma import aims
+import numpy as np
+from glob import glob
+import random
+import pandas as pd
+import os
+from deep_folding.brainvisa.utils.bbox import compute_max_box
+from deep_folding.brainvisa.utils.mask import compute_simple_mask
+from deep_folding.brainvisa.utils.sulcus import complete_sulci_name
+from deep_folding.brainvisa.utils.skeleton import generate_skeleton_from_graph
+from deep_folding.brainvisa.utils.foldlabel import generate_foldlabel_thin_junction
+import dico_toolbox as dtx
+
 
 _DEFAULT_DATA_DIR = '/neurospin/dico/data/bv_databases/human/hcp/hcp'
-_DEFAULT_SAVING_DIR = '/neurospin/dico/lguillon/distmap/benchmark/deletion/'
-_DEFAULT_BBOX_DIR = '/neurospin/dico/data/deep_folding/data/bbox/'
+_DEFAULT_MASK_DIR = '/neurospin/dico/data/deep_folding/current/mask/1mm/'
+_DEFAULT_SAVING_DIR = '/neurospin/dico/lguillon/distmap/benchmark/test/'
+_DEFAULT_BBOX_DIR = '/neurospin/dico/data/deep_folding/current/bbox/'
 
 
 class Benchmark():
-    """Generates benchmark of altered graphs
+    """Generates benchmark of altered skeletons
     """
 
     def __init__(self, b_num, side, ss_size, sulci_list, saving_dir,
-                 data_dir=_DEFAULT_DATA_DIR, bbox_dir=_DEFAULT_BBOX_DIR):
+                 data_dir=_DEFAULT_DATA_DIR, bbox_dir=_DEFAULT_BBOX_DIR,
+                 mask_dir=_DEFAULT_MASK_DIR, mask=True, inpainting=False):
         """Inits with list of directories, bounding box and sulci
 
         Args:
@@ -79,101 +84,80 @@ class Benchmark():
             data_dir: string naming full path source directories containing
                       MRI images
             saving_dir: name of directory where altered skeletons will be saved
+            mask_dir: name of directory where masks are stored
         """
+        self.inpainting = inpainting
         self.b_num = b_num
         self.side = side
         self.ss_size = ss_size
-        self.sulci_list = sulci_list
-        self.sulci_list = complete_sulci_name(self.sulci_list, self.side)
+        self.sulci_list = complete_sulci_name(sulci_list, self.side)
         self.src_dir = data_dir
         self.saving_dir = saving_dir
+        self.saving_dir_skel = saving_dir + 'skeletons/raw/'
+        self.saving_dir_foldlabel = saving_dir + 'foldlabels/raw/'
         self.path_to_graph = "t1mri/BL/default_analysis/folds/3.1/deepcnn_auto"
         self.abnormality_test = []
-        # self.bbmin, self.bbmax = compute_max_box(
-        #      self.sulci_list, side, src_dir=bbox_dir)
-        #print(self.bbmin, self.bbmax)
-        self.cpt_skel_1 = 't1mri/default_acquisition/default_analysis/segmentation'
-        self.cpt_skel_2 = 'skeleton_'
-        self.cpt_skel_3 = '.nii.gz'
+        self.voxel_size_out = (1, 1, 1, 1)
+        if mask:
+            # Get mask and corresponding bounding_box
+            self.mask, self.bbmin, self.bbmax = compute_simple_mask(self.sulci_list, side,
+                                                             mask_dir=mask_dir)
+        else:
+            self.bbmin, self.bbmax = compute_max_box(self.sulci_list, side,
+                                talairach_box=True, src_dir=bbox_dir)
+
+        print(self.mask, self.bbmin, self.bbmax)
 
     def get_simple_surfaces(self, sub):
         """Selects simple surfaces of one subject that satisfy following
-           conditions: size >= given ss_size and completely included in the
-           bouding box
+           conditions: size in [given ss_size min, given ss_size max] and with
+           the right number of voxels included in the mask
 
         Args:
             sub: int giving the subject
         """
-        cpt_arg_1 = 't1mri/default_acquisition/default_analysis/folds/3.1/default_session_auto'
-        cpt_arg_2 = '_default_session_auto.arg'
-        print(os.path.join(self.src_dir, str(sub) + '/'))
-        if os.path.isdir(os.path.join(self.src_dir, str(sub) + '/')):
-            print('ici')
+
+        self.graph_file = f"{self.src_dir}/{sub}/" +\
+                     f"{self.path_to_graph}/{self.side}{sub}_deepcnn_auto.arg"
+
+        if os.path.isdir(os.path.join(self.src_dir, str(sub) + '/')) \
+            and os.path.isfile(self.graph_file):
             self.surfaces = dict()
-            # graph_file = os.path.join(self.data_dir, str(sub), cpt_arg_1,
-            #                           self.side + str(sub) + cpt_arg_2)
-            graph_file = f"{self.src_dir}/{sub}/" +\
-                         f"{self.path_to_graph}/{self.side}{sub}_deepcnn_auto.arg"
-            # skel_file = os.path.join(
-            #     self.data_dir,
-            #     str(sub),
-            #     self.cpt_skel_1,
-            #     self.side +
-            #     self.cpt_skel_2 +
-            #     str(sub) +
-            #     self.cpt_skel_3)
-            graph = aims.read(graph_file)
-            voxel_size = graph['voxel_size'][:3]
-            # transformation to native space of graph to ICBM template
-            g_to_icbm_template = aims.GraphManip.getICBM2009cTemplateTransform(
-                                            graph)
-            with open("/neurospin/dico/data/deep_folding/current/datasets/hcp/crops/1mm/SC/no_mask/Rdistmap.json") as json_file:
-                sulcus = json.load(json_file)
-                self.bbmin = sulcus['bbmin']
-                self.bbmax = sulcus['bbmax']
-            print(sulcus)
-            bbox_min = None
-            bbox_max = None
-            # self.skel = aims.read(skel_file)
 
-            for v in graph.vertices():
+            self.graph = aims.read(self.graph_file)
+
+            g_to_icbm_template = aims.GraphManip.getICBM2009cTemplateTransform(self.graph)
+            voxel_size_in = self.graph['voxel_size'][:3]
+
+            for v in self.graph.vertices():
                 if 'label' in v:
-                    #print(v['label'])
-                    # bbmin_surface = v['Tal_boundingbox_min']
-                    # bbmax_surface = v['Tal_boundingbox_max']
-                    bbmin_surface = v['boundingbox_min']
-                    bbmax_surface = v['boundingbox_max']
-                    # print([g_to_icbm_template.transform(np.array(voxel) * voxel_size)
-                    #         for voxel in bbmin_surface])
-                    for bucket_name in ('aims_ss', 'aims_bottom', 'aims_other'):
-                        bucket = v.get(bucket_name)
-                        if bucket is not None:
-                            voxels = np.asarray(
-                                [g_to_icbm_template.transform(np.array(voxel) * voxel_size)
-                                 for voxel in bucket[0].keys()])
-
-                            if voxels.shape == (0, ):
-                                continue
-                            bbox_min = np.min(np.vstack(
-                                ([bbox_min] if bbox_min is not None else [])
-                                + [voxels]), axis=0)
-                            bbox_max = np.max(np.vstack(
-                                ([bbox_max] if bbox_max is not None else [])
-                                + [voxels]), axis=0)
-
-
                     bck_map = v['aims_ss']
-                    # print(bbmin_surface, bbmax_surface)
-                    # print('la',bbox_min, bbox_max)
+                    # Creation of a volume in ICBM space where to write voxels
+                    # of the simple surface
+                    hdr = aims.StandardReferentials.icbm2009cTemplateHeader()
+                    resampling_ratio = np.array(hdr['voxel_size']) / self.voxel_size_out
+                    orig_dim = hdr['volume_dimension']
+                    new_dim = list((resampling_ratio * orig_dim).astype(int))
 
-                    if all([a >= b for (a, b) in zip(bbox_min, self.bbmin)]) and all(
-                            [a <= b for (a, b) in zip(bbox_max, self.bbmax)]):
-                        print(sub, v['label'])
-                        print(self.bbmin, self.bbmax)
-                        print('la',bbox_min, bbox_max)
-                        for bucket in bck_map:
-                            if bucket.size() > self.ss_size:  # In order to keep only large enough simple surfaces
-                                self.surfaces[len(self.surfaces)] = v
+                    vol = aims.Volume(new_dim, dtype='S16')
+                    vol.copyHeaderFrom(hdr)
+                    vol.header()['voxel_size'] = self.voxel_size_out
+                    arr = np.asarray(vol)
+                    # Transformation of SS voxels to ICBM space with voxel_size_out
+                    voxels_icbm = np.asarray(
+                        [g_to_icbm_template.transform(np.array(voxel) * voxel_size_in)
+                         for voxel in bck_map[0].keys()])
+                    voxels = np.round(np.array(voxels_icbm) / self.voxel_size_out[:3]).astype(int)
+                    # Writing of the voxels in the created volume
+                    for i,j,k in voxels:
+                        arr[i,j,k,0] = 1
+                    # Suppression of all voxels out of the mask
+                    arr[np.array(self.mask)<1]=0
+                    # Selection of the ss if a mininum of voxels remains
+                    if np.count_nonzero(arr>0)>self.ss_size and np.count_nonzero(arr>0)<500:
+                        print(v['label'],bck_map[0].size())
+                        print(np.count_nonzero(arr == 1))
+                        self.surfaces[len(self.surfaces)] = v
 
             return self.surfaces
 
@@ -184,68 +168,46 @@ class Benchmark():
             sub: int giving the subject
         """
         # Suppression of one random simple surface (satisfying both criteria)
-        random.seed(42)
-        surface = random.randint(0, len(self.surfaces) - 1)
-        print(self.surfaces[surface]['label'])
+        random.seed(56) #benchmark 1 : random seed = 42
+        surface = random.randint(0, len(self.surfaces)-1)
 
         bck_map = self.surfaces[surface]['aims_ss']
         for voxel in bck_map[0].keys():
             self.skel.setValue(0, voxel[0], voxel[1], voxel[2])
+            if self.inpainting:
+                 self.foldlabel.setValue(0, voxel[0], voxel[1], voxel[2])
 
         bck_map_bottom = self.surfaces[surface]['aims_bottom']
         for voxel in bck_map_bottom[0].keys():
             self.skel.setValue(0, voxel[0], voxel[1], voxel[2])
+            if self.inpainting:
+                 self.foldlabel.setValue(0, voxel[0], voxel[1], voxel[2])
+
+        for k in range(len(self.surfaces[surface].edges())):
+            if 'aims_junction' in self.surfaces[surface].edges()[k]:
+                bck_map_junction = self.surfaces[surface].edges()[k]['aims_junction']
+                for voxel in bck_map_junction[0].keys():
+                    self.skel.setValue(0, voxel[0], voxel[1], voxel[2])
+                    if self.inpainting:
+                         self.foldlabel.setValue(0, voxel[0], voxel[1], voxel[2])
 
         save_subject = sub
         return save_subject
 
-    def add_ss(self, subjects_list, i):
-        """Adds one simple surface from subject i to subject i+1 skeleton
+    def generate_skeleton(self, sub):
+        """Generates a skeleton from a graph
 
         Args:
-            subjects_list: list of subjects
-            i: int giving the current subject
+            sub: int giving the subject
         """
-        sub_added = subjects_list[i + 1]
-        # random.seed(42)
-        surface = random.randint(0, len(self.surfaces) - 1)
+        self.skel = generate_skeleton_from_graph(self.graph)
 
-        if os.path.isdir(self.data_dir + str(sub_added)):
-            skel_file = os.path.join(
-                self.data_dir,
-                str(sub_added),
-                self.cpt_skel_1,
-                self.side +
-                self.cpt_skel_2 +
-                str(sub_added) +
-                self.cpt_skel_3)
-            self.skel = aims.read(skel_file)
-            bck_map = self.surfaces[surface]['aims_ss']
-            for voxel in bck_map[0].keys():
-                if self.skel.value(voxel[0], voxel[1], voxel[2]) != 11:
-                    self.skel.setValue(60, voxel[0], voxel[1], voxel[2])
-
-            bck_map_bottom = self.surfaces[surface]['aims_bottom']
-            for voxel in bck_map_bottom[0].keys():
-                if self.skel.value(voxel[0], voxel[1], voxel[2]) != 11:
-                    self.skel.setValue(60, voxel[0], voxel[1], voxel[2])
-
-        save_subject = sub_added
-        return save_subject
-
-    def random_skel(self, sub):
+    def generate_foldlabel(self, sub):
+        """Deletes one simple surface
+        Args:
+            sub: int giving the subject
         """
-        """
-        if os.path.isdir(self.data_dir + str(sub)):
-            skel_file = os.path.join(
-                self.data_dir,
-                str(sub),
-                self.cpt_skel_1,
-                self.side +
-                self.cpt_skel_2 +
-                str(sub) +
-                self.cpt_skel_3)
-            self.skel = aims.read(skel_file)
+        self.foldlabel = generate_foldlabel_thin_junction(self.graph)
 
     def save_file(self, sub):
         """Saves the modified skeleton
@@ -253,13 +215,13 @@ class Benchmark():
         Args:
             sub: int giving the subject
         """
-        fileout = os.path.join(
-            self.saving_dir,
-            'output_skeleton_' +
-            str(sub) +
-            '.nii.gz')
+        fileout = os.path.join(self.saving_dir, 'modified_skeleton_' + str(sub) + '.nii.gz')
         print('writing altered skeleton to', fileout)
         aims.write(self.skel, fileout)
+        if self.inpainting:
+            fileout = os.path.join(self.saving_dir, 'modified_foldlabel_' + str(sub) + '.nii.gz')
+            print('writing altered foldlabel to', fileout)
+            aims.write(self.foldlabel, fileout)
 
     def save_lists(self, abnormality_test, givers, subjects_list):
         """Saves lists of modified subjects
@@ -279,10 +241,7 @@ class Benchmark():
         df_train.to_csv(os.path.join(self.saving_dir, 'train.csv'))
 
         df_abnor_test = pd.DataFrame(abnormality_test)
-        df_abnor_test.to_csv(
-            os.path.join(
-                self.saving_dir,
-                'abnormality_test.csv'))
+        df_abnor_test.to_csv(os.path.join(self.saving_dir, 'abnormality_test.csv'))
 
         df_givers = pd.DataFrame(givers)
         df_givers.to_csv(os.path.join(self.saving_dir, 'givers.csv'))
@@ -294,14 +253,13 @@ def get_sub_list(subjects_list):
     """
     if subjects_list:
         subjects_list = pd.read_csv(subjects_list)
-        subjects_list = list(subjects_list['0'])
+        subjects_list = list(subjects_list['subjects'])
     else:
         # Selection of right handed subjects only
-        right_handed = pd.read_csv(
-            '/neurospin/dico/lguillon/hcp_info/right_handed.csv')
+        right_handed = pd.read_csv('/neurospin/dico/lguillon/hcp_info/right_handed.csv')
         subjects_list = list(right_handed['subjects'].astype(str))
         # Check whether subjects' files exist
-        hcp_sub = os.listdir('/neurospin/dico/data/bv_databases/human/hcp/hcp/')
+        hcp_sub = os.listdir(_DEFAULT_DATA_DIR)
         subjects_list = [sub for sub in subjects_list if sub in hcp_sub]
 
         random.shuffle(subjects_list)
@@ -309,9 +267,9 @@ def get_sub_list(subjects_list):
     return subjects_list
 
 
-def generate(b_num, side, ss_size, sulci_list, mode='suppress', bench_size=150,
+def generate(b_num, side, ss_size, sulci_list, bench_size=150,
              subjects_list=None, saving_dir=_DEFAULT_SAVING_DIR,
-             bbox_dir=_DEFAULT_BBOX_DIR):
+             bbox_dir=_DEFAULT_BBOX_DIR, inpainting=False):
     """
     Generates a benchmark
 
@@ -319,11 +277,9 @@ def generate(b_num, side, ss_size, sulci_list, mode='suppress', bench_size=150,
         b_num: number of the benchmark to create
         side: hemisphere side (either L for left, or R for right hemisphere)
         sulci_list: list of sulcus names
-        mode: string giving the type of benchmark to create ('suppress', 'add'
-              or 'mix')
     """
     benchmark = Benchmark(b_num, side, ss_size, sulci_list, saving_dir,
-                          bbox_dir=bbox_dir)
+                          bbox_dir=bbox_dir, inpainting=inpainting)
     abnormality_test = []
     givers = []
     subjects_list = get_sub_list(subjects_list)
@@ -331,29 +287,20 @@ def generate(b_num, side, ss_size, sulci_list, mode='suppress', bench_size=150,
     for i, sub in enumerate(subjects_list):
         print(sub)
         save_sub = sub
-        if mode in ['suppress', 'add', 'mix']:
-            print(mode)
-            benchmark.get_simple_surfaces(sub)
-    #         if benchmark.surfaces and len(benchmark.surfaces.keys()) > 0:
-    #             if mode == 'suppress' or (
-    #                     mode == 'mix' and i < bench_size / 2):
-    #                 # Suppression of simple surfaces
-    #                 save_sub = benchmark.delete_ss(sub)
-    #             elif mode == 'add' or (mode == 'mix' and i >= bench_size / 2):
-    #                 # Addition of simple surfaces
-    #                 save_sub = benchmark.add_ss(subjects_list, i)
-    #                 givers.append(sub)
-    #             benchmark.save_file(save_sub)
-    #             # Addition of modified graph to abnormality_test set
-    #             abnormality_test.append(save_sub)
-    #     elif mode == 'random' or mode == 'asymmetry':
-    #         benchmark.random_skel(sub)
-    #         benchmark.save_file(save_sub)
-    #         # Addition of modified graph to abnormality_test set
-    #         abnormality_test.append(save_sub)
-    #     if len(abnormality_test) == bench_size:
-    #         break
-    # benchmark.save_lists(abnormality_test, givers, subjects_list)
+        benchmark.get_simple_surfaces(sub)
+        if benchmark.surfaces and len(benchmark.surfaces.keys()) > 0:
+            benchmark.generate_skeleton(sub)
+            benchmark.generate_foldlabel(sub)
+            # Suppression of simple surfaces
+            save_sub = benchmark.delete_ss(sub)
+
+            benchmark.save_file(save_sub)
+            # Addition of modified graph to abnormality_test set
+            abnormality_test.append(save_sub)
+
+        if len(abnormality_test) == bench_size:
+            break
+    benchmark.save_lists(abnormality_test, givers, subjects_list)
 
 
 ######################################################################
@@ -361,11 +308,6 @@ def generate(b_num, side, ss_size, sulci_list, mode='suppress', bench_size=150,
 ######################################################################
 
 if __name__ == '__main__':
-    generate(
-        333,
-        'R',
-        500,
-        sulci_list=[
-            'S.C.'],
-        mode='suppress',
-        bench_size=4)
+    generate(333, 'R', 200, sulci_list=['S.C.'],
+            subjects_list='/neurospin/dico/lguillon/distmap/data/test_list.csv',
+            bench_size=3, inpainting=False)
