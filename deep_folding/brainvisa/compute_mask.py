@@ -103,6 +103,7 @@ def increment_one_mask(graph_filename, mask, sulcus, voxel_size_out):
         graph)
     voxel_size_in = graph['voxel_size'][:3]
     arr = np.asarray(mask)
+    arr_one = np.zeros(arr.shape).astype(np.int16)
 
     # Gets the min and max coordinates of the sulci
     # by looping over all the vertices of the graph
@@ -124,13 +125,26 @@ def increment_one_mask(graph_filename, mask, sulcus, voxel_size_out):
                 if voxels.shape == (0,):
                     continue
                 for i, j, k in voxels:
-                    arr[i, j, k, 0] += 1
+                    arr_one[i, j, k, 0] += 1
 
+    # Guarantees that array is one 1 even if vosel is present twice
+    arr_one = (arr_one >= 1).astype(np.int16)
+
+    # Puts in aims volume the array of one mask
+    vol_one = aims.Volume(arr_one)
+    vol_one.copyHeaderFrom(mask.header())
+    vol_one.header()['voxel_size'] = mask.header()['voxel_size']
+
+    # Increments global mask
+    arr += arr_one
+
+    return vol_one
 
 def increment_mask(subjects: list,
                    mask: aims.Volume,
                    sulcus: str,
-                   voxel_size_out: tuple):
+                   voxel_size_out: tuple,
+                   sample_dir: str):
     """Increments mask for the chosen sulcus for all subjects
 
     Parameters:
@@ -148,10 +162,11 @@ def increment_mask(subjects: list,
                                f"{sub['dir']} doesn't contain {graph_file}")
         sulci_pattern = list_graph_file[0]
 
-        increment_one_mask(sulci_pattern % sub,
-                           mask,
-                           sulcus,
-                           voxel_size_out)
+        vol_one = increment_one_mask(sulci_pattern % sub,
+                                      mask,
+                                      sulcus,
+                                      voxel_size_out)
+        aims.write(vol_one, f"{sample_dir}/{sub['subject']}.nii.gz")
 
 
 def write_mask(mask: aims.Volume, mask_file: str):
@@ -208,6 +223,7 @@ class MaskAroundSulcus:
         self.side = side
         self.sulcus = complete_sulci_name(sulcus, side)
         self.new_sulcus = complete_sulci_name(self.new_sulcus, side)
+        self.mask_sample_dir = f"{mask_dir}/{self.side}/{self.new_sulcus}"
         self.out_voxel_size = (out_voxel_size,
                                out_voxel_size,
                                out_voxel_size)
@@ -237,6 +253,7 @@ class MaskAroundSulcus:
 
             # Creates target mask_dir if they don't exist
             create_folder(self.mask_dir)
+            create_folder(self.mask_sample_dir)
 
             # Creates volume that will take the mask
             self.mask = initialize_mask(self.out_voxel_size)
@@ -245,7 +262,8 @@ class MaskAroundSulcus:
             increment_mask(subjects,
                            self.mask,
                            self.sulcus,
-                           self.out_voxel_size)
+                           self.out_voxel_size,
+                           self.mask_sample_dir)
 
             # Saving of generated masks
             write_mask(self.mask, self.mask_file)

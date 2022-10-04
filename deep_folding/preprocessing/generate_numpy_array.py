@@ -33,34 +33,68 @@
 # The fact that you are presently reading this means that you have had
 # knowledge of the CeCILL license version 2 and that you accept its terms.
 
-"""
-    Utilities to perform quality checks
+"""Create numpy arrays from folders containing skeletons, distance maps...
+
+  Typical usage
+  -------------
+  You can use this program by first entering in the brainvisa environment
+  (here brainvisa 5.0.0 installed with singurity) and launching the script
+  from the terminal:
+  >>> bv bash
+  >>> python generate_numpy_array.py
+
+
 """
 
+
+"""Aim: create a numpy array of all nii.gz files from a given folder
+     create a numpy array with all corresponding id_subjects
+
+     /!\ id must correspond to file"""
+
+
+import os
 import glob
+
+import numpy as np
 import re
-
-from deep_folding.config.logs import set_file_logger
-# Defines logger
-log = set_file_logger(__file__)
+from soma import aims
 
 
-def compare_number_aims_files_with_expected(output_dir: str,
-                                            list_subjects: list):
-    """Compares number of generated files and expected number"""
+def generate_np_array(src_dir):
+    """Creates a numpy array of all nii.gz files from a given folder
+    """
+    list_arr_id = []
+    list_arr_file = []
+    expr = '^.distmap_generated_([0-9a-zA-Z]*).nii.gz$'
+    side = 'R'
 
-    all_files = glob.glob(f"{output_dir}/*")
+    if os.path.isdir(src_dir):
+        list_all_subjects = \
+            [re.search(expr, os.path.basename(dI))[1]
+             for dI in glob.glob(f"{src_dir}/*.nii.gz")]
 
-    generated_files = [f for f in all_files 
-                         if not re.search('.minf$', f)]
-    log.debug(f"Output directory = {output_dir}")
-    log.debug(f"Generated_files = {generated_files}")
+    else:
+        raise NotADirectoryError(
+            f"{self.src_dir} doesn't exist or is not a directory")
 
-    nb_generated_files = len(generated_files)
-    nb_expected_files = len(list_subjects)
+    for sub in list_all_subjects:
+        src_file = os.path.join(src_dir, f"{side}distmap_generated_{sub}.nii.gz")
+        file = aims.read(src_file)
+        arr_file = np.asarray(file)
+        list_arr_file.append(arr_file)
+        list_arr_id.append(sub)
 
-    log.info(f"\n\tNumber of generated files = {nb_generated_files}")
-    log.info(f"\n\tNumber of expected files = {nb_expected_files}")
+    list_arr_id = np.array(list_arr_id)
+    list_arr_file = np.array(list_arr_file)
+    np.save(os.path.join(src_dir, 'sub_id.npy'), list_arr_id)
+    np.save(os.path.join(src_dir, 'data.npy'), list_arr_file)
 
-    if nb_generated_files != nb_expected_files:
-        log.warning("Number of generated files != number of expected files")
+
+def main():
+    generate_np_array('/neurospin/dico/data/deep_folding/current/datasets/' \
+                      'hcp/distmaps/2mm/R')
+
+
+if __name__ == '__main__':
+    main()

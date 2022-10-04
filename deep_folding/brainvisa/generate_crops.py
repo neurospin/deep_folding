@@ -33,12 +33,12 @@
 # The fact that you are presently reading this means that you have had
 # knowledge of the CeCILL license version 2 and that you accept its terms.
 
-"""Creating pickle file from T1 MRI datas
+"""Creating npy file from T1 MRI datas
 
 The aim of this script is to create dataset of cropped skeletons from MRIs
-saved in a .pickle file.
+saved in a .npy file.
 We read resampled skeleton files
-Several steps are required: crop and .pickle generation
+Several steps are required: crop and .npy generation
 
   Typical usage
   -------------
@@ -69,6 +69,7 @@ from numpy import save
 import scipy.ndimage
 from deep_folding.brainvisa import exception_handler
 from deep_folding.brainvisa.utils.save_data import save_to_numpy
+from deep_folding.brainvisa.utils.save_data import save_to_pickle
 from deep_folding.brainvisa.utils.bbox import compute_max_box
 from deep_folding.brainvisa.utils.folder import create_folder
 from deep_folding.brainvisa.utils.logs import LogJson
@@ -76,6 +77,7 @@ from deep_folding.brainvisa.utils.logs import setup_log
 from deep_folding.brainvisa.utils.parallel import define_njobs
 from deep_folding.brainvisa.utils.mask import compute_centered_mask
 from deep_folding.brainvisa.utils.mask import compute_simple_mask
+from deep_folding.brainvisa.utils.mask import compute_intersection_mask
 from deep_folding.brainvisa.utils.subjects import get_number_subjects
 from deep_folding.brainvisa.utils.subjects import select_subjects_int
 from deep_folding.brainvisa.utils.quality_checks import \
@@ -154,11 +156,11 @@ def crop_mask(file_src, file_cropped, mask, bbmin, bbmax, no_mask=_NO_MASK_DEFAU
     file_mask = os.path.dirname(os.path.dirname(file_cropped))
     mask_cropped = aims.VolumeView(mask, bbmin, bbmax-bbmin)
     aims.write(mask_cropped,
-        f"{file_mask}/mask_cropped.nii.gz")
+               f"{file_mask}/mask_cropped.nii.gz")
 
 
 class CropGenerator:
-    """Generates cropped skeleton files and corresponding pickle file
+    """Generates cropped skeleton files and corresponding npy file
     """
 
     def __init__(self,
@@ -258,6 +260,7 @@ class CropGenerator:
             if os.path.isdir(self.src_dir):
                 files = glob.glob(f"{self.src_dir}/*.nii.gz")
                 log.debug(f"Nifti files in {self.src_dir} = {files}")
+                log.debug(f"Regular expresson is: {self.expr}")
                 if len(files):
                     list_all_subjects = [
                         re.search(self.expr, basename(dI))[1]
@@ -344,12 +347,20 @@ class CropGenerator:
                 aims.write(
                     self.mask,
                     f"{self.crop_dir}/{self.side}mask_{self.input_type}.nii.gz")
+            elif self.cropping_type == 'mask_intersect':
+                self.mask, self.bbmin, self.bbmax = \
+                    compute_intersection_mask(sulci_list=self.list_sulci,
+                                        side=self.side,
+                                        mask_dir=self.mask_dir)
+                aims.write(
+                    self.mask,
+                    f"{self.crop_dir}/{self.side}mask_{self.input_type}.nii.gz")
             else:
                 raise ValueError(
-                    'cropping_type must be either \'bbox\' or \'mask\'')
+                    'cropping_type must be either \'bbox\' or \'mask\' or \'mask_intersect\'')
 
     def compute(self, number_subjects=_ALL_SUBJECTS):
-        """Main API to create pickle files
+        """Main API to create numpy files
 
         The programm loops over all subjects from the input (source) directory.
 
@@ -366,15 +377,18 @@ class CropGenerator:
         # Generate cropped files
         self.crop_files(number_subjects=number_subjects)
 
-        # Creation of .pickle file for all subjects
+        # Creation of .npy file containing all subjects
         if number_subjects:
             save_to_numpy(cropped_dir=self.cropped_samples_dir,
+                          tgt_dir=self.crop_dir,
+                          file_basename=self.file_basename_npy)
+            save_to_pickle(cropped_dir=self.cropped_samples_dir,
                            tgt_dir=self.crop_dir,
                            file_basename=self.file_basename_pickle)
 
 
 class SkeletonCropGenerator(CropGenerator):
-    """Generates cropped skeleton files and corresponding pickle file
+    """Generates cropped skeleton files and corresponding npy file
     """
 
     def __init__(self,
@@ -399,7 +413,7 @@ class SkeletonCropGenerator(CropGenerator):
                     (generated using compute_mask.py)
             list_sulci: list of sulcus names
             side: hemisphere side (either L for left, or R for right hemisphere)
-            cropping_type: cropping type, either mask, or bbox
+            cropping_type: cropping type, either mask, or bbox, or mask_intersect
             combine_type: if True, combines sulci (in this case, order matters)
             parallel: if True, parallel computation
         """
@@ -425,21 +439,21 @@ class SkeletonCropGenerator(CropGenerator):
         self.cropped_file = '%(subject)s_cropped_skeleton.nii.gz'
 
         # subjects are detected as the nifti file names under src_dir
-        self.expr = '^.resampled_skeleton_([0-9a-zA-Z]*).nii.gz$'
+        self.expr = '^.resampled_skeleton_(.*).nii.gz$'
 
         # Creates json log class
         json_file = join(self.crop_dir, self.side + 'skeleton.json')
         self.json = LogJson(json_file)
 
-        # Creates pickles file name
+        # Creates npys file name
+        self.file_basename_npy = self.side + 'skeleton'
         self.file_basename_pickle = self.side + 'skeleton'
 
         self.input_type = 'skeleton'
 
 
-
 class FoldLabelCropGenerator(CropGenerator):
-    """Generates cropped skeleton files and corresponding pickle file
+    """Generates cropped skeleton files and corresponding npy file
     """
 
     def __init__(self,
@@ -464,7 +478,7 @@ class FoldLabelCropGenerator(CropGenerator):
                     (generated using compute_mask.py)
             list_sulci: list of sulcus names
             side: hemisphere side (either L for left, or R for right hemisphere)
-            cropping_type: cropping type, either mask, or bbox
+            cropping_type: cropping type, either mask, or bbox, or mask_intersect
             combine_type: if True, combines sulci (in this case, order matters)
             parallel: if True, parallel computation
         """
@@ -490,20 +504,21 @@ class FoldLabelCropGenerator(CropGenerator):
         self.cropped_file = '%(subject)s_cropped_foldlabel.nii.gz'
 
         # subjects are detected as the nifti file names under src_dir
-        self.expr = '^.resampled_foldlabel_([0-9a-zA-Z]*).nii.gz$'
+        self.expr = '^.resampled_foldlabel_(.*).nii.gz$'
 
         # Creates json log class
         json_file = join(self.crop_dir, self.side + 'foldlabel.json')
         self.json = LogJson(json_file)
 
-        # Creates pickles file name
+        # Creates npys file name
+        self.file_basename_npy = self.side + 'label'
         self.file_basename_pickle = self.side + 'label'
 
         self.input_type = 'foldlabel'
 
 
 class DistMapCropGenerator(CropGenerator):
-    """Generates cropped skeleton files and corresponding pickle file
+    """Generates cropped skeleton files and corresponding npy file
     """
 
     def __init__(self,
@@ -527,7 +542,7 @@ class DistMapCropGenerator(CropGenerator):
                     (generated using compute_mask.py)
             list_sulci: list of sulcus names
             side: hemisphere side (either L for left, or R for right hemisphere)
-            cropping_type: cropping type, either mask, or bbox
+            cropping_type: cropping type, either mask, or bbox, or mask_intersect
             combine_type: if True, combines sulci (in this case, order matters)
             parallel: if True, parallel computation
         """
@@ -553,13 +568,14 @@ class DistMapCropGenerator(CropGenerator):
         self.cropped_file = '%(subject)s_cropped_distmap.nii.gz'
 
         # subjects are detected as the nifti file names under src_dir
-        self.expr = '^.resampled_distmap_(\d{6}).nii.gz$'
+        self.expr = '^.resampled_distmap_(.*).nii.gz$'
 
         # Creates json log class
         json_file = join(self.crop_dir, self.side + 'distmap.json')
         self.json = LogJson(json_file)
 
-        # Creates pickles file name
+        # Creates npys file name
+        self.file_basename_npy = self.side + 'distmap'
         self.file_basename_pickle = self.side + 'distmap'
 
         self.input_type = 'distmap'
@@ -578,7 +594,7 @@ def parse_args(argv):
     # Parse command line arguments
     parser = argparse.ArgumentParser(
         prog=basename(__file__),
-        description='Generates cropped and pickle files')
+        description='Generates cropped and npy files')
     parser.add_argument(
         "-s", "--src_dir", type=str, default=_RESAMPLED_SKELETON_DIR_DEFAULT,
         help='Source directory where input files lie. '
@@ -587,8 +603,8 @@ def parse_args(argv):
              'Default is : ' + _RESAMPLED_SKELETON_DIR_DEFAULT)
     parser.add_argument(
         "-y", "--input_type", type=str, default=_INPUT_TYPE_DEFAULT,
-         help='Input type: \'skeleton\', \'foldlabel\', \'distmap\' '
-             'Default is : ' + _INPUT_TYPE_DEFAULT)
+        help='Input type: \'skeleton\', \'foldlabel\', \'distmap\' '
+        'Default is : ' + _INPUT_TYPE_DEFAULT)
     parser.add_argument(
         "-o", "--output_dir", type=str, default=_CROP_DIR_DEFAULT,
         help='Output directory where to store the cropped files. '
@@ -625,6 +641,7 @@ def parse_args(argv):
              'Type of cropping: '
              'bbox: for bounding box cropping'
              'mask: selection based on a mask'
+             'mask_intersect: selection based on intersect of masks'
              'Default is : ' + _CROPPING_TYPE_DEFAULT)
     parser.add_argument(
         "-m", "--combine_type", type=bool, default=_COMBINE_TYPE_DEFAULT,
@@ -725,7 +742,7 @@ def generate_crops(
 
 @exception_handler
 def main(argv):
-    """Reads argument line and creates cropped files and pickle file
+    """Reads argument line and creates cropped files and npy file
 
     Args:
         argv: a list containing command line arguments

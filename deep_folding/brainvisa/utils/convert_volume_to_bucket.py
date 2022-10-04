@@ -39,6 +39,7 @@ import dico_toolbox as dtx
 
 import six
 from deep_folding.brainvisa.utils.remove_hull import convert_volume_to_bucket
+from deep_folding.brainvisa.utils.folder import create_folder
 from soma import aims
 from tqdm import tqdm
 
@@ -112,8 +113,9 @@ def parse_args(argv):
 
 
 def get_basename_without_extension(filename):
-    "Returns file basename without extension"
+    """Returns file basename without extension"""
     basename = os.path.basename(filename)
+    
     without_extension = basename.split('.')[0]
     return without_extension
 
@@ -130,13 +132,18 @@ def loop_over_directory(src_dir, tgt_dir, mask_dir, mesh, distmap):
     """
     # Gets and creates all filenames
     filenames = glob.glob(f"{src_dir}/*.nii.gz")
-    subjects = [get_basename_without_extension(
-        filename) for filename in filenames]
+    subjects = [get_basename_without_extension(filename) 
+                for filename in filenames]
     bucket_filenames = [
         build_bucket_filename(
             subject,
+<<<<<<< HEAD
             tgt_dir,
             mesh) for subject in subjects]
+=======
+            tgt_dir) for subject in subjects]
+    create_folder(tgt_dir)
+>>>>>>> 486a4d95b5969b5839ce8519d5f1c779c1df35d3
 
     # Creates target d    # python3 convert_volume_to_bucket.py \
     # -s /neurospin/dico/data/deep_folding/current/crops/CINGULATE/mask/sulcus_based/2mm/simple_combined/Rcrops \
