@@ -297,7 +297,6 @@ class FileResampler:
         """
 
         if number_subjects:
-            print(glob.glob(f"{self.src_dir}/*.nii.gz"))
             if os.path.isdir(self.src_dir):
                 list_all_subjects = \
                     [re.search(self.expr, os.path.basename(dI))[1]
@@ -359,12 +358,9 @@ class SkeletonResampler(FileResampler):
 
         # Names of files in function of dictionary: keys -> 'subject' and 'side'
         # Src directory contains either 'R' or 'L' a subdirectory
-        # self.src_file = join(
-        #     self.src_dir,
-        #     '%(side)sskeleton_generated_%(subject)s.nii.gz')
         self.src_file = join(
             self.src_dir,
-            'modified_skeleton_%(subject)s.nii.gz')
+            '%(side)sskeleton_generated_%(subject)s.nii.gz')
 
         # Names of files in function of dictionary: keys -> 'subject' and
         # 'side'
@@ -373,8 +369,7 @@ class SkeletonResampler(FileResampler):
             f'%(side)sresampled_skeleton_%(subject)s.nii.gz')
 
         # subjects are detected as the nifti file names under src_dir
-        self.expr = 'modified_skeleton_([0-9a-zA-Z]*).nii.gz$'
-        #self.expr = 'skeleton_generated_([0-9a-zA-Z]*).nii.gz$'
+        self.expr = '^.skeleton_generated_([0-9a-zA-Z]*).nii.gz$'
 
     @staticmethod
     def resample_one_subject(src_file: str,
@@ -415,12 +410,9 @@ class FoldLabelResampler(FileResampler):
 
         # Names of files in function of dictionary: keys -> 'subject' and 'side'
         # Src directory contains either 'R' or 'L' a subdirectory
-        # self.src_file = join(
-        #     self.src_dir,
-        #     '%(side)sfoldlabel_%(subject)s.nii.gz')
         self.src_file = join(
             self.src_dir,
-            'modified_foldlabel_%(subject)s.nii.gz')
+            '%(side)sfoldlabel_%(subject)s.nii.gz')
 
         # Names of files in function of dictionary: keys -> 'subject' and
         # 'side'
@@ -429,8 +421,7 @@ class FoldLabelResampler(FileResampler):
             f'%(side)sresampled_foldlabel_%(subject)s.nii.gz')
 
         # subjects are detected as the nifti file names under src_dir
-        # self.expr = '^.foldlabel_([0-9a-zA-Z]*).nii.gz$'
-        self.expr = 'modified_foldlabel_([0-9a-zA-Z]*).nii.gz$'
+        self.expr = '^.foldlabel_([0-9a-zA-Z]*).nii.gz$'
 
     @staticmethod
     def resample_one_subject(src_file: str,
