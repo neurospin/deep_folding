@@ -57,12 +57,13 @@ from deep_folding.brainvisa.utils.bbox import compute_max_box
 from deep_folding.brainvisa.utils.mask import compute_simple_mask
 from deep_folding.brainvisa.utils.sulcus import complete_sulci_name
 from deep_folding.brainvisa.utils.skeleton import generate_skeleton_from_graph
+from deep_folding.brainvisa.utils.foldlabel import generate_foldlabel_thin_junction
 import dico_toolbox as dtx
 
 
 _DEFAULT_DATA_DIR = '/neurospin/dico/data/bv_databases/human/hcp/hcp'
 _DEFAULT_MASK_DIR = '/neurospin/dico/data/deep_folding/current/mask/1mm/'
-_DEFAULT_SAVING_DIR = '/neurospin/dico/lguillon/distmap/benchmark/deletion_no_junction/200/skeletons/raw/'
+_DEFAULT_SAVING_DIR = '/neurospin/dico/lguillon/distmap/benchmark/test/'
 _DEFAULT_BBOX_DIR = '/neurospin/dico/data/deep_folding/current/bbox/'
 
 
@@ -72,7 +73,7 @@ class Benchmark():
 
     def __init__(self, b_num, side, ss_size, sulci_list, saving_dir,
                  data_dir=_DEFAULT_DATA_DIR, bbox_dir=_DEFAULT_BBOX_DIR,
-                 mask_dir=_DEFAULT_MASK_DIR, mask=True):
+                 mask_dir=_DEFAULT_MASK_DIR, mask=True, inpainting=False):
         """Inits with list of directories, bounding box and sulci
 
         Args:
@@ -85,13 +86,15 @@ class Benchmark():
             saving_dir: name of directory where altered skeletons will be saved
             mask_dir: name of directory where masks are stored
         """
+        self.inpainting = inpainting
         self.b_num = b_num
         self.side = side
         self.ss_size = ss_size
-        self.sulci_list = sulci_list
-        self.sulci_list = complete_sulci_name(self.sulci_list, self.side)
+        self.sulci_list = complete_sulci_name(sulci_list, self.side)
         self.src_dir = data_dir
         self.saving_dir = saving_dir
+        self.saving_dir_skel = saving_dir + 'skeletons/raw/'
+        self.saving_dir_foldlabel = saving_dir + 'foldlabels/raw/'
         self.path_to_graph = "t1mri/BL/default_analysis/folds/3.1/deepcnn_auto"
         self.abnormality_test = []
         self.voxel_size_out = (1, 1, 1, 1)
@@ -102,20 +105,17 @@ class Benchmark():
         else:
             self.bbmin, self.bbmax = compute_max_box(self.sulci_list, side,
                                 talairach_box=True, src_dir=bbox_dir)
-        print(self.bbmin, self.bbmax)
 
         print(self.mask, self.bbmin, self.bbmax)
 
     def get_simple_surfaces(self, sub):
         """Selects simple surfaces of one subject that satisfy following
-           conditions: size >= given ss_size and completely included in the
-           mask
+           conditions: size in [given ss_size min, given ss_size max] and with
+           the right number of voxels included in the mask
 
         Args:
             sub: int giving the subject
         """
-        cpt_arg_1 = 't1mri/default_acquisition/default_analysis/folds/3.1/default_session_auto'
-        cpt_arg_2 = '_default_session_auto.arg'
 
         self.graph_file = f"{self.src_dir}/{sub}/" +\
                      f"{self.path_to_graph}/{self.side}{sub}_deepcnn_auto.arg"
@@ -132,7 +132,6 @@ class Benchmark():
             for v in self.graph.vertices():
                 if 'label' in v:
                     bck_map = v['aims_ss']
-
                     # Creation of a volume in ICBM space where to write voxels
                     # of the simple surface
                     hdr = aims.StandardReferentials.icbm2009cTemplateHeader()
@@ -175,27 +174,40 @@ class Benchmark():
         bck_map = self.surfaces[surface]['aims_ss']
         for voxel in bck_map[0].keys():
             self.skel.setValue(0, voxel[0], voxel[1], voxel[2])
+            if self.inpainting:
+                 self.foldlabel.setValue(0, voxel[0], voxel[1], voxel[2])
 
         bck_map_bottom = self.surfaces[surface]['aims_bottom']
         for voxel in bck_map_bottom[0].keys():
             self.skel.setValue(0, voxel[0], voxel[1], voxel[2])
+            if self.inpainting:
+                 self.foldlabel.setValue(0, voxel[0], voxel[1], voxel[2])
 
         for k in range(len(self.surfaces[surface].edges())):
             if 'aims_junction' in self.surfaces[surface].edges()[k]:
                 bck_map_junction = self.surfaces[surface].edges()[k]['aims_junction']
                 for voxel in bck_map_junction[0].keys():
                     self.skel.setValue(0, voxel[0], voxel[1], voxel[2])
+                    if self.inpainting:
+                         self.foldlabel.setValue(0, voxel[0], voxel[1], voxel[2])
 
         save_subject = sub
         return save_subject
 
     def generate_skeleton(self, sub):
-        """Deletes one simple surface
+        """Generates a skeleton from a graph
 
         Args:
             sub: int giving the subject
         """
         self.skel = generate_skeleton_from_graph(self.graph)
+
+    def generate_foldlabel(self, sub):
+        """Deletes one simple surface
+        Args:
+            sub: int giving the subject
+        """
+        self.foldlabel = generate_foldlabel_thin_junction(self.graph)
 
     def save_file(self, sub):
         """Saves the modified skeleton
@@ -206,6 +218,10 @@ class Benchmark():
         fileout = os.path.join(self.saving_dir, 'modified_skeleton_' + str(sub) + '.nii.gz')
         print('writing altered skeleton to', fileout)
         aims.write(self.skel, fileout)
+        if self.inpainting:
+            fileout = os.path.join(self.saving_dir, 'modified_foldlabel_' + str(sub) + '.nii.gz')
+            print('writing altered foldlabel to', fileout)
+            aims.write(self.foldlabel, fileout)
 
     def save_lists(self, abnormality_test, givers, subjects_list):
         """Saves lists of modified subjects
@@ -251,9 +267,9 @@ def get_sub_list(subjects_list):
     return subjects_list
 
 
-def generate(b_num, side, ss_size, sulci_list, mode='suppress', bench_size=150,
+def generate(b_num, side, ss_size, sulci_list, bench_size=150,
              subjects_list=None, saving_dir=_DEFAULT_SAVING_DIR,
-             bbox_dir=_DEFAULT_BBOX_DIR):
+             bbox_dir=_DEFAULT_BBOX_DIR, inpainting=False):
     """
     Generates a benchmark
 
@@ -261,11 +277,9 @@ def generate(b_num, side, ss_size, sulci_list, mode='suppress', bench_size=150,
         b_num: number of the benchmark to create
         side: hemisphere side (either L for left, or R for right hemisphere)
         sulci_list: list of sulcus names
-        mode: string giving the type of benchmark to create ('suppress', 'add'
-              or 'mix')
     """
     benchmark = Benchmark(b_num, side, ss_size, sulci_list, saving_dir,
-                          bbox_dir=bbox_dir)
+                          bbox_dir=bbox_dir, inpainting=inpainting)
     abnormality_test = []
     givers = []
     subjects_list = get_sub_list(subjects_list)
@@ -273,26 +287,17 @@ def generate(b_num, side, ss_size, sulci_list, mode='suppress', bench_size=150,
     for i, sub in enumerate(subjects_list):
         print(sub)
         save_sub = sub
-        if mode in ['suppress', 'add', 'mix']:
-            benchmark.get_simple_surfaces(sub)
-            if benchmark.surfaces and len(benchmark.surfaces.keys()) > 0:
-                if mode == 'suppress':
-                    benchmark.generate_skeleton(sub)
+        benchmark.get_simple_surfaces(sub)
+        if benchmark.surfaces and len(benchmark.surfaces.keys()) > 0:
+            benchmark.generate_skeleton(sub)
+            benchmark.generate_foldlabel(sub)
+            # Suppression of simple surfaces
+            save_sub = benchmark.delete_ss(sub)
 
-                    # Suppression of simple surfaces
-                    save_sub = benchmark.delete_ss(sub)
-                elif mode == 'add' or (mode=='mix' and i>=bench_size/2):
-                    # Addition of simple surfaces
-                    save_sub = benchmark.add_ss(subjects_list, i)
-                    givers.append(sub)
-                benchmark.save_file(save_sub)
-                # Addition of modified graph to abnormality_test set
-                abnormality_test.append(save_sub)
-        elif mode == 'random' or mode == 'asymmetry':
-            benchmark.random_skel(sub)
             benchmark.save_file(save_sub)
             # Addition of modified graph to abnormality_test set
             abnormality_test.append(save_sub)
+
         if len(abnormality_test) == bench_size:
             break
     benchmark.save_lists(abnormality_test, givers, subjects_list)
@@ -305,4 +310,4 @@ def generate(b_num, side, ss_size, sulci_list, mode='suppress', bench_size=150,
 if __name__ == '__main__':
     generate(333, 'R', 200, sulci_list=['S.C.'],
             subjects_list='/neurospin/dico/lguillon/distmap/data/test_list.csv',
-            mode='suppress', bench_size=200)
+            bench_size=3, inpainting=False)
