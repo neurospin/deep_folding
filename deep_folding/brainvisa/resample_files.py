@@ -611,15 +611,16 @@ def resample_files(
             output_filename=output_filename)
     elif input_type == "foldlabel":
         src_filename = _FOLDLABEL_FILENAME if src_filename is None else src_filename
-        output_filename = _RESAMPLED_FOLDLABEL_FILENAME if output_filename is None else output_filename
+        output_filename = _RESAMPELD_FOLDLABEL_FILENAME if output_filename is None else output_filename
         resampler = FoldLabelResampler(
             src_dir=src_dir,
             resampled_dir=resampled_dir,
             transform_dir=transform_dir,
             side=side,
             out_voxel_size=out_voxel_size,
-<<<<<<< HEAD
-            parallel=parallel)
+            parallel=parallel,
+            src_filename=src_filename,
+            output_filename=output_filename)
     elif input_type == "distmap":
         resampler = DistMapResampler(
             src_dir=src_dir,
@@ -628,11 +629,6 @@ def resample_files(
             side=side,
             out_voxel_size=out_voxel_size,
             parallel=parallel)
-=======
-            parallel=parallel,
-            src_filename=src_filename,
-            output_filename=output_filename)
->>>>>>> 486a4d95b5969b5839ce8519d5f1c779c1df35d3
     else:
         raise ValueError(
             "input_type: shall be either 'skeleton', 'foldlabel' or "\
