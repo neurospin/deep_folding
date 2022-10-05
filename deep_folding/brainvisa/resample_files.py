@@ -35,7 +35,7 @@
 
 """Resample skeletons
 
-The aim of this script is to resample skeletons and foldlabel.
+The aim of this script is to resample skeletons, foldlabels and distmaps.
 
   Typical usage
   -------------
@@ -250,7 +250,8 @@ class FileResampler:
     @staticmethod
     def resample_one_subject(src_file: str,
                              out_voxel_size: float,
-                             transform_file: str):
+                             transform_file: str,
+                             resampled_file=None):
         """Resamples skeleton
 
         This static method is called by resample_one_subject_wrapper
@@ -284,8 +285,9 @@ class FileResampler:
             resampled = self.resample_one_subject(
                 src_file=src_file,
                 out_voxel_size=self.out_voxel_size,
-                transform_file=transform_file)
-            aims.write(resampled, resampled_file)
+                transform_file=transform_file,
+                resampled_file=resampled_file)
+            #aims.write(resampled, resampled_file)
         else:
             raise FileNotFoundError(f"{src_file} not found")
 
@@ -303,7 +305,7 @@ class FileResampler:
 
             log.debug(f"src_dir = {self.src_dir}")
             log.debug(f"reg exp = {self.expr}")
-            
+
             if os.path.isdir(self.src_dir):
                 src_files = glob.glob(f"{self.src_dir}/*.nii.gz")
                 log.debug(f"list src files = {src_files}")
@@ -385,7 +387,7 @@ class SkeletonResampler(FileResampler):
 
         # subjects are detected as the nifti file names under src_dir
         self.expr = '^.' + src_filename + '(.*).nii.gz$'
-        
+
     @staticmethod
     def resample_one_subject(src_file: str,
                              out_voxel_size: float,
@@ -443,10 +445,59 @@ class FoldLabelResampler(FileResampler):
     @staticmethod
     def resample_one_subject(src_file: str,
                              out_voxel_size: float,
-                             transform_file: str):
-        return resample_one_foldlabel(input_image=src_file,
-                                      out_voxel_size=out_voxel_size,
-                                      transformation=transform_file)
+                             transform_file: str,
+                             resampled_file=None):
+        resampled = resample_one_foldlabel(input_image=src_file,
+                                           out_voxel_size=out_voxel_size,
+                                           transformation=transform_file)
+        aims.write(resampled, resampled_file)
+
+
+class DistMapResampler(FileResampler):
+    """Resamples all files from source directories
+    """
+
+    def __init__(self, src_dir, resampled_dir, transform_dir,
+                 side, out_voxel_size, parallel
+                 ):
+        """Inits with list of directories
+        Args:
+            src_dir: folder containing generated skeletons, labels or distmaps
+            resampled_dir: name of target (output) directory,
+            transform_dir: directory containing transform files to ICBM2009c
+            side: either 'L' or 'R', hemisphere side
+            out_voxel_size: float giving voxel size in mm
+            parallel: does parallel computation if True
+        """
+        super(DistMapResampler, self).__init__(
+            src_dir=src_dir, resampled_dir=resampled_dir,
+            transform_dir=transform_dir, side=side,
+            out_voxel_size=out_voxel_size, parallel=parallel)
+
+        # Names of files in function of dictionary: keys -> 'subject' and 'side'
+        # Src directory contains either 'R' or 'L' a subdirectory
+        self.src_file = join(
+            self.src_dir,
+            '%(side)sdistmap_generated_%(subject)s.nii.gz')
+
+        # Names of files in function of dictionary: keys -> 'subject' and
+        # 'side'
+        self.resampled_file = join(
+            self.resampled_dir,
+            f'%(side)sresampled_distmap_%(subject)s.nii.gz')
+
+        # subjects are detected as the nifti file names under src_dir
+        self.expr = '^.distmap_generated_([a-z]{2}\d{6}).nii.gz$'
+
+    @staticmethod
+    def resample_one_subject(src_file: str,
+                             out_voxel_size: float,
+                             transform_file: str,
+                             resampled_file: str):
+        return resample_one_distmap(input_image=src_file,
+                                    resampled_dir=resampled_file,
+                                    out_voxel_size=out_voxel_size,
+                                    transformation=transform_file)
 
 
 def parse_args(argv):
@@ -465,11 +516,12 @@ def parse_args(argv):
         description='Generates resampled files (skeletons, foldlabels,...)')
     parser.add_argument(
         "-s", "--src_dir", type=str, default=_SKELETON_DIR_DEFAULT,
-        help='Source directory where inputs files (skeletons or labels) lie. '
+        help='Source directory where inputs files (skeletons, labels or ' \
+             'distmaps) lie. '
              'Default is : ' + _SKELETON_DIR_DEFAULT)
     parser.add_argument(
         "-y", "--input_type", type=str, default=_INPUT_TYPE_DEFAULT,
-        help='Input type: \'skeleton\', \'foldlabel\' '
+        help='Input type: \'skeleton\', \'foldlabel\', \'distmap\' '
              'Default is : ' + _INPUT_TYPE_DEFAULT)
     parser.add_argument(
         "-o", "--output_dir", type=str, default=_RESAMPLED_SKELETON_DIR_DEFAULT,
@@ -559,7 +611,7 @@ def resample_files(
             output_filename=output_filename)
     elif input_type == "foldlabel":
         src_filename = _FOLDLABEL_FILENAME if src_filename is None else src_filename
-        output_filename = _RESAMPLED_FOLDLABEL_FILENAME if output_filename is None else output_filename
+        output_filename = _RESAMPELD_FOLDLABEL_FILENAME if output_filename is None else output_filename
         resampler = FoldLabelResampler(
             src_dir=src_dir,
             resampled_dir=resampled_dir,
@@ -569,9 +621,18 @@ def resample_files(
             parallel=parallel,
             src_filename=src_filename,
             output_filename=output_filename)
+    elif input_type == "distmap":
+        resampler = DistMapResampler(
+            src_dir=src_dir,
+            resampled_dir=resampled_dir,
+            transform_dir=transform_dir,
+            side=side,
+            out_voxel_size=out_voxel_size,
+            parallel=parallel)
     else:
         raise ValueError(
-            "input_type: shall be either 'skeleton' or 'foldlabel'")
+            "input_type: shall be either 'skeleton', 'foldlabel' or "\
+            "distmap")
 
     resampler.compute(number_subjects=number_subjects)
 

@@ -103,3 +103,16 @@ def generate_distmap_from_skeleton_file(skeleton_file: str,
         ' -s OUTSIDE'
     log.debug(cmd_distMap)
     os.system(cmd_distMap)
+
+
+def generate_distmap_from_resampled_skeleton(skeleton_file: str,
+                                      distmap_file: str):
+    """Generates distmap from resampled skeleton file."""
+
+    # Generation of distmap from padded skeletons
+    cmd_distMap = 'AimsChamferDistanceMap' + \
+        ' -i ' + skeleton_file + \
+        ' -o ' + distmap_file + \
+        ' -s OUTSIDE'
+    log.debug(cmd_distMap)
+    os.system(cmd_distMap)

@@ -179,7 +179,6 @@ class GraphConvert2Skeleton:
 
         skeleton_file = f"{self.skeleton_dir}/" +\
                         f"{self.side}skeleton_generated_{subject}.nii.gz"
-
         generate_skeleton_from_graph_file(graph_file,
                                           skeleton_file,
                                           self.junction)
@@ -189,7 +188,7 @@ class GraphConvert2Skeleton:
         """
         # Gets list fo subjects
         filenames = glob.glob(f"{self.src_dir}/*")
-        list_subjects = [basename(filename) for filename in filenames 
+        list_subjects = [basename(filename) for filename in filenames
                     if not re.search('.minf$', filename)]
         list_subjects = select_subjects_int(list_subjects, number_subjects)
 

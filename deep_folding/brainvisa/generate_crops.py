@@ -62,6 +62,7 @@ import tempfile
 from os import listdir
 from os.path import join
 from os.path import basename
+import csv
 
 import numpy as np
 from numpy import save
@@ -137,7 +138,16 @@ def crop_mask(file_src, file_cropped, mask, bbmin, bbmax, no_mask=_NO_MASK_DEFAU
     else:
         arr[arr_mask == 0] = 0
 
+    # bbmin = np.array([14, 89, 24])
+    # bbmax = np.array([92, 152, 112])
+    # bbmin = np.array([24, 64, 28])
+    # bbmax = np.array([102, 127, 116])
+    # For benchmark asymmetry
+    # bbmin = np.array([92, 84, 24])
+    # bbmax = np.array([170, 147, 112])
+
     log.debug(f"bbmin = {bbmin.tolist()}")
+    log.debug(f"bbmax = {bbmax.tolist()}")
     log.debug(f"size = {(bbmax-bbmin).tolist()}")
     # Crops volume according to mask bounding box
     vol_cropped = aims.VolumeView(vol, bbmin, bbmax-bbmin)
@@ -260,8 +270,12 @@ class CropGenerator:
             else:
                 raise NotADirectoryError(
                     f"{self.src_dir} doesn't exist or is not a directory")
+            # with open('/neurospin/dico/lguillon/distmap/data/test_list.csv', newline='') as f:
+            #     reader = csv.reader(f)
+            #     data = list(reader)
+            # list_subjects = [data[k][1] for k in range(len(data))]
 
-            # Gives the possibility to list only the first number_subjects
+            # # Gives the possibility to list only the first number_subjects
             list_subjects = select_subjects_int(list_all_subjects,
                                                 number_subjects)
 

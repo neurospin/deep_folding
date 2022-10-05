@@ -62,7 +62,7 @@ from deep_folding.brainvisa.utils.subjects import select_subjects_int
 from deep_folding.brainvisa.utils.logs import setup_log
 from deep_folding.brainvisa.utils.parallel import define_njobs
 from deep_folding.brainvisa.utils.distmap import \
-    generate_distmap_from_skeleton_file
+generate_distmap_from_skeleton_file, generate_distmap_from_resampled_skeleton
 from deep_folding.brainvisa.utils.quality_checks import \
     compare_number_aims_files_with_expected
 from pqdm.processes import pqdm
@@ -106,6 +106,9 @@ def parse_args(argv):
         "-a", "--parallel", default=False, action='store_true',
         help='if set (-a), launches computation in parallel')
     parser.add_argument(
+        "-r", "--resampled_skel", default=False,
+        help='if set (-a), generates distmap from already resampled skeleton')
+    parser.add_argument(
         "-n", "--nb_subjects", type=str, default="all",
         help='Number of subjects to take into account, or \'all\'. '
              '0 subject is allowed, for debug purpose.'
@@ -130,6 +133,7 @@ def parse_args(argv):
     params['output_dir'] = abspath(args.output_dir)
     params['side'] = args.side
     params['parallel'] = args.parallel
+    params['resampled_skel'] = args.resampled_skel
     # Checks if nb_subjects is either the string "all" or a positive integer
     params['nb_subjects'] = get_number_subjects(args.nb_subjects)
 
@@ -144,25 +148,33 @@ class SkelConvert2DistMap:
     """
 
     def __init__(self, src_dir, distmaps_dir,
-                 side, parallel):
+                 side, parallel, resampled_skel=False):
         self.src_dir = src_dir
         self.distmap_dir = distmaps_dir
         self.side = side
         self.parallel = parallel
         self.distmap_dir = f"{self.distmap_dir}/{self.side}"
+        self.resampled_skel = resampled_skel
 
         create_folder(abspath(self.distmap_dir))
 
     def generate_one_distmap(self, subject: str):
         """Generates and writes distmap for one subject.
         """
-        skeleton_file = glob.glob(f"{self.src_dir}/{self.side}/" +\
-                                  f"*{subject}.nii.gz")[0]
-
         distmap_file = f"{self.distmap_dir}/" +\
                         f"{self.side}distmap_generated_{subject}.nii.gz"
 
-        generate_distmap_from_skeleton_file(skeleton_file,
+        if self.resampled_skel:
+            skeleton_file = glob.glob(f"{self.src_dir}/" +\
+                                  f"*{subject}*.nii.gz")[0]
+            generate_distmap_from_resampled_skeleton(skeleton_file,
+                                            distmap_file)
+        else:
+            print(1)
+            skeleton_file = glob.glob(f"{self.src_dir}/{self.side}/" +\
+                                  f"*{subject}.nii.gz")[0]
+            print(2)
+            generate_distmap_from_skeleton_file(skeleton_file,
                                             distmap_file)
 
     def compute(self, number_subjects):
@@ -170,9 +182,10 @@ class SkelConvert2DistMap:
         """
         # Gets list fo subjects
         filenames = glob.glob(f"{self.src_dir}/{self.side}/*.nii.gz")
+        #filenames = glob.glob(f"{self.src_dir}/*.nii.gz")
         list_subjects = [
             re.search(
-                '([ae\\d]{5,6})',
+                '([a-z]{2}\d{6})',
                 filename).group(0) for filename in filenames]
         list_subjects = select_subjects_int(list_subjects, number_subjects)
         log.info(f"Expected number of subjects = {len(list_subjects)}")
@@ -183,9 +196,10 @@ class SkelConvert2DistMap:
         if self.parallel:
             log.info(
                 "PARALLEL MODE: subjects are computed in parallel.")
+
             pqdm(list_subjects,
                  self.generate_one_distmap,
-                 n_jobs=define_njobs())
+                 n_jobs=20)
         else:
             log.info(
                 "SERIAL MODE: subjects are scanned serially, "
@@ -203,6 +217,7 @@ def generate_distmaps(
         distmaps_dir=_DISTMAPS_DIR_DEFAULT,
         side=_SIDE_DEFAULT,
         parallel=False,
+        resampled_skel=True,
         number_subjects=_ALL_SUBJECTS):
     """Generates distmaps from skeletons"""
 
@@ -211,7 +226,8 @@ def generate_distmaps(
         src_dir=src_dir,
         distmaps_dir=distmaps_dir,
         side=side,
-        parallel=parallel
+        parallel=parallel,
+        resampled_skel=resampled_skel
     )
     # Actual generation of skeletons from graphs
     conversion.compute(number_subjects=number_subjects)
@@ -233,6 +249,7 @@ def main(argv):
         distmaps_dir=params['output_dir'],
         side=params['side'],
         parallel=params['parallel'],
+        resampled_skel=params['resampled_skel'],
         number_subjects=params['nb_subjects'])
 
 
