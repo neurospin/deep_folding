@@ -137,13 +137,9 @@ def loop_over_directory(src_dir, tgt_dir, mask_dir, mesh, distmap):
     bucket_filenames = [
         build_bucket_filename(
             subject,
-<<<<<<< HEAD
             tgt_dir,
-            mesh) for subject in subjects]
-=======
-            tgt_dir) for subject in subjects]
+            mesh) for subject in subjects]ts]
     create_folder(tgt_dir)
->>>>>>> 486a4d95b5969b5839ce8519d5f1c779c1df35d3
 
     # Creates target d    # python3 convert_volume_to_bucket.py \
     # -s /neurospin/dico/data/deep_folding/current/crops/CINGULATE/mask/sulcus_based/2mm/simple_combined/Rcrops \
