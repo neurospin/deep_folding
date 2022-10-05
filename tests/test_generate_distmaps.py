@@ -10,6 +10,10 @@ if os.path.isdir('/neurospin/dico/data/deep_folding/current/datasets/hcp/skeleto
     src_dir = '/neurospin/dico/data/deep_folding/current/datasets/hcp/skeletons/raw/'
     tgt_dir = '/tmp/'
     ref_dir = '/neurospin/dico/data/deep_folding/test/distmap'
+else:
+    src_dir = '/nfs/neurospin/dico/data/deep_folding/current/datasets/hcp/skeletons/raw/'
+    tgt_dir = '/tmp/'
+    ref_dir = '/nfs/neurospin/dico/data/deep_folding/test/distmap'
 
 
 def equal_distmaps(distmap_ref, distmap_target):

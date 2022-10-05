@@ -6,6 +6,11 @@ import pandas as pd
 import os
 from deep_folding.brainvisa.benchmark_generation_distmap import Benchmark
 
+if os.path.isdir('/neurospin/'):
+    mask_dir='/neurospin/dico/data/deep_folding/current/mask/1mm/'
+else:
+    mask_dir = '/nfs/neurospin/dico/data/deep_folding/current/mask/1mm/'
+
 
 def equal_skeletons(skel_ref, skel_target):
     """Returns True if skel1 and skel2 are identical
@@ -33,7 +38,8 @@ def test_suppr_benchmark():
     sulci_list = ['S.C._right']
 
     benchmark = Benchmark(1, 'R', 200, sulci_list, data_dir=src_dir,
-                          saving_dir=tgt_dir, bbox_dir=bbox_dir)
+                          saving_dir=tgt_dir, bbox_dir=bbox_dir,
+                          mask_dir=mask_dir)
     print(src_dir)
     subjects_list = ['100206']
 
