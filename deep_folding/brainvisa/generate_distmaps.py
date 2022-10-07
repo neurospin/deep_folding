@@ -52,8 +52,11 @@ import argparse
 import glob
 import re
 import sys
+import os
 from os.path import abspath
 from os.path import basename
+from os.path import normpath
+from os import pardir
 
 from deep_folding.brainvisa import exception_handler
 from deep_folding.brainvisa.utils.folder import create_folder
@@ -170,10 +173,8 @@ class SkelConvert2DistMap:
             generate_distmap_from_resampled_skeleton(skeleton_file,
                                             distmap_file)
         else:
-            print(1)
             skeleton_file = glob.glob(f"{self.src_dir}/{self.side}/" +\
-                                  f"*{subject}.nii.gz")[0]
-            print(2)
+                                  f"*{subject}*.nii.gz")[0]
             generate_distmap_from_skeleton_file(skeleton_file,
                                             distmap_file)
 
@@ -182,11 +183,11 @@ class SkelConvert2DistMap:
         """
         # Gets list fo subjects
         filenames = glob.glob(f"{self.src_dir}/{self.side}/*.nii.gz")
-        #filenames = glob.glob(f"{self.src_dir}/*.nii.gz")
+
         list_subjects = [
             re.search(
-                '([a-z]{2}\d{6})',
-                filename).group(0) for filename in filenames]
+                f"({self.side}skeleton_generated_)(.*)(\.nii\.gz)",
+                filename).group(2) for filename in filenames]
         list_subjects = select_subjects_int(list_subjects, number_subjects)
         log.info(f"Expected number of subjects = {len(list_subjects)}")
         log.info(f"list_subjects[:5] = {list_subjects[:5]}")
