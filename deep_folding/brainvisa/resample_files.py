@@ -397,9 +397,10 @@ class SkeletonResampler(FileResampler):
 
         This static method is called by resample_one_subject_wrapper
         from parent class FileResampler"""
-        return resample_one_skeleton(input_image=src_file,
+        resampled = resample_one_skeleton(input_image=src_file,
                                           out_voxel_size=out_voxel_size,
                                           transformation=transform_file)
+        aims.write(resampled, resampled_file)
 
 
 class FoldLabelResampler(FileResampler):
