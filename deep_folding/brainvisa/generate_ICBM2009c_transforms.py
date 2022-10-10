@@ -107,6 +107,10 @@ def parse_args(argv):
         help='Relative path to graph. '
              'Default is ' + _PATH_TO_GRAPH_DEFAULT)
     parser.add_argument(
+        "-b", "--bids", default=False, action="store_true",
+        help="If the database uses the BIDS format"
+    )
+    parser.add_argument(
         "-a", "--parallel", default=False, action='store_true',
         help='if set (-a), launches computation in parallel')
     parser.add_argument(
@@ -128,13 +132,10 @@ def parse_args(argv):
               prog_name=basename(__file__),
               suffix='right' if args.side == 'R' else 'left')
 
-    params = {}
+    params = vars(args)
 
     params['src_dir'] = abspath(args.src_dir)
     params['transform_dir'] = abspath(args.output_dir)
-    params['path_to_graph'] = args.path_to_graph
-    params['side'] = args.side
-    params['parallel'] = args.parallel
     # Checks if nb_subjects is either the string "all" or a positive integer
     params['nb_subjects'] = get_number_subjects(args.nb_subjects)
 
@@ -276,6 +277,7 @@ def main(argv):
         transform_dir=params['transform_dir'],
         path_to_graph=params['path_to_graph'],
         side=params['side'],
+        bids=params['bids'],
         parallel=params['parallel'],
         number_subjects=params['nb_subjects'])
 
