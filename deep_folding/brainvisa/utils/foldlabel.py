@@ -82,19 +82,20 @@ def generate_foldlabel_thin_junction(
                     if arr_label[i, j, k]>2000:
                         arr_label[i, j, k] = val_aims_ss + add_val['aims_plidepassage']
 
-            if 'aims_junction' in vertex.edges()[edge]:
-                voxels_junction = np.array(
-                                vertex.edges()[edge]['aims_junction'][0].keys())
-                if voxels_junction.shape == (0,):
-                    continue
-                for i, j, k in voxels_junction:
-                    if arr_label[i, j, k]==0:
-                        arr_label[i, j, k] = val_aims_ss + add_val['aims_junction']
-
         for bucket_name, value in {'aims_bottom':6000, 'aims_other':-1000, 'aims_ss':0}.items():
             bucket = vertex.get(bucket_name)
             if bucket is not None:
                 voxels = np.array(bucket[0].keys())
+                for edge in range(len(vertex.edges())):
+                    if 'aims_junction' in vertex.edges()[edge]:
+                        voxels_junction = np.array(
+                                         vertex.edges()[edge]['aims_junction'][0].keys())
+                        if voxels_junction.shape == (0,):
+                            continue
+                        for i, j, k in voxels_junction:
+                            if arr_label[i, j, k]==0:
+                                arr_label[i, j, k] = val_aims_ss + add_val['aims_junction']
+
                 if voxels.shape == (0,):
                     continue
                 for i, j, k in voxels:
