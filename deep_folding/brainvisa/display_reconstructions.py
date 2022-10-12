@@ -79,15 +79,15 @@ def main():
         if bucket:
             view = '3D'
             if len(np.unique(input))==2:
-                input = dtx.convert.volume_to_bucketMap_aims(input, vs=vox_size)
-                output = dtx.convert.volume_to_bucketMap_aims(output, vs=vox_size)
+                input = dtx.convert.volume_to_bucketMap_aims(input, voxel_size=vox_size)
+                output = dtx.convert.volume_to_bucketMap_aims(output, voxel_size=vox_size)
             else:
                 input[input>0.5] = 1
                 input[input<=0.5] = 0
                 output[output>0.5] = 1
                 output[output<=0.5] = 0
-                input = dtx.convert.volume_to_bucketMap_aims(input, vs=(1,1,1))
-                output = dtx.convert.volume_to_bucketMap_aims(output, vs=(1,1,1))
+                input = dtx.convert.volume_to_bucketMap_aims(input, voxel_size=vox_size)
+                output = dtx.convert.volume_to_bucketMap_aims(output, voxel_size=vox_size)
 
         for img, entry in [(input, 'input'), (output, 'output')]:
             globals()['block%s%s%s' % (sub_id, phase, entry)] = a.createWindow(view, block=block)
