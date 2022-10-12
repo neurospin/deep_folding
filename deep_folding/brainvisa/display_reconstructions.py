@@ -76,7 +76,7 @@ def main():
         input = input_arr[0][k]
         print(input.shape)
         output = output_arr[0][k].astype(float)
-        if buckets:
+        if bucket:
             view = '3D'
             if len(np.unique(input))==2:
                 input = dtx.convert.volume_to_bucketMap_aims(input, vs=vox_size)
@@ -92,7 +92,7 @@ def main():
         for img, entry in [(input, 'input'), (output, 'output')]:
             globals()['block%s%s%s' % (sub_id, phase, entry)] = a.createWindow(view, block=block)
 
-            globals()['img%s%s%s' % (sub_id, phase, entry)], globals()['a_img%s%s%s' % (sub_id, phase, entry)] = array_to_ana(a, img, sub_id, phase, status=entry, bucket=buckets, vs=vox_size)
+            globals()['img%s%s%s' % (sub_id, phase, entry)], globals()['a_img%s%s%s' % (sub_id, phase, entry)] = array_to_ana(a, img, sub_id, phase, status=entry, bucket=bucket, vs=vox_size)
 
             globals()['block%s%s%s' % (sub_id, phase, entry)].addObjects(
                                         globals()['a_img%s%s%s' %
