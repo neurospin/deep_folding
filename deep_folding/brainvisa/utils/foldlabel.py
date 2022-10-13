@@ -62,46 +62,45 @@ def generate_foldlabel_thin_junction(
     arr_label = np.asarray(vol_label)
 
     # Sorted in ascendent priority
-    label = {'aims_other': 1,
-             'aims_ss': 1000,
-             'aims_bottom': 2000,
-             'aims_junction': 3000,
-             'aims_plidepassage': 4000}
-
-    for edge in graph.edges():
-        for bucket_name, value in {'aims_junction': 110}.items():
-            bucket = edge.get(bucket_name)
-            label[bucket_name] += 1
-            if bucket is not None:
-                voxels = np.array(bucket[0].keys())
-                if voxels.shape == (0,):
-                    continue
-                for i, j, k in voxels:
-                    arr_label[i, j, k] = label[bucket_name]
-
-    for edge in graph.edges():
-        for bucket_name, value in {'aims_plidepassage': 120}.items():
-            bucket = edge.get(bucket_name)
-            label[bucket_name] += 1
-            if bucket is not None:
-                voxels = np.array(bucket[0].keys())
-                if voxels.shape == (0,):
-                    continue
-                for i, j, k in voxels:
-                    arr_label[i, j, k] = label[bucket_name]
+    val_aims_ss = 1000
+    add_val = {'aims_other': -1000,
+                'aims_ss': 0,
+                'aims_top': 7000,
+                'aims_bottom': 6000,
+                'aims_junction': 5000,
+                'aims_plidepassage': 4000}
 
     for vertex in graph.vertices():
-        for bucket_name, value in {'aims_other': 100,
-                                   'aims_ss': 60,
-                                   'aims_bottom': 30}.items():
+        val_aims_ss += 1
+
+        for edge in range(len(vertex.edges())):
+            if 'aims_plidepassage' in vertex.edges()[edge]:
+                voxels_plidepassage = np.array(
+                                vertex.edges()[edge]['aims_plidepassage'][0].keys())
+                if voxels_plidepassage.shape == (0,):
+                    continue
+                for i, j, k in voxels_plidepassage:
+                    if arr_label[i, j, k]>2000:
+                        arr_label[i, j, k] = val_aims_ss + add_val['aims_plidepassage']
+
+        for bucket_name, value in {'aims_bottom':6000, 'aims_other':-1000, 'aims_ss':0}.items():
             bucket = vertex.get(bucket_name)
-            label[bucket_name] += 1
             if bucket is not None:
                 voxels = np.array(bucket[0].keys())
+                for edge in range(len(vertex.edges())):
+                    if 'aims_junction' in vertex.edges()[edge]:
+                        voxels_junction = np.array(
+                                         vertex.edges()[edge]['aims_junction'][0].keys())
+                        if voxels_junction.shape == (0,):
+                            continue
+                        for i, j, k in voxels_junction:
+                            if arr_label[i, j, k]==0:
+                                arr_label[i, j, k] = val_aims_ss + add_val['aims_junction']
+
                 if voxels.shape == (0,):
                     continue
                 for i, j, k in voxels:
-                    arr_label[i, j, k] = label[bucket_name]
+                    arr_label[i, j, k] = val_aims_ss + add_val[bucket_name]
 
     return vol_label
 
