@@ -119,7 +119,7 @@ def compute_simple_mask(sulci_list, side, mask_dir=_MASK_DIR_DEFAULT, dilation=_
             arr = np.asarray(mask)
             arr_result += arr
 
-        arr_result = np.asarray(dl.dilate(mask_result, radius=5))
+        arr_result = np.asarray(dl.dilate(mask_result, radius=dilation))
         np.asarray(mask_result)[:] = arr_result
 
     # Computes the mask bounding box
