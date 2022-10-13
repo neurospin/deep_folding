@@ -65,6 +65,7 @@ def generate_foldlabel_thin_junction(
     val_aims_ss = 1000
     add_val = {'aims_other': -1000,
                 'aims_ss': 0,
+                'aims_top': 7000,
                 'aims_bottom': 6000,
                 'aims_junction': 5000,
                 'aims_plidepassage': 4000}
