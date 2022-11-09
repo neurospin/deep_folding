@@ -138,7 +138,7 @@ def loop_over_directory(src_dir, tgt_dir, mask_dir, mesh, distmap):
         build_bucket_filename(
             subject,
             tgt_dir,
-            mesh) for subject in subjects]ts]
+            mesh) for subject in subjects]
     create_folder(tgt_dir)
 
     # Creates target d    # python3 convert_volume_to_bucket.py \
