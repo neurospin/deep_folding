@@ -20,8 +20,8 @@ Generates datasets of crops
 Deep learning pipelines to investigate folding patterns are not working on the whole brain (or the whole hemisphere) but on brain crops.
 Several processings are required, as drawn here:
 
-.. image:: docs/general_scheme.png
-  :width: 600
+.. image:: docs/deep_folding.png
+  :width: 1000
  
 We give a step-by-step description of the pipeline in `<deep_folding/brainvisa/README.rst>`_.
 
