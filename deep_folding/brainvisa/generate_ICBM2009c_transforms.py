@@ -107,6 +107,10 @@ def parse_args(argv):
         help='Relative path to graph. '
              'Default is ' + _PATH_TO_GRAPH_DEFAULT)
     parser.add_argument(
+        "-b", "--bids", default=False, action="store_true",
+        help="If the database uses the BIDS format"
+    )
+    parser.add_argument(
         "-a", "--parallel", default=False, action='store_true',
         help='if set (-a), launches computation in parallel')
     parser.add_argument(
@@ -128,13 +132,10 @@ def parse_args(argv):
               prog_name=basename(__file__),
               suffix='right' if args.side == 'R' else 'left')
 
-    params = {}
+    params = vars(args)
 
     params['src_dir'] = abspath(args.src_dir)
     params['transform_dir'] = abspath(args.output_dir)
-    params['path_to_graph'] = args.path_to_graph
-    params['side'] = args.side
-    params['parallel'] = args.parallel
     # Checks if nb_subjects is either the string "all" or a positive integer
     params['nb_subjects'] = get_number_subjects(args.nb_subjects)
 
@@ -150,12 +151,13 @@ class GraphGenerateTransform:
 
     def __init__(self, src_dir, transform_dir,
                  side, parallel,
-                 path_to_graph):
+                 path_to_graph, bids):
         self.src_dir = src_dir
         self.transform_dir = transform_dir
         self.side = side
         self.parallel = parallel
         self.path_to_graph = path_to_graph
+        self.bids = bids
         self.transform_dir = f"{self.transform_dir}/{self.side}"
         create_folder(abspath(self.transform_dir))
 
@@ -170,15 +172,31 @@ class GraphGenerateTransform:
         if len(list_graph_file) == 0:
             raise RuntimeError(f"No graph file! "
                                f"{graph_path} doesn't exist")
-        graph_file = list_graph_file[0]
+        for graph_file in list_graph_file:
+            transform_file = self.get_transform_filename(subject, graph_file)
+            graph = aims.read(graph_file)
+            g_to_icbm_template = aims.GraphManip.getICBM2009cTemplateTransform(
+                graph)
+            aims.write(g_to_icbm_template, transform_file)
+            if not self.bids:
+                break
+
+    def get_transform_filename(self, subject, graph_file):
         transform_file = (
             f"{self.transform_dir}/"
-            f"{self.side}transform_to_ICBM2009c_{subject}.trm")
-
-        graph = aims.read(graph_file)
-        g_to_icbm_template = aims.GraphManip.getICBM2009cTemplateTransform(
-            graph)
-        aims.write(g_to_icbm_template, transform_file)
+            f"{self.side}transform_to_ICBM2009c_{subject}")
+        if self.bids:
+            session = re.search("ses-([^_/]+)", graph_file)
+            acquisition = re.search("acq-([^_/]+)", graph_file)
+            run = re.search("run-([^_/]+)", graph_file)
+            if session:
+                transform_file += f"_{session[0]}"
+            if acquisition:
+                transform_file += f"_{acquisition[0]}"
+            if run:
+                transform_file += f"_{run[0]}"
+        transform_file += ".trm"
+        return transform_file
 
     def compute(self, number_subjects):
         """Loops over subjects to generate transforms to ICBM2009c from graphs.
@@ -212,8 +230,13 @@ class GraphGenerateTransform:
                 self.generate_one_transform(sub)
 
         # Checks if there is expected number of generated files
-        compare_number_aims_files_with_expected(self.transform_dir,
-                                                list_subjects)
+        if self.bids:
+            list_graphs = [g for g in glob.glob(f"{self.src_dir}/*/{self.path_to_graph}")
+                           if not re.search('.minf$', g)]
+            compare_number_aims_files_with_expected(self.transform_dir, list_graphs)
+        else:
+            compare_number_aims_files_with_expected(self.transform_dir,
+                                                    list_subjects)
 
 
 def generate_ICBM2009c_transforms(
@@ -221,6 +244,7 @@ def generate_ICBM2009c_transforms(
         transform_dir=_TRANSFORM_DIR_DEFAULT,
         path_to_graph=_PATH_TO_GRAPH_DEFAULT,
         side=_SIDE_DEFAULT,
+        bids=False,
         parallel=False,
         number_subjects=_ALL_SUBJECTS):
     """Generates skeletons from graphs"""
@@ -231,6 +255,7 @@ def generate_ICBM2009c_transforms(
         transform_dir=transform_dir,
         path_to_graph=path_to_graph,
         side=side,
+        bids=bids,
         parallel=parallel
     )
     # Actual generation of skeletons from graphs
@@ -253,6 +278,7 @@ def main(argv):
         transform_dir=params['transform_dir'],
         path_to_graph=params['path_to_graph'],
         side=params['side'],
+        bids=params['bids'],
         parallel=params['parallel'],
         number_subjects=params['nb_subjects'])
 
