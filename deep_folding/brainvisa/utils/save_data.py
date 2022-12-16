@@ -2,7 +2,6 @@
 Scripts that enables to create a dataframe of numpy arrays from .nii.gz or .nii
 images.
 """
-from __future__ import division
 
 import os
 import re
@@ -66,7 +65,7 @@ def save_to_pickle(cropped_dir, tgt_dir=None, file_basename=None):
 
 def quality_checks(csv_file_path, npy_array_file_path, cropped_dir):
     """Checks that the numpy arrays are equal to subject nifti files.
-    
+
     This is to check that the subjects list in csv file
     match the order set in numpy arrays"""
     arr = np.load(npy_array_file_path, mmap_mode='r')
@@ -85,8 +84,8 @@ def quality_checks(csv_file_path, npy_array_file_path, cropped_dir):
 
 def save_to_numpy(cropped_dir, tgt_dir=None, file_basename=None):
     """
-    Creates a numpy array for each subjecty. 
-    
+    Creates a numpy array for each subject.
+
     Saved these this dataframe to npy format on the target
     directory
 
@@ -100,7 +99,6 @@ def save_to_numpy(cropped_dir, tgt_dir=None, file_basename=None):
 
     log.info("Now generating numpy array...")
     log.debug(f"cropped_dir = {cropped_dir}")
-
     for filename in sorted(os.listdir(cropped_dir)):
         file_nii = os.path.join(cropped_dir, filename)
         if is_file_nii(file_nii):
@@ -131,8 +129,13 @@ def save_to_numpy(cropped_dir, tgt_dir=None, file_basename=None):
         os.path.join(tgt_dir, file_basename+'.npy'),
         cropped_dir)
 
+
 if __name__ == '__main__':
     save_to_pickle(
         cropped_dir='/neurospin/dico/data/deep_folding/current/crops/SC/mask/sulcus_based/2mm/Rlabels/',
         tgt_dir='/neurospin/dico/data/deep_folding/current/crops/SC/mask/sulcus_based/2mm/',
         file_basename='Rlabels')
+    # save_to_numpy(
+    #     cropped_dir='/neurospin/dico/data/deep_folding/current/datasets/hcp/crops/1mm/SC/no_mask/Rcrops/',
+    #     tgt_dir='/neurospin/dico/data/deep_folding/current/datasets/hcp/crops/1mm/SC/no_mask/Rcrops',
+    #     file_basename='Rlabels')

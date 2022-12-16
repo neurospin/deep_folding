@@ -203,7 +203,7 @@ class GraphConvert2Skeleton:
         """
         # Gets list fo subjects
         filenames = glob.glob(f"{self.src_dir}/*")
-        list_subjects = [basename(filename) for filename in filenames 
+        list_subjects = [basename(filename) for filename in filenames
                     if not re.search('.minf$', filename)]
         list_subjects = select_subjects_int(list_subjects, number_subjects)
 
