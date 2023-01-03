@@ -12,7 +12,7 @@ _PATH_TO_GRAPH_SUPERVISED_DEFAULT = \
 
 # Default directory in which lies the dataset
 # It points to HCP directory
-_SRC_DIR_DEFAULT = "/neurospin/dico/data/bv_databases/human/hcp/hcp"
+_SRC_DIR_DEFAULT = "/neurospin/dico/data/bv_databases/human/not_labeled/hcp/hcp"
 
 # Gives the relative path to the labelled graph .arg
 # in a "morphologist-like" dataset
@@ -45,6 +45,12 @@ _RESAMPLED_SKELETON_DIR_DEFAULT = "test/datasets/hcp/skeletons/1mm"
 
 # Default directory where we put crops
 _CROP_DIR_DEFAULT = "test/datasets/hcp/crops/CINGULATE/mask/1mm"
+
+# Dilation size
+_DILATION_DEFAULT = 5.0
+
+# Threshold value
+_THRESHOLD_DEFAULT = 0.0
 
 # hemisphere 'L' or 'R'
 _SIDE_DEFAULT = 'R'
