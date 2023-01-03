@@ -51,7 +51,7 @@ from soma.aimsalgo import MorphoGreyLevel_S16
 
 from deep_folding.config.logs import set_file_logger
 
-from deep_folding.brainvisa.utils.constants import _MASK_DIR_DEFAULT
+from deep_folding.brainvisa.utils.constants import _MASK_DIR_DEFAULT, _DILATION_DEFAULT, _THRESHOLD_DEFAULT
 
 # Defines logger
 log = set_file_logger(__file__)
@@ -79,7 +79,7 @@ def compute_bbox_mask(arr):
     return np.array(bbmin), np.array(bbmax)
 
 
-def compute_simple_mask(sulci_list, side, mask_dir=_MASK_DIR_DEFAULT):
+def compute_simple_mask(sulci_list, side, mask_dir=_MASK_DIR_DEFAULT, dilation=_DILATION_DEFAULT, threshold=_THRESHOLD_DEFAULT):
     """Function returning mask combining mask over several sulci
 
     It reads mask files in the source mask directory and combines them.
@@ -107,7 +107,8 @@ def compute_simple_mask(sulci_list, side, mask_dir=_MASK_DIR_DEFAULT):
     mask_result = list_masks[0]
     if len(list_masks)==1:
         print(f"only one sulcus: {sulci_list[0]}")
-        arr_result = np.asarray(dl.dilate(mask_result, radius=5))
+        mask_result[np.asarray(mask_result) <= threshold] = 0
+        arr_result = np.asarray(dl.dilate(mask_result, radius=dilation))
         np.asarray(mask_result)[:] = arr_result
 
     else:
@@ -118,7 +119,7 @@ def compute_simple_mask(sulci_list, side, mask_dir=_MASK_DIR_DEFAULT):
             arr = np.asarray(mask)
             arr_result += arr
 
-        arr_result = np.asarray(dl.dilate(mask_result, radius=5))
+        arr_result = np.asarray(dl.dilate(mask_result, radius=dilation))
         np.asarray(mask_result)[:] = arr_result
 
     # Computes the mask bounding box

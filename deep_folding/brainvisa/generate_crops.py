@@ -34,12 +34,10 @@
 # knowledge of the CeCILL license version 2 and that you accept its terms.
 
 """Creating npy file from T1 MRI datas
-
 The aim of this script is to create dataset of cropped skeletons from MRIs
 saved in a .npy file.
 We read resampled skeleton files
 Several steps are required: crop and .npy generation
-
   Typical usage
   -------------
   You can use this program by first entering in the brainvisa environment
@@ -47,10 +45,8 @@ Several steps are required: crop and .npy generation
   from the terminal:
   >>> bv bash
   >>> python3 generate_crops.py
-
   Alternatively, you can launch the script in the interactive terminal ipython:
   >>> %run generate_crops.py
-
 """
 
 import argparse
@@ -94,7 +90,8 @@ from deep_folding.brainvisa.utils.constants import \
     _CROP_DIR_DEFAULT,\
     _SIDE_DEFAULT, _CROPPING_TYPE_DEFAULT,\
     _COMBINE_TYPE_DEFAULT, _INPUT_TYPE_DEFAULT,\
-    _SULCUS_DEFAULT, _NO_MASK_DEFAULT
+    _SULCUS_DEFAULT, _NO_MASK_DEFAULT,\
+    _DILATION_DEFAULT, _THRESHOLD_DEFAULT
 
 # Defines logger
 log = set_file_logger(__file__)
@@ -168,6 +165,8 @@ class CropGenerator:
                  crop_dir=_CROP_DIR_DEFAULT,
                  bbox_dir=_BBOX_DIR_DEFAULT,
                  mask_dir=_MASK_DIR_DEFAULT,
+                 dilation=_DILATION_DEFAULT,
+                 threshold=_THRESHOLD_DEFAULT,
                  list_sulci=_SULCUS_DEFAULT,
                  side=_SIDE_DEFAULT,
                  cropping_type=_CROPPING_TYPE_DEFAULT,
@@ -175,7 +174,6 @@ class CropGenerator:
                  parallel=False,
                  no_mask=_NO_MASK_DEFAULT):
         """Inits with list of directories and list of sulci
-
         Args:
             src_dir: folder containing generated skeletons, labels or distmaps
             crop_dir: name of output directory for crops with full path
@@ -197,6 +195,8 @@ class CropGenerator:
         self.list_sulci = complete_sulci_name(self.list_sulci, self.side)
         self.bbox_dir = bbox_dir
         self.mask_dir = mask_dir
+        self.dilation = dilation
+        self.threshold = threshold
         self.cropping_type = cropping_type
         self.combine_type = combine_type
         self.parallel = parallel
@@ -213,7 +213,6 @@ class CropGenerator:
 
     def crop_one_file(self, subject_id):
         """Crops one file
-
         Args:
             subject_id: string giving the subject ID
         """
@@ -247,9 +246,7 @@ class CropGenerator:
 
     def crop_files(self, number_subjects=_ALL_SUBJECTS):
         """Crop nii files
-
         The programm loops over all subjects from the input (source) directory.
-
         Args:
             number_subjects: integer giving the number of subjects to analyze,
                 by default it is set to _ALL_SUBJECTS (-1).
@@ -280,8 +277,8 @@ class CropGenerator:
                                                 number_subjects)
 
             log.info(f"Expected number of subjects = {len(list_subjects)}")
-            log.info(f"list_subjects[:5] = {list_subjects[:5]}")
-            log.debug(f"list_subjects = {list_subjects}")
+            log.info(f"list_subjects[:5] = {list_subjects[:5]}")
+            log.debug(f"list_subjects = {list_subjects}")
 
             # Creates target and cropped directory
             create_folder(self.crop_dir)
@@ -321,7 +318,6 @@ class CropGenerator:
 
     def compute_bounding_box_or_mask(self, number_subjects):
         """Computes bounding box or mask
-
         Args:
             number_subjects: integer giving the number of subjects to analyze,
                 by default it is set to _ALL_SUBJECTS (-1)."""
@@ -343,7 +339,9 @@ class CropGenerator:
                     self.mask, self.bbmin, self.bbmax = \
                         compute_simple_mask(sulci_list=self.list_sulci,
                                             side=self.side,
-                                            mask_dir=self.mask_dir)
+                                            mask_dir=self.mask_dir,
+                                            dilation=self.dilation,
+                                            threshold=self.threshold)
                 aims.write(
                     self.mask,
                     f"{self.crop_dir}/{self.side}mask_{self.input_type}.nii.gz")
@@ -361,9 +359,7 @@ class CropGenerator:
 
     def compute(self, number_subjects=_ALL_SUBJECTS):
         """Main API to create numpy files
-
         The programm loops over all subjects from the input (source) directory.
-
         Args:
             number_subjects: integer giving the number of subjects to analyze,
                 by default it is set to _ALL_SUBJECTS (-1).
@@ -403,7 +399,6 @@ class SkeletonCropGenerator(CropGenerator):
                  parallel=False,
                  no_mask=_NO_MASK_DEFAULT):
         """Inits with list of directories and list of sulci
-
         Args:
             src_dir: folder containing generated skeletons or labels
             crop_dir: name of output dire/neurospin/dico/data/deep_folding/currentctory for crops with full path
@@ -468,7 +463,6 @@ class FoldLabelCropGenerator(CropGenerator):
                  parallel=False,
                  no_mask=_NO_MASK_DEFAULT):
         """Inits with list of directories and list of sulci
-
         Args:
             src_dir: folder containing generated skeletons or labels
             crop_dir: name of output directory for crops with full path
@@ -583,10 +577,8 @@ class DistMapCropGenerator(CropGenerator):
 
 def parse_args(argv):
     """Function parsing command-line arguments
-
     Args:
         argv: a list containing command line arguments
-
     Returns:
         params: dictionary with keys: src_dir, tgt_dir, nb_subjects, list_sulci
     """
@@ -613,6 +605,14 @@ def parse_args(argv):
         "-k", "--mask_dir", type=str, default=_MASK_DIR_DEFAULT,
         help='masking directory where mask has been stored. '
              'Default is : ' + _MASK_DIR_DEFAULT)
+    parser.add_argument(
+        "-d", "--dilation", type=float, default=_DILATION_DEFAULT,
+        help='Dilation size of mask. '
+             'Default is : ' + str(_DILATION_DEFAULT))
+    parser.add_argument(
+        "-t", "--threshold", type=float, default=_THRESHOLD_DEFAULT,
+        help='Threshold value of mask. '
+             'Default is : ' + str(_THRESHOLD_DEFAULT))
     parser.add_argument(
         "-b", "--bbox_dir", type=str, default=_BBOX_DIR_DEFAULT,
         help='Bounding box directory where json files containing '
@@ -743,7 +743,6 @@ def generate_crops(
 @exception_handler
 def main(argv):
     """Reads argument line and creates cropped files and npy file
-
     Args:
         argv: a list containing command line arguments
     """
