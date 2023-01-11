@@ -59,9 +59,6 @@ def generate_skeleton_thin_junction(
     vol_skel = create_empty_volume_from_graph(graph)
     arr_skel = np.asarray(vol_skel)
 
-    cnt_duplicate = 0
-    cnt_total = 0
-
     for edge in graph.edges():
         for bucket_name, value in {'aims_junction': 110}.items():
             bucket = edge.get(bucket_name)
@@ -71,6 +68,16 @@ def generate_skeleton_thin_junction(
                     continue
                 for i, j, k in voxels:
                     arr_skel[i, j, k] = value
+
+    for edge in graph.edges():             
+        if edge.getSyntax() == 'hull_junction':
+            bucket = edge.get('aims_junction')
+            if bucket is not None:
+                voxels = np.array(bucket[0].keys())
+                if voxels.shape == (0,):
+                    continue
+                for i, j, k in voxels:
+                    arr_skel[i, j, k] = 35      
 
     for edge in graph.edges():
         for bucket_name, value in {'aims_plidepassage': 120}.items():
@@ -91,9 +98,6 @@ def generate_skeleton_thin_junction(
                 if voxels.shape == (0,):
                     continue
                 for i, j, k in voxels:
-                    # cnt_total += 1
-                    # if arr_skel[i, j, k] != 0:
-                    #     cnt_duplicate += 1
                     arr_skel[i, j, k] = value
 
     return vol_skel

@@ -87,7 +87,7 @@ from deep_folding.brainvisa.utils.constants import \
 _SKELETON_FILENAME = "skeleton_generated_"
 _FOLDLABEL_FILENAME = "foldlabel_"
 _RESAMPLED_SKELETON_FILENAME = "resampled_skeleton_"
-_RESAMPELD_FOLDLABEL_FILENAME = "resampled_foldlabel_"
+_RESAMPLED_FOLDLABEL_FILENAME = "resampled_foldlabel_"
 
 # Defines logger
 log = set_file_logger(__file__)
@@ -117,7 +117,7 @@ def resample_one_skeleton(input_image,
     # for the bottom value (30) and the simple surface value (60)
     # with respect to the natural order
     # We don't give background, which is the interior 0
-    values = np.array([11, 60, 30, 10, 20, 40, 50, 70, 80, 90, 100, 110, 120])
+    values = np.array([11, 60, 30, 35, 10, 20, 40, 50, 70, 80, 90, 100, 110, 120])
 
     # Normalization and resampling of skeleton images
     resampled = resample(input_image=input_image,
@@ -612,7 +612,7 @@ def resample_files(
             output_filename=output_filename)
     elif input_type == "foldlabel":
         src_filename = _FOLDLABEL_FILENAME if src_filename is None else src_filename
-        output_filename = _RESAMPELD_FOLDLABEL_FILENAME if output_filename is None else output_filename
+        output_filename = _RESAMPLED_FOLDLABEL_FILENAME if output_filename is None else output_filename
         resampler = FoldLabelResampler(
             src_dir=src_dir,
             resampled_dir=resampled_dir,

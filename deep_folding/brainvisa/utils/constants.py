@@ -12,7 +12,7 @@ _PATH_TO_GRAPH_SUPERVISED_DEFAULT = \
 
 # Default directory in which lies the dataset
 # It points to HCP directory
-_SRC_DIR_DEFAULT = "/neurospin/dico/data/bv_databases/human/hcp/hcp"
+_SRC_DIR_DEFAULT = "/neurospin/dico/data/bv_databases/human/not_labeled/hcp/hcp"
 
 # Gives the relative path to the labelled graph .arg
 # in a "morphologist-like" dataset
