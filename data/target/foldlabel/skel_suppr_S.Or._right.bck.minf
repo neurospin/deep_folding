@@ -1,0 +1,6 @@
+attributes = {
+    'voxel_size' : [ 1, 1, 1, 1 ],
+    'file_type' : 'BCK',
+    'data_type' : 'VOID',
+    'object_type' : 'Bucket'
+  }

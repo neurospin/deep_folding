@@ -1,0 +1,46 @@
+{
+    "bbmax_AIMS_Talairach": [
+        60.66335687670315,
+        75.71952983264742,
+        -4.598121985840422
+    ],
+    "bbmax_MNI152": [
+        154.77748948253384,
+        168.99963329321318,
+        107.75398867525428
+    ],
+    "bbmax_voxel": [
+        155,
+        169,
+        108
+    ],
+    "bbmin_AIMS_Talairach": [
+        34.063088432523074,
+        61.7344393738619,
+        -54.79035146878189
+    ],
+    "bbmin_MNI152": [
+        129.86412144733617,
+        151.3616518724251,
+        60.714083900903006
+    ],
+    "bbmin_voxel": [
+        130,
+        151,
+        61
+    ],
+    "bbox_dir": "/home/lg261972/Documents/deep_folding/data/target/bbox",
+    "date": "2023-01-16 10:29:03",
+    "git_sha": "9a500d2eae36d4199bda81fde94af8bb5a53e7bf",
+    "is_git": true,
+    "nb_subjects": 1,
+    "new_sulcus": "S.T.s.ter.asc.ant._left",
+    "out_voxel_size": 1,
+    "repo_working_dir": "/home/lg261972/Documents/deep_folding",
+    "side": "L",
+    "src_dir": [
+        "/home/lg261972/Documents/deep_folding/data/source/supervised"
+    ],
+    "sulcus": "S.T.s.ter.asc.ant._left",
+    "timestamp": 1673861343.5604858
+}
