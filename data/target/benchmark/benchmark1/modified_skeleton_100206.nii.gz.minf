@@ -1,0 +1,14 @@
+attributes = {
+    'volume_dimension' : [ 137, 287, 231, 1 ],
+    'sizeX' : 137,
+    'sizeY' : 287,
+    'sizeZ' : 231,
+    'sizeT' : 1,
+    'voxel_size' : [ 0.699999988079071, 0.700012028217316, 0.700012028217316 ],
+    'referentials' : [ 'Scanner-based anatomical coordinates' ],
+    'transformations' : [ [ -1, 0, 0, 47.9500007629395, 0, -1, 0, 99.7517166137695, 0, 0, -1, 80.1513748168945, 0, 0, 0, 1 ] ],
+    'storage_to_memory' : [ -1, 0, 0, 136, 0, -1, 0, 286, 0, 0, -1, 230, 0, 0, 0, 1 ],
+    'format' : 'NIFTI-1',
+    'data_type' : 'S16',
+    'object_type' : 'Volume'
+  }

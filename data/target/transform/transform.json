@@ -1,0 +1,10 @@
+{
+    "date": "2021-06-18 16:48:45",
+    "git_sha": "1fc62a7f1ce1bf334303327c46a5fa10d60ea4b6",
+    "is_git": true,
+    "nb_subjects": 2,
+    "repo_working_dir": "/home/lg261972/Documents/deep_folding",
+    "src_dir": "/home/lg261972/Documents/deep_folding/data/source/unsupervised",
+    "tgt_dir": "/home/lg261972/Documents/deep_folding/data/target/transform",
+    "timestamp": 1624027725.330476
+}
