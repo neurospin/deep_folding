@@ -309,6 +309,7 @@ class FileResampler:
             if os.path.isdir(self.src_dir):
                 src_files = glob.glob(f"{self.src_dir}/*.nii.gz")
                 log.debug(f"list src files = {src_files}")
+                log.debug(os.path.basename(src_files[0]))
 
                 list_all_subjects = \
                     [re.search(self.expr, os.path.basename(dI))[1]
@@ -488,7 +489,7 @@ class DistMapResampler(FileResampler):
             f'%(side)sresampled_distmap_%(subject)s.nii.gz')
 
         # subjects are detected as the nifti file names under src_dir
-        self.expr = '^.distmap_generated_([a-z]{2}\d{6}).nii.gz$'
+        self.expr = '^.distmap_generated_(sub-.*_ses-v1).nii.gz$'
 
     @staticmethod
     def resample_one_subject(src_file: str,
