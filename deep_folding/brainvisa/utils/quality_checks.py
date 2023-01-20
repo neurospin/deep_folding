@@ -60,7 +60,36 @@ def compare_number_aims_files_with_expected(output_dir: str,
     nb_expected_files = len(list_subjects)
 
     log.info(f"\n\tNumber of generated files = {nb_generated_files}")
-    log.info(f"\n\tNumber of expected files = {nb_expected_files}")
+    log.info(f"\n\tNumber of requested files = {nb_expected_files}")
 
     if nb_generated_files != nb_expected_files:
-        log.warning("Number of generated files != number of expected files")
+        log.warning("Number of generated files != number of requested files "
+                    "as determined by number of subjects")
+
+
+def compare_number_aims_files_with_number_in_source(output_dir: str,
+                                                    src_dir: str):
+    """Compares number of generated files and source files"""
+
+    all_files = glob.glob(f"{output_dir}/*")
+
+    generated_files = [f for f in all_files 
+                         if not re.search('.minf$', f)]
+    log.debug(f"Output directory = {output_dir}")
+    log.debug(f"Generated_files = {generated_files}")
+
+    src_files = glob.glob(f"{src_dir}/*")
+
+    src_files = [f for f in src_files 
+                         if not re.search('.minf$', f)]
+
+    nb_generated_files = len(generated_files)
+    nb_expected_files = len(src_files)
+
+    log.info(f"\n\tNumber of generated files = {nb_generated_files}")
+    log.info(f"\n\tNumber of source files = {nb_expected_files}")
+
+    if nb_generated_files != nb_expected_files:
+        log.warning("Number of generated files != number of source files. "
+                    "This is the important warning to look at "
+                    "if you want to process the whole dataset")
