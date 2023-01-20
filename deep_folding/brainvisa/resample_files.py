@@ -86,8 +86,10 @@ from deep_folding.brainvisa.utils.constants import \
 
 _SKELETON_FILENAME = "skeleton_generated_"
 _FOLDLABEL_FILENAME = "foldlabel_"
+_DISTMAP_FILENAME = "distmap_generated_"
 _RESAMPLED_SKELETON_FILENAME = "resampled_skeleton_"
 _RESAMPELD_FOLDLABEL_FILENAME = "resampled_foldlabel_"
+_RESAMPLED_DISTMAP_FILENAME = "resampled_distmap_"
 
 # Defines logger
 log = set_file_logger(__file__)
@@ -460,7 +462,8 @@ class DistMapResampler(FileResampler):
     """
 
     def __init__(self, src_dir, resampled_dir, transform_dir,
-                 side, out_voxel_size, parallel
+                 side, out_voxel_size, parallel, src_filename,
+                 output_filename
                  ):
         """Inits with list of directories
         Args:
@@ -480,16 +483,16 @@ class DistMapResampler(FileResampler):
         # Src directory contains either 'R' or 'L' a subdirectory
         self.src_file = join(
             self.src_dir,
-            '%(side)sdistmap_generated_%(subject)s.nii.gz')
+            f'%(side)s' + src_filename + '%(subject)s.nii.gz')
 
         # Names of files in function of dictionary: keys -> 'subject' and
         # 'side'
         self.resampled_file = join(
             self.resampled_dir,
-            f'%(side)sresampled_distmap_%(subject)s.nii.gz')
+            f'%(side)s' + output_filename + '%(subject)s.nii.gz')
 
         # subjects are detected as the nifti file names under src_dir
-        self.expr = '^.distmap_generated_(sub-.*_ses-v1).nii.gz$'
+        self.expr = '^.' + src_filename + '(.*).nii.gz$'
 
     @staticmethod
     def resample_one_subject(src_file: str,
@@ -548,12 +551,12 @@ def parse_args(argv):
         help='Voxel size of bounding box. '
              'Default is : None')
     parser.add_argument(
-        "-f", "--src_filename", type=str, default=None,
+        "-f", "--src_filename", type=str, default=_SKELETON_FILENAME,
         help='Filename of sources files. '
              'Format is : "<SIDE><src_filename><SUBJECT>.nii.gz" '
              'Default is : ' + _SKELETON_FILENAME)
     parser.add_argument(
-        "-e", "--output_filename", type=str, default=None,
+        "-e", "--output_filename", type=str, default=_RESAMPLED_SKELETON_FILENAME,
         help='Filename of output files. '
              'Format is : "<SIDE><output_filename><SUBJECT>.nii.gz" '
              'Default is : ' + _RESAMPLED_SKELETON_FILENAME)
@@ -630,7 +633,9 @@ def resample_files(
             transform_dir=transform_dir,
             side=side,
             out_voxel_size=out_voxel_size,
-            parallel=parallel)
+            parallel=parallel,
+            src_filename=src_filename,
+            output_filename=output_filename)
     else:
         raise ValueError(
             "input_type: shall be either 'skeleton', 'foldlabel' or "\
