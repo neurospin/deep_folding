@@ -42,11 +42,14 @@ import argparse
 import sys
 
 from os.path import basename
+from argparse import Namespace
 
 
 from deep_folding.brainvisa import exception_handler
 from deep_folding.config.logs import set_file_logger, set_root_logger_level
+from deep_folding.brainvisa.utils.logs import setup_log
 
+from deep_folding.brainvisa.utils.sulcus import complete_sulci_name
 
 from deep_folding.brainvisa.compute_mask import compute_mask
 from deep_folding.brainvisa.generate_crops import generate_crops
@@ -169,7 +172,7 @@ def main(argv):
     log.info(sulci_list)
 
 
-        # generate masks
+    # generate masks
     for sulcus in sulci_list:
         log.info(f"Treating the mask generation of {sulcus} (if required).")
         path_to_sulcus_mask = os.path.join(params['masks_dir'], vox_size,
@@ -177,15 +180,26 @@ def main(argv):
         log.debug(path_to_sulcus_mask)
         
         if not os.path.exists(path_to_sulcus_mask):
-            compute_mask(src_dir=params['labeled_subjects_dir'],
-                         path_to_graph=params['path_to_graph_supervised'],
-                         mask_dir=os.path.join(params['masks_dir'], vox_size),
-                         sulcus=sulcus,
-                         new_sulcus=params['new_sulcus'],
-                         side=params['side'],
-                         number_subjects=params['nb_subjects_mask'],
-                         out_voxel_size=params['out_voxel_size'])
+            # set up the right parameters
+            args_compute_mask = {'src_dir': params['labeled_subjects_dir'],
+                                 'path_to_graph': params['path_to_graph_supervised'],
+                                 'mask_dir': os.path.join(params['masks_dir'], vox_size),
+                                 'sulcus': sulcus,
+                                 'new_sulcus': params['new_sulcus'],
+                                 'side': params['side'],
+                                 'number_subjects': params['nb_subjects_mask'],
+                                 'out_voxel_size': params['out_voxel_size']}
+            
+            # write the logs as if the command line compute_mask.py was executed
+            new_sulcus = args_compute_mask['new_sulcus'] if args_compute_mask['new_sulcus'] else args_compute_mask['sulcus']
+            setup_log(Namespace(**{'verbose': log.level, **args_compute_mask}),
+                      log_dir=f"{args_compute_mask['mask_dir']}",
+                      prog_name='pipeline_compute_masks.py',
+                      suffix=complete_sulci_name(new_sulcus, args_compute_mask['side']))
+            
+            compute_mask(**args_compute_mask)
             log.info('Mask generated')
+
         else:
             log.info(f"Mask with the given parameters (side={params['side']},, sulcus={sulcus}, \
 voxel size={vox_size}) is already computed and stored at {path_to_sulcus_mask}. Please delete \
@@ -195,14 +209,21 @@ it before if you want to overwrite it.")
     # generate skeletons
     skel_dir = os.path.join(params['skeleton_dir'], 'raw', params['side'])
     if not os.path.exists(skel_dir):
-        generate_skeletons(src_dir=params['graphs_dir'],
-                           skeleton_dir=params['skeleton_dir'] + '/raw',
-                           path_to_graph=params['path_to_graph'],
-                           side=params['side'],
-                           junction=params['junction'],
-                           bids=params['bids'],
-                           parallel=params['parallel'],
-                           number_subjects=params['nb_subjects'])
+        args_generate_skeletons = {'src_dir': params['graphs_dir'],
+                                   'skeleton_dir': params['skeleton_dir'] + '/raw',
+                                   'path_to_graph': params['path_to_graph'],
+                                   'side': params['side'],
+                                   'junction': params['junction'],
+                                   'bids': params['bids'],
+                                   'parallel': params['parallel'],
+                                   'number_subjects': params['nb_subjects']}
+        
+        setup_log(Namespace(**{'verbose': log.level, **args_generate_skeletons}),
+                  log_dir=f"{args_generate_skeletons['skeleton_dir']}",
+                  prog_name='pipeline_generate_skeletons.py',
+                  suffix=full_side[1:])
+
+        generate_skeletons(**args_generate_skeletons)
         log.info('Skeletons generated')
     else:
         log.info(f"Raw skeletons are already computed. If you want overwrite them, please delete the \
@@ -213,12 +234,19 @@ folder at {skel_dir}.")
     if params['input_type'] == 'distmap':
         distmap_raw_path = os.path.join(params['distmaps_dir'], 'raw', params['side'])
         if not os.path.exists(distmap_raw_path):
-            generate_distmaps(src_dir=params['skeleton_dir'] + '/raw',
-                              distmaps_dir=params['distmaps_dir'] + '/raw',
-                              side=params['side'],
-                              parallel=params['parallel'],
-                              resampled_skel=params['resampled_skel'],
-                              number_subjects=params['nb_subjects'])
+            args_generate_distmaps = {'src_dir': params['skeleton_dir'] + '/raw',
+                                      'distmaps_dir': params['distmaps_dir'] + '/raw',
+                                      'side': params['side'],
+                                      'parallel': params['parallel'],
+                                      'resampled_skel': params['resampled_skel'],
+                                      'number_subjects': params['nb_subjects']}
+
+            setup_log(Namespace(**{'verbose': log.level, **args_generate_distmaps}),
+                      log_dir=f"{args_generate_distmaps['distmaps_dir']}",
+                      prog_name='pipeline_generate_distamps.py',
+                      suffix=full_side[1:])
+
+            generate_distmaps(**args_generate_distmaps)
             log.info('Raw distmaps generated')
         else:
             log.info(f"Raw distmaps are already computed. If you want overwrite them, please delete the \
@@ -228,13 +256,20 @@ folder at {distmap_raw_path}.")
     if params['input_type'] == 'foldlabel':
         foldlabel_raw_path = os.path.join(params['foldlabel_dir'], 'raw', params['side'])
         if not os.path.exists(foldlabel_raw_path):
-            generate_foldlabels(src_dir=params['skeleton_dir'] + '/raw',
-                                foldlabel_dir=params['foldlabel_dir'] + '/raw',
-                                path_to_graph=params['path_to_graph'],
-                                side=params['side'],
-                                junction=params['junction'],
-                                parallel=params['parallel'],
-                                number_subjects=params['nb_subjects'])
+            args_generate_foldlabels = {'src_dir': params['skeleton_dir'] + '/raw',
+                                        'foldlabel_dir': params['foldlabel_dir'] + '/raw',
+                                        'path_to_graph': params['path_to_graph'],
+                                        'side': params['side'],
+                                        'junction': params['junction'],
+                                        'parallel': params['parallel'],
+                                        'number_subjects': params['nb_subjects']}
+
+            setup_log(Namespace(**{'verbose': log.level, **args_generate_foldlabels}),
+                      log_dir=f"{args_generate_foldlabels['foldlabel_dir']}",
+                      prog_name='pipeline_generate_foldlabels.py',
+                      suffix=full_side[1:])
+
+            generate_foldlabels(**args_generate_foldlabels)
             log.info('Raw foldlabels generated')
         else:
             log.info(f"Raw foldlabels are already computed. If you want overwrite them, please delete the \
@@ -245,13 +280,20 @@ folder at {foldlabel_raw_path}.")
     if params['out_voxel_size'] != 'raw':
         path_to_transforms = os.path.join(params['transform_dir'], params['side'])
         if not os.path.exists(path_to_transforms):
-            generate_ICBM2009c_transforms(src_dir=params['graphs_dir'],
-                                          transform_dir=params['transform_dir'],
-                                          path_to_graph=params['path_to_graph'],
-                                          side=params['side'],
-                                          bids=params['bids'],
-                                          parallel=params['parallel'],
-                                          number_subjects=params['nb_subjects'])
+            args_generate_transforms = {'src_dir': params['graphs_dir'],
+                                        'transform_dir': params['transform_dir'],
+                                        'path_to_graph': params['path_to_graph'],
+                                        'side': params['side'],
+                                        'bids': params['bids'],
+                                        'parallel': params['parallel'],
+                                        'number_subjects': params['nb_subjects']}
+
+            setup_log(Namespace(**{'verbose': log.level, **args_generate_transforms}),
+                      log_dir=f"{args_generate_transforms['transform_dir']}",
+                      prog_name='pipeline_generate_ICBM2009c_transforms.py',
+                      suffix=full_side[1:])
+
+            generate_ICBM2009c_transforms(**args_generate_transforms)
             log.info('Transforms generated')
         else:
             log.info(f"Transforms are already computed. If you want overwrite them, please delete the \
@@ -274,16 +316,23 @@ folder at {path_to_transforms}.")
             resampled_dir = os.path.join(params['skeleton_dir'], vox_size)
         
         if not os.path.exists(resampled_dir):
-            resample_files(src_dir=raw_input,
-                           input_type=params['input_type'],
-                           resampled_dir=resampled_dir,
-                           transform_dir=params['transform_dir'],
-                           side=params['side'],
-                           number_subjects=params['nb_subjects'],
-                           out_voxel_size=params['out_voxel_size'],
-                           parallel=params['parallel'],
-                           src_filename=params['src_filename'],
-                           output_filename=params['output_filename'])
+            args_resample_files = {'src_dir': raw_input,
+                                   'input_type': params['input_type'],
+                                   'resampled_dir': resampled_dir,
+                                   'transform_dir': params['transform_dir'],
+                                   'side': params['side'],
+                                   'number_subjects': params['nb_subjects'],
+                                   'out_voxel_size': params['out_voxel_size'],
+                                   'parallel': params['parallel'],
+                                   'src_filename': params['src_filename'],
+                                   'output_filename': params['output_filename']}
+
+            setup_log(Namespace(**{'verbose': log.level, **args_resample_files}),
+                      log_dir=f"{args_resample_files['resampled_dir']}",
+                      prog_name='pipeline_resample_files.py',
+                      suffix=full_side[1:])
+
+            resample_files(**args_resample_files)
             log.info(f"{params['input_type']} resampled")
         else:
             log.info(f"Resampled {params['input_type']}s are already computed. If you want overwrite them, please delete the \
@@ -312,18 +361,25 @@ folder at {resampled_dir}.")
     path_to_crops = os.path.join(params['crops_dir'], vox_size, params['region_name'],
                                  mask_str)
     if not os.path.exists(path_to_crops+'/'+params['side']+params['input_type']+'s'):
-        generate_crops(src_dir=src_dir,
-                       input_type=params['input_type'],
-                       crop_dir=path_to_crops,
-                       bbox_dir=params['bbox_dir'],
-                       mask_dir=params['masks_dir'] + f'/{vox_size}',
-                       side=params['side'],
-                       list_sulci=sulci_list,
-                       cropping_type=params['cropping_type'],
-                       combine_type=params['combine_type'],
-                       parallel=params['parallel'],
-                       number_subjects=params['nb_subjects'],
-                       no_mask=params['no_mask'])
+        args_generate_crops = {'src_dir': src_dir,
+                               'input_type': params['input_type'],
+                               'crop_dir': path_to_crops,
+                               'bbox_dir': params['bbox_dir'],
+                               'mask_dir': params['masks_dir'] + f'/{vox_size}',
+                               'side': params['side'],
+                               'list_sulci': sulci_list,
+                               'cropping_type': params['cropping_type'],
+                               'combine_type': params['combine_type'],
+                               'parallel': params['parallel'],
+                               'number_subjects': params['nb_subjects'],
+                               'no_mask': params['no_mask']}
+        
+        setup_log(Namespace(**{'verbose': log.level, **args_generate_crops}),
+                  log_dir=f"{args_generate_crops['crop_dir']}",
+                  prog_name='pipeline_generate_crops.py',
+                  suffix=full_side[1:]+'_'+args_generate_crops['input_type'])
+        
+        generate_crops(**args_generate_crops)
         log.info('Crops generated')
     else:
         log.info(f"Crops are already computed. If you want overwrite them, please delete the \
