@@ -34,6 +34,7 @@
 # knowledge of the CeCILL license version 2 and that you accept its terms.
 
 import os
+import glob
 
 from deep_folding.brainvisa.utils.constants import _ALL_SUBJECTS
 
@@ -140,3 +141,30 @@ def get_all_subjects_as_dictionary(src_dir_list,
     log.info(f"Number of subjects in directories: {len(subjects)}\n")
 
     return subjects
+
+
+def get_not_processed_files(src_dir, tgt_dir):
+    """Returns list of source files noy yet processed.
+    
+    This is done by comparing subjects in src and tgt directories"""
+
+    src_files = glob.glob(f"{src_dir}/*.nii.gz")
+    log.info(f"number of source files = {len(src_files)}")
+    log.info(f"first source file = {src_files[0]}")
+    log.debug(f"list src files = {src_files}")
+
+    tgt_files = glob.glob(f"{tgt_dir}/*.nii.gz")
+    log.info(f"number of target files = {len(tgt_files)}")
+    log.info(f"first target file = {tgt_files[0]}")
+
+    src_subjects = [subject.split("_")[-1] for subject in src_files]
+    tgt_subjects = [subject.split("_")[-1] for subject in tgt_files]
+
+    not_processed_subjects = list(set(src_subjects)-set(tgt_subjects))
+
+    root = ''.join(src_files[0].split("_")[:-1])
+    not_processed_files = [f"{root}_{subject}" for subject in not_processed_subjects]
+    log.info(f"number of not processed subjects = {len(not_processed_files)}")
+    log.info(f"first not_processed file = {not_processed_files[0]}")
+
+    return not_processed_files
