@@ -51,6 +51,7 @@ import glob
 import re
 import sys
 from os.path import abspath
+from os.path import exists
 from os.path import basename
 
 from deep_folding.brainvisa import exception_handler
@@ -62,7 +63,10 @@ from deep_folding.brainvisa.utils.parallel import define_njobs
 from deep_folding.brainvisa.utils.foldlabel import \
     generate_foldlabel_from_graph_file
 from deep_folding.brainvisa.utils.quality_checks import \
-    compare_number_aims_files_with_expected
+    compare_number_aims_files_with_expected, \
+    compare_number_aims_files_with_number_in_source, \
+    get_not_processed_subjects, \
+    save_list_to_csv
 from pqdm.processes import pqdm
 from deep_folding.config.logs import set_file_logger
 
@@ -190,9 +194,13 @@ class GraphConvert2FoldLabel:
     def compute(self, number_subjects):
         """Loops over subjects and converts graphs into skeletons.
         """
+        if not exists(self.src_dir):
+            raise ValueError(f"{self.src_dir} does not exist!")
         filenames = glob.glob(f"{self.src_dir}/*")
         list_subjects = [basename(filename) for filename in filenames 
                     if not re.search('.minf$', filename)]
+        list_subjects = \
+            get_not_processed_subjects(list_subjects, self.foldlabel_dir)
         list_subjects = select_subjects_int(list_subjects, number_subjects)
 
         # Performs computation on all subjects either serially or in parallel
@@ -210,6 +218,12 @@ class GraphConvert2FoldLabel:
         # Checks if there is expected number of generated files
         compare_number_aims_files_with_expected(self.foldlabel_dir,
                                                 list_subjects)
+        list_subjects = [basename(filename) for filename in filenames 
+                            if not re.search('.minf$', filename)]
+        not_processed_subjects = \
+            get_not_processed_subjects(list_subjects, self.foldlabel_dir)
+        save_list_to_csv(not_processed_subjects,
+                         f"{self.foldlabel_dir}/../not_processed_subjects.csv")
 
 def generate_foldlabels(
         src_dir=_SRC_DIR_DEFAULT,
