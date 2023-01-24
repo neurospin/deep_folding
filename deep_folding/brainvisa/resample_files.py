@@ -74,7 +74,9 @@ from deep_folding.brainvisa.utils.folder import create_folder
 from deep_folding.brainvisa.utils.logs import setup_log
 from deep_folding.brainvisa.utils.quality_checks import \
     compare_number_aims_files_with_expected, \
-    compare_number_aims_files_with_number_in_source
+    compare_number_aims_files_with_number_in_source, \
+    get_not_processed_files, \
+    save_list_to_csv
 from pqdm.processes import pqdm
 from deep_folding.config.logs import set_file_logger
 from soma import aims
@@ -315,6 +317,9 @@ class FileResampler:
                 src_files = glob.glob(f"{self.src_dir}/*.nii.gz")
                 log.debug(f"list src files = {src_files}")
 
+                # Creates target directories
+                create_folder(self.resampled_dir)
+
                 # Generates list of subjects not treated yet
                 not_processed_files = get_not_processed_files(self.src_dir, self.resampled_dir)
 
@@ -333,9 +338,6 @@ class FileResampler:
                 log.info(f"list_subjects[:5] = {list_subjects[:5]}")
                 log.debug(f"list_subjects = {list_subjects}")
 
-                # Creates target directories
-                create_folder(self.resampled_dir)
-
                 # Performs resampling for each file in a parallelized way
                 if self.parallel:
                     log.info(
@@ -350,6 +352,7 @@ class FileResampler:
                     for sub in list_subjects:
                         self.resample_one_subject_wrapper(sub)
             else:
+                list_subjects = []
                 log.info("There is no subject or there is no subject to process"
                          "in the source directory")
 
@@ -358,35 +361,12 @@ class FileResampler:
                                                     list_subjects)
 
             # Checks if number of generated files == number of src files
-            compare_number_aims_files_with_number_in_source(self.resampled_dir,
-                                                            self.src_dir)
-
-
-def get_not_processed_files(src_dir, tgt_dir):
-    """Returns list of source files noy yet processed.
-    
-    This is done by comparing subjects in src and tgt directories"""
-
-    src_files = glob.glob(f"{src_dir}/*.nii.gz")
-    log.info(f"number of source files = {len(src_files)}")
-    log.info(f"first source file = {src_files[0]}")
-    log.debug(f"list src files = {src_files}")
-
-    tgt_files = glob.glob(f"{tgt_dir}/*.nii.gz")
-    log.info(f"number of target files = {len(tgt_files)}")
-    log.info(f"first target file = {tgt_files[0]}")
-
-    src_subjects = [subject.split("_")[-1] for subject in src_files]
-    tgt_subjects = [subject.split("_")[-1] for subject in tgt_files]
-
-    not_processed_subjects = list(set(src_subjects)-set(tgt_subjects))
-
-    root = ''.join(src_files[0].split("_")[:-1])
-    not_processed_files = [f"{root}_{subject}" for subject in not_processed_subjects]
-    log.info(f"number of not processed subjects = {len(not_processed_files)}")
-    log.info(f"first not_processed file = {not_processed_files[0]}")
-
-    return not_processed_files
+            resampled_files, src_files = \
+                compare_number_aims_files_with_number_in_source(self.resampled_dir,
+                                                                self.src_dir)
+            not_processed_files = get_not_processed_files(self.src_dir, self.resampled_dir)
+            save_list_to_csv(not_processed_files, 
+                             f"{self.resampled_dir}/../not_processed_files.csv")
 
 
 class SkeletonResampler(FileResampler):
