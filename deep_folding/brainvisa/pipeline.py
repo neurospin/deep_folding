@@ -216,7 +216,8 @@ it before if you want to overwrite it.")
                                    'junction': params['junction'],
                                    'bids': params['bids'],
                                    'parallel': params['parallel'],
-                                   'number_subjects': params['nb_subjects']}
+                                   'number_subjects': params['nb_subjects'],
+                                   'quality_checks': params['skel_qc_path']}
         
         setup_log(Namespace(**{'verbose': log.level, **args_generate_skeletons}),
                   log_dir=f"{args_generate_skeletons['skeleton_dir']}",

@@ -197,5 +197,33 @@ We then generate skeleton crops and foldlabel crops. The effective mask is saved
 
     python3 generate_crops.py -s $RESAMPLED_SKELETON_DIR -o $CROP_DIR -i $SIDE -y skeleton -k $MASK_DIR -u $SULCUS -c mask -a
     python3 generate_crops.py -s $RESAMPLED_SKELETON_DIR -o $CROP_DIR -i $SIDE -y foldlabel -k $MASK_DIR -u $SULCUS -c mask -a
-  
+
+pipeline.py
+===========
+
+You can use the pipeline.py program to do all the previous steps in one command line. The way it works is that it calls all the required functions to process the target dataset from graphs to crops.
+/!\ Currently, if a step is already done (already existing skeletons for example), the program doesn't recompute it and use the existing data.
+
+All the parameters required for the called functions need to be written in a json file, which is the only argument (with verbose) of the pipeline function.
+/!\ Any change in the arguments of a called function needs to be passed on both the json file and the pipeline.py code itself.
+
+
+Currently (last update on 25/01/2023) the arguments of the json file are the following:
+
+- side: same as others, 'R' or 'L'
+- out_voxel_size: int, same as others.
+- brain_region_json: *pipeline specific* ; path to a json containing brain regions, each one defined by a set of sulci.
+- region name: *pipeline specific* ; name of the target region in the brain_region_json
+- parallel: same as others.
+- nb_subjects: int, same as others.
+- input_type: what kind of crops to produce. Either 'skeleton' (default), 'foldlabel' or 'distmap'.
+- labeled_subject_dir: path to a labeled database, used to generate the mask of the target region
+- path_to_graph(_supervised): end of the path to graphs. Used to generate the masks (_supervised) or the skeletons.
+- masks_dir: where to save the masks
+- skel_qc_path: path to the csv file containing the hand-made quality checks. Used by generate_skeletons.
+- nb_subjects_mask: int, used by compute_mask. Number of subjects used to compute the masks.
+- [object]_dir: directory where the object is to be saved. If the file already exists, the program uses the already existing data and doesn't recompute it.
+- other parameters: function specific parameters.
+
+
  

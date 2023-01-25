@@ -73,3 +73,9 @@ _COMBINE_TYPE_DEFAULT = False
 
 # Whether applying mask or not on cropped file
 _NO_MASK_DEFAULT = False
+
+# path to the brain regions' json
+_BRAIN_REGION_JSON = '/neurospin/dico/agaudin/Runs/06_deep_folding/sulci_regions_overlap.json'
+
+# path to the qc csv
+_QC_PATH_DEFAULT = ''
