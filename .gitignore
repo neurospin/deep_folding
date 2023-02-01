@@ -10,11 +10,11 @@ dist
 notebooks/.ipynb_checkpoints
 notebooks/.vscode
 notebooks/test
-data/target
 notebooks/mni_icbm152_nlin_asym_09c
 .vscode
 deep_folding/brainvisa/test
 data/test
+data/target
 
 # Files #
 ################
