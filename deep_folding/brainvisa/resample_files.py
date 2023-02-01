@@ -119,7 +119,7 @@ def resample_one_skeleton(input_image,
     # for the bottom value (30) and the simple surface value (60)
     # with respect to the natural order
     # We don't give background, which is the interior 0
-    values = np.array([11, 60, 30, 10, 20, 40, 50, 70, 80, 90, 100, 110, 120])
+    values = np.array([11, 60, 30, 35, 10, 20, 40, 50, 70, 80, 90, 100, 110, 120])
 
     # Normalization and resampling of skeleton images
     resampled = resample(input_image=input_image,
