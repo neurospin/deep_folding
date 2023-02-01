@@ -9,6 +9,7 @@ import glob
 
 import numpy as np
 import pandas as pd
+from tqdm import tqdm
 from soma import aims
 
 from deep_folding.config.logs import set_file_logger
@@ -48,7 +49,7 @@ def save_to_pickle(cropped_dir, tgt_dir=None, file_basename=None):
     log.info("Now generating pickle file...")
     log.debug(f"cropped_dir = {cropped_dir}")
 
-    for filename in os.listdir(cropped_dir):
+    for filename in tqdm(os.listdir(cropped_dir)):
         file_nii = os.path.join(cropped_dir, filename)
         if is_file_nii(file_nii):
             aimsvol = aims.read(file_nii)
@@ -97,9 +98,11 @@ def save_to_numpy(cropped_dir, tgt_dir=None, file_basename=None):
     list_sample_id = []
     list_sample_file = []
 
-    log.info("Now generating numpy array...")
+    log.info("Now generating numpy array: 4 steps")
     log.debug(f"cropped_dir = {cropped_dir}")
-    for filename in sorted(os.listdir(cropped_dir)):
+    log.info("1. Now reading cropped dir...")
+    listdir = os.listdir(cropped_dir)
+    for filename in tqdm(sorted(listdir)):
         file_nii = os.path.join(cropped_dir, filename)
         if is_file_nii(file_nii):
             aimsvol = aims.read(file_nii)
@@ -108,6 +111,7 @@ def save_to_numpy(cropped_dir, tgt_dir=None, file_basename=None):
             list_sample_id.append(os.path.basename(subject))
             list_sample_file.append(sample)
 
+    log.info("2. Now writing subject name file...")
     # Writes subject ID csv file
     subject_df = pd.DataFrame(list_sample_id, columns=["Subject"])
     subject_df.to_csv(os.path.join(tgt_dir, file_basename+'_subject.csv'),
@@ -118,12 +122,13 @@ def save_to_numpy(cropped_dir, tgt_dir=None, file_basename=None):
     list_sample_id = np.array(list_sample_id)
     np.save(os.path.join(tgt_dir, 'sub_id.npy'), list_sample_id)
 
+    log.info("3. Now saving to numpy array...")
     # Writes volumes as numpy arrays
     list_sample_file = np.array(list_sample_file)
     np.save(os.path.join(tgt_dir, file_basename+'.npy'), list_sample_file)
 
     # Quality_checks
-    log.info("Now performing checks on numpy arrays...")
+    log.info("4. Now performing checks on numpy arrays...")
     quality_checks(
         os.path.join(tgt_dir, file_basename+'_subject.csv'),
         os.path.join(tgt_dir, file_basename+'.npy'),
