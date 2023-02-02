@@ -186,17 +186,6 @@ def main(argv):
     params['transform_dir'] = os.path.join(params["output_dir"], "transforms")
     params['crops_dir'] = os.path.join(params["output_dir"], "crops")
 
-    # Generates file prefix
-    if params["input_type"] == "distmap":
-        params["src_filename"] = "distmap_generated_"
-        params["output_filename"] = "resampled_distmap_"
-    elif params["input_type"] == "foldlabel":
-        params["src_filename"] = "foldlabel_generated_"
-        params["output_filename"] = "resampled_foldlabel_"
-    else:
-        params["src_filename"] = "skeleton_generated_"
-        params["output_filename"] = "resampled_skeleton_"
-
     # generate masks
     for sulcus in sulci_list:
         log.info(f"Treating the mask generation of {sulcus} (if required).")
@@ -254,7 +243,7 @@ it before if you want to overwrite it.")
     else:
         log.info("Raw skeletons are already computed. "
                  "If you want to overwrite them, "
-                 f"please delete the folder at {skel_dir}.")
+                 f"please delete the folder at {skel_dir}")
     
 
     # generate raw distmaps if required
@@ -278,7 +267,7 @@ it before if you want to overwrite it.")
         else:
             log.info("Raw distmaps are already computed. "
                      "If you want to overwrite them, "
-                     f"please delete the folder at {distmap_raw_path}.")
+                     f"please delete the folder at {distmap_raw_path}")
     
     # generate raw foldlabels if required
     if params['input_type'] == 'foldlabel':
@@ -302,7 +291,7 @@ it before if you want to overwrite it.")
         else:
             log.info("Raw foldlabels are already computed. "
                      "If you want to overwrite them, "
-                     f"please delete the folder at {foldlabel_raw_path}.")
+                     f"please delete the folder at {foldlabel_raw_path}")
 
 
     # generate transform
@@ -327,7 +316,7 @@ it before if you want to overwrite it.")
         else:
             log.info("Transforms are already computed. "
                      "If you want to overwrite them, "
-                     f"please delete the folder at {path_to_transforms}.")
+                     f"please delete the folder at {path_to_transforms}")
 
 
     # resample files
@@ -368,7 +357,7 @@ it before if you want to overwrite it.")
         else:
             log.info(f"Resampled {params['input_type']}s are already computed. "
                      "If you want to overwrite them, "
-                     f"please delete the folder at {resampled_dir}.")
+                     f"please delete the folder at {resampled_dir}")
     
 
     # generate crops
@@ -423,7 +412,7 @@ it before if you want to overwrite it.")
     else:
         log.info("Crops are already computed. "
                  "If you want to overwrite them, "
-                 f"please delete the folder at {path_to_crops}.")
+                 f"please delete the folder at {path_to_crops}")
     
 
 
