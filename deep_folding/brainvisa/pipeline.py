@@ -171,6 +171,27 @@ def main(argv):
                                 json_path=params['brain_regions_json'])
     log.info(sulci_list)
 
+    # Generates supervised output paths
+    params['masks_dir'] = os.path.join(params["supervised_output_dir"], "mask")
+    params['bbox_dir'] = os.path.join(params["supervised_output_dir"], "bbox")
+
+    # Generates unsupervised output paths
+    params['skeleton_dir'] = os.path.join(params["output_dir"], "skeletons")
+    params['distmaps_dir'] = os.path.join(params["output_dir"], "distmaps")
+    params['foldlabel_dir'] = os.path.join(params["output_dir"], "foldlabels")
+    params['transform_dir'] = os.path.join(params["output_dir"], "transforms")
+    params['crops_dir'] = os.path.join(params["output_dir"], "crops")
+
+    # Generates file prefix
+    if params["input_type"] == "distmap":
+        params["src_filename"] = "distmap_generated_"
+        params["output_filename"] = "resampled_distmap_"
+    elif params["input_type"] == "foldlabel":
+        params["src_filename"] = "foldlabel_generated_"
+        params["output_filename"] = "resampled_foldlabel_"
+    else:
+        params["src_filename"] = "skeleton_generated_"
+        params["output_filename"] = "resampled_skeleton_"
 
     # generate masks
     for sulcus in sulci_list:
