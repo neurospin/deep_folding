@@ -60,12 +60,6 @@ from deep_folding.brainvisa.generate_skeletons import generate_skeletons
 from deep_folding.brainvisa.resample_files import resample_files
 
 
-# Imports constants
-from deep_folding.brainvisa.utils.constants import \
-    _ALL_SUBJECTS, _SUPERVISED_SRC_DIR_DEFAULT,\
-    _MASK_DIR_DEFAULT, _SIDE_DEFAULT, _SULCUS_DEFAULT,\
-    _VOXEL_SIZE_DEFAULT, _PATH_TO_GRAPH_SUPERVISED_DEFAULT,\
-    _BRAIN_REGION_JSON, _PATH_TO_GRAPH_DEFAULT
 
 # Defines logger
 log = set_file_logger(__file__)
@@ -164,6 +158,16 @@ def main(argv):
         mask_str = 'no_mask'
     else:
         mask_str = 'mask'
+    
+    src_filename = f"{params['input_type']}_generated_"
+    output_filename = f"resampled_{params['input_type']}_"
+
+    if params['input_type'] == 'distmap':
+        cropdir_name = "distmap"
+    elif params['input_type'] == 'foldlabel':
+        cropdir_name = "label"
+    else:
+        cropdir_name = "crop"
 
 
     # get the concerned sulci
@@ -351,8 +355,8 @@ it before if you want to overwrite it.")
                                    'number_subjects': params['nb_subjects'],
                                    'out_voxel_size': params['out_voxel_size'],
                                    'parallel': params['parallel'],
-                                   'src_filename': params['src_filename'],
-                                   'output_filename': params['output_filename']}
+                                   'src_filename': src_filename,
+                                   'output_filename': output_filename}
 
             setup_log(Namespace(**{'verbose': log.level, **args_resample_files}),
                       log_dir=f"{args_resample_files['resampled_dir']}",
@@ -371,16 +375,16 @@ it before if you want to overwrite it.")
     if params['input_type'] == 'distmap':
         raw_input = params['distmaps_dir']
         resampled_dir = os.path.join(params['distmaps_dir'], vox_size)
-        cropdir_name = "distmap"
+
     elif params['input_type'] == 'foldlabel':
         raw_input = params['foldlabel_dir']
         resampled_dir = os.path.join(params['foldlabel_dir'], vox_size)
-        cropdir_name = "label"
+        
     else:
         # raw data supposed to be skeletons by default
         raw_input = params['skeleton_dir']
         resampled_dir = os.path.join(params['skeleton_dir'], vox_size)
-        cropdir_name = "crop"
+
     
     if params['out_voxel_size'] == 'raw':
         src_dir = raw_input + 'raw'
@@ -411,6 +415,11 @@ it before if you want to overwrite it.")
         
         generate_crops(**args_generate_crops)
         log.info('Crops generated')
+
+        # save params json where the crops lie
+        with open(path_to_crops+'/pipeline_params.json', 'w') as file:
+            json.dump(params, file)
+    
     else:
         log.info("Crops are already computed. "
                  "If you want to overwrite them, "
