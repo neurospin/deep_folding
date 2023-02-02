@@ -350,15 +350,16 @@ it before if you want to overwrite it.")
     if params['input_type'] == 'distmap':
         raw_input = params['distmaps_dir']
         resampled_dir = os.path.join(params['distmaps_dir'], vox_size)
-    
+        cropdir_name = "distmap"
     elif params['input_type'] == 'foldlabel':
         raw_input = params['foldlabel_dir']
         resampled_dir = os.path.join(params['foldlabel_dir'], vox_size)
-    
+        cropdir_name = "label"
     else:
         # raw data supposed to be skeletons by default
         raw_input = params['skeleton_dir']
         resampled_dir = os.path.join(params['skeleton_dir'], vox_size)
+        cropdir_name = "crop"
     
     if params['out_voxel_size'] == 'raw':
         src_dir = raw_input + 'raw'
@@ -367,7 +368,8 @@ it before if you want to overwrite it.")
     
     path_to_crops = os.path.join(params['crops_dir'], vox_size, params['region_name'],
                                  mask_str)
-    if not os.path.exists(path_to_crops+'/'+params['side']+params['input_type']+'s'):
+
+    if not os.path.exists(path_to_crops+'/'+params['side']+cropdir_name+'s'):
         args_generate_crops = {'src_dir': src_dir,
                                'input_type': params['input_type'],
                                'crop_dir': path_to_crops,
