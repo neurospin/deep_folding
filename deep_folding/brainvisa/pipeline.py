@@ -72,7 +72,7 @@ log = set_file_logger(__file__)
 
 
 # get all the sulci of a given brain region
-def get_sulci_list(region_name, side, json_path='/neurospin/dico/agaudin/Runs/06_deep_folding/sulci_regions_overlap.json'):
+def get_sulci_list(region_name, side, json_path='/neurospin/dico/data/deep_folding/current/sulci_regions_overlap.json'):
     with open(json_path, 'r') as file:
         brain_regions = json.load(file)
     
@@ -206,7 +206,7 @@ voxel size={vox_size}) is already computed and stored at {path_to_sulcus_mask}. 
 it before if you want to overwrite it.")
 
 
-    # generate skeletons
+    # generate raw skeletons
     skel_dir = os.path.join(params['skeleton_dir'], 'raw', params['side'])
     if not os.path.exists(skel_dir):
         args_generate_skeletons = {'src_dir': params['graphs_dir'],
@@ -253,7 +253,7 @@ folder at {skel_dir}.")
             log.info(f"Raw distmaps are already computed. If you want overwrite them, please delete the \
 folder at {distmap_raw_path}.")
     
-    # generate foldlabels if required
+    # generate raw foldlabels if required
     if params['input_type'] == 'foldlabel':
         foldlabel_raw_path = os.path.join(params['foldlabel_dir'], 'raw', params['side'])
         if not os.path.exists(foldlabel_raw_path):
@@ -316,7 +316,8 @@ folder at {path_to_transforms}.")
             raw_input = os.path.join(params['skeleton_dir'], 'raw')
             resampled_dir = os.path.join(params['skeleton_dir'], vox_size)
         
-        if not os.path.exists(resampled_dir):
+        path_resampled_path = os.path.join(resampled_dir, params['side'])
+        if not os.path.exists(path_resampled_path):
             args_resample_files = {'src_dir': raw_input,
                                    'input_type': params['input_type'],
                                    'resampled_dir': resampled_dir,
