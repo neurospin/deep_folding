@@ -162,6 +162,12 @@ def main(argv):
     src_filename = f"{params['input_type']}_generated_"
     output_filename = f"resampled_{params['input_type']}_"
 
+    if params['input_type'] == 'distmap':
+        cropdir_name = "distmap"
+    elif params['input_type'] == 'foldlabel':
+        cropdir_name = "label"
+    else:
+        cropdir_name = "crop"
 
 
     # get the concerned sulci
@@ -348,16 +354,16 @@ it before if you want to overwrite it.")
     if params['input_type'] == 'distmap':
         raw_input = params['distmaps_dir']
         resampled_dir = os.path.join(params['distmaps_dir'], vox_size)
-        cropdir_name = "distmap"
+
     elif params['input_type'] == 'foldlabel':
         raw_input = params['foldlabel_dir']
         resampled_dir = os.path.join(params['foldlabel_dir'], vox_size)
-        cropdir_name = "label"
+        
     else:
         # raw data supposed to be skeletons by default
         raw_input = params['skeleton_dir']
         resampled_dir = os.path.join(params['skeleton_dir'], vox_size)
-        cropdir_name = "crop"
+
     
     if params['out_voxel_size'] == 'raw':
         src_dir = raw_input + 'raw'
