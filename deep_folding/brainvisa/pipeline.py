@@ -161,9 +161,9 @@ def main(argv):
     log.info(vox_size)
 
     if params['no_mask'] == True:
-        mask_str = 'mask'
-    else:
         mask_str = 'no_mask'
+    else:
+        mask_str = 'mask'
 
 
     # get the concerned sulci
@@ -227,8 +227,9 @@ it before if you want to overwrite it.")
         generate_skeletons(**args_generate_skeletons)
         log.info('Skeletons generated')
     else:
-        log.info(f"Raw skeletons are already computed. If you want overwrite them, please delete the \
-folder at {skel_dir}.")
+        log.info("Raw skeletons are already computed. "
+                 "If you want to overwrite them, "
+                 f"please delete the folder at {skel_dir}.")
     
 
     # generate raw distmaps if required
@@ -250,8 +251,9 @@ folder at {skel_dir}.")
             generate_distmaps(**args_generate_distmaps)
             log.info('Raw distmaps generated')
         else:
-            log.info(f"Raw distmaps are already computed. If you want overwrite them, please delete the \
-folder at {distmap_raw_path}.")
+            log.info("Raw distmaps are already computed. "
+                     "If you want to overwrite them, "
+                     f"please delete the folder at {distmap_raw_path}.")
     
     # generate raw foldlabels if required
     if params['input_type'] == 'foldlabel':
@@ -273,8 +275,9 @@ folder at {distmap_raw_path}.")
             generate_foldlabels(**args_generate_foldlabels)
             log.info('Raw foldlabels generated')
         else:
-            log.info(f"Raw foldlabels are already computed. If you want overwrite them, please delete the \
-folder at {foldlabel_raw_path}.")
+            log.info("Raw foldlabels are already computed. "
+                     "If you want to overwrite them, "
+                     f"please delete the folder at {foldlabel_raw_path}.")
 
 
     # generate transform
@@ -297,8 +300,9 @@ folder at {foldlabel_raw_path}.")
             generate_ICBM2009c_transforms(**args_generate_transforms)
             log.info('Transforms generated')
         else:
-            log.info(f"Transforms are already computed. If you want overwrite them, please delete the \
-folder at {path_to_transforms}.")
+            log.info("Transforms are already computed. "
+                     "If you want to overwrite them, "
+                     f"please delete the folder at {path_to_transforms}.")
 
 
     # resample files
@@ -337,8 +341,9 @@ folder at {path_to_transforms}.")
             resample_files(**args_resample_files)
             log.info(f"{params['input_type']} resampled")
         else:
-            log.info(f"Resampled {params['input_type']}s are already computed. If you want overwrite them, please delete the \
-folder at {resampled_dir}.")
+            log.info(f"Resampled {params['input_type']}s are already computed. "
+                     "If you want to overwrite them, "
+                     f"please delete the folder at {resampled_dir}.")
     
 
     # generate crops
@@ -384,8 +389,9 @@ folder at {resampled_dir}.")
         generate_crops(**args_generate_crops)
         log.info('Crops generated')
     else:
-        log.info(f"Crops are already computed. If you want overwrite them, please delete the \
-folder at {path_to_crops}.")
+        log.info("Crops are already computed. "
+                 "If you want to overwrite them, "
+                 f"please delete the folder at {path_to_crops}.")
     
 
 
