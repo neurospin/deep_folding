@@ -202,10 +202,12 @@ pipeline.py
 ===========
 
 You can use the pipeline.py program to do all the previous steps in one command line. The way it works is that it calls all the required functions to process the target dataset from graphs to crops.
-/!\ Currently, if a step is already done (already existing skeletons for example), the program doesn't recompute it and use the existing data.
+
+/!\\ Currently, if a step is already done (already existing skeletons for example), the program doesn't recompute it and use the existing data.
 
 All the parameters required for the called functions need to be written in a json file, which is the only argument (with verbose) of the pipeline function.
-/!\ Any change in the arguments of a called function needs to be passed on both the json file and the pipeline.py code itself.
+
+/!\\ Any change in the arguments of a called function needs to be passed on both the json file and the pipeline.py code itself.
 
 Remark: a command line log is still computed with this method. The only difference is that the name of the normally called python file has "pipeline_" at the beginning.
 
