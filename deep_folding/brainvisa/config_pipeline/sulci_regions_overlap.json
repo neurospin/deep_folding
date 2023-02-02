@@ -1,0 +1,1185 @@
+{
+    "brain": {
+        "S.C._left": {
+            "S.C._left" : [
+                "S.C._left"
+            ]
+        },
+
+        "S.C.-sylv._left": {
+            "S.C._left" : [
+                "S.C._left"
+            ],
+            "S.C.sylvian._left" : [
+                "S.C.sylvian._left"
+            ]
+        },
+
+        "S.T.s.-br.post._left": {
+            "S.T.s._left" : [
+                "S.T.s._left"
+            ],
+            "S.T.s.ter.asc.ant._left" : [
+                "S.T.s.ter.asc.ant._left"
+            ],
+            "S.T.s.ter.asc.post._left" : [
+                "S.T.s.ter.asc.post._left"
+            ]
+        },
+
+        "S.T.s._left": {
+            "S.T.s._left" : [
+                "S.T.s._left"
+            ]
+        },
+
+        "S.T.s.-4br._left": {
+            "S.T.s._left" : [
+                "S.T.s._left"
+            ],
+            "F.I.P.r.int.1_left" : [
+                "F.I.P.r.int.1_left"
+            ],
+            "F.I.P.r.int.2_left" : [
+                "F.I.P.r.int.2_left"
+            ],
+            "S.T.s.ter.asc.ant._left" : [
+                "S.T.s.ter.asc.ant._left"
+            ],
+            "S.T.s.ter.asc.post._left" : [
+                "S.T.s.ter.asc.post._left"
+            ]
+        },
+
+        "S.T.s.br._left": {
+            "F.I.P.r.int.1_left" : [
+                "F.I.P.r.int.1_left"
+            ],
+            "F.I.P.r.int.2_left" : [
+                "F.I.P.r.int.2_left"
+            ],
+            "S.T.s.ter.asc.ant._left" : [
+                "S.T.s.ter.asc.ant._left"
+            ],
+            "S.T.s.ter.asc.post._left" : [
+                "S.T.s.ter.asc.post._left"
+            ],
+            "S.GSM._left" : [
+                "S.GSM._left"
+            ]
+        },
+
+        "F.C.L.p.-subsc.-sylv._left": {
+            "F.C.L.p._left" : [
+                "F.C.L.p._left"
+            ],
+            "F.C.L.r.sc.ant._left" : [
+                "F.C.L.r.sc.ant._left"
+            ],
+            "F.C.L.r.sc.post._left" : [
+                "F.C.L.r.sc.post._left"
+            ],
+            "S.C.sylvian._left" : [
+                "S.C.sylvian._left"
+            ]
+        },
+
+        "F.C.L.p.-subsc.-sylv.-BROCA_left": {
+            "F.C.L.p._left" : [
+                "F.C.L.p._left"
+            ],
+            "F.C.L.r.sc.ant._left" : [
+                "F.C.L.r.sc.ant._left"
+            ],
+            "F.C.L.r.sc.post._left" : [
+                "F.C.L.r.sc.post._left"
+            ],
+            "S.C.sylvian._left" : [
+                "S.C.sylvian._left"
+            ],
+            "F.C.L.r.ant._left" : [
+                "F.C.L.r.ant._left"
+            ],
+            "F.C.L.r.asc._left" : [
+                "F.C.L.r.asc._left"
+            ],
+            "F.C.L.r.diag._left" : [
+                "F.C.L.r.diag._left"
+            ]
+        },
+
+        "BROCA_left": {
+            "F.C.L.r.ant._left" : [
+                "F.C.L.r.ant._left"
+            ],
+            "F.C.L.r.asc._left" : [
+                "F.C.L.r.asc._left"
+            ],
+            "F.C.L.r.diag._left" : [
+                "F.C.L.r.diag._left"
+            ]
+        },
+
+        "S.Pe.C._left": {
+            "S.Pe.C.inf._left" : [
+                "S.Pe.C.inf._left"
+            ],
+            "S.Pe.C.inter._left" : [
+                "S.Pe.C.inter._left"
+            ],
+            "S.Pe.C.marginal._left" : [
+                "S.Pe.C.marginal._left"
+            ],
+            "S.Pe.C.sup._left" : [
+                "S.Pe.C.sup._left"
+            ],
+            "S.Pe.C.median._left" : [
+                "S.Pe.C.median._left"
+            ]
+        },
+
+        "S.C.-S.Pe.C._left": {
+            "S.C._left" : [
+                "S.C._left"
+            ],
+            "S.Pe.C.inf._left" : [
+                "S.Pe.C.inf._left"
+            ],
+            "S.Pe.C.inter._left" : [
+                "S.Pe.C.inter._left"
+            ],
+            "S.Pe.C.marginal._left" : [
+                "S.Pe.C.marginal._left"
+            ],
+            "S.Pe.C.sup._left" : [
+                "S.Pe.C.sup._left"
+            ],
+            "S.Pe.C.median._left" : [
+                "S.Pe.C.median._left"
+            ]
+        },
+
+        "S.Pe.C.inf.-S.Pe.C.inter.-S.F.inf._left": {
+            "S.Pe.C.inf._left" : [
+                "S.Pe.C.inf._left"
+            ],
+            "S.Pe.C.inter._left" : [
+                "S.Pe.C.inter._left"
+            ],
+            "S.F.inf._left" : [
+                "S.F.inf._left"
+            ],
+            "S.F.inf.ant._left" : [
+                "S.F.inf.ant._left"
+            ]
+        },
+
+        "S.Pe.C.sup.-S.Pe.C.marginal-S.Pe.C.median-S.F.sup._left": {
+            "S.Pe.C.marginal._left" : [
+                "S.Pe.C.marginal._left"
+            ],
+            "S.Pe.C.sup._left" : [
+                "S.Pe.C.sup._left"
+            ],
+            "S.Pe.C.median._left" : [
+                "S.Pe.C.median._left"
+            ]
+        },
+
+        "S.F.inter._left": {
+            "S.F.inter._left" : [
+                "S.F.inter._left"
+            ]
+        },
+
+        "S.Pe.C.-S.F._left": {
+            "S.Pe.C.inf._left" : [
+                "S.Pe.C.inf._left"
+            ],
+            "S.Pe.C.inter._left" : [
+                "S.Pe.C.inter._left"
+            ],
+            "S.Pe.C.marginal._left" : [
+                "S.Pe.C.marginal._left"
+            ],
+            "S.Pe.C.sup._left" : [
+                "S.Pe.C.sup._left"
+            ],
+            "S.Pe.C.median._left" : [
+                "S.Pe.C.median._left"
+            ],
+            "S.F.sup._left" : [
+                "S.F.sup._left"
+            ],
+            "S.F.inter._left" : [
+                "S.F.inter._left"
+            ],
+            "S.F.inf._left" : [
+                "S.F.inf._left"
+            ],
+            "S.F.inf.ant._left" : [
+                "S.F.inf.ant._left"
+            ]
+        },
+
+        "S.F.median-S.F.pol.tr._left": {
+            "S.F.median._left" : [
+                "S.F.median._left"
+            ],
+            "S.F.polaire.tr._left" : [
+                "S.F.polaire.tr._left"
+            ]
+        },
+
+        "S.or._left": {
+            "S.Or._left" : [
+                "S.Or._left"
+            ]
+        },
+
+        "S.F.marginal-S.F.inf.ant._left": {
+            "S.F.marginal._left" : [
+                "S.F.marginal._left"
+            ],
+            "S.F.orbitaire._left" : [
+                "S.F.orbitaire._left"
+            ],
+            "S.F.inf.ant._left" : [
+                "S.F.inf.ant._left"
+            ]
+        },
+
+        "S.F.inf.-BROCA-S.Pe.C.inf_left": {
+            "S.F.inf._left" : [
+                "S.F.inf._left"
+            ],
+            "S.F.inf.ant._left" : [
+                "S.F.inf.ant._left"
+            ],
+            "F.C.L.r.ant._left" : [
+                "F.C.L.r.ant._left"
+            ],
+            "F.C.L.r.asc._left" : [
+                "F.C.L.r.asc._left"
+            ],
+            "F.C.L.r.diag._left" : [
+                "F.C.L.r.diag._left"
+            ],
+            "S.Pe.C.inf._left" : [
+                "S.Pe.C.inf._left"
+            ]
+        },
+
+        "S.F.int.-S.R._left": {
+            "S.F.int._left" : [
+                "S.F.int._left"
+            ],
+            "S.R.inf._left" : [
+                "S.R.inf._left"
+            ],
+            "S.R.sup._left" : [
+                "S.R.sup._left"
+            ]
+        },
+
+        "S.F.int.-F.C.M.ant._left": {
+            "S.F.int._left" : [
+                "S.F.int._left"
+            ],
+            "F.C.M.ant._left" : [
+                "F.C.M.ant._left"
+            ]
+        },
+
+        "F.C.M.post.-S.p.C._left": {
+            "F.C.M.post._left" : [
+                "F.C.M.post._left"
+            ],
+            "S.C.LPC._left" : [
+                "S.C.LPC._left"
+            ],
+            "S.p.C._left" : [
+                "S.p.C._left"
+            ]
+        },
+
+        "F.C.M.-S.F.int.-S.R.-S.p.C._left": {
+            "F.C.M.ant._left" : [
+                "F.C.M.ant._left"
+            ],
+            "F.C.M.post._left" : [
+                "F.C.M.post._left"
+            ],
+            "S.F.int._left" : [
+                "S.F.int._left"
+            ],
+            "S.R.inf._left" : [
+                "S.R.inf._left"
+            ],
+            "S.R.sup._left" : [
+                "S.R.sup._left"
+            ],
+            "S.C.LPC._left" : [
+                "S.C.LPC._left"
+            ],
+            "S.p.C._left" : [
+                "S.p.C._left"
+            ]
+        },
+
+        "F.C.M.p.-S.Call.-S.s.P.-S.intraCing._left": {
+            "F.C.M.post._left" : [
+                "F.C.M.post._left"
+            ],
+            "S.Call._left" : [
+                "S.Call._left"
+            ],
+            "S.s.P._left" : [
+                "S.s.P._left"
+            ],
+            "S.intraCing._left": [
+                "S.intraCing._left"
+            ]
+        },
+
+        "S.s.P.-S.Pa.int._left": {
+            "S.s.P._left" : [
+                "S.s.P._left"
+            ],
+            "S.Pa.int._left" : [
+                "S.Pa.int._left"
+            ]
+        },
+
+        "F.P.O.-S.Pa.t._left": {
+            "F.P.O._left" : [
+                "F.P.O._left"
+            ],
+            "S.Pa.t._left" : [
+                "S.Pa.t._left"
+            ]
+        },
+
+        "Sc.Cal._left": {
+            "F.Cal.ant.-Sc.Cal._left" : [
+                "F.Cal.ant.-Sc.Cal._left"
+            ],
+            "S.O.p._left" : [
+                "S.O.p._left"
+            ]
+        },
+
+        "F.P.O.-S.Cu.-Sc.Cal._left": {
+            "F.P.O._left" : [
+                "F.P.O._left"
+            ],
+            "S.Pa.t._left" : [
+                "S.Pa.t._left"
+            ],
+            "S.Cu._left" : [
+                "S.Cu._left"
+            ],
+            "F.Cal.ant.-Sc.Cal._left" : [
+                "F.Cal.ant.-Sc.Cal._left"
+            ],
+            "S.O.p._left" : [
+                "S.O.p._left"
+            ]
+        },
+
+        "Sc.Cal.-S.Li._left": {
+            "F.Cal.ant.-Sc.Cal._left" : [
+                "F.Cal.ant.-Sc.Cal._left"
+            ],
+            "S.O.p._left" : [
+                "S.O.p._left"
+            ],
+            "S.Li.ant._left" : [
+                "S.Li.ant._left"
+            ],
+            "S.Li.post._left" : [
+                "S.Li.post._left"
+            ]
+        },
+
+        "F.Coll.-S.Rh._left": {
+            "F.Coll._left" : [
+                "F.Coll._left"
+            ],
+            "S.Rh._left" : [
+                "S.Rh._left"
+            ]
+        },
+
+        "S.O.T.lat._left": {
+            "S.O.T.lat.ant._left" : [
+                "S.O.T.lat.ant._left"
+            ],
+            "S.O.T.lat.int._left" : [
+                "S.O.T.lat.int._left"
+            ],
+            "S.O.T.lat.med._left" : [
+                "S.O.T.lat.med._left"
+            ],
+            "S.O.T.lat.post._left" : [
+                "S.O.T.lat.post._left"
+            ]
+        },
+
+        "F.Coll.-S.Rh.-S.O.T.lat._left": {
+            "F.Coll._left" : [
+                "F.Coll._left"
+            ],
+            "S.Rh._left" : [
+                "S.Rh._left"
+            ],
+            "S.O.T.lat.ant._left" : [
+                "S.O.T.lat.ant._left"
+            ],
+            "S.O.T.lat.int._left" : [
+                "S.O.T.lat.int._left"
+            ],
+            "S.O.T.lat.med._left" : [
+                "S.O.T.lat.med._left"
+            ],
+            "S.O.T.lat.post._left" : [
+                "S.O.T.lat.post._left"
+            ]
+        },
+
+        "S.T.i._left": {
+            "S.T.i.ant._left" : [
+                "S.T.i.ant._left"
+            ],
+            "S.T.i.post._left" : [
+                "S.T.i.post._left"
+            ]
+        },
+
+        "S.T.i.-S.O.T.lat._left": {
+            "S.T.i.ant._left" : [
+                "S.T.i.ant._left"
+            ],
+            "S.T.i.post._left" : [
+                "S.T.i.post._left"
+            ],
+            "S.O.T.lat.ant._left" : [
+                "S.O.T.lat.ant._left"
+            ],
+            "S.O.T.lat.int._left" : [
+                "S.O.T.lat.int._left"
+            ],
+            "S.O.T.lat.med._left" : [
+                "S.O.T.lat.med._left"
+            ],
+            "S.O.T.lat.post._left" : [
+                "S.O.T.lat.post._left"
+            ]
+        },
+
+        "S.T.i.-S.T.s.-S.T.pol._left": {
+            "S.T.i.ant._left" : [
+                "S.T.i.ant._left"
+            ],
+            "S.T.i.post._left" : [
+                "S.T.i.post._left"
+            ],
+            "S.T.s._left" : [
+                "S.T.s._left"
+            ],
+            "S.T.pol._left" : [
+                "S.T.pol._left"
+            ]
+        },
+
+        "OCCIPITAL_left": {
+            "OCCIPITAL_left" : [
+                "OCCIPITAL_left"
+            ]
+        },
+
+        "S.Po.C._left": {
+            "S.Po.C.sup._left" : [
+                "S.Po.C.sup._left"
+            ],
+            "F.I.P.Po.C.inf._left" : [
+                "F.I.P.Po.C.inf._left"
+            ],
+            "F.C.L.r.retroC.tr._left" : [
+                "F.C.L.r.retroC.tr._left"
+            ]
+        },
+
+        "S.C.-S.Po.C._left": {
+            "S.C._left" : [
+                "S.C._left"
+            ],
+            "S.Po.C.sup._left" : [
+                "S.Po.C.sup._left"
+            ],
+            "F.I.P.Po.C.inf._left" : [
+                "F.I.P.Po.C.inf._left"
+            ],
+            "F.C.L.r.retroC.tr._left" : [
+                "F.C.L.r.retroC.tr._left"
+            ]
+        },
+
+        "F.I.P._left": {
+            "F.I.P._left" : [
+                "F.I.P._left"
+            ],
+            "F.I.P.Po.C.inf._left" : [
+                "F.I.P.Po.C.inf._left"
+            ]
+        },
+
+        "Lobule parietal inf._left": {
+            "F.I.P._left" : [
+                "F.I.P._left"
+            ],
+            "F.I.P.Po.C.inf._left" : [
+                "F.I.P.Po.C.inf._left"
+            ],
+            "F.I.P.r.int.1_left" : [
+                "F.I.P.r.int.1_left"
+            ],
+            "F.I.P.r.int.2_left" : [
+                "F.I.P.r.int.2_left"
+            ],
+            "S.T.s.ter.asc.ant._left" : [
+                "S.T.s.ter.asc.ant._left"
+            ],
+            "S.T.s.ter.asc.post._left" : [
+                "S.T.s.ter.asc.post._left"
+            ],
+            "S.GSM._left" : [
+                "S.GSM._left"
+            ]
+        },
+
+        "Lobule parietal sup._left": {
+            "F.I.P._left" : [
+                "F.I.P._left"
+            ],
+            "S.Po.C.sup._left" : [
+                "S.Po.C.sup._left"
+            ],
+            "S.Pa.sup._left" : [
+                "S.Pa.sup._left"
+            ]
+        },
+
+        "INSULA-F.C.L.p._left": {
+            "INSULA_left" : [
+                "INSULA_left"
+            ],
+            "F.C.L.p._left" : [
+                "F.C.L.p._left"
+            ]
+        },
+
+        "INSULA_left": {
+            "INSULA_left" : [
+                "INSULA_left"
+            ]
+        },
+
+        "S.Olf._left": {
+            "S.Olf._left" : [
+                "S.Olf._left"
+            ]
+        },
+
+        "S.C._right": {
+            "S.C._right" : [
+                "S.C._right"
+            ]
+        },
+
+        "S.C.-sylv._right": {
+            "S.C._right" : [
+                "S.C._right"
+            ],
+            "S.C.sylvian._right" : [
+                "S.C.sylvian._right"
+            ]
+        },
+
+        "S.T.s.-br.post._right": {
+            "S.T.s._right" : [
+                "S.T.s._right"
+            ],
+            "S.T.s.ter.asc.ant._right" : [
+                "S.T.s.ter.asc.ant._right"
+            ],
+            "S.T.s.ter.asc.post._right" : [
+                "S.T.s.ter.asc.post._right"
+            ]
+        },
+
+        "S.T.s._right": {
+            "S.T.s._right" : [
+                "S.T.s._right"
+            ]
+        },
+
+        "S.T.s.-4br._right": {
+            "S.T.s._right" : [
+                "S.T.s._right"
+            ],
+            "F.I.P.r.int.1_right" : [
+                "F.I.P.r.int.1_right"
+            ],
+            "F.I.P.r.int.2_right" : [
+                "F.I.P.r.int.2_right"
+            ],
+            "S.T.s.ter.asc.ant._right" : [
+                "S.T.s.ter.asc.ant._right"
+            ],
+            "S.T.s.ter.asc.post._right" : [
+                "S.T.s.ter.asc.post._right"
+            ]
+        },
+
+        "S.T.s.br._right": {
+            "F.I.P.r.int.1_right" : [
+                "F.I.P.r.int.1_right"
+            ],
+            "F.I.P.r.int.2_right" : [
+                "F.I.P.r.int.2_right"
+            ],
+            "S.T.s.ter.asc.ant._right" : [
+                "S.T.s.ter.asc.ant._right"
+            ],
+            "S.T.s.ter.asc.post._right" : [
+                "S.T.s.ter.asc.post._right"
+            ],
+            "S.GSM._right" : [
+                "S.GSM._right"
+            ]
+        },
+
+        "F.C.L.p.-subsc.-sylv._right": {
+            "F.C.L.p._right" : [
+                "F.C.L.p._right"
+            ],
+            "F.C.L.r.sc.ant._right" : [
+                "F.C.L.r.sc.ant._right"
+            ],
+            "F.C.L.r.sc.post._right" : [
+                "F.C.L.r.sc.post._right"
+            ],
+            "S.C.sylvian._right" : [
+                "S.C.sylvian._right"
+            ]
+        },
+
+        "F.C.L.p.-subsc.-sylv.-BROCA_right": {
+            "F.C.L.p._right" : [
+                "F.C.L.p._right"
+            ],
+            "F.C.L.r.sc.ant._right" : [
+                "F.C.L.r.sc.ant._right"
+            ],
+            "F.C.L.r.sc.post._right" : [
+                "F.C.L.r.sc.post._right"
+            ],
+            "S.C.sylvian._right" : [
+                "S.C.sylvian._right"
+            ],
+            "F.C.L.r.ant._right" : [
+                "F.C.L.r.ant._right"
+            ],
+            "F.C.L.r.asc._right" : [
+                "F.C.L.r.asc._right"
+            ],
+            "F.C.L.r.diag._right" : [
+                "F.C.L.r.diag._right"
+            ]
+        },
+
+        "BROCA_right": {
+            "F.C.L.r.ant._right" : [
+                "F.C.L.r.ant._right"
+            ],
+            "F.C.L.r.asc._right" : [
+                "F.C.L.r.asc._right"
+            ],
+            "F.C.L.r.diag._right" : [
+                "F.C.L.r.diag._right"
+            ]
+        },
+
+        "S.Pe.C._right": {
+            "S.Pe.C.inf._right" : [
+                "S.Pe.C.inf._right"
+            ],
+            "S.Pe.C.inter._right" : [
+                "S.Pe.C.inter._right"
+            ],
+            "S.Pe.C.marginal._right" : [
+                "S.Pe.C.marginal._right"
+            ],
+            "S.Pe.C.sup._right" : [
+                "S.Pe.C.sup._right"
+            ],
+            "S.Pe.C.median._right" : [
+                "S.Pe.C.median._right"
+            ]
+        },
+
+        "S.C.-S.Pe.C._right": {
+            "S.C._right" : [
+                "S.C._right"
+            ],
+            "S.Pe.C.inf._right" : [
+                "S.Pe.C.inf._right"
+            ],
+            "S.Pe.C.inter._right" : [
+                "S.Pe.C.inter._right"
+            ],
+            "S.Pe.C.marginal._right" : [
+                "S.Pe.C.marginal._right"
+            ],
+            "S.Pe.C.sup._right" : [
+                "S.Pe.C.sup._right"
+            ],
+            "S.Pe.C.median._right" : [
+                "S.Pe.C.median._right"
+            ]
+        },
+
+        "S.Pe.C.inf.-S.Pe.C.inter.-S.F.inf._right": {
+            "S.Pe.C.inf._right" : [
+                "S.Pe.C.inf._right"
+            ],
+            "S.Pe.C.inter._right" : [
+                "S.Pe.C.inter._right"
+            ],
+            "S.F.inf._right" : [
+                "S.F.inf._right"
+            ],
+            "S.F.inf.ant._right" : [
+                "S.F.inf.ant._right"
+            ]
+        },
+
+        "S.Pe.C.sup.-S.Pe.C.marginal-S.Pe.C.median-S.F.sup._right": {
+            "S.Pe.C.marginal._right" : [
+                "S.Pe.C.marginal._right"
+            ],
+            "S.Pe.C.sup._right" : [
+                "S.Pe.C.sup._right"
+            ],
+            "S.Pe.C.median._right" : [
+                "S.Pe.C.median._right"
+            ]
+        },
+
+        "S.F.inter._right": {
+            "S.F.inter._right" : [
+                "S.F.inter._right"
+            ]
+        },
+
+        "S.Pe.C.-S.F._right": {
+            "S.Pe.C.inf._right" : [
+                "S.Pe.C.inf._right"
+            ],
+            "S.Pe.C.inter._right" : [
+                "S.Pe.C.inter._right"
+            ],
+            "S.Pe.C.marginal._right" : [
+                "S.Pe.C.marginal._right"
+            ],
+            "S.Pe.C.sup._right" : [
+                "S.Pe.C.sup._right"
+            ],
+            "S.Pe.C.median._right" : [
+                "S.Pe.C.median._right"
+            ],
+            "S.F.sup._right" : [
+                "S.F.sup._right"
+            ],
+            "S.F.inter._right" : [
+                "S.F.inter._right"
+            ],
+            "S.F.inf._right" : [
+                "S.F.inf._right"
+            ],
+            "S.F.inf.ant._right" : [
+                "S.F.inf.ant._right"
+            ]
+        },
+
+        "S.F.median-S.F.pol.tr._right": {
+            "S.F.median._right" : [
+                "S.F.median._right"
+            ],
+            "S.F.polaire.tr._right" : [
+                "S.F.polaire.tr._right"
+            ]
+        },
+
+        "S.or._right": {
+            "S.Or._right" : [
+                "S.Or._right"
+            ]
+        },
+
+        "S.F.marginal-S.F.inf.ant._right": {
+            "S.F.marginal._right" : [
+                "S.F.marginal._right"
+            ],
+            "S.F.orbitaire._right" : [
+                "S.F.orbitaire._right"
+            ],
+            "S.F.inf.ant._right" : [
+                "S.F.inf.ant._right"
+            ]
+        },
+
+        "S.F.inf.-BROCA-S.Pe.C.inf_right": {
+            "S.F.inf._right" : [
+                "S.F.inf._right"
+            ],
+            "S.F.inf.ant._right" : [
+                "S.F.inf.ant._right"
+            ],
+            "F.C.L.r.ant._right" : [
+                "F.C.L.r.ant._right"
+            ],
+            "F.C.L.r.asc._right" : [
+                "F.C.L.r.asc._right"
+            ],
+            "F.C.L.r.diag._right" : [
+                "F.C.L.r.diag._right"
+            ],
+            "S.Pe.C.inf._right" : [
+                "S.Pe.C.inf._right"
+            ]
+        },
+
+        "S.F.int.-S.R._right": {
+            "S.F.int._right" : [
+                "S.F.int._right"
+            ],
+            "S.R.inf._right" : [
+                "S.R.inf._right"
+            ],
+            "S.R.sup._right" : [
+                "S.R.sup._right"
+            ]
+        },
+
+        "S.F.int.-F.C.M.ant._right": {
+            "S.F.int._right" : [
+                "S.F.int._right"
+            ],
+            "F.C.M.ant._right" : [
+                "F.C.M.ant._right"
+            ]
+        },
+
+        "F.C.M.post.-S.p.C._right": {
+            "F.C.M.post._right" : [
+                "F.C.M.post._right"
+            ],
+            "S.C.LPC._right" : [
+                "S.C.LPC._right"
+            ],
+            "S.p.C._right" : [
+                "S.p.C._right"
+            ]
+        },
+
+        "F.C.M.-S.F.int.-S.R.-S.p.C._right": {
+            "F.C.M.ant._right" : [
+                "F.C.M.ant._right"
+            ],
+            "F.C.M.post._right" : [
+                "F.C.M.post._right"
+            ],
+            "S.F.int._right" : [
+                "S.F.int._right"
+            ],
+            "S.R.inf._right" : [
+                "S.R.inf._right"
+            ],
+            "S.R.sup._right" : [
+                "S.R.sup._right"
+            ],
+            "S.C.LPC._right" : [
+                "S.C.LPC._right"
+            ],
+            "S.p.C._right" : [
+                "S.p.C._right"
+            ]
+        },
+
+        "F.C.M.p.-S.Call.-S.s.P.-S.intraCing._right": {
+            "F.C.M.post._right" : [
+                "F.C.M.post._right"
+            ],
+            "S.Call._right" : [
+                "S.Call._right"
+            ],
+            "S.s.P._right" : [
+                "S.s.P._right"
+            ],
+            "S.intraCing._right": [
+                "S.intraCing._right"
+            ]
+        },
+
+        "S.s.P.-S.Pa.int._right": {
+            "S.s.P._right" : [
+                "S.s.P._right"
+            ],
+            "S.Pa.int._right" : [
+                "S.Pa.int._right"
+            ]
+        },
+
+        "F.P.O.-S.Pa.t._right": {
+            "F.P.O._right" : [
+                "F.P.O._right"
+            ],
+            "S.Pa.t._right" : [
+                "S.Pa.t._right"
+            ]
+        },
+
+        "Sc.Cal._right": {
+            "F.Cal.ant.-Sc.Cal._right" : [
+                "F.Cal.ant.-Sc.Cal._right"
+            ],
+            "S.O.p._right" : [
+                "S.O.p._right"
+            ]
+        },
+
+        "F.P.O.-S.Cu.-Sc.Cal._right": {
+            "F.P.O._right" : [
+                "F.P.O._right"
+            ],
+            "S.Pa.t._right" : [
+                "S.Pa.t._right"
+            ],
+            "S.Cu._right" : [
+                "S.Cu._right"
+            ],
+            "F.Cal.ant.-Sc.Cal._right" : [
+                "F.Cal.ant.-Sc.Cal._right"
+            ],
+            "S.O.p._right" : [
+                "S.O.p._right"
+            ]
+        },
+
+        "Sc.Cal.-S.Li._right": {
+            "F.Cal.ant.-Sc.Cal._right" : [
+                "F.Cal.ant.-Sc.Cal._right"
+            ],
+            "S.O.p._right" : [
+                "S.O.p._right"
+            ],
+            "S.Li.ant._right" : [
+                "S.Li.ant._right"
+            ],
+            "S.Li.post._right" : [
+                "S.Li.post._right"
+            ]
+        },
+
+        "F.Coll.-S.Rh._right": {
+            "F.Coll._right" : [
+                "F.Coll._right"
+            ],
+            "S.Rh._right" : [
+                "S.Rh._right"
+            ]
+        },
+
+        "S.O.T.lat._right": {
+            "S.O.T.lat.ant._right" : [
+                "S.O.T.lat.ant._right"
+            ],
+            "S.O.T.lat.int._right" : [
+                "S.O.T.lat.int._right"
+            ],
+            "S.O.T.lat.med._right" : [
+                "S.O.T.lat.med._right"
+            ],
+            "S.O.T.lat.post._right" : [
+                "S.O.T.lat.post._right"
+            ]
+        },
+
+        "F.Coll.-S.Rh.-S.O.T.lat._right": {
+            "F.Coll._right" : [
+                "F.Coll._right"
+            ],
+            "S.Rh._right" : [
+                "S.Rh._right"
+            ],
+            "S.O.T.lat.ant._right" : [
+                "S.O.T.lat.ant._right"
+            ],
+            "S.O.T.lat.int._right" : [
+                "S.O.T.lat.int._right"
+            ],
+            "S.O.T.lat.med._right" : [
+                "S.O.T.lat.med._right"
+            ],
+            "S.O.T.lat.post._right" : [
+                "S.O.T.lat.post._right"
+            ]
+        },
+
+        "S.T.i._right": {
+            "S.T.i.ant._right" : [
+                "S.T.i.ant._right"
+            ],
+            "S.T.i.post._right" : [
+                "S.T.i.post._right"
+            ]
+        },
+
+        "S.T.i.-S.O.T.lat._right": {
+            "S.T.i.ant._right" : [
+                "S.T.i.ant._right"
+            ],
+            "S.T.i.post._right" : [
+                "S.T.i.post._right"
+            ],
+            "S.O.T.lat.ant._right" : [
+                "S.O.T.lat.ant._right"
+            ],
+            "S.O.T.lat.int._right" : [
+                "S.O.T.lat.int._right"
+            ],
+            "S.O.T.lat.med._right" : [
+                "S.O.T.lat.med._right"
+            ],
+            "S.O.T.lat.post._right" : [
+                "S.O.T.lat.post._right"
+            ]
+        },
+
+        "S.T.i.-S.T.s.-S.T.pol._right": {
+            "S.T.i.ant._right" : [
+                "S.T.i.ant._right"
+            ],
+            "S.T.i.post._right" : [
+                "S.T.i.post._right"
+            ],
+            "S.T.s._right" : [
+                "S.T.s._right"
+            ],
+            "S.T.pol._right" : [
+                "S.T.pol._right"
+            ]
+        },
+
+        "OCCIPITAL_right": {
+            "OCCIPITAL_right" : [
+                "OCCIPITAL_right"
+            ]
+        },
+
+        "S.Po.C._right": {
+            "S.Po.C.sup._right" : [
+                "S.Po.C.sup._right"
+            ],
+            "F.I.P.Po.C.inf._right" : [
+                "F.I.P.Po.C.inf._right"
+            ],
+            "F.C.L.r.retroC.tr._right" : [
+                "F.C.L.r.retroC.tr._right"
+            ]
+        },
+
+        "S.C.-S.Po.C._right": {
+            "S.C._right" : [
+                "S.C._right"
+            ],
+            "S.Po.C.sup._right" : [
+                "S.Po.C.sup._right"
+            ],
+            "F.I.P.Po.C.inf._right" : [
+                "F.I.P.Po.C.inf._right"
+            ],
+            "F.C.L.r.retroC.tr._right" : [
+                "F.C.L.r.retroC.tr._right"
+            ]
+        },
+
+        "F.I.P._right": {
+            "F.I.P._right" : [
+                "F.I.P._right"
+            ],
+            "F.I.P.Po.C.inf._right" : [
+                "F.I.P.Po.C.inf._right"
+            ]
+        },
+
+        "Lobule parietal inf._right": {
+            "F.I.P._right" : [
+                "F.I.P._right"
+            ],
+            "F.I.P.Po.C.inf._right" : [
+                "F.I.P.Po.C.inf._right"
+            ],
+            "F.I.P.r.int.1_right" : [
+                "F.I.P.r.int.1_right"
+            ],
+            "F.I.P.r.int.2_right" : [
+                "F.I.P.r.int.2_right"
+            ],
+            "S.T.s.ter.asc.ant._right" : [
+                "S.T.s.ter.asc.ant._right"
+            ],
+            "S.T.s.ter.asc.post._right" : [
+                "S.T.s.ter.asc.post._right"
+            ],
+            "S.GSM._right" : [
+                "S.GSM._right"
+            ]
+        },
+
+        "Lobule parietal sup._right": {
+            "F.I.P._right" : [
+                "F.I.P._right"
+            ],
+            "S.Po.C.sup._right" : [
+                "S.Po.C.sup._right"
+            ],
+            "S.Pa.sup._right" : [
+                "S.Pa.sup._right"
+            ]
+        },
+
+        "INSULA-F.C.L.p._right": {
+            "INSULA_right" : [
+                "INSULA_right"
+            ],
+            "F.C.L.p._right" : [
+                "F.C.L.p._right"
+            ]
+        },
+
+        "INSULA_right": {
+            "INSULA_right" : [
+                "INSULA_right"
+            ]
+        },
+
+        "S.Olf._right": {
+            "S.Olf._right" : [
+                "S.Olf._right"
+            ]
+        }
+    }
+}
