@@ -87,6 +87,11 @@ def get_sulci_list(region_name, side, json_path='/neurospin/dico/data/deep_foldi
 
     return sulci_list
 
+def print_info(step, description):
+    log.info("\n\n# ----------------------\n"
+             f"# STEP {step}: {description}\n"
+             "# ----------------------\n")
+    return step+1
 
 
 def parse_args(argv: list) -> dict:
@@ -186,7 +191,9 @@ def main(argv):
     params['transform_dir'] = os.path.join(params["output_dir"], "transforms")
     params['crops_dir'] = os.path.join(params["output_dir"], "crops")
 
+    step = 1
     # generate masks
+    step = print_info(step, "generate masks")
     for sulcus in sulci_list:
         log.info(f"Treating the mask generation of {sulcus} (if required).")
         path_to_sulcus_mask = os.path.join(params['masks_dir'], vox_size,
@@ -221,6 +228,7 @@ it before if you want to overwrite it.")
 
 
     # generate raw skeletons
+    step = print_info(step, "generate raw skeletons")
     skel_dir = os.path.join(params['skeleton_dir'], 'raw', params['side'])
     if not os.path.exists(skel_dir):
         args_generate_skeletons = {'src_dir': params['graphs_dir'],
@@ -248,6 +256,7 @@ it before if you want to overwrite it.")
 
     # generate raw distmaps if required
     if params['input_type'] == 'distmap':
+        step = print_info(step, "generate raw distmaps")
         distmap_raw_path = os.path.join(params['distmaps_dir'], 'raw', params['side'])
         if not os.path.exists(distmap_raw_path):
             args_generate_distmaps = {'src_dir': params['skeleton_dir'] + '/raw',
@@ -271,6 +280,7 @@ it before if you want to overwrite it.")
     
     # generate raw foldlabels if required
     if params['input_type'] == 'foldlabel':
+        step = print_info(step, "generate raw foldlabels")
         foldlabel_raw_path = os.path.join(params['foldlabel_dir'], 'raw', params['side'])
         if not os.path.exists(foldlabel_raw_path):
             args_generate_foldlabels = {'src_dir': params['skeleton_dir'] + '/raw',
@@ -296,6 +306,7 @@ it before if you want to overwrite it.")
 
     # generate transform
     if params['out_voxel_size'] != 'raw':
+        step = print_info(step, "generate transforms")
         path_to_transforms = os.path.join(params['transform_dir'], params['side'])
         if not os.path.exists(path_to_transforms):
             args_generate_transforms = {'src_dir': params['graphs_dir'],
@@ -321,6 +332,7 @@ it before if you want to overwrite it.")
 
     # resample files
     if params['out_voxel_size'] != 'raw':
+        step = print_info(step, f"resample {params['input_type']} files")
         if params['input_type'] == 'distmap':
             raw_input = os.path.join(params['distmaps_dir'], 'raw')
             resampled_dir = os.path.join(params['distmaps_dir'], vox_size)
@@ -364,11 +376,9 @@ it before if you want to overwrite it.")
     if params['input_type'] == 'distmap':
         raw_input = params['distmaps_dir']
         resampled_dir = os.path.join(params['distmaps_dir'], vox_size)
-
     elif params['input_type'] == 'foldlabel':
         raw_input = params['foldlabel_dir']
         resampled_dir = os.path.join(params['foldlabel_dir'], vox_size)
-        
     else:
         # raw data supposed to be skeletons by default
         raw_input = params['skeleton_dir']
@@ -383,6 +393,7 @@ it before if you want to overwrite it.")
     path_to_crops = os.path.join(params['crops_dir'], vox_size, params['region_name'],
                                  mask_str)
 
+    step = print_info(step, f"generate {params['input_type']} crops")
     if not os.path.exists(path_to_crops+'/'+params['side']+cropdir_name+'s'):
         args_generate_crops = {'src_dir': src_dir,
                                'input_type': params['input_type'],
