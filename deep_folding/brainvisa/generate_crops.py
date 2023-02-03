@@ -266,7 +266,7 @@ class CropGenerator:
                     raise ValueError(f"no nifti files in {self.src_dir}")
             else:
                 raise NotADirectoryError(
-                    f"{self.src_dir} doesn't exist or is not a directory")
+                    f"{self.src_dir} does not exist or is not a directory")
             # with open('/neurospin/dico/lguillon/distmap/data/test_list.csv', newline='') as f:
             #     reader = csv.reader(f)
             #     data = list(reader)
@@ -331,6 +331,7 @@ class CropGenerator:
                                     src_dir=self.bbox_dir)
             elif self.cropping_type == 'mask':
                 if self.combine_type:
+                    # /!\ SPECIFIC FOR THE CINGULATE REGION STUDY (2022, CHAVAS, GAUDIN & CHAVAS, GUILLON)
                     self.mask, self.bbmin, self.bbmax = \
                         compute_centered_mask(sulci_list=self.list_sulci,
                                               side=self.side,
@@ -349,7 +350,9 @@ class CropGenerator:
                 self.mask, self.bbmin, self.bbmax = \
                     compute_intersection_mask(sulci_list=self.list_sulci,
                                         side=self.side,
-                                        mask_dir=self.mask_dir)
+                                        mask_dir=self.mask_dir,
+                                        dilation=self.dilation,
+                                        threshold=self.threshold)
                 aims.write(
                     self.mask,
                     f"{self.crop_dir}/{self.side}mask_{self.input_type}.nii.gz")

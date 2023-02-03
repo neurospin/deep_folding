@@ -101,7 +101,7 @@ def parse_args(argv):
     parser.add_argument(
         "-o", "--output_dir", type=str, default=_DISTMAPS_DIR_DEFAULT,
         help='Output directory where to put distmap files.'
-        'Default is : ' + _SKELETON_DIR_DEFAULT)
+        'Default is : ' + _DISTMAPS_DIR_DEFAULT)
     parser.add_argument(
         "-i", "--side", type=str, default=_SIDE_DEFAULT,
         help='Hemisphere side. Default is : ' + _SIDE_DEFAULT)
