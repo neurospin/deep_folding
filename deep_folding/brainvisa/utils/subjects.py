@@ -36,6 +36,8 @@
 import os
 import glob
 
+import pandas as pd
+
 from deep_folding.brainvisa.utils.constants import _ALL_SUBJECTS
 
 from deep_folding.config.logs import set_file_logger
@@ -142,3 +144,38 @@ def get_all_subjects_as_dictionary(src_dir_list,
 
     return subjects
 
+
+def select_good_qc(orig_list: list, qc_path: str):
+    """Return the sublist of orig_list where all the data with bad qc have been removed.
+    /!\ Also removes subjects that are not mentioned in the qc file.
+
+    Args:
+        orig_list: list of strings, the origin list of subjects
+        qc_path: string giving the path to the file containing the relevant information.
+            It is supposed to be a .csv (or .tsv) with a 'participant_id' and a 'qc' columns.
+            qc values are supposed to be either 0 or 1.
+            If qc_path is set to None, then no QC are applied.
+
+    Returns:
+        subjects: list of strings, being the subjects with acceptable qc.
+    """
+    if qc_path == '':
+        # then no QC are applied
+        sublist = orig_list
+    
+    else:
+        log.info(f'Treat quality checks from {qc_path}')
+        if '.tsv' in qc_path:
+            sep = '\t'
+        else:
+            sep = ','
+        qc_file = pd.read_csv(qc_path, sep=sep)
+
+        qc_file = qc_file[qc_file.qc != 0]
+
+        sublist = [name for name in orig_list if name in qc_file.participant_id.values]
+
+        log.info(f"{len(set(orig_list) - set(sublist))} subjects have been removed because of the qc. \
+They are the following: {set(orig_list) - set(sublist)}")
+
+    return sublist

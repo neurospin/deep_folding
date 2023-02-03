@@ -8,8 +8,8 @@ import numpy as np
 from soma import aims
 
 
-_VOXEL_SIZE = 2
-_BUCKET = False
+_VOXEL_SIZE = 1
+_BUCKET = True
 
 
 def array_to_ana(ana_a, img, sub_id, phase, status, bucket, vs):

@@ -56,7 +56,7 @@ from os.path import basename
 from deep_folding.brainvisa import exception_handler
 from deep_folding.brainvisa.utils.folder import create_folder
 from deep_folding.brainvisa.utils.subjects import get_number_subjects
-from deep_folding.brainvisa.utils.subjects import select_subjects_int
+from deep_folding.brainvisa.utils.subjects import select_subjects_int, select_good_qc
 from deep_folding.brainvisa.utils.logs import setup_log
 from deep_folding.brainvisa.utils.parallel import define_njobs
 from deep_folding.brainvisa.utils.skeleton import \
@@ -70,7 +70,8 @@ from deep_folding.config.logs import set_file_logger
 from deep_folding.brainvisa.utils.constants import \
     _ALL_SUBJECTS, _SRC_DIR_DEFAULT,\
     _SKELETON_DIR_DEFAULT, _SIDE_DEFAULT, \
-    _JUNCTION_DEFAULT, _PATH_TO_GRAPH_DEFAULT
+    _JUNCTION_DEFAULT, _PATH_TO_GRAPH_DEFAULT, \
+    _QC_PATH_DEFAULT
 
 # Defines logger
 log = set_file_logger(__file__)
@@ -106,6 +107,11 @@ def parse_args(argv):
         default=_PATH_TO_GRAPH_DEFAULT,
         help='Relative path to graph. '
              'Default is ' + _PATH_TO_GRAPH_DEFAULT)
+    parser.add_argument(
+        "-q", "--quality_checks", type=str,
+        default=_QC_PATH_DEFAULT,
+        help='Path to quality check .csv. '
+             'Default is ' + _QC_PATH_DEFAULT)
     parser.add_argument(
         "-j", "--junction", type=str, default=_JUNCTION_DEFAULT,
         help='junction rendering (either \'wide\' or \'thin\') '
@@ -155,10 +161,11 @@ class GraphConvert2Skeleton:
 
     def __init__(self, src_dir, skeleton_dir,
                  side, junction, parallel,
-                 path_to_graph, bids):
+                 path_to_graph, bids, qc_path):
         self.src_dir = src_dir
         self.skeleton_dir = skeleton_dir
         self.side = side
+        self.qc_path = qc_path
         self.junction = junction
         self.parallel = parallel
         self.path_to_graph = path_to_graph
@@ -201,10 +208,11 @@ class GraphConvert2Skeleton:
     def compute(self, number_subjects):
         """Loops over subjects and converts graphs into skeletons.
         """
-        # Gets list fo subjects
+        # Gets list of subjects
         filenames = glob.glob(f"{self.src_dir}/*")
         list_subjects = [basename(filename) for filename in filenames
                     if not re.search('.minf$', filename)]
+        list_subjects = select_good_qc(list_subjects, self.qc_path)
         list_subjects = select_subjects_int(list_subjects, number_subjects)
 
         log.info(f"Expected number of subjects = {len(list_subjects)}")
@@ -242,7 +250,8 @@ def generate_skeletons(
         junction=_JUNCTION_DEFAULT,
         bids=False,
         parallel=False,
-        number_subjects=_ALL_SUBJECTS):
+        number_subjects=_ALL_SUBJECTS,
+        qc_path=_QC_PATH_DEFAULT):
     """Generates skeletons from graphs"""
 
     # Initialization
@@ -253,7 +262,8 @@ def generate_skeletons(
         side=side,
         bids=bids,
         junction=junction,
-        parallel=parallel
+        parallel=parallel,
+        qc_path=qc_path
     )
     # Actual generation of skeletons from graphs
     conversion.compute(number_subjects=number_subjects)
@@ -278,7 +288,8 @@ def main(argv):
         junction=params['junction'],
         bids=params['bids'],
         parallel=params['parallel'],
-        number_subjects=params['nb_subjects'])
+        number_subjects=params['nb_subjects'],
+        qc_path=params['quality_checks'])
 
 
 if __name__ == '__main__':

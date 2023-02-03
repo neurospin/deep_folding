@@ -354,6 +354,7 @@ class CropGenerator:
                                     src_dir=self.bbox_dir)
             elif self.cropping_type == 'mask':
                 if self.combine_type:
+                    # /!\ SPECIFIC FOR THE CINGULATE REGION STUDY (2022, CHAVAS, GAUDIN & CHAVAS, GUILLON)
                     self.mask, self.bbmin, self.bbmax = \
                         compute_centered_mask(sulci_list=self.list_sulci,
                                               side=self.side,
@@ -372,7 +373,9 @@ class CropGenerator:
                 self.mask, self.bbmin, self.bbmax = \
                     compute_intersection_mask(sulci_list=self.list_sulci,
                                         side=self.side,
-                                        mask_dir=self.mask_dir)
+                                        mask_dir=self.mask_dir,
+                                        dilation=self.dilation,
+                                        threshold=self.threshold)
                 aims.write(
                     self.mask,
                     f"{self.crop_dir}/{self.side}mask_{self.input_type}.nii.gz")

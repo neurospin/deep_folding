@@ -1,0 +1,12 @@
+{
+    "brain": {
+	"S.T.s.branches._right": {
+            "S.T.s.ter.asc.ant._right" : [
+                "S.T.s.ter.asc.ant._right"
+            ],
+            "S.T.s.ter.asc.post._right" : [
+                "S.T.s.ter.asc.post._right"
+            ]
+        }
+    }
+}
