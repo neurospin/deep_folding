@@ -89,8 +89,8 @@ def test_suppr_benchmark():
 
     # equal_skel = equal_skeletons(skel_ref, skel_target)
     equal_skel, nb_different_pixels = are_arrays_almost_equal(skel_ref, skel_target, 1, 0)
-    print(f"skel_target: {skel_target}")
-    print(f"skel_ref: {skel_ref}")
+    print(f"skel_target: {np.unique(skel_target, return_counts=True)}")
+    print(f"skel_ref: {np.unique(skel_ref, return_counts=True)}")
     print(f"nb of different pixels: {nb_different_pixels}")
     assert equal_skel
 
