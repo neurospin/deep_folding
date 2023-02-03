@@ -92,5 +92,5 @@ def test_generate_foldlabels_value_correspondance():
                       f"{data_dir}/skel_suppr_{mask}.bck")
 
 
-# if __name__ == '__main__':
-#     test_generate_foldlabels_value_correspondance()
+if __name__ == '__main__':
+    test_generate_foldlabels_value_correspondance()

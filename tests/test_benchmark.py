@@ -103,5 +103,5 @@ def test_suppr_benchmark():
     equal_csv = equal_csv_files(tgt_csv, ref_csv)
     assert equal_csv
 
-
-test_suppr_benchmark()
+if __name__ == '__main__':
+    test_suppr_benchmark()
