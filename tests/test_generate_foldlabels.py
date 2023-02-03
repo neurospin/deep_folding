@@ -85,6 +85,7 @@ def test_generate_foldlabels_value_correspondance():
 
         if not os.path.exists(tgt_dir):
             os.makedirs(tgt_dir)
+
         aims.write(dtx.convert.volume_to_bucketMap_aims(np.squeeze(skeleton)), f"{tgt_dir}/skel_suppr_{mask}.bck")
 
         equal_buckets(f"{tgt_dir}/skel_suppr_{mask}.bck",

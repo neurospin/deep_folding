@@ -1,0 +1,34 @@
+{
+    "bbmax": [
+        137,
+        153,
+        78
+    ],
+    "bbmin": [
+        112,
+        129,
+        33
+    ],
+    "bbox_dir": "/home/lg261972/Documents/deep_folding/data/reference/bbox",
+    "cropped_dir": "/home/lg261972/Documents/deep_folding/data/target/data/nearest/Lcrops",
+    "date": "2021-06-18 16:48:42",
+    "git_sha": "1fc62a7f1ce1bf334303327c46a5fa10d60ea4b6",
+    "interp": "nearest",
+    "is_git": true,
+    "list_sulci": [
+        "S.T.s.ter.asc.ant._left"
+    ],
+    "nb_subjects": 2,
+    "out_voxel_size": [
+        1,
+        1,
+        1
+    ],
+    "repo_working_dir": "/home/lg261972/Documents/deep_folding",
+    "resampling_type": "AimsApplyTransform",
+    "side": "L",
+    "src_dir": "/home/lg261972/Documents/deep_folding/data/source/unsupervised",
+    "tgt_dir": "/home/lg261972/Documents/deep_folding/data/target/data/nearest",
+    "timestamp": 1624027722.2184749,
+    "transform_dir": "/home/lg261972/Documents/deep_folding/data/reference/transform"
+}
