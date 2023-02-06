@@ -403,7 +403,8 @@ class CropGenerator:
         if number_subjects:
             save_to_numpy(cropped_dir=self.cropped_samples_dir,
                           tgt_dir=self.crop_dir,
-                          file_basename=self.file_basename_npy)
+                          file_basename=self.file_basename_npy,
+                          parallel=self.parallel)
             save_to_pickle(cropped_dir=self.cropped_samples_dir,
                            tgt_dir=self.crop_dir,
                            file_basename=self.file_basename_pickle)

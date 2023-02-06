@@ -10,12 +10,17 @@ import glob
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
+from functools import partial
+from pqdm.processes import pqdm
+from p_tqdm import p_map
 from soma import aims
+from deep_folding.brainvisa.utils.parallel import define_njobs
 
 from deep_folding.config.logs import set_file_logger
 
 # Defines logger
 log = set_file_logger(__file__)
+
 
 def is_file_nii(filename):
     """Tests if file is nii file
@@ -83,7 +88,24 @@ def quality_checks(csv_file_path, npy_array_file_path, cropped_dir):
                               "arrays don't match")
 
 
-def save_to_numpy(cropped_dir, tgt_dir=None, file_basename=None):
+def get_one_numpy_array(filename, cropped_dir):
+    file_nii = os.path.join(cropped_dir, filename)
+    if is_file_nii(file_nii):
+        aimsvol = aims.read(file_nii)
+        sample = np.asarray(aimsvol)
+        subject = re.search('(.*)_cropped_(.*)', file_nii).group(1)
+        id = os.path.basename(subject)
+        if type(sample) is np.ndarray:
+            return id, sample
+        else:
+            raise ValueError(\
+                f"For file={file_nii} and id={id}, "
+                "no numpy array has been generated. ")
+    else:
+        raise ValueError(\
+                f"file={file_nii} does not look like a nifti file")
+
+def save_to_numpy(cropped_dir, tgt_dir=None, file_basename=None, parallel = False):
     """
     Creates a numpy array for each subject.
 
@@ -102,14 +124,25 @@ def save_to_numpy(cropped_dir, tgt_dir=None, file_basename=None):
     log.debug(f"cropped_dir = {cropped_dir}")
     log.info("1. Now reading cropped dir...")
     listdir = os.listdir(cropped_dir)
-    for filename in tqdm(sorted(listdir)):
-        file_nii = os.path.join(cropped_dir, filename)
-        if is_file_nii(file_nii):
-            aimsvol = aims.read(file_nii)
-            sample = np.asarray(aimsvol)
-            subject = re.search('(.*)_cropped_(.*)', file_nii).group(1)
-            list_sample_id.append(os.path.basename(subject))
-            list_sample_file.append(sample)
+    listdir = [filename for filename in listdir \
+        if is_file_nii(os.path.join(cropped_dir, filename))]
+    if parallel:
+        log.info("Reading cropped dir is done in PARALLEL")
+        partial_func = partial(get_one_numpy_array, cropped_dir=cropped_dir)
+        list_result =  p_map(partial_func, listdir)
+        log.info(f"{[x for x in list_result]}")
+        list_sample_id, list_sample_file =\
+            [x for x, y in list_result], [y for x, y in list_result]
+    else:
+        log.info("Reading cropped dir is done SERIALLY")
+        for filename in tqdm(sorted(listdir)):
+            file_nii = os.path.join(cropped_dir, filename)
+            if is_file_nii(file_nii):
+                aimsvol = aims.read(file_nii)
+                sample = np.asarray(aimsvol)
+                subject = re.search('(.*)_cropped_(.*)', file_nii).group(1)
+                list_sample_id.append(os.path.basename(subject))
+                list_sample_file.append(sample)
 
     log.info("2. Now writing subject name file...")
     # Writes subject ID csv file
