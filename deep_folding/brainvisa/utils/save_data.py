@@ -96,7 +96,21 @@ def save_to_pickle_from_list(cropped_dir, tgt_dir=None, file_basename=None,
     dataframe.to_pickle(file_pickle)
 
 
-def quality_checks(csv_file_path, npy_array_file_path, cropped_dir):
+def compare_one_array(cropped_dir, list_basename, row):
+    index = row[0]
+    sub = row[1]
+    index_sub = [idx for idx,x in enumerate(list_basename) if sub in x][0]
+    subject_file = f"{cropped_dir}/{list_basename[index_sub]}"
+    vol = aims.read(subject_file)
+    arr_ref = np.asarray(vol)
+    return arr_ref
+    # arr_from_array = arr[index,...]
+    # if not np.array_equal(arr_ref, arr_from_array):
+    #     raise ValueError(f"For subject = {sub} and index = {index}\n"
+    #                     "arrays don't match")
+
+
+def quality_checks(csv_file_path, npy_array_file_path, cropped_dir, parallel=False):
     """Checks that the numpy arrays are equal to subject nifti files.
 
     This is to check that the subjects list in csv file
@@ -104,15 +118,28 @@ def quality_checks(csv_file_path, npy_array_file_path, cropped_dir):
     arr = np.load(npy_array_file_path, mmap_mode='r')
     subjects = pd.read_csv(csv_file_path)
     log.info(f"subjects.head() = {subjects.head()}")
-    for index, row in subjects.iterrows():
-        sub = row['Subject']
-        subject_file = glob.glob(f"{cropped_dir}/{sub}*.nii.gz")[0]
-        vol = aims.read(subject_file)
-        arr_ref = np.asarray(vol)
-        arr_from_array = arr[index,...]
-        if not np.array_equal(arr_ref, arr_from_array):
-            raise ValueError(f"For subject = {sub} and index = {index}\n"
-                              "arrays don't match")
+    if parallel:
+        log.info("Quality check is done in PARALLEL")
+        list_nifti = glob.glob(f"{cropped_dir}/*.nii.gz")
+        list_basename = [os.path.basename(f) for f in list_nifti]
+        partial_func = partial(compare_one_array, cropped_dir, list_basename)
+        enum = [x for x in enumerate(subjects['Subject'])]
+        list_arr = p_map(partial_func, enum)
+        for index, arr_ref in enumerate(list_arr):
+            if not np.array_equal(arr_ref, arr[index,...]):
+                raise ValueError(f"For subject = {list_basename[index]} and index = {index}\n"
+                                "arrays do not match")
+    else:
+        log.info("Quality check is done SERIALLY")
+        for index, row in tqdm(subjects.iterrows()):
+            sub = row['Subject']
+            subject_file = glob.glob(f"{cropped_dir}/{sub}*.nii.gz")[0]
+            vol = aims.read(subject_file)
+            arr_ref = np.asarray(vol)
+            arr_from_array = arr[index,...]
+            if not np.array_equal(arr_ref, arr_from_array):
+                raise ValueError(f"For subject = {sub} and index = {index}\n"
+                                "arrays do not match")
 
 
 def get_one_numpy_array(filename, cropped_dir):
@@ -186,7 +213,8 @@ def save_to_numpy(cropped_dir, tgt_dir=None, file_basename=None, parallel = Fals
     quality_checks(
         os.path.join(tgt_dir, file_basename+'_subject.csv'),
         os.path.join(tgt_dir, file_basename+'.npy'),
-        cropped_dir)
+        cropped_dir, 
+        parallel=parallel)
 
     return list_sample_id, list_sample_file
 
