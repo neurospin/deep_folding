@@ -37,7 +37,7 @@ def is_file_nii(filename):
     return is_file_nii
 
 
-def save_to_pickle(cropped_dir, tgt_dir=None, file_basename=None):
+def save_to_pickle(cropped_dir, tgt_dir=None, file_basename=None, parallel=False):
     """
     Creates a dataframe of data with a column for each subject and associated
     np.array. Saved these this dataframe to pkl format on the target
@@ -62,6 +62,33 @@ def save_to_pickle(cropped_dir, tgt_dir=None, file_basename=None):
             subject = re.search('(.*)_cropped_(.*)', file_nii).group(1)
             data_dict[subject] = [sample]
 
+    dataframe = pd.DataFrame.from_dict(data_dict)
+
+    file_pickle_basename = file_basename + '.pkl'
+    file_pickle = os.path.join(tgt_dir, file_pickle_basename)
+    dataframe.to_pickle(file_pickle)
+
+
+def save_to_pickle_from_list(cropped_dir, tgt_dir=None, file_basename=None,
+                             list_sample_id=None, list_sample_file=None):
+    """
+    Creates a dataframe of data with a column for each subject and associated
+    np.array. Saved these this dataframe to pkl format on the target
+    directory
+
+    Args:
+        cropped_dir: directory containing cropped images
+        tgt_dir: directory where to save the pickle file
+        file_basename: final file name = file_basename.pkl
+    """
+
+    data_dict = dict()
+
+    log.info("Now generating pickle file...")
+    log.debug(f"cropped_dir = {cropped_dir}")
+
+    data_dict = {list_sample_id[i]: [list_sample_file[i]] \
+                   for i in range(len(list_sample_id))}
     dataframe = pd.DataFrame.from_dict(data_dict)
 
     file_pickle_basename = file_basename + '.pkl'
@@ -105,6 +132,7 @@ def get_one_numpy_array(filename, cropped_dir):
         raise ValueError(\
                 f"file={file_nii} does not look like a nifti file")
 
+
 def save_to_numpy(cropped_dir, tgt_dir=None, file_basename=None, parallel = False):
     """
     Creates a numpy array for each subject.
@@ -130,7 +158,6 @@ def save_to_numpy(cropped_dir, tgt_dir=None, file_basename=None, parallel = Fals
         log.info("Reading cropped dir is done in PARALLEL")
         partial_func = partial(get_one_numpy_array, cropped_dir=cropped_dir)
         list_result =  p_map(partial_func, listdir)
-        log.info(f"{[x for x in list_result]}")
         list_sample_id, list_sample_file =\
             [x for x, y in list_result], [y for x, y in list_result]
     else:
@@ -147,12 +174,6 @@ def save_to_numpy(cropped_dir, tgt_dir=None, file_basename=None, parallel = Fals
     log.info("2. Now writing subject name file...")
     # Writes subject ID csv file
     subject_df = pd.DataFrame(list_sample_id, columns=["Subject"])
-    subject_df.to_csv(os.path.join(tgt_dir, file_basename+'_subject.csv'),
-                      index=False)
-    log.info(f"5 first saved subjects are: {subject_df.head()}")
-
-    # Writes subject ID to npy file (per retrocompatibility)
-    list_sample_id = np.array(list_sample_id)
     np.save(os.path.join(tgt_dir, 'sub_id.npy'), list_sample_id)
 
     log.info("3. Now saving to numpy array...")
@@ -167,13 +188,15 @@ def save_to_numpy(cropped_dir, tgt_dir=None, file_basename=None, parallel = Fals
         os.path.join(tgt_dir, file_basename+'.npy'),
         cropped_dir)
 
+    return list_sample_id, list_sample_file
+
 
 if __name__ == '__main__':
-    save_to_pickle(
-        cropped_dir='/neurospin/dico/data/deep_folding/current/crops/SC/mask/sulcus_based/2mm/Rlabels/',
-        tgt_dir='/neurospin/dico/data/deep_folding/current/crops/SC/mask/sulcus_based/2mm/',
-        file_basename='Rlabels')
-    # save_to_numpy(
-    #     cropped_dir='/neurospin/dico/data/deep_folding/current/datasets/hcp/crops/1mm/SC/no_mask/Rcrops/',
-    #     tgt_dir='/neurospin/dico/data/deep_folding/current/datasets/hcp/crops/1mm/SC/no_mask/Rcrops',
+    # save_to_pickle(
+    #     cropped_dir='/neurospin/dico/data/deep_folding/current/crops/SC/mask/sulcus_based/2mm/Rlabels/',
+    #     tgt_dir='/neurospin/dico/data/deep_folding/current/crops/SC/mask/sulcus_based/2mm/',
     #     file_basename='Rlabels')
+    save_to_numpy(
+        cropped_dir='/neurospin/dico/data/deep_folding/current/datasets/hcp/crops/1mm/SC/no_mask/Rcrops/',
+        tgt_dir='/neurospin/dico/data/deep_folding/current/datasets/hcp/crops/1mm/SC/no_mask/Rcrops',
+        file_basename='Rlabels')

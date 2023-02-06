@@ -65,7 +65,7 @@ from numpy import save
 import scipy.ndimage
 from deep_folding.brainvisa import exception_handler
 from deep_folding.brainvisa.utils.save_data import save_to_numpy
-from deep_folding.brainvisa.utils.save_data import save_to_pickle
+from deep_folding.brainvisa.utils.save_data import save_to_pickle_from_list
 from deep_folding.brainvisa.utils.bbox import compute_max_box
 from deep_folding.brainvisa.utils.folder import create_folder
 from deep_folding.brainvisa.utils.logs import LogJson
@@ -401,13 +401,16 @@ class CropGenerator:
 
         # Creation of .npy file containing all subjects
         if number_subjects:
-            save_to_numpy(cropped_dir=self.cropped_samples_dir,
-                          tgt_dir=self.crop_dir,
-                          file_basename=self.file_basename_npy,
-                          parallel=self.parallel)
-            save_to_pickle(cropped_dir=self.cropped_samples_dir,
+            list_sample_id, list_sample_file = \
+                save_to_numpy(cropped_dir=self.cropped_samples_dir,
+                              tgt_dir=self.crop_dir,
+                              file_basename=self.file_basename_npy,
+                              parallel=self.parallel)
+            save_to_pickle_from_list(cropped_dir=self.cropped_samples_dir,
                            tgt_dir=self.crop_dir,
-                           file_basename=self.file_basename_pickle)
+                           file_basename=self.file_basename_pickle,
+                           list_sample_id=list_sample_id,
+                           list_sample_file=list_sample_file)
 
 
 class SkeletonCropGenerator(CropGenerator):
