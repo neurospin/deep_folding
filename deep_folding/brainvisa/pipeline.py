@@ -417,8 +417,8 @@ it before if you want to overwrite it.")
         log.info('Crops generated')
 
         # save params json where the crops lie
-        with open(path_to_crops+'/pipeline_params.json', 'w') as file:
-            json.dump(params, file)
+        with open(path_to_crops+f'/pipeline_params_{cropdir_name}s.json', 'w') as file:
+            json.dump(params, file, indent=2)
     
     else:
         log.info("Crops are already computed. "
