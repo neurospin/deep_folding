@@ -134,10 +134,15 @@ def parse_args(argv: list) -> dict:
 
 @exception_handler
 def main(argv):
-    """Reads argument line and determines the max bounding box
+    """Main function to compute the pipeline, i.e. to compute crops from graphs.
 
     Args:
-        argv: a list containing command line arguments
+        argv: a list containing command line arguments which are
+            - params_path: path to the json file where the parameters for the functions called
+              by pipeline are stored.
+            - verbose: If no option is provided then logging.INFO is selected.
+              If one option -v (or -vv) or more is provided
+              then logging.DEBUG is selected.
     """
 
     # Parsing arguments
