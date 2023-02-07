@@ -205,6 +205,8 @@ def save_to_numpy(cropped_dir, tgt_dir=None, file_basename=None, parallel = Fals
     log.info("STEP 2. Now writing subject name file...")
     # Writes subject ID csv file
     subject_df = pd.DataFrame(list_sample_id, columns=["Subject"])
+    subject_df.to_csv(os.path.join(tgt_dir, file_basename+'_subject.csv'),
+                      index=False)
     np.save(os.path.join(tgt_dir, 'sub_id.npy'), list_sample_id)
 
     log.info("STEP 3. Now saving to numpy array...")
