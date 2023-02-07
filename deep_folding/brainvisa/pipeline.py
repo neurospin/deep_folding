@@ -87,11 +87,26 @@ def get_sulci_list(region_name, side, json_path='/neurospin/dico/data/deep_foldi
 
     return sulci_list
 
+
 def print_info(step, description):
     log.info("\n\n# ----------------------\n"
              f"# STEP {step}: {description}\n"
              "# ----------------------\n")
     return step+1
+
+
+def is_step_to_be_computed(path, log_string, overwrite=False):
+    if ((not os.path.exists(path)) or (overwrite==True)):
+        return True
+    else:
+        log.info(f"{log_string} are already computed. "
+                 "If you want to overwrite them, "
+                 f"please delete the folder {path} "
+                 "if you want to generate it all again. "
+                 "Otherwise, if you want to generate "
+                 "only not processed subjects, "
+                 "set \"overwrite_all\" to true in json configuration file")
+        return False
 
 
 def parse_args(argv: list) -> dict:
@@ -174,6 +189,7 @@ def main(argv):
     else:
         cropdir_name = "crop"
 
+    overwrite = params['overwrite_all']
 
     # get the concerned sulci
     sulci_list = get_sulci_list(params['region_name'], side=params['side'],
@@ -200,7 +216,11 @@ def main(argv):
                                            params['side'], sulcus+full_side)
         log.debug(path_to_sulcus_mask)
         
-        if not os.path.exists(path_to_sulcus_mask):
+        if is_step_to_be_computed(\
+                path=path_to_sulcus_mask,
+                log_string=f"Mask with the given parameters (side={params['side']}, "
+                           f"sulcus={sulcus}, voxel size={vox_size})", 
+                overwrite=overwrite):
             # set up the right parameters
             args_compute_mask = {'src_dir': params['labeled_subjects_dir'],
                                  'path_to_graph': params['path_to_graph_supervised'],
@@ -221,16 +241,11 @@ def main(argv):
             compute_mask(**args_compute_mask)
             log.info('Mask generated')
 
-        else:
-            log.info(f"Mask with the given parameters (side={params['side']},, sulcus={sulcus}, \
-voxel size={vox_size}) is already computed and stored at {path_to_sulcus_mask}. Please delete \
-it before if you want to overwrite it.")
-
 
     # generate raw skeletons
     step = print_info(step, "generate raw skeletons")
     skel_dir = os.path.join(params['skeleton_dir'], 'raw', params['side'])
-    if not os.path.exists(skel_dir):
+    if is_step_to_be_computed(skel_dir, "Raw skeletons", overwrite):
         args_generate_skeletons = {'src_dir': params['graphs_dir'],
                                    'skeleton_dir': params['skeleton_dir'] + '/raw',
                                    'path_to_graph': params['path_to_graph'],
@@ -248,17 +263,13 @@ it before if you want to overwrite it.")
 
         generate_skeletons(**args_generate_skeletons)
         log.info('Skeletons generated')
-    else:
-        log.info("Raw skeletons are already computed. "
-                 "If you want to overwrite them, "
-                 f"please delete the folder at {skel_dir}")
     
 
     # generate raw distmaps if required
     if params['input_type'] == 'distmap':
         step = print_info(step, "generate raw distmaps")
         distmap_raw_path = os.path.join(params['distmaps_dir'], 'raw', params['side'])
-        if not os.path.exists(distmap_raw_path):
+        if is_step_to_be_computed(distmap_raw_path, "Raw distmaps", overwrite):
             args_generate_distmaps = {'src_dir': params['skeleton_dir'] + '/raw',
                                       'distmaps_dir': params['distmaps_dir'] + '/raw',
                                       'side': params['side'],
@@ -273,16 +284,13 @@ it before if you want to overwrite it.")
 
             generate_distmaps(**args_generate_distmaps)
             log.info('Raw distmaps generated')
-        else:
-            log.info("Raw distmaps are already computed. "
-                     "If you want to overwrite them, "
-                     f"please delete the folder at {distmap_raw_path}")
+
     
     # generate raw foldlabels if required
     if params['input_type'] == 'foldlabel':
         step = print_info(step, "generate raw foldlabels")
         foldlabel_raw_path = os.path.join(params['foldlabel_dir'], 'raw', params['side'])
-        if not os.path.exists(foldlabel_raw_path):
+        if is_step_to_be_computed(foldlabel_raw_path, "Raw foldlabels", overwrite):
             args_generate_foldlabels = {'src_dir': params['skeleton_dir'] + '/raw',
                                         'foldlabel_dir': params['foldlabel_dir'] + '/raw',
                                         'path_to_graph': params['path_to_graph'],
@@ -298,17 +306,13 @@ it before if you want to overwrite it.")
 
             generate_foldlabels(**args_generate_foldlabels)
             log.info('Raw foldlabels generated')
-        else:
-            log.info("Raw foldlabels are already computed. "
-                     "If you want to overwrite them, "
-                     f"please delete the folder at {foldlabel_raw_path}")
 
 
     # generate transform
     if params['out_voxel_size'] != 'raw':
         step = print_info(step, "generate transforms")
         path_to_transforms = os.path.join(params['transform_dir'], params['side'])
-        if not os.path.exists(path_to_transforms):
+        if is_step_to_be_computed(path_to_transforms, "Transforms", overwrite):
             args_generate_transforms = {'src_dir': params['graphs_dir'],
                                         'transform_dir': params['transform_dir'],
                                         'path_to_graph': params['path_to_graph'],
@@ -324,10 +328,6 @@ it before if you want to overwrite it.")
 
             generate_ICBM2009c_transforms(**args_generate_transforms)
             log.info('Transforms generated')
-        else:
-            log.info("Transforms are already computed. "
-                     "If you want to overwrite them, "
-                     f"please delete the folder at {path_to_transforms}")
 
 
     # resample files
@@ -347,7 +347,10 @@ it before if you want to overwrite it.")
             resampled_dir = os.path.join(params['skeleton_dir'], vox_size)
         
         path_resampled_path = os.path.join(resampled_dir, params['side'])
-        if not os.path.exists(path_resampled_path):
+        if is_step_to_be_computed(
+                path=path_resampled_path,
+                log_string=f"Resampled {params['input_type']}s",
+                overwrite=overwrite):
             args_resample_files = {'src_dir': raw_input,
                                    'input_type': params['input_type'],
                                    'resampled_dir': resampled_dir,
@@ -366,10 +369,6 @@ it before if you want to overwrite it.")
 
             resample_files(**args_resample_files)
             log.info(f"{params['input_type']} resampled")
-        else:
-            log.info(f"Resampled {params['input_type']}s are already computed. "
-                     "If you want to overwrite them, "
-                     f"please delete the folder at {resampled_dir}")
     
 
     # generate crops
@@ -394,7 +393,10 @@ it before if you want to overwrite it.")
                                  mask_str)
 
     step = print_info(step, f"generate {params['input_type']} crops")
-    if not os.path.exists(path_to_crops+'/'+params['side']+cropdir_name+'s'):
+    if is_step_to_be_computed(
+                path=path_to_crops+'/'+params['side']+cropdir_name+'s',
+                log_string=f"Crops",
+                overwrite=overwrite):
         args_generate_crops = {'src_dir': src_dir,
                                'input_type': params['input_type'],
                                'crop_dir': path_to_crops,
@@ -419,11 +421,6 @@ it before if you want to overwrite it.")
         # save params json where the crops lie
         with open(path_to_crops+'/pipeline_params.json', 'w') as file:
             json.dump(params, file)
-    
-    else:
-        log.info("Crops are already computed. "
-                 "If you want to overwrite them, "
-                 f"please delete the folder at {path_to_crops}")
     
 
 
