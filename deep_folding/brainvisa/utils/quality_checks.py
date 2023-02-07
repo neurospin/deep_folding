@@ -40,6 +40,7 @@
 import glob
 import re
 import csv
+import os
 
 from deep_folding.config.logs import set_file_logger
 # Defines logger
@@ -130,7 +131,7 @@ def get_not_processed_files(src_dir, tgt_dir):
     return not_processed_files
 
 
-def get_not_processed_subjects(subjects, tgt_dir):
+def get_not_processed_subjects_dict(subjects, tgt_dir):
     """Returns list of subjects not yet processed.
     
     This is done by comparing subjects in subject dict and tgt directories"""
@@ -152,7 +153,7 @@ def get_not_processed_subjects(subjects, tgt_dir):
 
     not_processed_subjects_dict = []
     for sub in not_processed_subjects:
-        for s in src_subjects:
+        for s in subjects:
             if s['subject'] == sub:
                 not_processed_subjects_dict.append(s)
 

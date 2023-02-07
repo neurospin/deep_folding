@@ -59,7 +59,7 @@ from deep_folding.brainvisa.utils.subjects import select_subjects_int
 from deep_folding.brainvisa.utils.subjects import \
     get_all_subjects_as_dictionary
 from deep_folding.brainvisa.utils.quality_checks import \
-    get_not_processed_subjects
+    get_not_processed_subjects_dict
 from deep_folding.brainvisa.utils.sulcus import complete_sulci_name
 from deep_folding.config.logs import set_file_logger
 from soma import aims
@@ -255,7 +255,7 @@ class MaskAroundSulcus:
             create_folder(self.mask_sample_dir)
 
             # Generates list of subjects not treated yet
-            subjects = get_not_processed_subjects(subjects, self.mask_sample_dir)
+            subjects = get_not_processed_subjects_dict(subjects, self.mask_sample_dir)
 
             # Gives the possibility to list only the first number_subjects
             subjects = select_subjects_int(subjects, number_subjects)
