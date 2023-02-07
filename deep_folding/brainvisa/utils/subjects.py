@@ -169,6 +169,7 @@ def select_good_qc(orig_list: list, qc_path: str):
             sep = '\t'
         else:
             sep = ','
+        log.info(f'Reading qc tsv file')
         qc_file = pd.read_csv(qc_path, sep=sep)
 
         qc_file = qc_file[qc_file.qc != 0]

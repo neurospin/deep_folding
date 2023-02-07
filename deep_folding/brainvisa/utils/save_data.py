@@ -99,15 +99,15 @@ def save_to_dataframe_format_from_list(cropped_dir, tgt_dir=None, file_basename=
 def compare_one_array(cropped_dir, list_basename, row):
     index = row[0]
     sub = row[1]
-    index_sub = [idx for idx,x in enumerate(list_basename) if sub in x][0]
+    index_sub = [idx for idx,x in enumerate(list_basename) if sub in x]
+    if len(index_sub):
+        index_sub = index_sub[0]
+    else:
+        raise ValueError(f"Subject {sub} not in cropped files")
     subject_file = f"{cropped_dir}/{list_basename[index_sub]}"
     vol = aims.read(subject_file)
     arr_ref = np.asarray(vol)
     return arr_ref
-    # arr_from_array = arr[index,...]
-    # if not np.array_equal(arr_ref, arr_from_array):
-    #     raise ValueError(f"For subject = {sub} and index = {index}\n"
-    #                     "arrays don't match")
 
 
 def quality_checks(csv_file_path, npy_array_file_path, cropped_dir, parallel=False):
@@ -122,8 +122,10 @@ def quality_checks(csv_file_path, npy_array_file_path, cropped_dir, parallel=Fal
         log.info("Quality check is done in PARALLEL")
         list_nifti = glob.glob(f"{cropped_dir}/*.nii.gz")
         list_basename = [os.path.basename(f) for f in list_nifti]
+        log.info(f"list_basename[:3] = {list_basename[:3]}")
         partial_func = partial(compare_one_array, cropped_dir, list_basename)
         enum = [x for x in enumerate(subjects['Subject'])]
+        log.info(f"enum subjects[:3] = {enum[:3]}")
         list_arr = p_map(partial_func, enum)
         for index, arr_ref in enumerate(list_arr):
             if not np.array_equal(arr_ref, arr[index,...]):

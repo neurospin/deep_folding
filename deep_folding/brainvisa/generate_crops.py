@@ -84,6 +84,7 @@ from deep_folding.brainvisa.utils.quality_checks import \
 from deep_folding.brainvisa.utils.sulcus import complete_sulci_name
 from deep_folding.config.logs import set_file_logger
 from pqdm.processes import pqdm
+from p_tqdm import p_map
 from soma import aims
 
 # Import constants
@@ -315,7 +316,7 @@ class CropGenerator:
                 if self.parallel:
                     log.info(
                         "PARALLEL MODE: subjects are in parallel")
-                    pqdm(list_subjects, self.crop_one_file, n_jobs=define_njobs())
+                    p_map(self.crop_one_file, list_subjects, num_cpus=define_njobs())
                 else:
                     log.info(
                         "SERIAL MODE: subjects are scanned serially")

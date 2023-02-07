@@ -62,8 +62,10 @@ from deep_folding.brainvisa.utils.parallel import define_njobs
 from deep_folding.brainvisa.utils.skeleton import \
     generate_skeleton_from_graph_file
 from deep_folding.brainvisa.utils.quality_checks import \
-    compare_number_aims_files_with_expected
+    compare_number_aims_files_with_expected, \
+    get_not_processed_subjects
 from pqdm.processes import pqdm
+from p_tqdm import p_map
 from deep_folding.config.logs import set_file_logger
 
 # Import constants
@@ -213,6 +215,9 @@ class GraphConvert2Skeleton:
         list_subjects = [basename(filename) for filename in filenames
                     if not re.search('.minf$', filename)]
         list_subjects = select_good_qc(list_subjects, self.qc_path)
+        list_subjects = \
+            get_not_processed_subjects(list_subjects, self.skeleton_dir)
+ 
         list_subjects = select_subjects_int(list_subjects, number_subjects)
 
         log.info(f"Expected number of subjects = {len(list_subjects)}")
@@ -223,9 +228,9 @@ class GraphConvert2Skeleton:
         if self.parallel:
             log.info(
                 "PARALLEL MODE: subjects are computed in parallel.")
-            pqdm(list_subjects,
-                 self.generate_one_skeleton,
-                 n_jobs=define_njobs())
+            p_map(self.generate_one_skeleton,
+                 list_subjects,
+                 num_cpus=define_njobs())
         else:
             log.info(
                 "SERIAL MODE: subjects are scanned serially, "

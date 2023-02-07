@@ -60,7 +60,8 @@ from deep_folding.brainvisa.utils.subjects import select_subjects_int
 from deep_folding.brainvisa.utils.logs import setup_log
 from deep_folding.brainvisa.utils.parallel import define_njobs
 from deep_folding.brainvisa.utils.quality_checks import \
-    compare_number_aims_files_with_expected
+    compare_number_aims_files_with_expected, \
+    get_not_processed_subjects_transform
 from pqdm.processes import pqdm
 from deep_folding.config.logs import set_file_logger
 from soma import aims
@@ -208,7 +209,10 @@ class GraphGenerateTransform:
 
         list_subjects = [basename(filename) for filename in filenames 
                          if not re.search('.minf$', filename)]
-
+        list_subjects = \
+            get_not_processed_subjects_transform(list_subjects,
+                                       self.transform_dir,
+                                       prefix="ICBM2009c_")
         list_subjects = select_subjects_int(list_subjects, number_subjects)
 
         log.info(f"Expected number of subjects = {len(list_subjects)}")

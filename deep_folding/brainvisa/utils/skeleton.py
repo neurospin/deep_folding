@@ -47,6 +47,11 @@ from deep_folding.brainvisa.utils.constants import _JUNCTION_DEFAULT
 # Defines logger
 log = set_file_logger(__file__)
 
+def is_skeleton(arr):
+    """checks if arr is a skeleton"""
+    skel_values = np.array([0, 30, 35, 60, 100, 110, 120])
+    return np.isin(arr, skel_values).all()
+
 def generate_skeleton_thin_junction(
         graph: aims.Graph) -> aims.Volume:
     """Converts an aims graph into skeleton volumes
@@ -171,4 +176,6 @@ def generate_skeleton_from_graph_file(graph_file: str,
     """Generates skeleton from graph file"""
     graph = aims.read(graph_file)
     vol_skeleton = generate_skeleton_from_graph(graph, junction)
+    if not is_skeleton(np.asarray(vol_skeleton)):
+        raise ValueError(f"{skeleton_file} has unexpected skeleton values")
     aims.write(vol_skeleton, skeleton_file)

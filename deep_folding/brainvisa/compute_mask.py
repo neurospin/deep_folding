@@ -255,23 +255,24 @@ class MaskAroundSulcus:
             create_folder(self.mask_sample_dir)
 
             # Generates list of subjects not treated yet
-            subjects = get_not_processed_subjects_dict(subjects, self.mask_sample_dir)
+            not_treated_subjects = get_not_processed_subjects_dict(subjects, self.mask_sample_dir)
 
-            # Gives the possibility to list only the first number_subjects
-            subjects = select_subjects_int(subjects, number_subjects)
+            if len(not_treated_subjects):
+                # Gives the possibility to list only the first number_subjects
+                subjects = select_subjects_int(subjects, number_subjects)
 
-            # Creates volume that will take the mask
-            self.mask = initialize_mask(self.out_voxel_size)
+                # Creates volume that will take the mask
+                self.mask = initialize_mask(self.out_voxel_size)
 
-            # Increments mask for each sulcus and subjects
-            increment_mask(subjects,
-                           self.mask,
-                           self.sulcus,
-                           self.out_voxel_size,
-                           self.mask_sample_dir)
+                # Increments mask for each sulcus and subjects
+                increment_mask(subjects,
+                            self.mask,
+                            self.sulcus,
+                            self.out_voxel_size,
+                            self.mask_sample_dir)
 
-            # Saving of generated masks
-            write_mask(self.mask, self.mask_file)
+                # Saving of generated masks
+                write_mask(self.mask, self.mask_file)
 
 
 def compute_mask(src_dir=_SUPERVISED_SRC_DIR_DEFAULT,

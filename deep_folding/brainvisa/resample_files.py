@@ -60,6 +60,7 @@ import sys
 import tempfile
 from os.path import join
 from os.path import basename
+from p_tqdm import p_map
 
 import numpy as np
 
@@ -346,10 +347,10 @@ class FileResampler:
                 if self.parallel:
                     log.info(
                         "PARALLEL MODE: subjects are in parallel")
-                    pqdm(
-                        list_subjects,
+                    p_map(
                         self.resample_one_subject_wrapper,
-                        n_jobs=define_njobs())
+                        list_subjects,
+                        num_cpus=define_njobs())
                 else:
                     log.info(
                         "SERIAL MODE: subjects are scanned serially")
@@ -357,7 +358,7 @@ class FileResampler:
                         self.resample_one_subject_wrapper(sub)
             else:
                 list_subjects = []
-                log.info("There is no subject or there is no subject to process"
+                log.info("There is no subject or there is no subject to process "
                          "in the source directory")
 
             # Checks if there is expected number of generated files
