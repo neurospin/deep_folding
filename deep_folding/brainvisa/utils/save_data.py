@@ -14,7 +14,7 @@ from functools import partial
 from pqdm.processes import pqdm
 from p_tqdm import p_map
 from soma import aims
-from deep_folding.brainvisa.utils.parallel import define_njobs
+# from deep_folding.brainvisa.utils.parallel import define_njobs
 
 from deep_folding.config.logs import set_file_logger
 
@@ -69,7 +69,7 @@ def save_to_pickle(cropped_dir, tgt_dir=None, file_basename=None, parallel=False
     dataframe.to_pickle(file_pickle)
 
 
-def save_to_pickle_from_list(cropped_dir, tgt_dir=None, file_basename=None,
+def save_to_dataframe_format_from_list(cropped_dir, tgt_dir=None, file_basename=None,
                              list_sample_id=None, list_sample_file=None):
     """
     Creates a dataframe of data with a column for each subject and associated
@@ -175,9 +175,11 @@ def save_to_numpy(cropped_dir, tgt_dir=None, file_basename=None, parallel = Fals
     list_sample_id = []
     list_sample_file = []
 
-    log.info("Now generating numpy array: 4 steps")
+    log.info("\n\n--------------------------------\n"
+             "Now generating numpy array: 4 steps\n"
+             "--------------------------------\n")
     log.debug(f"cropped_dir = {cropped_dir}")
-    log.info("1. Now reading cropped dir...")
+    log.info("STEP 1. Now reading cropped dir...")
     listdir = os.listdir(cropped_dir)
     listdir = [filename for filename in listdir \
         if is_file_nii(os.path.join(cropped_dir, filename))]
@@ -198,18 +200,18 @@ def save_to_numpy(cropped_dir, tgt_dir=None, file_basename=None, parallel = Fals
                 list_sample_id.append(os.path.basename(subject))
                 list_sample_file.append(sample)
 
-    log.info("2. Now writing subject name file...")
+    log.info("STEP 2. Now writing subject name file...")
     # Writes subject ID csv file
     subject_df = pd.DataFrame(list_sample_id, columns=["Subject"])
     np.save(os.path.join(tgt_dir, 'sub_id.npy'), list_sample_id)
 
-    log.info("3. Now saving to numpy array...")
+    log.info("STEP 3. Now saving to numpy array...")
     # Writes volumes as numpy arrays
     list_sample_file = np.array(list_sample_file)
     np.save(os.path.join(tgt_dir, file_basename+'.npy'), list_sample_file)
 
     # Quality_checks
-    log.info("4. Now performing checks on numpy arrays...")
+    log.info("STEP 4. Now performing checks on numpy arrays...")
     quality_checks(
         os.path.join(tgt_dir, file_basename+'_subject.csv'),
         os.path.join(tgt_dir, file_basename+'.npy'),

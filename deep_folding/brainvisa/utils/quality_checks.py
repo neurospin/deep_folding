@@ -130,6 +130,39 @@ def get_not_processed_files(src_dir, tgt_dir):
     return not_processed_files
 
 
+def get_not_processed_subjects(subjects, tgt_dir):
+    """Returns list of subjects not yet processed.
+    
+    This is done by comparing subjects in subject dict and tgt directories"""
+
+    log.info(f"first subject start of fucntion= {subjects[0]}")
+    src_subjects = [sub['subject'] for sub in subjects]
+    log.info(f"first subject = {src_subjects[0]}")
+
+    tgt_files = glob.glob(f"{tgt_dir}/*.nii.gz")
+    log.info(f"number of target files = {len(tgt_files)}")
+    log.info(f"first target file = {tgt_files[0]}")
+
+    tgt_subjects = [os.path.basename(file) for file in tgt_files]
+    tgt_subjects = [subject.split(".")[0] for subject in tgt_subjects]
+
+    tgt_subjects = [subject.split(".")[0] for subject in tgt_subjects]
+
+    not_processed_subjects = list(set(src_subjects)-set(tgt_subjects))
+
+    not_processed_subjects_dict = []
+    for sub in not_processed_subjects:
+        for s in src_subjects:
+            if s['subject'] == sub:
+                not_processed_subjects_dict.append(s)
+
+    log.info(f"number of not processed subjects = {len(not_processed_subjects_dict)}")
+    if len(not_processed_subjects):
+        log.info(f"first not_processed subject = {not_processed_subjects_dict[0]}")
+
+    return not_processed_subjects_dict
+
+
 def get_not_processed_cropped_files(src_dir, tgt_dir):
     """Returns list of source files not yet processed.
     

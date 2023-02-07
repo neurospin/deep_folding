@@ -58,6 +58,8 @@ from deep_folding.brainvisa.utils.subjects import get_number_subjects
 from deep_folding.brainvisa.utils.subjects import select_subjects_int
 from deep_folding.brainvisa.utils.subjects import \
     get_all_subjects_as_dictionary
+from deep_folding.brainvisa.utils.quality_checks import \
+    get_not_processed_subjects
 from deep_folding.brainvisa.utils.sulcus import complete_sulci_name
 from deep_folding.config.logs import set_file_logger
 from soma import aims
@@ -248,12 +250,15 @@ class MaskAroundSulcus:
                 self.graph_file,
                 self.side)
 
-            # Gives the possibility to list only the first number_subjects
-            subjects = select_subjects_int(subjects, number_subjects)
-
             # Creates target mask_dir if they don't exist
             create_folder(self.mask_dir)
             create_folder(self.mask_sample_dir)
+
+            # Generates list of subjects not treated yet
+            subjects = get_not_processed_subjects(subjects, self.mask_sample_dir)
+
+            # Gives the possibility to list only the first number_subjects
+            subjects = select_subjects_int(subjects, number_subjects)
 
             # Creates volume that will take the mask
             self.mask = initialize_mask(self.out_voxel_size)
