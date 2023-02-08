@@ -37,12 +37,12 @@ DESCRIPTION = description
 URL = "https://github.com/neurospin/deep_folding"
 DOWNLOAD_URL = "https://github.com/neurospin/deep_folding"
 LICENSE = "CeCILL license version 2"
-AUTHOR = "Louise Guillon and Joel Chavas"
+AUTHOR = "Louise Guillon, Pierre Auriau, Aymeric Gaudin and Joel Chavas"
 AUTHOR_EMAIL = ""
 PLATFORMS = "OS Independent"
 PROVIDES = ["deep_folding"]
 REQUIRES = ['six', 'numpy', 'pytest', 'GitPython', 'typing', 'joblib',
-            'tqdm>=4.36', 'pqdm',
+            'tqdm>=4.36', 'pqdm', 'p_tqdm',
             'dico_toolbox @ \
                 git+https://git@github.com/neurospin/dico_toolbox#egg=dico_toolbox',
             'colorado @ \

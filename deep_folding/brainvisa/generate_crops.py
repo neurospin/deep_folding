@@ -65,7 +65,7 @@ from numpy import save
 import scipy.ndimage
 from deep_folding.brainvisa import exception_handler
 from deep_folding.brainvisa.utils.save_data import save_to_numpy
-from deep_folding.brainvisa.utils.save_data import save_to_pickle
+from deep_folding.brainvisa.utils.save_data import save_to_dataframe_format_from_list
 from deep_folding.brainvisa.utils.bbox import compute_max_box
 from deep_folding.brainvisa.utils.folder import create_folder
 from deep_folding.brainvisa.utils.logs import LogJson
@@ -77,10 +77,14 @@ from deep_folding.brainvisa.utils.mask import compute_intersection_mask
 from deep_folding.brainvisa.utils.subjects import get_number_subjects
 from deep_folding.brainvisa.utils.subjects import select_subjects_int
 from deep_folding.brainvisa.utils.quality_checks import \
-    compare_number_aims_files_with_expected
+    compare_number_aims_files_with_expected, \
+    get_not_processed_cropped_files, \
+    compare_number_aims_files_with_number_in_source, \
+    save_list_to_csv
 from deep_folding.brainvisa.utils.sulcus import complete_sulci_name
 from deep_folding.config.logs import set_file_logger
 from pqdm.processes import pqdm
+from p_tqdm import p_map
 from soma import aims
 
 # Import constants
@@ -258,63 +262,83 @@ class CropGenerator:
                 files = glob.glob(f"{self.src_dir}/*.nii.gz")
                 log.debug(f"Nifti files in {self.src_dir} = {files}")
                 log.debug(f"Regular expresson is: {self.expr}")
+
+                # Creates target directories
+                create_folder(self.crop_dir)
+                create_folder(self.cropped_samples_dir)
+
+                # Generates list of subjects not treated yet
+                not_processed_files = get_not_processed_cropped_files(
+                                        self.src_dir,
+                                        self.cropped_samples_dir)
+
                 if len(files):
                     list_all_subjects = [
                         re.search(self.expr, basename(dI))[1]
-                        for dI in files]
+                        for dI in not_processed_files]
                 else:
                     raise ValueError(f"no nifti files in {self.src_dir}")
             else:
                 raise NotADirectoryError(
-                    f"{self.src_dir} does not exist or is not a directory")
-            # with open('/neurospin/dico/lguillon/distmap/data/test_list.csv', newline='') as f:
-            #     reader = csv.reader(f)
-            #     data = list(reader)
-            # list_subjects = [data[k][1] for k in range(len(data))]
+                    f"{self.src_dir} doesn't exist or is not a directory")
 
-            # # Gives the possibility to list only the first number_subjects
-            list_subjects = select_subjects_int(list_all_subjects,
-                                                number_subjects)
+            if len(list_all_subjects):
+                # # Gives the possibility to list only the first number_subjects
+                list_subjects = select_subjects_int(list_all_subjects,
+                                                    number_subjects)
 
-            log.info(f"Expected number of subjects = {len(list_subjects)}")
-            log.info(f"list_subjects[:5] = {list_subjects[:5]}")
-            log.debug(f"list_subjects = {list_subjects}")
+                log.info(f"Expected number of subjects = {len(list_subjects)}")
+                log.info(f"list_subjects[:5] = {list_subjects[:5]}")
+                log.debug(f"list_subjects = {list_subjects}")
 
-            # Creates target and cropped directory
-            create_folder(self.crop_dir)
-            create_folder(self.cropped_samples_dir)
+                # Creates target and cropped directory
+                create_folder(self.crop_dir)
+                create_folder(self.cropped_samples_dir)
 
-            # Writes number of subjects and directory names to json file
-            dict_to_add = {'nb_subjects': len(list_subjects),
-                           'src_dir': self.src_dir,
-                           'bbox_dir': self.bbox_dir,
-                           'mask_dir': self.mask_dir,
-                           'side': self.side,
-                           'list_sulci': self.list_sulci,
-                           'bbmin': self.bbmin.tolist(),
-                           'bbmax': self.bbmax.tolist(),
-                           'size': (self.bbmax-self.bbmin).tolist(),
-                           'crop_dir': self.crop_dir,
-                           'cropped_skeleton_dir': self.cropped_samples_dir,
-                           'cropping_type': self.cropping_type,
-                           'combine_type': self.combine_type,
-                           'no_mask': self.no_mask
-                           }
-            self.json.update(dict_to_add=dict_to_add)
+                # Writes number of subjects and directory names to json file
+                dict_to_add = {'nb_subjects': len(list_subjects),
+                            'src_dir': self.src_dir,
+                            'bbox_dir': self.bbox_dir,
+                            'mask_dir': self.mask_dir,
+                            'side': self.side,
+                            'list_sulci': self.list_sulci,
+                            'bbmin': self.bbmin.tolist(),
+                            'bbmax': self.bbmax.tolist(),
+                            'size': (self.bbmax-self.bbmin).tolist(),
+                            'crop_dir': self.crop_dir,
+                            'cropped_skeleton_dir': self.cropped_samples_dir,
+                            'cropping_type': self.cropping_type,
+                            'combine_type': self.combine_type,
+                            'no_mask': self.no_mask
+                            }
+                self.json.update(dict_to_add=dict_to_add)
 
-            if self.parallel:
-                log.info(
-                    "PARALLEL MODE: subjects are in parallel")
-                pqdm(list_subjects, self.crop_one_file, n_jobs=define_njobs())
+                if self.parallel:
+                    log.info(
+                        "PARALLEL MODE: subjects are in parallel")
+                    p_map(self.crop_one_file, list_subjects, num_cpus=define_njobs())
+                else:
+                    log.info(
+                        "SERIAL MODE: subjects are scanned serially")
+                    for sub in list_subjects:
+                        self.crop_one_file(sub)
             else:
-                log.info(
-                    "SERIAL MODE: subjects are scanned serially")
-                for sub in list_subjects:
-                    self.crop_one_file(sub)
+                list_subjects = []
+                log.info("There is no subject or there is no subject to process"
+                         "in the source directory")                
 
             # Checks if there is expected number of generated files
             compare_number_aims_files_with_expected(self.cropped_samples_dir,
                                                     list_subjects)
+
+            # Checks if number of generated files == number of src files
+            crop_files, src_files = \
+                compare_number_aims_files_with_number_in_source(self.cropped_samples_dir,
+                                                                self.src_dir)
+            not_processed_files = get_not_processed_cropped_files(self.src_dir, self.cropped_samples_dir)
+            save_list_to_csv(not_processed_files, 
+                             f"{self.crop_dir}/not_processed_files.csv")
+
 
     def compute_bounding_box_or_mask(self, number_subjects):
         """Computes bounding box or mask
@@ -378,12 +402,16 @@ class CropGenerator:
 
         # Creation of .npy file containing all subjects
         if number_subjects:
-            save_to_numpy(cropped_dir=self.cropped_samples_dir,
-                          tgt_dir=self.crop_dir,
-                          file_basename=self.file_basename_npy)
-            save_to_pickle(cropped_dir=self.cropped_samples_dir,
+            list_sample_id, list_sample_file = \
+                save_to_numpy(cropped_dir=self.cropped_samples_dir,
+                              tgt_dir=self.crop_dir,
+                              file_basename=self.file_basename_npy,
+                              parallel=self.parallel)
+            save_to_dataframe_format_from_list(cropped_dir=self.cropped_samples_dir,
                            tgt_dir=self.crop_dir,
-                           file_basename=self.file_basename_pickle)
+                           file_basename=self.file_basename_pickle,
+                           list_sample_id=list_sample_id,
+                           list_sample_file=list_sample_file)
 
 
 class SkeletonCropGenerator(CropGenerator):

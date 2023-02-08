@@ -43,6 +43,9 @@ _TRANSFORM_DIR_DEFAULT = "test/datasets/hcp/transforms"
 # Default directory where we put resampled skeletons
 _RESAMPLED_SKELETON_DIR_DEFAULT = "test/datasets/hcp/skeletons/1mm"
 
+# Default directory where we put resampled foldlabels
+_RESAMPLED_FOLDLABEL_DIR_DEFAULT = "test/datasets/hcp/foldlabels/1mm"
+
 # Default directory where we put crops
 _CROP_DIR_DEFAULT = "test/datasets/hcp/crops/CINGULATE/mask/1mm"
 
