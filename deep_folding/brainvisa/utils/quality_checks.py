@@ -152,7 +152,8 @@ def get_not_processed_subjects_dict(subjects, tgt_dir):
 
     tgt_files = glob.glob(f"{tgt_dir}/*.nii.gz")
     log.info(f"number of target files = {len(tgt_files)}")
-    log.info(f"first target file = {tgt_files[0]}")
+    if len(tgt_files):
+        log.info(f"first target file = {tgt_files[0]}")
 
     tgt_subjects = [os.path.basename(file) for file in tgt_files]
     tgt_subjects = [subject.split(".")[0] for subject in tgt_subjects]
