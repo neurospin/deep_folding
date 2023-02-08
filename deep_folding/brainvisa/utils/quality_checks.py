@@ -183,7 +183,7 @@ def get_not_processed_cropped_files(src_dir, tgt_dir):
     if type(src_dir) == str:
         src_files = glob.glob(f"{src_dir}/*.nii.gz")
     log.info(f"number of source files = {len(src_files)}")
-    if len(src_subjects):
+    if len(src_files):
         log.info(f"first source file = {src_files[0]}")
     log.debug(f"list src files = {src_files}")
 

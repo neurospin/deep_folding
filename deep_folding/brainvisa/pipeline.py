@@ -210,6 +210,7 @@ def main(argv):
     params['transform_dir'] = os.path.join(params["output_dir"], "transforms")
     params['crops_dir'] = os.path.join(params["output_dir"], "crops")
 
+
     step = 1
     # generate masks
     step = print_info(step, "generate masks")
@@ -300,10 +301,10 @@ def main(argv):
                                         'path_to_graph': params['path_to_graph'],
                                         'side': params['side'],
                                         'junction': params['junction'],
-                                    'bids': params['bids'],
+                                        'bids': params['bids'],
                                         'parallel': params['parallel'],
                                         'number_subjects': params['nb_subjects'],
-                                         'qc_path': params['skel_qc_path']}
+                                        'qc_path': params['skel_qc_path']}
 
             setup_log(Namespace(**{'verbose': log.level, **args_generate_foldlabels}),
                       log_dir=f"{args_generate_foldlabels['foldlabel_dir']}",
