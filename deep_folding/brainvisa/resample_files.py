@@ -326,7 +326,9 @@ class FileResampler:
                 create_folder(self.resampled_dir)
 
                 # Generates list of subjects not treated yet
-                not_processed_files = get_not_processed_files(self.src_dir, self.resampled_dir)
+                not_processed_files = get_not_processed_files(self.src_dir,
+                                                              self.resampled_dir,
+                                                              self.src_filename)
 
                 list_all_subjects = \
                     [re.search(self.expr, os.path.basename(dI))[1]
@@ -369,7 +371,9 @@ class FileResampler:
             resampled_files, src_files = \
                 compare_number_aims_files_with_number_in_source(self.resampled_dir,
                                                                 self.src_dir)
-            not_processed_files = get_not_processed_files(self.src_dir, self.resampled_dir)
+            not_processed_files = get_not_processed_files(self.src_dir,
+                                                          self.resampled_dir,
+                                                          self.src_filename)
             save_list_to_csv(not_processed_files, 
                              f"{self.resampled_dir}/../not_processed_files.csv")
 
@@ -409,6 +413,7 @@ class SkeletonResampler(FileResampler):
 
         # Names of files in function of dictionary: keys -> 'subject' and
         # 'side'
+        self.src_filename = src_filename
         self.resampled_file = join(
             self.resampled_dir,
             f'%(side)s' + output_filename + '%(subject)s.nii.gz')
@@ -464,6 +469,7 @@ class FoldLabelResampler(FileResampler):
 
         # Names of files in function of dictionary: keys -> 'subject' and
         # 'side'
+        self.src_filename = src_filename
         self.resampled_file = join(
             self.resampled_dir,
             f'%(side)s' + output_filename + '%(subject)s.nii.gz')
@@ -512,6 +518,7 @@ class DistMapResampler(FileResampler):
 
         # Names of files in function of dictionary: keys -> 'subject' and
         # 'side'
+        self.src_filename = src_filename
         self.resampled_file = join(
             self.resampled_dir,
             f'%(side)s' + output_filename + '%(subject)s.nii.gz')

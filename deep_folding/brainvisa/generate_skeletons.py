@@ -175,22 +175,6 @@ class GraphConvert2Skeleton:
         self.skeleton_dir = f"{self.skeleton_dir}/{self.side}"
         create_folder(abspath(self.skeleton_dir))
 
-    def generate_one_skeleton(self, subject: str):
-        """Generates and writes skeleton for one subject.
-        """
-        graph_path = f"{self.src_dir}/{subject}*/" +\
-                     f"{self.path_to_graph}/{self.side}*.arg"
-        list_graph_file = glob.glob(graph_path)
-        log.debug(f"list_graph_file = {list_graph_file}")
-        if len(list_graph_file) == 0:
-            raise RuntimeError(f"No graph file! "
-                               f"{graph_path} doesn't exist")
-        for graph_file in list_graph_file:
-            skeleton_file = self.get_skeleton_filename(subject, graph_file)
-            generate_skeleton_from_graph_file(graph_file, skeleton_file, self.junction)
-            if not self.bids:
-                break
-
     def get_skeleton_filename(self, subject, graph_file):
         skeleton_file = f"{self.skeleton_dir}/" + \
                         f"{self.side}skeleton_generated_{subject}"
@@ -206,6 +190,22 @@ class GraphConvert2Skeleton:
                 skeleton_file += f"_{run[0]}"
         skeleton_file += ".nii.gz"
         return skeleton_file
+        
+    def generate_one_skeleton(self, subject: str):
+        """Generates and writes skeleton for one subject.
+        """
+        graph_path = f"{self.src_dir}/{subject}*/" +\
+                     f"{self.path_to_graph}/{self.side}*.arg"
+        list_graph_file = glob.glob(graph_path)
+        log.debug(f"list_graph_file = {list_graph_file}")
+        if len(list_graph_file) == 0:
+            raise RuntimeError(f"No graph file! "
+                               f"{graph_path} does not exist")
+        for graph_file in list_graph_file:
+            skeleton_file = self.get_skeleton_filename(subject, graph_file)
+            generate_skeleton_from_graph_file(graph_file, skeleton_file, self.junction)
+            if not self.bids:
+                break
 
     def compute(self, number_subjects):
         """Loops over subjects and converts graphs into skeletons.

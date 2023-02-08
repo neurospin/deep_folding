@@ -179,7 +179,10 @@ def main(argv):
     else:
         mask_str = 'mask'
     
-    src_filename = f"{params['input_type']}_generated_"
+    src_filename = f"{params['input_type']}_" \
+        if params['input_type']=="foldlabel" else \
+        f"{params['input_type']}_generated_"
+
     output_filename = f"resampled_{params['input_type']}_"
 
     if params['input_type'] == 'distmap':
@@ -243,26 +246,27 @@ def main(argv):
 
 
     # generate raw skeletons
-    step = print_info(step, "generate raw skeletons")
-    skel_dir = os.path.join(params['skeleton_dir'], 'raw', params['side'])
-    if is_step_to_be_computed(skel_dir, "Raw skeletons", overwrite):
-        args_generate_skeletons = {'src_dir': params['graphs_dir'],
-                                   'skeleton_dir': params['skeleton_dir'] + '/raw',
-                                   'path_to_graph': params['path_to_graph'],
-                                   'side': params['side'],
-                                   'junction': params['junction'],
-                                   'bids': params['bids'],
-                                   'parallel': params['parallel'],
-                                   'number_subjects': params['nb_subjects'],
-                                   'qc_path': params['skel_qc_path']}
-        
-        setup_log(Namespace(**{'verbose': log.level, **args_generate_skeletons}),
-                  log_dir=f"{args_generate_skeletons['skeleton_dir']}",
-                  prog_name='pipeline_generate_skeletons.py',
-                  suffix=full_side[1:])
+    if params['input_type'] in ['skeleton', 'distmap']:
+        step = print_info(step, "generate raw skeletons")
+        skel_dir = os.path.join(params['skeleton_dir'], 'raw', params['side'])
+        if is_step_to_be_computed(skel_dir, "Raw skeletons", overwrite):
+            args_generate_skeletons = {'src_dir': params['graphs_dir'],
+                                    'skeleton_dir': params['skeleton_dir'] + '/raw',
+                                    'path_to_graph': params['path_to_graph'],
+                                    'side': params['side'],
+                                    'junction': params['junction'],
+                                    'bids': params['bids'],
+                                    'parallel': params['parallel'],
+                                    'number_subjects': params['nb_subjects'],
+                                    'qc_path': params['skel_qc_path']}
+            
+            setup_log(Namespace(**{'verbose': log.level, **args_generate_skeletons}),
+                    log_dir=f"{args_generate_skeletons['skeleton_dir']}",
+                    prog_name='pipeline_generate_skeletons.py',
+                    suffix=full_side[1:])
 
-        generate_skeletons(**args_generate_skeletons)
-        log.info('Skeletons generated')
+            generate_skeletons(**args_generate_skeletons)
+            log.info('Skeletons generated')
     
 
     # generate raw distmaps if required
@@ -291,13 +295,15 @@ def main(argv):
         step = print_info(step, "generate raw foldlabels")
         foldlabel_raw_path = os.path.join(params['foldlabel_dir'], 'raw', params['side'])
         if is_step_to_be_computed(foldlabel_raw_path, "Raw foldlabels", overwrite):
-            args_generate_foldlabels = {'src_dir': params['skeleton_dir'] + '/raw',
+            args_generate_foldlabels = {'src_dir':  params['graphs_dir'],
                                         'foldlabel_dir': params['foldlabel_dir'] + '/raw',
                                         'path_to_graph': params['path_to_graph'],
                                         'side': params['side'],
                                         'junction': params['junction'],
+                                    'bids': params['bids'],
                                         'parallel': params['parallel'],
-                                        'number_subjects': params['nb_subjects']}
+                                        'number_subjects': params['nb_subjects'],
+                                         'qc_path': params['skel_qc_path']}
 
             setup_log(Namespace(**{'verbose': log.level, **args_generate_foldlabels}),
                       log_dir=f"{args_generate_foldlabels['foldlabel_dir']}",

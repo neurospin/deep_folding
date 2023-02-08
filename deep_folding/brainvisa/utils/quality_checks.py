@@ -99,7 +99,7 @@ def compare_number_aims_files_with_number_in_source(output_dir: str,
     return generated_files, src_files
 
 
-def get_not_processed_files(src_dir, tgt_dir):
+def get_not_processed_files(src_dir, tgt_dir, src_filename):
     """Returns list of source files not yet processed.
     
     This is done by comparing subjects in src and tgt directories"""
@@ -121,19 +121,21 @@ def get_not_processed_files(src_dir, tgt_dir):
     else:
         tgt_subjects = []
 
-    src_subjects = [subject.split("generated_")[-1] for subject in src_files]
+    src_subjects = [subject.split(src_filename)[-1] for subject in src_files]
     log.info("src subjects before . split: " + src_subjects[0])
     src_subjects = [subject.split(".")[0] for subject in src_subjects]
     log.info("Src subjects after . split: " + src_subjects[0])
 
     not_processed_subjects = list(set(src_subjects)-set(tgt_subjects))
 
-    root = src_files[0].split("generated_")[0]
-    not_processed_files = [f"{root}generated_{subject}.nii.gz" for subject in not_processed_subjects]
+    root = src_files[0].split(src_filename)[0]
+    log.info("src_filename: " + src_filename)
+    log.info("root: " + root)
+    not_processed_files = [f"{root}{src_filename}{subject}.nii.gz" for subject in not_processed_subjects]
     log.info(f"number of not processed subjects = {len(not_processed_files)}")
     if len(not_processed_files):
         log.info(f"first not_processed file = {not_processed_files[0]}")
-
+    
     return not_processed_files
 
 
@@ -173,6 +175,7 @@ def get_not_processed_subjects_dict(subjects, tgt_dir):
 def get_not_processed_cropped_files(src_dir, tgt_dir):
     """Returns list of source files not yet processed.
     
+    this one is specific toc rop directory.
     This is done by comparing subjects in src and tgt directories"""
 
     if type(src_dir) == str:
@@ -210,14 +213,14 @@ def get_not_processed_subjects(src_subjects, tgt_dir, prefix="generated_"):
     This is done by comparing subjects in src and tgt directories"""
 
     log.info(f"number of source subjects = {len(src_subjects)}")
-    log.info(f"first subject = {src_subjects[0]}")
+    log.info(f"first src subject = {src_subjects[0]}")
     tgt_files = glob.glob(f"{tgt_dir}/*.nii.gz")
     log.info(f"number of target files = {len(tgt_files)}")
     if len(tgt_files):
         log.info(f"first target file = {tgt_files[0]}")
 
     tgt_subjects = [subject.split(prefix)[-1] for subject in tgt_files]
-    tgt_subjects = [subject.split("_")[0] for subject in tgt_subjects]
+    # tgt_subjects = [subject.split("_")[0] for subject in tgt_subjects]
     
     tgt_subjects = [subject.split(".")[0] for subject in tgt_subjects]
 
