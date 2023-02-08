@@ -107,7 +107,8 @@ def get_not_processed_files(src_dir, tgt_dir, src_filename):
     if type(src_dir) == str:
         src_files = glob.glob(f"{src_dir}/*.nii.gz")
     log.info(f"number of source files = {len(src_files)}")
-    log.info(f"first source file = {src_files[0]}")
+    if len(src_files):
+        log.info(f"first source file = {src_files[0]}")
     log.debug(f"list src files = {src_files}")
 
     tgt_files = glob.glob(f"{tgt_dir}/*.nii.gz")
@@ -146,7 +147,8 @@ def get_not_processed_subjects_dict(subjects, tgt_dir):
 
     log.info(f"first subject start of fucntion= {subjects[0]}")
     src_subjects = [sub['subject'] for sub in subjects]
-    log.info(f"first subject = {src_subjects[0]}")
+    if len(src_subjects):
+        log.info(f"first subject = {src_subjects[0]}")
 
     tgt_files = glob.glob(f"{tgt_dir}/*.nii.gz")
     log.info(f"number of target files = {len(tgt_files)}")
@@ -181,7 +183,8 @@ def get_not_processed_cropped_files(src_dir, tgt_dir):
     if type(src_dir) == str:
         src_files = glob.glob(f"{src_dir}/*.nii.gz")
     log.info(f"number of source files = {len(src_files)}")
-    log.info(f"first source file = {src_files[0]}")
+    if len(src_subjects):
+        log.info(f"first source file = {src_files[0]}")
     log.debug(f"list src files = {src_files}")
 
     tgt_files = glob.glob(f"{tgt_dir}/*.nii.gz")
@@ -213,7 +216,8 @@ def get_not_processed_subjects(src_subjects, tgt_dir, prefix="generated_"):
     This is done by comparing subjects in src and tgt directories"""
 
     log.info(f"number of source subjects = {len(src_subjects)}")
-    log.info(f"first src subject = {src_subjects[0]}")
+    if len(src_subjects):
+        log.info(f"first src subject = {src_subjects[0]}")
     tgt_files = glob.glob(f"{tgt_dir}/*.nii.gz")
     log.info(f"number of target files = {len(tgt_files)}")
     if len(tgt_files):
@@ -238,7 +242,8 @@ def get_not_processed_subjects_distmap(src_subjects, tgt_dir, prefix="generated_
     This is done by comparing subjects in src and tgt directories"""
 
     log.info(f"number of source subjects = {len(src_subjects)}")
-    log.info(f"first src subject = {src_subjects[0]}")
+    if len(src_subjects):
+        log.info(f"first src subject = {src_subjects[0]}")
     tgt_files = glob.glob(f"{tgt_dir}/*.nii.gz")
     log.info(f"number of target files = {len(tgt_files)}")
     if len(tgt_files):
@@ -265,7 +270,8 @@ def get_not_processed_subjects_transform(src_subjects, tgt_dir, prefix="ICBM2009
     This is done by comparing subjects in src and tgt directories"""
 
     log.info(f"number of source subjects = {len(src_subjects)}")
-    log.info(f"first subject = {src_subjects[0]}")
+    if len(src_subjects):
+        log.info(f"first subject = {src_subjects[0]}")
     tgt_files = glob.glob(f"{tgt_dir}/*.trm")
     log.info(f"number of target files = {len(tgt_files)}")
     if len(tgt_files):
