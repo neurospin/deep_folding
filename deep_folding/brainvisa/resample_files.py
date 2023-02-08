@@ -60,6 +60,7 @@ import sys
 import tempfile
 from os.path import join
 from os.path import basename
+from p_tqdm import p_map
 
 import numpy as np
 
@@ -73,7 +74,10 @@ from deep_folding.brainvisa.utils.subjects import select_subjects_int
 from deep_folding.brainvisa.utils.folder import create_folder
 from deep_folding.brainvisa.utils.logs import setup_log
 from deep_folding.brainvisa.utils.quality_checks import \
-    compare_number_aims_files_with_expected
+    compare_number_aims_files_with_expected, \
+    compare_number_aims_files_with_number_in_source, \
+    get_not_processed_files, \
+    save_list_to_csv
 from pqdm.processes import pqdm
 from deep_folding.config.logs import set_file_logger
 from soma import aims
@@ -82,13 +86,14 @@ from soma import aims
 from deep_folding.brainvisa.utils.constants import \
     _ALL_SUBJECTS, _INPUT_TYPE_DEFAULT, _SKELETON_DIR_DEFAULT,\
     _TRANSFORM_DIR_DEFAULT, _RESAMPLED_SKELETON_DIR_DEFAULT,\
+    _RESAMPLED_FOLDLABEL_DIR_DEFAULT, \
     _SIDE_DEFAULT, _VOXEL_SIZE_DEFAULT
 
 _SKELETON_FILENAME = "skeleton_generated_"
 _FOLDLABEL_FILENAME = "foldlabel_"
 _DISTMAP_FILENAME = "distmap_generated_"
 _RESAMPLED_SKELETON_FILENAME = "resampled_skeleton_"
-_RESAMPELD_FOLDLABEL_FILENAME = "resampled_foldlabel_"
+_RESAMPLED_FOLDLABEL_FILENAME = "resampled_foldlabel_"
 _RESAMPLED_DISTMAP_FILENAME = "resampled_distmap_"
 
 
@@ -294,6 +299,10 @@ class FileResampler:
         else:
             raise FileNotFoundError(f"{src_file} not found")
 
+
+
+
+
     def compute(self, number_subjects=_ALL_SUBJECTS):
         """Loops over nii files
 
@@ -314,40 +323,60 @@ class FileResampler:
                 log.debug(f"list src files = {src_files}")
                 log.debug(os.path.basename(src_files[0]))
 
+                # Creates target directories
+                create_folder(self.resampled_dir)
+
+                # Generates list of subjects not treated yet
+                not_processed_files = get_not_processed_files(self.src_dir,
+                                                              self.resampled_dir,
+                                                              self.src_filename)
+
                 list_all_subjects = \
                     [re.search(self.expr, os.path.basename(dI))[1]
-                     for dI in src_files]
+                     for dI in not_processed_files]
             else:
                 raise NotADirectoryError(
                     f"{self.src_dir} doesn't exist or is not a directory")
 
-            # Gives the possibility to list only the first number_subjects
-            list_subjects = select_subjects_int(
-                list_all_subjects, number_subjects)
-            log.info(f"Expected number of subjects = {len(list_subjects)}")
-            log.info(f"list_subjects[:5] = {list_subjects[:5]}")
-            log.debug(f"list_subjects = {list_subjects}")
+            if len(list_all_subjects):
+                # Gives the possibility to list only the first number_subjects
+                list_subjects = select_subjects_int(
+                    list_all_subjects, number_subjects)
+                log.info(f"Expected number of subjects = {len(list_subjects)}")
+                log.info(f"list_subjects[:5] = {list_subjects[:5]}")
+                log.debug(f"list_subjects = {list_subjects}")
 
-            # Creates target directories
-            create_folder(self.resampled_dir)
-
-            # Performs resampling for each file in a parallelized way
-            if self.parallel:
-                log.info(
-                    "PARALLEL MODE: subjects are in parallel")
-                pqdm(
-                    list_subjects,
-                    self.resample_one_subject_wrapper,
-                    n_jobs=define_njobs())
+                # Performs resampling for each file in a parallelized way
+                if self.parallel:
+                    log.info(
+                        "PARALLEL MODE: subjects are in parallel")
+                    p_map(
+                        self.resample_one_subject_wrapper,
+                        list_subjects,
+                        num_cpus=define_njobs())
+                else:
+                    log.info(
+                        "SERIAL MODE: subjects are scanned serially")
+                    for sub in list_subjects:
+                        self.resample_one_subject_wrapper(sub)
             else:
-                log.info(
-                    "SERIAL MODE: subjects are scanned serially")
-                for sub in list_subjects:
-                    self.resample_one_subject_wrapper(sub)
+                list_subjects = []
+                log.info("There is no subject or there is no subject to process "
+                         "in the source directory")
 
             # Checks if there is expected number of generated files
             compare_number_aims_files_with_expected(self.resampled_dir,
                                                     list_subjects)
+
+            # Checks if number of generated files == number of src files
+            resampled_files, src_files = \
+                compare_number_aims_files_with_number_in_source(self.resampled_dir,
+                                                                self.src_dir)
+            not_processed_files = get_not_processed_files(self.src_dir,
+                                                          self.resampled_dir,
+                                                          self.src_filename)
+            save_list_to_csv(not_processed_files, 
+                             f"{self.resampled_dir}/../not_processed_files.csv")
 
 
 class SkeletonResampler(FileResampler):
@@ -385,6 +414,7 @@ class SkeletonResampler(FileResampler):
 
         # Names of files in function of dictionary: keys -> 'subject' and
         # 'side'
+        self.src_filename = src_filename
         self.resampled_file = join(
             self.resampled_dir,
             f'%(side)s' + output_filename + '%(subject)s.nii.gz')
@@ -440,6 +470,7 @@ class FoldLabelResampler(FileResampler):
 
         # Names of files in function of dictionary: keys -> 'subject' and
         # 'side'
+        self.src_filename = src_filename
         self.resampled_file = join(
             self.resampled_dir,
             f'%(side)s' + output_filename + '%(subject)s.nii.gz')
@@ -488,6 +519,7 @@ class DistMapResampler(FileResampler):
 
         # Names of files in function of dictionary: keys -> 'subject' and
         # 'side'
+        self.src_filename = src_filename
         self.resampled_file = join(
             self.resampled_dir,
             f'%(side)s' + output_filename + '%(subject)s.nii.gz')

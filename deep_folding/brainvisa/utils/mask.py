@@ -101,19 +101,20 @@ def compute_simple_mask(sulci_list, side, mask_dir=_MASK_DIR_DEFAULT, dilation=_
 
     for sulcus in sulci_list:
         mask_file = join(mask_dir, side, sulcus + '.nii.gz')
+        log.info(f"mask file: {mask_file}")
         list_masks.append(aims.read(mask_file))
 
     # Computes the mask being a combination of all masks
     mask_result = list_masks[0]
     if len(list_masks)==1:
-        print(f"only one sulcus: {sulci_list[0]}")
+        log.info(f"only one sulcus: {sulci_list[0]}")
         mask_result[np.asarray(mask_result) <= threshold] = 0
         arr_result = np.asarray(dl.dilate(mask_result, radius=dilation))
         np.asarray(mask_result)[:] = arr_result
 
     else:
         arr_result = np.asarray(mask_result)
-        print(f"first sulcus: {sulci_list[0]}")
+        log.info(f"first sulcus: {sulci_list[0]}")
         for k, mask in enumerate(list_masks[1:]):
             print(f"sulcus {sulci_list[k+1]}")
             arr = np.asarray(mask)
@@ -123,6 +124,7 @@ def compute_simple_mask(sulci_list, side, mask_dir=_MASK_DIR_DEFAULT, dilation=_
         arr_result = np.asarray(dl.dilate(mask_result, radius=dilation))
         np.asarray(mask_result)[:] = arr_result
 
+    log.info(f"threshold = {threshold}")
     # Computes the mask bounding box
     bbmin, bbmax = compute_bbox_mask(arr_result)
     # aims.write(mask_result, '/neurospin/dico/data/deep_folding/current/datasets/hcp/crops/1mm/precentral/mask/test.nii.gz')

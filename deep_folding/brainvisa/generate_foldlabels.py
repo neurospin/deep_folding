@@ -51,26 +51,32 @@ import glob
 import re
 import sys
 from os.path import abspath
+from os.path import exists
 from os.path import basename
 
 from deep_folding.brainvisa import exception_handler
 from deep_folding.brainvisa.utils.folder import create_folder
 from deep_folding.brainvisa.utils.subjects import get_number_subjects
-from deep_folding.brainvisa.utils.subjects import select_subjects_int
+from deep_folding.brainvisa.utils.subjects import select_subjects_int, select_good_qc
 from deep_folding.brainvisa.utils.logs import setup_log
 from deep_folding.brainvisa.utils.parallel import define_njobs
 from deep_folding.brainvisa.utils.foldlabel import \
     generate_foldlabel_from_graph_file
 from deep_folding.brainvisa.utils.quality_checks import \
-    compare_number_aims_files_with_expected
+    compare_number_aims_files_with_expected, \
+    compare_number_aims_files_with_number_in_source, \
+    get_not_processed_subjects, \
+    save_list_to_csv
 from pqdm.processes import pqdm
+from p_tqdm import p_map
 from deep_folding.config.logs import set_file_logger
 
 # Import constants
 from deep_folding.brainvisa.utils.constants import \
     _ALL_SUBJECTS, _SRC_DIR_DEFAULT,\
     _FOLDLABEL_DIR_DEFAULT, _SIDE_DEFAULT, \
-    _JUNCTION_DEFAULT, _PATH_TO_GRAPH_DEFAULT
+    _JUNCTION_DEFAULT, _PATH_TO_GRAPH_DEFAULT, \
+        _QC_PATH_DEFAULT
 
 # Defines logger
 log = set_file_logger(__file__)
@@ -106,9 +112,18 @@ def parse_args(argv):
         help='Relative path to graph. '
              'Default is ' + _PATH_TO_GRAPH_DEFAULT)
     parser.add_argument(
+        "-q", "--quality_checks", type=str,
+        default=_QC_PATH_DEFAULT,
+        help='Path to quality check .csv. '
+             'Default is ' + _QC_PATH_DEFAULT)
+    parser.add_argument(
         "-j", "--junction", type=str, default=_JUNCTION_DEFAULT,
         help='junction rendering (either \'wide\' or \'thin\') '
              f"Default is {_JUNCTION_DEFAULT}")
+    parser.add_argument(
+        "-b", "--bids", default=False, action="store_true",
+        help="if the database uses the BIDS format"
+    )
     parser.add_argument(
         "-a", "--parallel", default=False, action='store_true',
         help='if set (-a), launches computation in parallel')
@@ -154,52 +169,71 @@ class GraphConvert2FoldLabel:
 
     def __init__(self, src_dir, foldlabel_dir,
                  side, junction, parallel,
-                 path_to_graph):
+                 path_to_graph, bids, qc_path):
         self.src_dir = src_dir
         self.foldlabel_dir = foldlabel_dir
         self.side = side
+        self.qc_path = qc_path
         self.junction = junction
         self.parallel = parallel
         self.path_to_graph = path_to_graph
+        self.bids = bids
         self.foldlabel_dir = f"{self.foldlabel_dir}/{self.side}"
 
         create_folder(abspath(self.foldlabel_dir))
+
+    def get_foldlabel_filename(self, subject, graph_file):
+        foldlabel_file = f"{self.foldlabel_dir}/" + \
+                        f"{self.side}foldlabel_{subject}"
+        if self.bids:
+            session = re.search("ses-([^_/]+)", graph_file)
+            acquisition = re.search("acq-([^_/]+)", graph_file)
+            run = re.search("run-([^_/]+)", graph_file)
+            if session:
+                foldlabel_file += f"_{session[0]}"
+            if acquisition:
+                foldlabel_file += f"_{acquisition[0]}"
+            if run:
+                foldlabel_file += f"_{run[0]}"
+        foldlabel_file += ".nii.gz"
+        return foldlabel_file
 
     def generate_one_foldlabel(self, subject: str):
         """Generates and writes skeleton for one subject.
         """
         # Gets graph file path
         graph_path = f"{self.src_dir}/{subject}*/" +\
-                     f"{self.path_to_graph}/{self.side}{subject}*.arg"
+                     f"{self.path_to_graph}/{self.side}*.arg"
         list_graph_file = glob.glob(graph_path)
         log.debug(f"list_graph_file = {list_graph_file}")
         if len(list_graph_file) == 0:
             raise RuntimeError(f"No graph file! "
                                f"{graph_path} doesn't exist")
-        graph_file = list_graph_file[0]
 
-        # Gets foldlabel path
-        foldlabel_file = \
-            f"{self.foldlabel_dir}/{self.side}foldlabel_{subject}.nii.gz"
-
-        # Generates foldlabel
-        generate_foldlabel_from_graph_file(graph_file,
-                                           foldlabel_file,
-                                           self.junction)
+        for graph_file in list_graph_file:
+            foldlabel_file = self.get_foldlabel_filename(subject, graph_file)
+            generate_foldlabel_from_graph_file(graph_file, foldlabel_file, self.junction)
+            if not self.bids:
+                break
 
     def compute(self, number_subjects):
         """Loops over subjects and converts graphs into skeletons.
         """
+        if not exists(self.src_dir):
+            raise ValueError(f"{self.src_dir} does not exist!")
         filenames = glob.glob(f"{self.src_dir}/*")
         list_subjects = [basename(filename) for filename in filenames 
                     if not re.search('.minf$', filename)]
+        list_subjects = select_good_qc(list_subjects, self.qc_path)
+        list_subjects = \
+            get_not_processed_subjects(list_subjects, self.foldlabel_dir, "foldlabel_")
         list_subjects = select_subjects_int(list_subjects, number_subjects)
 
         # Performs computation on all subjects either serially or in parallel
         if self.parallel:
             log.info(
                 "PARALLEL MODE: subjects are computed in parallel.")
-            pqdm(list_subjects, self.generate_one_foldlabel, n_jobs=define_njobs())
+            p_map(self.generate_one_foldlabel, list_subjects, num_cpus=define_njobs())
         else:
             log.info(
                 "SERIAL MODE: subjects are scanned serially, "
@@ -210,6 +244,12 @@ class GraphConvert2FoldLabel:
         # Checks if there is expected number of generated files
         compare_number_aims_files_with_expected(self.foldlabel_dir,
                                                 list_subjects)
+        list_subjects = [basename(filename) for filename in filenames 
+                            if not re.search('.minf$', filename)]
+        not_processed_subjects = \
+            get_not_processed_subjects(list_subjects, self.foldlabel_dir)
+        save_list_to_csv(not_processed_subjects,
+                         f"{self.foldlabel_dir}/../not_processed_subjects.csv")
 
 def generate_foldlabels(
         src_dir=_SRC_DIR_DEFAULT,
@@ -217,8 +257,10 @@ def generate_foldlabels(
         path_to_graph=_PATH_TO_GRAPH_DEFAULT,
         side=_SIDE_DEFAULT,
         junction=_JUNCTION_DEFAULT,
+        bids=False,
         parallel=False,
-        number_subjects=_ALL_SUBJECTS):
+        number_subjects=_ALL_SUBJECTS,
+        qc_path=_QC_PATH_DEFAULT):
     """Generates foldlabels from graphs"""
 
     # Initialization
@@ -227,8 +269,10 @@ def generate_foldlabels(
         foldlabel_dir=foldlabel_dir,
         path_to_graph=path_to_graph,
         side=side,
+        bids=bids,
         junction=junction,
-        parallel=parallel
+        parallel=parallel,
+        qc_path = qc_path
     )
     # Actual generation of skeletons from graphs
     conversion.compute(number_subjects=number_subjects)
@@ -250,8 +294,10 @@ def main(argv):
         path_to_graph=params['path_to_graph'],
         side=params['side'],
         junction=params['junction'],
+        bids=params['bids'],
         parallel=params['parallel'],
-        number_subjects=params['nb_subjects'])
+        number_subjects=params['nb_subjects'],
+        qc_path=params['quality_checks'])
 
 
 if __name__ == '__main__':

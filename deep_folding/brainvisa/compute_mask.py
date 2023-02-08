@@ -58,6 +58,8 @@ from deep_folding.brainvisa.utils.subjects import get_number_subjects
 from deep_folding.brainvisa.utils.subjects import select_subjects_int
 from deep_folding.brainvisa.utils.subjects import \
     get_all_subjects_as_dictionary
+from deep_folding.brainvisa.utils.quality_checks import \
+    get_not_processed_subjects_dict
 from deep_folding.brainvisa.utils.sulcus import complete_sulci_name
 from deep_folding.config.logs import set_file_logger
 from soma import aims
@@ -248,25 +250,29 @@ class MaskAroundSulcus:
                 self.graph_file,
                 self.side)
 
-            # Gives the possibility to list only the first number_subjects
-            subjects = select_subjects_int(subjects, number_subjects)
-
             # Creates target mask_dir if they don't exist
             create_folder(self.mask_dir)
             create_folder(self.mask_sample_dir)
 
-            # Creates volume that will take the mask
-            self.mask = initialize_mask(self.out_voxel_size)
+            # Generates list of subjects not treated yet
+            not_treated_subjects = get_not_processed_subjects_dict(subjects, self.mask_sample_dir)
 
-            # Increments mask for each sulcus and subjects
-            increment_mask(subjects,
-                           self.mask,
-                           self.sulcus,
-                           self.out_voxel_size,
-                           self.mask_sample_dir)
+            if len(not_treated_subjects):
+                # Gives the possibility to list only the first number_subjects
+                subjects = select_subjects_int(subjects, number_subjects)
 
-            # Saving of generated masks
-            write_mask(self.mask, self.mask_file)
+                # Creates volume that will take the mask
+                self.mask = initialize_mask(self.out_voxel_size)
+
+                # Increments mask for each sulcus and subjects
+                increment_mask(subjects,
+                            self.mask,
+                            self.sulcus,
+                            self.out_voxel_size,
+                            self.mask_sample_dir)
+
+                # Saving of generated masks
+                write_mask(self.mask, self.mask_file)
 
 
 def compute_mask(src_dir=_SUPERVISED_SRC_DIR_DEFAULT,

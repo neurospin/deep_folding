@@ -62,8 +62,10 @@ from deep_folding.brainvisa.utils.parallel import define_njobs
 from deep_folding.brainvisa.utils.skeleton import \
     generate_skeleton_from_graph_file
 from deep_folding.brainvisa.utils.quality_checks import \
-    compare_number_aims_files_with_expected
+    compare_number_aims_files_with_expected, \
+    get_not_processed_subjects
 from pqdm.processes import pqdm
+from p_tqdm import p_map
 from deep_folding.config.logs import set_file_logger
 
 # Import constants
@@ -173,22 +175,6 @@ class GraphConvert2Skeleton:
         self.skeleton_dir = f"{self.skeleton_dir}/{self.side}"
         create_folder(abspath(self.skeleton_dir))
 
-    def generate_one_skeleton(self, subject: str):
-        """Generates and writes skeleton for one subject.
-        """
-        graph_path = f"{self.src_dir}/{subject}*/" +\
-                     f"{self.path_to_graph}/{self.side}{subject}*.arg"
-        list_graph_file = glob.glob(graph_path)
-        log.debug(f"list_graph_file = {list_graph_file}")
-        if len(list_graph_file) == 0:
-            raise RuntimeError(f"No graph file! "
-                               f"{graph_path} doesn't exist")
-        for graph_file in list_graph_file:
-            skeleton_file = self.get_skeleton_filename(subject, graph_file)
-            generate_skeleton_from_graph_file(graph_file, skeleton_file, self.junction)
-            if not self.bids:
-                break
-
     def get_skeleton_filename(self, subject, graph_file):
         skeleton_file = f"{self.skeleton_dir}/" + \
                         f"{self.side}skeleton_generated_{subject}"
@@ -204,6 +190,22 @@ class GraphConvert2Skeleton:
                 skeleton_file += f"_{run[0]}"
         skeleton_file += ".nii.gz"
         return skeleton_file
+        
+    def generate_one_skeleton(self, subject: str):
+        """Generates and writes skeleton for one subject.
+        """
+        graph_path = f"{self.src_dir}/{subject}*/" +\
+                     f"{self.path_to_graph}/{self.side}*.arg"
+        list_graph_file = glob.glob(graph_path)
+        log.debug(f"list_graph_file = {list_graph_file}")
+        if len(list_graph_file) == 0:
+            raise RuntimeError(f"No graph file! "
+                               f"{graph_path} does not exist")
+        for graph_file in list_graph_file:
+            skeleton_file = self.get_skeleton_filename(subject, graph_file)
+            generate_skeleton_from_graph_file(graph_file, skeleton_file, self.junction)
+            if not self.bids:
+                break
 
     def compute(self, number_subjects):
         """Loops over subjects and converts graphs into skeletons.
@@ -213,6 +215,9 @@ class GraphConvert2Skeleton:
         list_subjects = [basename(filename) for filename in filenames
                     if not re.search('.minf$', filename)]
         list_subjects = select_good_qc(list_subjects, self.qc_path)
+        list_subjects = \
+            get_not_processed_subjects(list_subjects, self.skeleton_dir)
+ 
         list_subjects = select_subjects_int(list_subjects, number_subjects)
 
         log.info(f"Expected number of subjects = {len(list_subjects)}")
@@ -223,9 +228,9 @@ class GraphConvert2Skeleton:
         if self.parallel:
             log.info(
                 "PARALLEL MODE: subjects are computed in parallel.")
-            pqdm(list_subjects,
-                 self.generate_one_skeleton,
-                 n_jobs=define_njobs())
+            p_map(self.generate_one_skeleton,
+                 list_subjects,
+                 num_cpus=define_njobs())
         else:
             log.info(
                 "SERIAL MODE: subjects are scanned serially, "

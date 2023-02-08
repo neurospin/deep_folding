@@ -1,4 +1,5 @@
 {
+  "overwrite_all": true,
   "side": "R",
   "out_voxel_size": 2,
   "region_name": "S.C.",
