@@ -86,13 +86,14 @@ from soma import aims
 from deep_folding.brainvisa.utils.constants import \
     _ALL_SUBJECTS, _INPUT_TYPE_DEFAULT, _SKELETON_DIR_DEFAULT,\
     _TRANSFORM_DIR_DEFAULT, _RESAMPLED_SKELETON_DIR_DEFAULT,\
+    _RESAMPLED_FOLDLABEL_DIR_DEFAULT, \
     _SIDE_DEFAULT, _VOXEL_SIZE_DEFAULT
 
 _SKELETON_FILENAME = "skeleton_generated_"
 _FOLDLABEL_FILENAME = "foldlabel_"
 _DISTMAP_FILENAME = "distmap_generated_"
 _RESAMPLED_SKELETON_FILENAME = "resampled_skeleton_"
-_RESAMPELD_FOLDLABEL_FILENAME = "resampled_foldlabel_"
+_RESAMPLED_FOLDLABEL_FILENAME = "resampled_foldlabel_"
 _RESAMPLED_DISTMAP_FILENAME = "resampled_distmap_"
 
 

@@ -67,8 +67,10 @@ from deep_folding.brainvisa.utils.parallel import define_njobs
 from deep_folding.brainvisa.utils.distmap import \
 generate_distmap_from_skeleton_file, generate_distmap_from_resampled_skeleton
 from deep_folding.brainvisa.utils.quality_checks import \
-    compare_number_aims_files_with_expected
+    compare_number_aims_files_with_expected, \
+    get_not_processed_subjects_distmap
 from pqdm.processes import pqdm
+from p_tqdm import p_map
 from deep_folding.config.logs import set_file_logger
 
 # Import constants
@@ -189,6 +191,9 @@ class SkelConvert2DistMap:
                 f"({self.side}skeleton_generated_)(.*)(\.nii\.gz)",
                 filename).group(2) for filename in filenames]
         list_subjects = select_subjects_int(list_subjects, number_subjects)
+        log.info(f"list_subjects[:5] before = {list_subjects[:5]}")
+        list_subjects = \
+            get_not_processed_subjects_distmap(list_subjects, self.distmap_dir)
         log.info(f"Expected number of subjects = {len(list_subjects)}")
         log.info(f"list_subjects[:5] = {list_subjects[:5]}")
         log.debug(f"list_subjects = {list_subjects}")
@@ -198,9 +203,9 @@ class SkelConvert2DistMap:
             log.info(
                 "PARALLEL MODE: subjects are computed in parallel.")
 
-            pqdm(list_subjects,
-                 self.generate_one_distmap,
-                 n_jobs=20)
+            p_map(self.generate_one_distmap,
+                  list_subjects,
+                  num_cpus=20)
         else:
             log.info(
                 "SERIAL MODE: subjects are scanned serially, "

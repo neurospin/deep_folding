@@ -220,13 +220,44 @@ def get_not_processed_subjects(src_subjects, tgt_dir, prefix="generated_"):
         log.info(f"first target file = {tgt_files[0]}")
 
     tgt_subjects = [subject.split(prefix)[-1] for subject in tgt_files]
-    # tgt_subjects = [subject.split("_")[0] for subject in tgt_subjects]
-    
+    tgt_subjects = [subject.split("_")[0] for subject in tgt_subjects]
+
     tgt_subjects = [subject.split(".")[0] for subject in tgt_subjects]
+
+    if len(tgt_subjects):
+        log.info(f"first tgt subject = {tgt_subjects[0]}")
 
     not_processed_subjects = list(set(src_subjects)-set(tgt_subjects))
 
     return not_processed_subjects
+
+
+def get_not_processed_subjects_distmap(src_subjects, tgt_dir, prefix="generated_"):
+    """Returns list of source files not yet processed.
+    
+    This is done by comparing subjects in src and tgt directories"""
+
+    log.info(f"number of source subjects = {len(src_subjects)}")
+    log.info(f"first src subject = {src_subjects[0]}")
+    tgt_files = glob.glob(f"{tgt_dir}/*.nii.gz")
+    log.info(f"number of target files = {len(tgt_files)}")
+    if len(tgt_files):
+        log.info(f"first target file = {tgt_files[0]}")
+
+    tgt_subjects = [subject.split(prefix)[-1] for subject in tgt_files]
+    # tgt_subjects = [subject.split("_")[0] for subject in tgt_subjects]
+
+    tgt_subjects = [subject.split(".")[0] for subject in tgt_subjects]
+
+    if len(tgt_subjects):
+        log.info(f"first tgt subject = {tgt_subjects[0]}")
+
+    not_processed_subjects = list(set(src_subjects)-set(tgt_subjects))
+    over_processed_subjects = list(set(tgt_subjects)-set(src_subjects))
+    log.info(f"Over processed subjects = {over_processed_subjects}")
+
+    return not_processed_subjects
+
 
 def get_not_processed_subjects_transform(src_subjects, tgt_dir, prefix="ICBM2009c_"):
     """Returns list of source files not yet processed.
