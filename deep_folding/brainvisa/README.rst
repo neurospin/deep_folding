@@ -215,7 +215,7 @@ Currently (last update on 09/02/2023) the arguments of the json file are the fol
 - save_behavior: parameter to set how the generated files should be saved. Choose 'clear_and_compute' to delete potential already existing ones, choose 'best' to compute only subjects that don't already exist,
 choose 'minimal' to call the functions only if the directory is missing or empty.
 Remark: for the mask computation, it is always 'best' that is chosen.
-Remark: 'clear_and_compute' should be used only if you want to recompute the whole pipeline for all subjects. 'best' should be prefered in other cases.
+Remark: 'clear_and_compute' should be used only if you want to recompute the whole pipeline for all subjects. 'best' should be preferred in other cases.
 - side: 'R' for right hemisphere or 'L' for left hemisphere.
 - out_voxel_size: float, same as others.
 - region name: *pipeline specific* ; name of the target region in the brain_region_json.
