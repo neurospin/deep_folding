@@ -40,6 +40,7 @@ import json
 import os
 import argparse
 import sys
+import shutil
 
 from os.path import basename
 from argparse import Namespace
@@ -95,18 +96,29 @@ def print_info(step, description):
     return step+1
 
 
-def is_step_to_be_computed(path, log_string, overwrite=False):
-    if ((not os.path.exists(path)) or (overwrite==True)):
+def is_step_to_be_computed(path, log_string, save_behavior='best'):
+    if ((not os.path.exists(path)) or \
+        (os.path.exists(path) and os.listdir(path)==[]) or \
+        (save_behavior=='best') or \
+        (save_behavior=='clear_and_compute')):
+        # if no output directory or
+        # empty output directory or
+        # recompute missing subjects
+        # or clear the directory and recompute everything
         return True
-    else:
+    elif save_behavior=='minimal':
         log.info(f"{log_string} are already computed. "
                  "If you want to overwrite them, "
-                 f"please delete the folder {path} "
+                 f"please either delete the folder {path} "
+                 "or set 'save_behavior' to 'clear_and_compute'"
                  "if you want to generate it all again. "
                  "Otherwise, if you want to generate "
                  "only not processed subjects, "
-                 "set \"overwrite_all\" to true in json configuration file")
+                 "set 'save_behavior' to 'best' in json configuration file")
         return False
+    else:
+        raise ValueError(f"Unknown value for save_behavior: {save_behavior}. Choose between 'best' (recommanded)\
+minimal and clear_and_compute. Refer to the README for more information.")
 
 
 def parse_args(argv: list) -> dict:
@@ -197,7 +209,7 @@ def main(argv):
     else:
         cropdir_name = "crop"
 
-    overwrite = params['overwrite_all']
+    save_behavior = params['save_behavior']
 
     # get the concerned sulci
     sulci_list = get_sulci_list(params['region_name'], side=params['side'],
@@ -225,11 +237,13 @@ def main(argv):
                                            params['side'], sulcus+full_side)
         log.debug(path_to_sulcus_mask)
         
+        # never remove the mask folder -> do it by hand if you really want to
         if is_step_to_be_computed(\
                 path=path_to_sulcus_mask,
                 log_string=f"Mask with the given parameters (side={params['side']}, "
                            f"sulcus={sulcus}, voxel size={vox_size})", 
-                overwrite=overwrite):
+                save_behavior='best'):
+            
             # set up the right parameters
             args_compute_mask = {'src_dir': params['labeled_subjects_dir'],
                                  'path_to_graph': params['path_to_graph_supervised'],
@@ -247,6 +261,7 @@ def main(argv):
                       prog_name='pipeline_compute_masks.py',
                       suffix=complete_sulci_name(new_sulcus, args_compute_mask['side']))
             
+            # execute the actual function
             compute_mask(**args_compute_mask)
             log.info('Mask generated')
 
@@ -255,7 +270,13 @@ def main(argv):
     if params['input_type'] in ['skeleton', 'distmap']:
         step = print_info(step, "generate raw skeletons")
         skel_dir = os.path.join(params['skeleton_dir'], 'raw', params['side'])
-        if is_step_to_be_computed(skel_dir, "Raw skeletons", overwrite):
+
+        if is_step_to_be_computed(skel_dir, "Raw skeletons", save_behavior=save_behavior):
+            if save_behavior == 'clear_and_compute' and os.path.exists(skel_dir):
+                # remove the target folder
+                log.info(f"Delete {skel_dir}")
+                shutil.rmtree(skel_dir)
+
             args_generate_skeletons = {'src_dir': params['graphs_dir'],
                                     'skeleton_dir': params['skeleton_dir'] + '/raw',
                                     'path_to_graph': params['path_to_graph'],
@@ -279,7 +300,13 @@ def main(argv):
     if params['input_type'] == 'distmap':
         step = print_info(step, "generate raw distmaps")
         distmap_raw_path = os.path.join(params['distmaps_dir'], 'raw', params['side'])
-        if is_step_to_be_computed(distmap_raw_path, "Raw distmaps", overwrite):
+
+        if is_step_to_be_computed(distmap_raw_path, "Raw distmaps", save_behavior=save_behavior):
+            if save_behavior == 'clear_and_compute' and os.path.exists(distmap_raw_path):
+                # remove the target folder
+                log.info(f"Delete {distmap_raw_path}")
+                shutil.rmtree(distmap_raw_path)
+
             args_generate_distmaps = {'src_dir': params['skeleton_dir'] + '/raw',
                                       'distmaps_dir': params['distmaps_dir'] + '/raw',
                                       'side': params['side'],
@@ -300,7 +327,13 @@ def main(argv):
     if params['input_type'] == 'foldlabel':
         step = print_info(step, "generate raw foldlabels")
         foldlabel_raw_path = os.path.join(params['foldlabel_dir'], 'raw', params['side'])
-        if is_step_to_be_computed(foldlabel_raw_path, "Raw foldlabels", overwrite):
+
+        if is_step_to_be_computed(foldlabel_raw_path, "Raw foldlabels", save_behavior=save_behavior):
+            if save_behavior == 'clear_and_compute' and os.path.exists(foldlabel_raw_path):
+                # remove the target folder
+                log.info(f"Delete {foldlabel_raw_path}")
+                shutil.rmtree(foldlabel_raw_path)
+            
             args_generate_foldlabels = {'src_dir':  params['graphs_dir'],
                                         'foldlabel_dir': params['foldlabel_dir'] + '/raw',
                                         'path_to_graph': params['path_to_graph'],
@@ -324,7 +357,13 @@ def main(argv):
     if params['out_voxel_size'] != 'raw':
         step = print_info(step, "generate transforms")
         path_to_transforms = os.path.join(params['transform_dir'], params['side'])
-        if is_step_to_be_computed(path_to_transforms, "Transforms", overwrite):
+
+        if is_step_to_be_computed(path_to_transforms, "Transforms", save_behavior=save_behavior):
+            if save_behavior == 'clear_and_compute' and os.path.exists(path_to_transforms):
+                # remove the target folder
+                log.info(f"Delete {path_to_transforms}")
+                shutil.rmtree(path_to_transforms)
+            
             args_generate_transforms = {'src_dir': params['graphs_dir'],
                                         'transform_dir': params['transform_dir'],
                                         'path_to_graph': params['path_to_graph'],
@@ -359,10 +398,16 @@ def main(argv):
             resampled_dir = os.path.join(params['skeleton_dir'], vox_size)
         
         path_resampled_path = os.path.join(resampled_dir, params['side'])
+
         if is_step_to_be_computed(
                 path=path_resampled_path,
                 log_string=f"Resampled {params['input_type']}s",
-                overwrite=overwrite):
+                save_behavior=save_behavior):
+            if save_behavior == 'clear_and_compute' and os.path.exists(path_resampled_path):
+                # remove the target folder
+                log.info(f"Delete {path_resampled_path}")
+                shutil.rmtree(path_resampled_path)
+            
             args_resample_files = {'src_dir': raw_input,
                                    'input_type': params['input_type'],
                                    'resampled_dir': resampled_dir,
@@ -403,12 +448,18 @@ def main(argv):
     
     path_to_crops = os.path.join(params['crops_dir'], vox_size, params['region_name'],
                                  mask_str)
+    path_to_crops_complete = path_to_crops+'/'+params['side']+cropdir_name+'s'
 
     step = print_info(step, f"generate {params['input_type']} crops")
     if is_step_to_be_computed(
-                path=path_to_crops+'/'+params['side']+cropdir_name+'s',
+                path=path_to_crops_complete,
                 log_string=f"Crops",
-                overwrite=overwrite):
+                save_behavior=save_behavior):
+        if save_behavior == 'clear_and_compute' and os.path.exists(path_to_crops_complete):
+            # remove the target folder
+            log.info(f"Delete {path_to_crops_complete}")
+            shutil.rmtree(path_to_crops_complete)
+
         args_generate_crops = {'src_dir': src_dir,
                                'input_type': params['input_type'],
                                'crop_dir': path_to_crops,

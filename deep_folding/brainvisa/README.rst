@@ -210,8 +210,12 @@ All the parameters required for the called functions need to be written in a jso
 Remark: a command line log is still computed with this method. The only difference is that the name of the normally called python file has "pipeline_" at the beginning. The parameters json file file is also copied to the crop directory.
 
 
-Currently (last update on 06/02/2023) the arguments of the json file are the following:
+Currently (last update on 09/02/2023) the arguments of the json file are the following:
 
+- save_behavior: parameter to set how the generated files should be saved. Choose 'clear_and_compute' to delete potential already existing ones, choose 'best' to compute only subjects that don't already exist,
+choose 'minimal' to call the functions only if the directory is missing or empty.
+Remark: for the mask computation, it is always 'best' that is chosen.
+Remark: 'clear_and_compute' should be used only if you want to recompute the whole pipeline for all subjects. 'best' should be prefered in other cases.
 - side: 'R' for right hemisphere or 'L' for left hemisphere.
 - out_voxel_size: float, same as others.
 - region name: *pipeline specific* ; name of the target region in the brain_region_json.
