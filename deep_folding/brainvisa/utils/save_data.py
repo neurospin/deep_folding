@@ -14,9 +14,13 @@ from functools import partial
 from pqdm.processes import pqdm
 from p_tqdm import p_map
 from soma import aims
-# from deep_folding.brainvisa.utils.parallel import define_njobs
+from deep_folding.brainvisa.utils.disk_orientation import read_nifti_as_npy_with_orientation
 
 from deep_folding.config.logs import set_file_logger
+
+# Imports constants
+from deep_folding.brainvisa.utils.constants import \
+    _DISK_ORIENTATION_DEFAULT 
 
 # Defines logger
 log = set_file_logger(__file__)
@@ -35,7 +39,6 @@ def is_file_nii(filename):
         and '.nii' in filename \
         and '.minf' not in filename
     return is_file_nii
-
 
 def save_to_pickle(cropped_dir, tgt_dir=None, file_basename=None, parallel=False):
     """
@@ -96,7 +99,7 @@ def save_to_dataframe_format_from_list(cropped_dir, tgt_dir=None, file_basename=
     dataframe.to_pickle(file_pickle)
 
 
-def compare_one_array(cropped_dir, list_basename, row):
+def compare_one_array(cropped_dir, list_basename, disk_orientation, row):
     index = row[0]
     sub = row[1]
     index_sub = [idx for idx,x in enumerate(list_basename) if sub in x]
@@ -105,12 +108,12 @@ def compare_one_array(cropped_dir, list_basename, row):
     else:
         raise ValueError(f"Subject {sub} not in cropped files")
     subject_file = f"{cropped_dir}/{list_basename[index_sub]}"
-    vol = aims.read(subject_file)
-    arr_ref = np.asarray(vol)
+    arr_ref = read_nifti_as_npy_with_orientation(subject_file, disk_orientation)
     return arr_ref
 
 
-def quality_checks(csv_file_path, npy_array_file_path, cropped_dir, parallel=False):
+def quality_checks(csv_file_path, npy_array_file_path, cropped_dir, 
+                   parallel=False, disk_orientation=_DISK_ORIENTATION_DEFAULT):
     """Checks that the numpy arrays are equal to subject nifti files.
 
     This is to check that the subjects list in csv file
@@ -123,7 +126,10 @@ def quality_checks(csv_file_path, npy_array_file_path, cropped_dir, parallel=Fal
         list_nifti = glob.glob(f"{cropped_dir}/*.nii.gz")
         list_basename = [os.path.basename(f) for f in list_nifti]
         log.info(f"list_basename[:3] = {list_basename[:3]}")
-        partial_func = partial(compare_one_array, cropped_dir, list_basename)
+        partial_func = partial(compare_one_array, 
+                               cropped_dir=cropped_dir,
+                               list_basename=list_basename,
+                               disk_orientation=disk_orientation)
         enum = [x for x in enumerate(subjects['Subject'])]
         log.info(f"enum subjects[:3] = {enum[:3]}")
         list_arr = p_map(partial_func, enum)
@@ -136,19 +142,17 @@ def quality_checks(csv_file_path, npy_array_file_path, cropped_dir, parallel=Fal
         for index, row in tqdm(subjects.iterrows()):
             sub = row['Subject']
             subject_file = glob.glob(f"{cropped_dir}/{sub}*.nii.gz")[0]
-            vol = aims.read(subject_file)
-            arr_ref = np.asarray(vol)
+            arr_ref = read_nifti_as_npy_with_orientation(subject_file, disk_orientation)
             arr_from_array = arr[index,...]
             if not np.array_equal(arr_ref, arr_from_array):
                 raise ValueError(f"For subject = {sub} and index = {index}\n"
                                 "arrays do not match")
 
 
-def get_one_numpy_array(filename, cropped_dir):
+def get_one_numpy_array(filename, cropped_dir, disk_orientation):
     file_nii = os.path.join(cropped_dir, filename)
     if is_file_nii(file_nii):
-        aimsvol = aims.read(file_nii)
-        sample = np.asarray(aimsvol)
+        sample = read_nifti_as_npy_with_orientation(file_nii, disk_orientation)
         subject = re.search('(.*)_cropped_(.*)', file_nii).group(1)
         id = os.path.basename(subject)
         if type(sample) is np.ndarray:
@@ -162,7 +166,8 @@ def get_one_numpy_array(filename, cropped_dir):
                 f"file={file_nii} does not look like a nifti file")
 
 
-def save_to_numpy(cropped_dir, tgt_dir=None, file_basename=None, parallel = False):
+def save_to_numpy(cropped_dir, tgt_dir=None, file_basename=None, 
+                  parallel = False, disk_orientation=_DISK_ORIENTATION_DEFAULT):
     """
     Creates a numpy array for each subject.
 
@@ -187,20 +192,18 @@ def save_to_numpy(cropped_dir, tgt_dir=None, file_basename=None, parallel = Fals
         if is_file_nii(os.path.join(cropped_dir, filename))]
     if parallel:
         log.info("Reading cropped dir is done in PARALLEL")
-        partial_func = partial(get_one_numpy_array, cropped_dir=cropped_dir)
+        partial_func = partial(get_one_numpy_array,
+                               cropped_dir=cropped_dir,
+                               disk_orientation=disk_orientation)
         list_result =  p_map(partial_func, listdir)
         list_sample_id, list_sample_file =\
             [x for x, y in list_result], [y for x, y in list_result]
     else:
         log.info("Reading cropped dir is done SERIALLY")
         for filename in tqdm(sorted(listdir)):
-            file_nii = os.path.join(cropped_dir, filename)
-            if is_file_nii(file_nii):
-                aimsvol = aims.read(file_nii)
-                sample = np.asarray(aimsvol)
-                subject = re.search('(.*)_cropped_(.*)', file_nii).group(1)
-                list_sample_id.append(os.path.basename(subject))
-                list_sample_file.append(sample)
+            id, sample = get_one_numpy_array(filename, cropped_dir, disk_orientation)
+            list_sample_id.append(id)
+            list_sample_file.append(sample)
 
     log.info("STEP 2. Now writing subject name file...")
     # Writes subject ID csv file
@@ -220,7 +223,8 @@ def save_to_numpy(cropped_dir, tgt_dir=None, file_basename=None, parallel = Fals
         os.path.join(tgt_dir, file_basename+'_subject.csv'),
         os.path.join(tgt_dir, file_basename+'.npy'),
         cropped_dir, 
-        parallel=parallel)
+        parallel=parallel,
+        disk_orientation=disk_orientation)
 
     return list_sample_id, list_sample_file
 

@@ -36,6 +36,7 @@
 "Utilities to set disk orientation"
 
 from soma import aims
+import numpy as np
 from deep_folding.config.logs import set_file_logger
 
 # Defines logger
@@ -48,3 +49,14 @@ def set_disk_orientation(vol, disk_orientation):
     elif disk_orientation != "lpi":
         raise ValueError(f"disk_orientation has value: {disk_orientation}. "
                          "It must be either \"las\" or \"lpi\"")
+
+
+def read_nifti_as_npy_with_orientation(file_nii, disk_orientation):
+    aimsvol = aims.read(file_nii)
+    if disk_orientation == "las":
+        sample = np.flip(np.flip(aimsvol.np, 1), 2)
+    elif disk_orientation == "lpi":
+        sample = np.asarray(aimsvol)
+    else:
+        raise ValueError(f"Not allowed value for disk_orientation: {disk_orientation}")
+    return sample

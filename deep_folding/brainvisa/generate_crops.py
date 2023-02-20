@@ -418,12 +418,14 @@ class CropGenerator:
                 save_to_numpy(cropped_dir=self.cropped_samples_dir,
                               tgt_dir=self.crop_dir,
                               file_basename=self.file_basename_npy,
-                              parallel=self.parallel)
+                              parallel=self.parallel,
+                              disk_orientation=self.disk_orientation)
             save_to_dataframe_format_from_list(cropped_dir=self.cropped_samples_dir,
                            tgt_dir=self.crop_dir,
                            file_basename=self.file_basename_pickle,
                            list_sample_id=list_sample_id,
-                           list_sample_file=list_sample_file)
+                           list_sample_file=list_sample_file,
+                           disk_orientation=self.disk_orientation)
 
 
 class SkeletonCropGenerator(CropGenerator):
