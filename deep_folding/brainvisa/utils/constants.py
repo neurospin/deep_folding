@@ -82,3 +82,6 @@ _BRAIN_REGION_JSON = '/neurospin/dico/data/deep_folding/current/sulci_regions_ov
 
 # path to the qc csv
 _QC_PATH_DEFAULT = ''
+
+# disk orientation default
+_DISK_ORIENTATION_DEFAULT = 'lpi'

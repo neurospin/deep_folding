@@ -76,7 +76,7 @@ from deep_folding.brainvisa.utils.constants import \
     _ALL_SUBJECTS, _SRC_DIR_DEFAULT,\
     _FOLDLABEL_DIR_DEFAULT, _SIDE_DEFAULT, \
     _JUNCTION_DEFAULT, _PATH_TO_GRAPH_DEFAULT, \
-        _QC_PATH_DEFAULT
+    _QC_PATH_DEFAULT, _DISK_ORIENTATION_DEFAULT
 
 # Defines logger
 log = set_file_logger(__file__)
@@ -133,6 +133,11 @@ def parse_args(argv):
              '0 subject is allowed, for debug purpose.'
              'Default is : all')
     parser.add_argument(
+        "-d", "--disk_orientation", type=str, default="lpi",
+        help='Disk storage orientation. '
+             'Either \"las\" or \"lpi\" (aims default). '
+             f'Default is : {_DISK_ORIENTATION_DEFAULT}')
+    parser.add_argument(
         '-v', '--verbose', action='count', default=0,
         help='Verbose mode: '
         'If no option is provided then logging.INFO is selected. '
@@ -146,14 +151,10 @@ def parse_args(argv):
               prog_name=basename(__file__),
               suffix='right' if args.side == 'R' else 'left')
 
-    params = {}
+    params = vars(args)
 
     params['src_dir'] = abspath(args.src_dir)
     params['foldlabel_dir'] = abspath(args.output_dir)
-    params['path_to_graph'] = args.path_to_graph
-    params['side'] = args.side
-    params['junction'] = args.junction
-    params['parallel'] = args.parallel
     # Checks if nb_subjects is either the string "all" or a positive integer
     params['nb_subjects'] = get_number_subjects(args.nb_subjects)
 
@@ -169,7 +170,8 @@ class GraphConvert2FoldLabel:
 
     def __init__(self, src_dir, foldlabel_dir,
                  side, junction, parallel,
-                 path_to_graph, bids, qc_path):
+                 path_to_graph, bids, qc_path,
+                 disk_orientation):
         self.src_dir = src_dir
         self.foldlabel_dir = foldlabel_dir
         self.side = side
@@ -179,6 +181,7 @@ class GraphConvert2FoldLabel:
         self.path_to_graph = path_to_graph
         self.bids = bids
         self.foldlabel_dir = f"{self.foldlabel_dir}/{self.side}"
+        self.disk_orientation = disk_orientation
 
         create_folder(abspath(self.foldlabel_dir))
 
@@ -212,7 +215,8 @@ class GraphConvert2FoldLabel:
 
         for graph_file in list_graph_file:
             foldlabel_file = self.get_foldlabel_filename(subject, graph_file)
-            generate_foldlabel_from_graph_file(graph_file, foldlabel_file, self.junction)
+            generate_foldlabel_from_graph_file(graph_file, foldlabel_file, 
+                                               self.junction, self.disk_orientation)
             if not self.bids:
                 break
 
@@ -260,7 +264,8 @@ def generate_foldlabels(
         bids=False,
         parallel=False,
         number_subjects=_ALL_SUBJECTS,
-        qc_path=_QC_PATH_DEFAULT):
+        qc_path=_QC_PATH_DEFAULT,
+        disk_orientation=_DISK_ORIENTATION_DEFAULT):
     """Generates foldlabels from graphs"""
 
     # Initialization
@@ -272,7 +277,8 @@ def generate_foldlabels(
         bids=bids,
         junction=junction,
         parallel=parallel,
-        qc_path = qc_path
+        qc_path=qc_path,
+        disk_orientation=disk_orientation
     )
     # Actual generation of skeletons from graphs
     conversion.compute(number_subjects=number_subjects)
@@ -297,7 +303,8 @@ def main(argv):
         bids=params['bids'],
         parallel=params['parallel'],
         number_subjects=params['nb_subjects'],
-        qc_path=params['quality_checks'])
+        qc_path=params['quality_checks'],
+        disk_orientation=params['disk_orientation'])
 
 
 if __name__ == '__main__':

@@ -64,7 +64,6 @@ from deep_folding.brainvisa.utils.skeleton import \
 from deep_folding.brainvisa.utils.quality_checks import \
     compare_number_aims_files_with_expected, \
     get_not_processed_subjects
-from pqdm.processes import pqdm
 from p_tqdm import p_map
 from deep_folding.config.logs import set_file_logger
 
@@ -73,7 +72,7 @@ from deep_folding.brainvisa.utils.constants import \
     _ALL_SUBJECTS, _SRC_DIR_DEFAULT,\
     _SKELETON_DIR_DEFAULT, _SIDE_DEFAULT, \
     _JUNCTION_DEFAULT, _PATH_TO_GRAPH_DEFAULT, \
-    _QC_PATH_DEFAULT
+    _QC_PATH_DEFAULT, _DISK_ORIENTATION_DEFAULT
 
 # Defines logger
 log = set_file_logger(__file__)
@@ -131,6 +130,11 @@ def parse_args(argv):
              '0 subject is allowed, for debug purpose.'
              'Default is : all')
     parser.add_argument(
+        "-d", "--disk_orientation", type=str, default="lpi",
+        help='Disk storage orientation. '
+             'Either \"las\" or \"lpi\" (aims default). '
+             f'Default is : {_DISK_ORIENTATION_DEFAULT}')
+    parser.add_argument(
         '-v', '--verbose', action='count', default=0,
         help='Verbose mode: '
         'If no option is provided then logging.INFO is selected. '
@@ -163,11 +167,13 @@ class GraphConvert2Skeleton:
 
     def __init__(self, src_dir, skeleton_dir,
                  side, junction, parallel,
-                 path_to_graph, bids, qc_path):
+                 path_to_graph, bids, qc_path,
+                 disk_orientation):
         self.src_dir = src_dir
         self.skeleton_dir = skeleton_dir
         self.side = side
         self.qc_path = qc_path
+        self.disk_orientation=disk_orientation
         self.junction = junction
         self.parallel = parallel
         self.path_to_graph = path_to_graph
@@ -203,7 +209,8 @@ class GraphConvert2Skeleton:
                                f"{graph_path} does not exist")
         for graph_file in list_graph_file:
             skeleton_file = self.get_skeleton_filename(subject, graph_file)
-            generate_skeleton_from_graph_file(graph_file, skeleton_file, self.junction)
+            generate_skeleton_from_graph_file(graph_file, skeleton_file, 
+                                              self.junction, self.disk_orientation)
             if not self.bids:
                 break
 
@@ -256,7 +263,8 @@ def generate_skeletons(
         bids=False,
         parallel=False,
         number_subjects=_ALL_SUBJECTS,
-        qc_path=_QC_PATH_DEFAULT):
+        qc_path=_QC_PATH_DEFAULT,
+        disk_orientation=_DISK_ORIENTATION_DEFAULT):
     """Generates skeletons from graphs"""
 
     # Initialization
@@ -268,7 +276,8 @@ def generate_skeletons(
         bids=bids,
         junction=junction,
         parallel=parallel,
-        qc_path=qc_path
+        qc_path=qc_path,
+        disk_orientation=disk_orientation
     )
     # Actual generation of skeletons from graphs
     conversion.compute(number_subjects=number_subjects)
@@ -294,7 +303,8 @@ def main(argv):
         bids=params['bids'],
         parallel=params['parallel'],
         number_subjects=params['nb_subjects'],
-        qc_path=params['quality_checks'])
+        qc_path=params['quality_checks'],
+        disk_orientation=params['disk_orientation'])
 
 
 if __name__ == '__main__':

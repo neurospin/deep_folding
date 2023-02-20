@@ -76,7 +76,8 @@ from deep_folding.config.logs import set_file_logger
 # Import constants
 from deep_folding.brainvisa.utils.constants import \
     _ALL_SUBJECTS, _SKELETON_DIR_DEFAULT,\
-    _DISTMAPS_DIR_DEFAULT, _SIDE_DEFAULT
+    _DISTMAPS_DIR_DEFAULT, _SIDE_DEFAULT,\
+    _DISK_ORIENTATION_DEFAULT
 
 # Defines logger
 log = set_file_logger(__file__)
@@ -119,6 +120,11 @@ def parse_args(argv):
              '0 subject is allowed, for debug purpose.'
              'Default is : all')
     parser.add_argument(
+        "-d", "--disk_orientation", type=str, default="lpi",
+        help='Disk storage orientation. '
+             'Either \"las\" or \"lpi\" (aims default). '
+             f'Default is : {_DISK_ORIENTATION_DEFAULT}')
+    parser.add_argument(
         '-v', '--verbose', action='count', default=0,
         help='Verbose mode: '
         'If no option is provided then logging.INFO is selected. '
@@ -132,13 +138,10 @@ def parse_args(argv):
               prog_name=basename(__file__),
               suffix='right' if args.side == 'R' else 'left')
 
-    params = {}
+    params = vars(args)
 
     params['src_dir'] = abspath(args.src_dir)
     params['output_dir'] = abspath(args.output_dir)
-    params['side'] = args.side
-    params['parallel'] = args.parallel
-    params['resampled_skel'] = args.resampled_skel
     # Checks if nb_subjects is either the string "all" or a positive integer
     params['nb_subjects'] = get_number_subjects(args.nb_subjects)
 
@@ -153,12 +156,13 @@ class SkelConvert2DistMap:
     """
 
     def __init__(self, src_dir, distmaps_dir,
-                 side, parallel, resampled_skel=False):
+                 side, parallel, disk_orientation, resampled_skel=False):
         self.src_dir = src_dir
         self.distmap_dir = distmaps_dir
         self.side = side
         self.parallel = parallel
         self.distmap_dir = f"{self.distmap_dir}/{self.side}"
+        self.disk_orientation = disk_orientation
         self.resampled_skel = resampled_skel
 
         create_folder(abspath(self.distmap_dir))
@@ -173,12 +177,12 @@ class SkelConvert2DistMap:
             skeleton_file = glob.glob(f"{self.src_dir}/" +\
                                   f"*{subject}*.nii.gz")[0]
             generate_distmap_from_resampled_skeleton(skeleton_file,
-                                            distmap_file)
+                                            distmap_file, self.disk_orientation)
         else:
             skeleton_file = glob.glob(f"{self.src_dir}/{self.side}/" +\
                                   f"*{subject}*.nii.gz")[0]
             generate_distmap_from_skeleton_file(skeleton_file,
-                                            distmap_file)
+                                            distmap_file, self.disk_orientation)
 
     def compute(self, number_subjects):
         """Loops over subjects and converts graphs into distmaps.
@@ -223,6 +227,7 @@ def generate_distmaps(
         distmaps_dir=_DISTMAPS_DIR_DEFAULT,
         side=_SIDE_DEFAULT,
         parallel=False,
+        disk_orientation=_DISK_ORIENTATION_DEFAULT,
         resampled_skel=True,
         number_subjects=_ALL_SUBJECTS):
     """Generates distmaps from skeletons"""
@@ -233,6 +238,7 @@ def generate_distmaps(
         distmaps_dir=distmaps_dir,
         side=side,
         parallel=parallel,
+        disk_orientation=disk_orientation,
         resampled_skel=resampled_skel
     )
     # Actual generation of skeletons from graphs
@@ -255,6 +261,7 @@ def main(argv):
         distmaps_dir=params['output_dir'],
         side=params['side'],
         parallel=params['parallel'],
+        disk_orientation=params['disk_orientation'],
         resampled_skel=params['resampled_skel'],
         number_subjects=params['nb_subjects'])
 

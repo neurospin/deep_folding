@@ -60,6 +60,8 @@ import sys
 import tempfile
 from os.path import join
 from os.path import basename
+
+from psutil import disk_io_counters
 from p_tqdm import p_map
 
 import numpy as np
@@ -72,6 +74,7 @@ from deep_folding.brainvisa.utils.referentials import \
 from deep_folding.brainvisa.utils.subjects import get_number_subjects
 from deep_folding.brainvisa.utils.subjects import select_subjects_int
 from deep_folding.brainvisa.utils.folder import create_folder
+from deep_folding.brainvisa.utils.disk_orientation import set_disk_orientation
 from deep_folding.brainvisa.utils.logs import setup_log
 from deep_folding.brainvisa.utils.quality_checks import \
     compare_number_aims_files_with_expected, \
@@ -87,7 +90,8 @@ from deep_folding.brainvisa.utils.constants import \
     _ALL_SUBJECTS, _INPUT_TYPE_DEFAULT, _SKELETON_DIR_DEFAULT,\
     _TRANSFORM_DIR_DEFAULT, _RESAMPLED_SKELETON_DIR_DEFAULT,\
     _RESAMPLED_FOLDLABEL_DIR_DEFAULT, \
-    _SIDE_DEFAULT, _VOXEL_SIZE_DEFAULT
+    _SIDE_DEFAULT, _VOXEL_SIZE_DEFAULT, \
+    _DISK_ORIENTATION_DEFAULT
 
 _SKELETON_FILENAME = "skeleton_generated_"
 _FOLDLABEL_FILENAME = "foldlabel_"
@@ -164,7 +168,8 @@ def resample_one_foldlabel(input_image,
 def resample_one_distmap(input_image,
                          resampled_dir,
                          out_voxel_size,
-                         transformation):
+                         transformation,
+                         disk_orientation):
     """Resamples one distmap file
 
     Args
@@ -222,7 +227,7 @@ class FileResampler:
     """
 
     def __init__(self, src_dir, resampled_dir, transform_dir,
-                 side, out_voxel_size, parallel
+                 side, out_voxel_size, parallel, disk_orientation
                  ):
         """Inits with list of directories
 
@@ -236,6 +241,7 @@ class FileResampler:
         """
         self.side = side
         self.parallel = parallel
+        self.disk_orientation = disk_orientation
 
         # Names of files in function of dictionary: keys -> 'subject' and 'side'
         # Src directory contains either 'R' or 'L' a subdirectory
@@ -259,6 +265,7 @@ class FileResampler:
     def resample_one_subject(src_file: str,
                              out_voxel_size: float,
                              transform_file: str,
+                             disk_orientation: str,
                              resampled_file=None):
         """Resamples skeleton
 
@@ -385,7 +392,7 @@ class SkeletonResampler(FileResampler):
 
     def __init__(self, src_dir, resampled_dir, transform_dir,
                  side, out_voxel_size, parallel, src_filename,
-                 output_filename
+                 output_filename, disk_orientation
                  ):
         """Inits with list of directories
 
@@ -402,7 +409,8 @@ class SkeletonResampler(FileResampler):
         super(SkeletonResampler, self).__init__(
             src_dir=src_dir, resampled_dir=resampled_dir,
             transform_dir=transform_dir, side=side,
-            out_voxel_size=out_voxel_size, parallel=parallel)
+            out_voxel_size=out_voxel_size, parallel=parallel,
+            disk_orientation=disk_orientation)
 
         # Names of files in function of dictionary: keys -> 'subject' and 'side'
         # Src directory contains either 'R' or 'L' a subdirectory
@@ -426,6 +434,7 @@ class SkeletonResampler(FileResampler):
     def resample_one_subject(src_file: str,
                              out_voxel_size: float,
                              transform_file: str,
+                             disk_orientation: str,
                              resampled_file=None):
         """Resamples skeleton
 
@@ -434,6 +443,7 @@ class SkeletonResampler(FileResampler):
         resampled = resample_one_skeleton(input_image=src_file,
                                           out_voxel_size=out_voxel_size,
                                           transformation=transform_file)
+        set_disk_orientation(resampled, disk_orientation)
         aims.write(resampled, resampled_file)
 
 
@@ -443,7 +453,7 @@ class FoldLabelResampler(FileResampler):
 
     def __init__(self, src_dir, resampled_dir, transform_dir,
                  side, out_voxel_size, parallel, src_filename,
-                 output_filename
+                 output_filename, disk_orientation
                  ):
         """Inits with list of directories
 
@@ -460,7 +470,8 @@ class FoldLabelResampler(FileResampler):
         super(FoldLabelResampler, self).__init__(
             src_dir=src_dir, resampled_dir=resampled_dir,
             transform_dir=transform_dir, side=side,
-            out_voxel_size=out_voxel_size, parallel=parallel)
+            out_voxel_size=out_voxel_size, parallel=parallel,
+            disk_orientation=disk_orientation)
 
         # Names of files in function of dictionary: keys -> 'subject' and 'side'
         # Src directory contains either 'R' or 'L' a subdirectory
@@ -482,10 +493,12 @@ class FoldLabelResampler(FileResampler):
     def resample_one_subject(src_file: str,
                              out_voxel_size: float,
                              transform_file: str,
+                             disk_orientation: str,
                              resampled_file=None):
         resampled = resample_one_foldlabel(input_image=src_file,
                                            out_voxel_size=out_voxel_size,
                                            transformation=transform_file)
+        set_disk_orientation(resampled, disk_orientation)
         aims.write(resampled, resampled_file)
 
 
@@ -495,7 +508,7 @@ class DistMapResampler(FileResampler):
 
     def __init__(self, src_dir, resampled_dir, transform_dir,
                  side, out_voxel_size, parallel, src_filename,
-                 output_filename
+                 output_filename, disk_orientation
                  ):
         """Inits with list of directories
         Args:
@@ -509,7 +522,8 @@ class DistMapResampler(FileResampler):
         super(DistMapResampler, self).__init__(
             src_dir=src_dir, resampled_dir=resampled_dir,
             transform_dir=transform_dir, side=side,
-            out_voxel_size=out_voxel_size, parallel=parallel)
+            out_voxel_size=out_voxel_size, parallel=parallel,
+            disk_orientation=disk_orientation)
 
         # Names of files in function of dictionary: keys -> 'subject' and 'side'
         # Src directory contains either 'R' or 'L' a subdirectory
@@ -531,11 +545,13 @@ class DistMapResampler(FileResampler):
     def resample_one_subject(src_file: str,
                              out_voxel_size: float,
                              transform_file: str,
+                             disk_orientation: str,
                              resampled_file: str):
         return resample_one_distmap(input_image=src_file,
                                     resampled_dir=resampled_file,
                                     out_voxel_size=out_voxel_size,
-                                    transformation=transform_file)
+                                    transformation=transform_file,
+                                    disk_orientation=disk_orientation)
 
 
 def parse_args(argv):
@@ -594,13 +610,16 @@ def parse_args(argv):
              'Format is : "<SIDE><output_filename><SUBJECT>.nii.gz" '
              'Default is : ' + _RESAMPLED_SKELETON_FILENAME)
     parser.add_argument(
+        "-d", "--disk_orientation", type=str, default="lpi",
+        help='Disk storage orientation. '
+             'Either \"las\" or \"lpi\" (aims default). '
+             f'Default is : {_DISK_ORIENTATION_DEFAULT}')
+    parser.add_argument(
         '-v', '--verbose', action='count', default=0,
         help='Verbose mode: '
         'If no option is provided then logging.INFO is selected. '
         'If one option -v (or -vv) or more is provided '
         'then logging.DEBUG is selected.')
-
-    params = {}
 
     args = parser.parse_args(argv)
 
@@ -609,17 +628,11 @@ def parse_args(argv):
               prog_name=basename(__file__),
               suffix='right' if args.side == 'R' else 'left')
 
-    params['src_dir'] = args.src_dir
-    params['input_type'] = args.input_type
+    params = vars(args)
+
     params['resampled_dir'] = args.output_dir
-    params['transform_dir'] = args.transform_dir
-    params['side'] = args.side
-    params['out_voxel_size'] = args.out_voxel_size
-    params['parallel'] = args.parallel
     # Checks if nb_subjects is either the string "all" or a positive integer
     params['nb_subjects'] = get_number_subjects(args.nb_subjects)
-    params['src_filename'] = args.src_filename
-    params['output_filename'] = args.output_filename
     return params
 
 
@@ -633,7 +646,8 @@ def resample_files(
         parallel=False,
         number_subjects=_ALL_SUBJECTS,
         src_filename=_SKELETON_FILENAME,
-        output_filename=_RESAMPLED_SKELETON_FILENAME):
+        output_filename=_RESAMPLED_SKELETON_FILENAME,
+        disk_orientation=_DISK_ORIENTATION_DEFAULT):
 
     if input_type == "skeleton":
         src_filename = _SKELETON_FILENAME if src_filename is None else src_filename
@@ -646,7 +660,8 @@ def resample_files(
             out_voxel_size=out_voxel_size,
             parallel=parallel,
             src_filename=src_filename,
-            output_filename=output_filename)
+            output_filename=output_filename,
+            disk_orientation=disk_orientation)
     elif input_type == "foldlabel":
         src_filename = _FOLDLABEL_FILENAME if src_filename is None else src_filename
         output_filename = _RESAMPLED_FOLDLABEL_FILENAME if output_filename is None else output_filename
@@ -658,7 +673,8 @@ def resample_files(
             out_voxel_size=out_voxel_size,
             parallel=parallel,
             src_filename=src_filename,
-            output_filename=output_filename)
+            output_filename=output_filename,
+            disk_orientation=disk_orientation)
     elif input_type == "distmap":
         resampler = DistMapResampler(
             src_dir=src_dir,
@@ -668,7 +684,8 @@ def resample_files(
             out_voxel_size=out_voxel_size,
             parallel=parallel,
             src_filename=src_filename,
-            output_filename=output_filename)
+            output_filename=output_filename,
+            disk_orientation=disk_orientation)
     else:
         raise ValueError(
             "input_type: shall be either 'skeleton', 'foldlabel' or "\
@@ -699,7 +716,8 @@ def main(argv):
         out_voxel_size=params['out_voxel_size'],
         parallel=params['parallel'],
         src_filename=params['src_filename'],
-        output_filename=params['output_filename']
+        output_filename=params['output_filename'],
+        disk_orientation=params['disk_orientation']
     )
 
 

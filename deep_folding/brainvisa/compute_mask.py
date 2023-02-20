@@ -47,6 +47,7 @@ import os
 import sys
 from os.path import basename
 from os.path import join
+from os.path import abspath
 
 import numpy as np
 from deep_folding.brainvisa import exception_handler
@@ -61,6 +62,7 @@ from deep_folding.brainvisa.utils.subjects import \
 from deep_folding.brainvisa.utils.quality_checks import \
     get_not_processed_subjects_dict
 from deep_folding.brainvisa.utils.sulcus import complete_sulci_name
+from deep_folding.brainvisa.utils.disk_orientation import set_disk_orientation
 from deep_folding.config.logs import set_file_logger
 from soma import aims
 
@@ -68,7 +70,8 @@ from soma import aims
 from deep_folding.brainvisa.utils.constants import \
     _ALL_SUBJECTS, _SUPERVISED_SRC_DIR_DEFAULT,\
     _MASK_DIR_DEFAULT, _SIDE_DEFAULT, _SULCUS_DEFAULT,\
-    _VOXEL_SIZE_DEFAULT, _PATH_TO_GRAPH_SUPERVISED_DEFAULT
+    _VOXEL_SIZE_DEFAULT, _PATH_TO_GRAPH_SUPERVISED_DEFAULT,\
+        _DISK_ORIENTATION_DEFAULT
 
 # Defines logger
 log = set_file_logger(__file__)
@@ -146,7 +149,8 @@ def increment_mask(subjects: list,
                    mask: aims.Volume,
                    sulcus: str,
                    voxel_size_out: tuple,
-                   sample_dir: str):
+                   sample_dir: str,
+                   disk_orientation: str):
     """Increments mask for the chosen sulcus for all subjects
 
     Parameters:
@@ -168,14 +172,16 @@ def increment_mask(subjects: list,
                                       mask,
                                       sulcus,
                                       voxel_size_out)
+        set_disk_orientation(vol_one, disk_orientation)
         aims.write(vol_one, f"{sample_dir}/{sub['subject']}.nii.gz")
 
 
-def write_mask(mask: aims.Volume, mask_file: str):
+def write_mask(mask: aims.Volume, mask_file: str, disk_orientation: str):
     """Writes mask on mask file"""
     mask_file_dir = os.path.dirname(mask_file)
     os.makedirs(mask_file_dir, exist_ok=True)
     log.info(f"\nFinal mask file: {mask_file}\n")
+    set_disk_orientation(mask, disk_orientation)
     aims.write(mask, mask_file)
 
 
@@ -193,7 +199,8 @@ class MaskAroundSulcus:
                  sulcus=_SULCUS_DEFAULT,
                  new_sulcus=None,
                  side=_SIDE_DEFAULT,
-                 out_voxel_size=None):
+                 out_voxel_size=None,
+                 disk_orientation=_DISK_ORIENTATION_DEFAULT):
         """Inits with list of directories and list of sulci
 
         Attributes:
@@ -229,6 +236,7 @@ class MaskAroundSulcus:
         self.out_voxel_size = (out_voxel_size,
                                out_voxel_size,
                                out_voxel_size)
+        self.disk_orientation = disk_orientation
 
         # Initiliazes mask
         self.mask = aims.Volume()
@@ -269,10 +277,11 @@ class MaskAroundSulcus:
                             self.mask,
                             self.sulcus,
                             self.out_voxel_size,
-                            self.mask_sample_dir)
+                            self.mask_sample_dir,
+                            self.disk_orientation)
 
                 # Saving of generated masks
-                write_mask(self.mask, self.mask_file)
+                write_mask(self.mask, self.mask_file, self.disk_orientation)
 
 
 def compute_mask(src_dir=_SUPERVISED_SRC_DIR_DEFAULT,
@@ -282,7 +291,8 @@ def compute_mask(src_dir=_SUPERVISED_SRC_DIR_DEFAULT,
                  new_sulcus=None,
                  side=_SIDE_DEFAULT,
                  number_subjects=_ALL_SUBJECTS,
-                 out_voxel_size=None):
+                 out_voxel_size=None,
+                 disk_orientation=_DISK_ORIENTATION_DEFAULT):
     """ Main program computing the box encompassing the sulcus in all subjects
 
     The programm loops over all subjects
@@ -299,6 +309,7 @@ def compute_mask(src_dir=_SUPERVISED_SRC_DIR_DEFAULT,
         number_subjects: integer giving the number of subjects to analyze,
             by default it is set to _ALL_SUBJECTS (-1)
         out_voxel_size: float giving voxel size
+        disk_orientation: str giving disk orientation, either lpi or las
 
     Returns:
         aims volume containing the mask
@@ -309,7 +320,8 @@ def compute_mask(src_dir=_SUPERVISED_SRC_DIR_DEFAULT,
                             sulcus=sulcus,
                             new_sulcus=new_sulcus,
                             side=side,
-                            out_voxel_size=out_voxel_size)
+                            out_voxel_size=out_voxel_size,
+                            disk_orientation=disk_orientation)
     mask.compute(number_subjects=number_subjects)
 
     return mask.mask
@@ -361,6 +373,11 @@ def parse_args(argv: list) -> dict:
              '0 subject is allowed, for debug purpose. '
              'Default is : all')
     parser.add_argument(
+        "-d", "--disk_orientation", type=str, default="lpi",
+        help='Disk storage orientation. '
+             'Either \"las\" or \"lpi\" (aims default). '
+             f'Default is : {_DISK_ORIENTATION_DEFAULT}')
+    parser.add_argument(
         '-v', '--verbose', action='count', default=0,
         help='Verbose mode: '
              'If no option is provided then logging.INFO is selected. '
@@ -382,14 +399,10 @@ def parse_args(argv: list) -> dict:
               prog_name=basename(__file__),
               suffix=complete_sulci_name(new_sulcus, args.side))
 
-    params['src_dir'] = args.src_dir  # src_dir is a list
-    params['path_to_graph'] = args.path_to_graph
+    params = vars(args)
+
     # mask_dir is a string, only one directory
-    params['mask_dir'] = args.output_dir
-    params['sulcus'] = args.sulcus  # sulcus is a string
-    params['new_sulcus'] = args.new_sulcus  # sulcus is a string
-    params['side'] = args.side
-    params['out_voxel_size'] = args.out_voxel_size
+    params['mask_dir'] = abspath(args.output_dir)
 
     # Checks if nb_subjects is either the string "all" or a positive integer
     params['nb_subjects'] = get_number_subjects(args.nb_subjects)
@@ -416,7 +429,8 @@ def main(argv):
         new_sulcus=params['new_sulcus'],
         side=params['side'],
         number_subjects=params['nb_subjects'],
-        out_voxel_size=params['out_voxel_size'])
+        out_voxel_size=params['out_voxel_size'],
+        disk_orientation=params['disk_orientation'])
 
 
 ######################################################################

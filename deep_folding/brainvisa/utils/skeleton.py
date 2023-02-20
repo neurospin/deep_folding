@@ -39,10 +39,13 @@ import numpy as np
 from soma import aims
 
 from deep_folding.brainvisa.utils.graph import create_empty_volume_from_graph
+from deep_folding.brainvisa.utils.disk_orientation import set_disk_orientation
+
 from deep_folding.config.logs import set_file_logger
 
 # junction type 'wide' or 'thin'
-from deep_folding.brainvisa.utils.constants import _JUNCTION_DEFAULT
+from deep_folding.brainvisa.utils.constants \
+    import _JUNCTION_DEFAULT, _DISK_ORIENTATION_DEFAULT
 
 # Defines logger
 log = set_file_logger(__file__)
@@ -172,10 +175,12 @@ def generate_skeleton_from_graph(graph: aims.Graph,
 
 def generate_skeleton_from_graph_file(graph_file: str,
                                       skeleton_file: str,
-                                      junction: str = _JUNCTION_DEFAULT):
+                                      junction: str = _JUNCTION_DEFAULT,
+                                      disk_orientation=_DISK_ORIENTATION_DEFAULT):
     """Generates skeleton from graph file"""
     graph = aims.read(graph_file)
     vol_skeleton = generate_skeleton_from_graph(graph, junction)
     if not is_skeleton(np.asarray(vol_skeleton)):
         raise ValueError(f"{skeleton_file} has unexpected skeleton values")
+    set_disk_orientation(vol_skeleton, disk_orientation)
     aims.write(vol_skeleton, skeleton_file)

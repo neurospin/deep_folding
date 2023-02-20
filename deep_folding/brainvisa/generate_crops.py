@@ -82,6 +82,7 @@ from deep_folding.brainvisa.utils.quality_checks import \
     compare_number_aims_files_with_number_in_source, \
     save_list_to_csv
 from deep_folding.brainvisa.utils.sulcus import complete_sulci_name
+from deep_folding.brainvisa.utils.disk_orientation import set_disk_orientation
 from deep_folding.config.logs import set_file_logger
 from pqdm.processes import pqdm
 from p_tqdm import p_map
@@ -95,14 +96,16 @@ from deep_folding.brainvisa.utils.constants import \
     _SIDE_DEFAULT, _CROPPING_TYPE_DEFAULT,\
     _COMBINE_TYPE_DEFAULT, _INPUT_TYPE_DEFAULT,\
     _SULCUS_DEFAULT, _NO_MASK_DEFAULT,\
-    _DILATION_DEFAULT, _THRESHOLD_DEFAULT
+    _DILATION_DEFAULT, _THRESHOLD_DEFAULT,\
+    _DISK_ORIENTATION_DEFAULT
 
 # Defines logger
 log = set_file_logger(__file__)
 
 
 def crop_bbox(file_src: str, file_cropped: str,
-              bbmin: np.array, bbmax: np.array):
+              bbmin: np.array, bbmax: np.array,
+              disk_orientation: str):
     """Crops according to bounding box"""
 
     # Read source hemisphere file
@@ -110,6 +113,7 @@ def crop_bbox(file_src: str, file_cropped: str,
 
     # Crops volume according to bounding box
     vol_cropped = aims.VolumeView(vol, bbmin, bbmax-bbmin)
+    set_disk_orientation(vol_cropped, disk_orientation)
     aims.write(vol_cropped, file_cropped)
 
 
@@ -127,7 +131,8 @@ def filter_mask(mask: aims.Volume):
     arr[:] = (arr_filter > 0.001).astype(int)
 
 
-def crop_mask(file_src, file_cropped, mask, bbmin, bbmax, no_mask=_NO_MASK_DEFAULT):
+def crop_mask(file_src, file_cropped, mask, bbmin, bbmax,
+              disk_orientation, no_mask=_NO_MASK_DEFAULT):
     """Crops according to mask"""
     vol = aims.read(file_src)
 
@@ -152,10 +157,12 @@ def crop_mask(file_src, file_cropped, mask, bbmin, bbmax, no_mask=_NO_MASK_DEFAU
     log.debug(f"size = {(bbmax-bbmin).tolist()}")
     # Crops volume according to mask bounding box
     vol_cropped = aims.VolumeView(vol, bbmin, bbmax-bbmin)
+    set_disk_orientation(vol_cropped, disk_orientation)
     aims.write(vol_cropped, file_cropped)
     # Crops mask according to mask bounding box
     file_mask = os.path.dirname(os.path.dirname(file_cropped))
     mask_cropped = aims.VolumeView(mask, bbmin, bbmax-bbmin)
+    set_disk_orientation(mask_cropped, disk_orientation)
     aims.write(mask_cropped,
                f"{file_mask}/mask_cropped.nii.gz")
 
@@ -176,6 +183,7 @@ class CropGenerator:
                  cropping_type=_CROPPING_TYPE_DEFAULT,
                  combine_type=_COMBINE_TYPE_DEFAULT,
                  parallel=False,
+                 disk_orientation=_DISK_ORIENTATION_DEFAULT,
                  no_mask=_NO_MASK_DEFAULT):
         """Inits with list of directories and list of sulci
         Args:
@@ -203,6 +211,7 @@ class CropGenerator:
         self.threshold = threshold
         self.cropping_type = cropping_type
         self.combine_type = combine_type
+        self.disk_orientation = disk_orientation
         self.parallel = parallel
         self.no_mask = no_mask
         print(self.no_mask)
@@ -241,10 +250,11 @@ class CropGenerator:
             # Cropping of skeleton image
             if self.cropping_type == 'bbox':
                 crop_bbox(file_src, file_cropped,
-                          self.bbmin, self.bbmax)
+                          self.bbmin, self.bbmax, self.disk_orientation)
             else:
                 crop_mask(file_src, file_cropped,
-                          self.mask, self.bbmin, self.bbmax, self.no_mask)
+                          self.mask, self.bbmin, self.bbmax, 
+                          self.disk_orientation, self.no_mask)
         else:
             raise FileNotFoundError(f"{file_src} not found")
 
@@ -367,6 +377,7 @@ class CropGenerator:
                                             mask_dir=self.mask_dir,
                                             dilation=self.dilation,
                                             threshold=self.threshold)
+                set_disk_orientation(self.mask, self.disk_orientation)
                 aims.write(
                     self.mask,
                     f"{self.crop_dir}/{self.side}mask_{self.input_type}.nii.gz")
@@ -377,6 +388,7 @@ class CropGenerator:
                                         mask_dir=self.mask_dir,
                                         dilation=self.dilation,
                                         threshold=self.threshold)
+                set_disk_orientation(self.mask, self.disk_orientation)
                 aims.write(
                     self.mask,
                     f"{self.crop_dir}/{self.side}mask_{self.input_type}.nii.gz")
@@ -428,6 +440,7 @@ class SkeletonCropGenerator(CropGenerator):
                  cropping_type=_CROPPING_TYPE_DEFAULT,
                  combine_type=_COMBINE_TYPE_DEFAULT,
                  parallel=False,
+                 disk_orientation=_DISK_ORIENTATION_DEFAULT,
                  no_mask=_NO_MASK_DEFAULT):
         """Inits with list of directories and list of sulci
         Args:
@@ -448,7 +461,7 @@ class SkeletonCropGenerator(CropGenerator):
             bbox_dir=bbox_dir, mask_dir=mask_dir,
             list_sulci=list_sulci, side=side,
             cropping_type=cropping_type, combine_type=combine_type,
-            parallel=parallel, no_mask=no_mask
+            parallel=parallel, disk_orientation=disk_orientation, no_mask=no_mask
         )
 
         # Directory where to store cropped skeleton files
@@ -492,6 +505,7 @@ class FoldLabelCropGenerator(CropGenerator):
                  cropping_type=_CROPPING_TYPE_DEFAULT,
                  combine_type=_COMBINE_TYPE_DEFAULT,
                  parallel=False,
+                 disk_orientation=_DISK_ORIENTATION_DEFAULT,
                  no_mask=_NO_MASK_DEFAULT):
         """Inits with list of directories and list of sulci
         Args:
@@ -512,7 +526,8 @@ class FoldLabelCropGenerator(CropGenerator):
             bbox_dir=bbox_dir, mask_dir=mask_dir,
             list_sulci=list_sulci, side=side,
             cropping_type=cropping_type, combine_type=combine_type,
-            parallel=parallel, no_mask=no_mask
+            parallel=parallel, disk_orientation=disk_orientation,
+            no_mask=no_mask
         )
 
         # Directory where to store cropped skeleton files
@@ -556,6 +571,7 @@ class DistMapCropGenerator(CropGenerator):
                  cropping_type=_CROPPING_TYPE_DEFAULT,
                  combine_type=_COMBINE_TYPE_DEFAULT,
                  parallel=False,
+                 disk_orientation=_DISK_ORIENTATION_DEFAULT,
                  no_mask=_NO_MASK_DEFAULT):
         """Inits with list of directories and list of sulci
         Args:
@@ -576,7 +592,8 @@ class DistMapCropGenerator(CropGenerator):
             bbox_dir=bbox_dir, mask_dir=mask_dir,
             list_sulci=list_sulci, side=side,
             cropping_type=cropping_type, combine_type=combine_type,
-            parallel=parallel, no_mask=no_mask
+            parallel=parallel, disk_orientation=disk_orientation,
+            no_mask=no_mask
         )
 
         # Directory where to store cropped skeleton files
@@ -681,13 +698,16 @@ def parse_args(argv):
         "-p", "--no_mask", type=bool, default=_NO_MASK_DEFAULT,
         help='Whether apply mask')
     parser.add_argument(
+        "-d", "--disk_orientation", type=str, default="lpi",
+        help='Disk storage orientation. '
+             'Either \"las\" or \"lpi\" (aims default). '
+             f'Default is : {_DISK_ORIENTATION_DEFAULT}')
+    parser.add_argument(
         '-v', '--verbose', action='count', default=0,
         help='Verbose mode: '
              'If no option is provided then logging.INFO is selected. '
              'If one option -v (or -vv) or more is provided '
              'then logging.DEBUG is selected.')
-
-    params = {}
 
     args = parser.parse_args(argv)
 
@@ -697,17 +717,7 @@ def parse_args(argv):
               prog_name=basename(__file__),
               suffix=f"right_{args.input_type}" if args.side == 'R' else 'left')
 
-    params['src_dir'] = args.src_dir
-    params['input_type'] = args.input_type
-    params['crop_dir'] = args.output_dir
-    params['bbox_dir'] = args.bbox_dir
-    params['mask_dir'] = args.mask_dir
-    params['list_sulci'] = args.sulcus  # a list of sulci
-    params['side'] = args.side
-    params['cropping_type'] = args.cropping_type
-    params['combine_type'] = args.combine_type
-    params['parallel'] = args.parallel
-    params['no_mask'] = args.no_mask
+    params = vars(args)
 
     # Checks if nb_subjects is either the string "all" or a positive integer
     params['nb_subjects'] = get_number_subjects(args.nb_subjects)
@@ -727,6 +737,7 @@ def generate_crops(
         cropping_type=_CROPPING_TYPE_DEFAULT,
         combine_type=_COMBINE_TYPE_DEFAULT,
         parallel=False,
+        disk_orientation=_DISK_ORIENTATION_DEFAULT,
         no_mask=True):
 
     if input_type == "skeleton":
@@ -740,6 +751,7 @@ def generate_crops(
             cropping_type=cropping_type,
             combine_type=combine_type,
             parallel=parallel,
+            disk_orientation=disk_orientation,
             no_mask=no_mask)
     elif input_type == "foldlabel":
         crop = FoldLabelCropGenerator(
@@ -752,6 +764,7 @@ def generate_crops(
             cropping_type=cropping_type,
             combine_type=combine_type,
             parallel=parallel,
+            disk_orientation=disk_orientation,
             no_mask=no_mask)
     elif input_type == "distmap":
         crop = DistMapCropGenerator(
@@ -764,6 +777,7 @@ def generate_crops(
             cropping_type=cropping_type,
             combine_type=combine_type,
             parallel=parallel,
+            disk_orientation=disk_orientation,
             no_mask=no_mask)
     else:
         raise ValueError(
@@ -794,6 +808,7 @@ def main(argv):
         combine_type=params['combine_type'],
         parallel=params['parallel'],
         number_subjects=params['nb_subjects'],
+        disk_orientation=params['disk_orientation'],
         no_mask=params['no_mask'])
 
 

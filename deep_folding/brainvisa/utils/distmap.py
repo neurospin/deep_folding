@@ -42,6 +42,7 @@ from soma import aims
 from soma import aimsalgo
 
 from deep_folding.brainvisa.utils.padding import padd
+from deep_folding.brainvisa.utils.disk_orientation import set_disk_orientation
 from deep_folding.config.logs import set_file_logger
 
 # Defines logger
@@ -49,7 +50,7 @@ log = set_file_logger(__file__)
 
 
 def generate_distmap_from_skeleton_file(skeleton_file: str,
-                                      distmap_file: str):
+                                      distmap_file: str, disk_orientation: str):
     """Generates distmap from skeleton file.
     Distmaps files are padded to avoid 0-background close to skeleton voxels
     when going to ICBMc referential.
@@ -94,6 +95,7 @@ def generate_distmap_from_skeleton_file(skeleton_file: str,
     temp_vol = padd(orig_skel_arr, dim, fill_value=0)
     temp_file = f"{temp_dir}/skel_new_dim.nii.gz"
     np.asarray(vol_ref)[:] = temp_vol
+    set_disk_orientation(vol_ref, disk_orientation)
     aims.write(vol_ref, temp_file)
 
     # Generation of distmap from padded skeletons
@@ -106,7 +108,7 @@ def generate_distmap_from_skeleton_file(skeleton_file: str,
 
 
 def generate_distmap_from_resampled_skeleton(skeleton_file: str,
-                                      distmap_file: str):
+                                      distmap_file: str, disk_orientation: str):
     """Generates distmap from resampled skeleton file."""
 
     # Generation of distmap from padded skeletons

@@ -252,7 +252,8 @@ def main(argv):
                                  'new_sulcus': params['new_sulcus'],
                                  'side': params['side'],
                                  'number_subjects': params['nb_subjects_mask'],
-                                 'out_voxel_size': params['out_voxel_size']}
+                                 'out_voxel_size': params['out_voxel_size'],
+                                 'disk_orientation': params['disk_orientation']}
             
             # write the logs as if the command line compute_mask.py was executed
             new_sulcus = args_compute_mask['new_sulcus'] if args_compute_mask['new_sulcus'] else args_compute_mask['sulcus']
@@ -285,7 +286,8 @@ def main(argv):
                                     'bids': params['bids'],
                                     'parallel': params['parallel'],
                                     'number_subjects': params['nb_subjects'],
-                                    'qc_path': params['skel_qc_path']}
+                                    'qc_path': params['skel_qc_path'],
+                                    'disk_orientation': params['disk_orientation']}
             
             setup_log(Namespace(**{'verbose': log.level, **args_generate_skeletons}),
                     log_dir=f"{args_generate_skeletons['skeleton_dir']}",
@@ -311,6 +313,7 @@ def main(argv):
                                       'distmaps_dir': params['distmaps_dir'] + '/raw',
                                       'side': params['side'],
                                       'parallel': params['parallel'],
+                                      'disk_orientation': params['disk_orientation'],
                                       'resampled_skel': params['resampled_skel'],
                                       'number_subjects': params['nb_subjects']}
 
@@ -341,6 +344,7 @@ def main(argv):
                                         'junction': params['junction'],
                                         'bids': params['bids'],
                                         'parallel': params['parallel'],
+                                        'disk_orientation': params['disk_orientation'],
                                         'number_subjects': params['nb_subjects'],
                                         'qc_path': params['skel_qc_path']}
 
@@ -370,6 +374,7 @@ def main(argv):
                                         'side': params['side'],
                                         'bids': params['bids'],
                                         'parallel': params['parallel'],
+                                        'disk_orientation': params['disk_orientation'],
                                         'number_subjects': params['nb_subjects']}
 
             setup_log(Namespace(**{'verbose': log.level, **args_generate_transforms}),
@@ -417,7 +422,8 @@ def main(argv):
                                    'out_voxel_size': params['out_voxel_size'],
                                    'parallel': params['parallel'],
                                    'src_filename': src_filename,
-                                   'output_filename': output_filename}
+                                   'output_filename': output_filename,
+                                   'disk_orienttion': params['disk_orientation']}
 
             setup_log(Namespace(**{'verbose': log.level, **args_resample_files}),
                       log_dir=f"{args_resample_files['resampled_dir']}",
@@ -471,6 +477,7 @@ def main(argv):
                                'combine_type': params['combine_type'],
                                'parallel': params['parallel'],
                                'number_subjects': params['nb_subjects'],
+                               'disk_orientation': params['disk_orientation'],
                                'no_mask': params['no_mask']}
         
         setup_log(Namespace(**{'verbose': log.level, **args_generate_crops}),
