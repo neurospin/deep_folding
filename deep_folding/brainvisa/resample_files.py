@@ -51,8 +51,6 @@ The aim of this script is to resample skeletons, foldlabels and distmaps.
 """
 
 import argparse
-from asyncio.subprocess import DEVNULL
-from email.mime import base
 import glob
 import os
 import re
@@ -61,7 +59,6 @@ import tempfile
 from os.path import join
 from os.path import basename
 
-from psutil import disk_io_counters
 from p_tqdm import p_map
 
 import numpy as np
@@ -74,14 +71,14 @@ from deep_folding.brainvisa.utils.referentials import \
 from deep_folding.brainvisa.utils.subjects import get_number_subjects
 from deep_folding.brainvisa.utils.subjects import select_subjects_int
 from deep_folding.brainvisa.utils.folder import create_folder
-from deep_folding.brainvisa.utils.disk_orientation import set_disk_orientation
+from deep_folding.brainvisa.utils.disk_orientation import \
+    set_disk_orientation, read_write_with_disk_orientation
 from deep_folding.brainvisa.utils.logs import setup_log
 from deep_folding.brainvisa.utils.quality_checks import \
     compare_number_aims_files_with_expected, \
     compare_number_aims_files_with_number_in_source, \
     get_not_processed_files, \
     save_list_to_csv
-from pqdm.processes import pqdm
 from deep_folding.config.logs import set_file_logger
 from soma import aims
 
@@ -166,7 +163,7 @@ def resample_one_foldlabel(input_image,
 
 
 def resample_one_distmap(input_image,
-                         resampled_dir,
+                         resampled_file,
                          out_voxel_size,
                          transformation,
                          disk_orientation):
@@ -212,12 +209,13 @@ def resample_one_distmap(input_image,
     # Normalization and resampling of skeleton images
     cmd_normalize = 'AimsApplyTransform' + \
                 ' -i ' + input_image + \
-                ' -o ' + resampled_dir + \
+                ' -o ' + resampled_file + \
                 ' -m ' + transfo_file + \
                 ' -r ' + ref_file + \
                 ' -t linear'
     print(cmd_normalize)
     os.system(cmd_normalize)
+    read_write_with_disk_orientation(resampled_file, disk_orientation)
 
 
 class FileResampler:
@@ -297,12 +295,12 @@ class FileResampler:
 
         # Performs the resampling
         if os.path.exists(src_file):
-            resampled = self.resample_one_subject(
+            self.resample_one_subject(
                 src_file=src_file,
                 out_voxel_size=self.out_voxel_size,
                 transform_file=transform_file,
-                resampled_file=resampled_file)
-            #aims.write(resampled, resampled_file)
+                resampled_file=resampled_file,
+                disk_orientation=self.disk_orientation)
         else:
             raise FileNotFoundError(f"{src_file} not found")
 
@@ -326,7 +324,7 @@ class FileResampler:
             log.debug(f"reg exp = {self.expr}")
 
             if os.path.isdir(self.src_dir):
-                src_files = glob.glob(f"{self.src_dir}/*.nii.gz")
+                src_files = sorted(glob.glob(f"{self.src_dir}/*.nii.gz"))
                 log.debug(f"list src files = {src_files}")
                 log.debug(os.path.basename(src_files[0]))
 
@@ -548,7 +546,7 @@ class DistMapResampler(FileResampler):
                              disk_orientation: str,
                              resampled_file: str):
         return resample_one_distmap(input_image=src_file,
-                                    resampled_dir=resampled_file,
+                                    resampled_file=resampled_file,
                                     out_voxel_size=out_voxel_size,
                                     transformation=transform_file,
                                     disk_orientation=disk_orientation)

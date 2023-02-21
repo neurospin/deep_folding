@@ -374,7 +374,6 @@ def main(argv):
                                         'side': params['side'],
                                         'bids': params['bids'],
                                         'parallel': params['parallel'],
-                                        'disk_orientation': params['disk_orientation'],
                                         'number_subjects': params['nb_subjects']}
 
             setup_log(Namespace(**{'verbose': log.level, **args_generate_transforms}),
@@ -423,7 +422,7 @@ def main(argv):
                                    'parallel': params['parallel'],
                                    'src_filename': src_filename,
                                    'output_filename': output_filename,
-                                   'disk_orienttion': params['disk_orientation']}
+                                   'disk_orientation': params['disk_orientation']}
 
             setup_log(Namespace(**{'verbose': log.level, **args_resample_files}),
                       log_dir=f"{args_resample_files['resampled_dir']}",

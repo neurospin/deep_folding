@@ -42,8 +42,9 @@ from deep_folding.config.logs import set_file_logger
 # Defines logger
 log = set_file_logger(__file__)
 
+
 def set_disk_orientation(vol, disk_orientation):
-    """Sets disk orientation of required disk orientation is las"""
+    """Sets disk orientation if required disk orientation is las"""
     if disk_orientation == "las":
         aims.carto.setOrientationInformation(vol.header(), 'abs: 1 -1 -1')
     elif disk_orientation != "lpi":
@@ -51,12 +52,24 @@ def set_disk_orientation(vol, disk_orientation):
                          "It must be either \"las\" or \"lpi\"")
 
 
+def read_write_with_disk_orientation(file_nii, disk_orientation):
+    """Sets disk orientation if required disk orientation is las"""
+    if disk_orientation == "las":
+        vol = aims.read(file_nii)
+        aims.carto.setOrientationInformation(vol.header(), 'abs: 1 -1 -1')
+        aims.write(vol, file_nii)
+    elif disk_orientation != "lpi":
+        raise ValueError(f"disk_orientation has value: {disk_orientation}. "
+                         "It must be either \"las\" or \"lpi\"")
+
+
 def read_nifti_as_npy_with_orientation(file_nii, disk_orientation):
     aimsvol = aims.read(file_nii)
-    if disk_orientation == "las":
-        sample = np.flip(np.flip(aimsvol.np, 1), 2)
-    elif disk_orientation == "lpi":
-        sample = np.asarray(aimsvol)
-    else:
-        raise ValueError(f"Not allowed value for disk_orientation: {disk_orientation}")
+    sample = np.asarray(aimsvol)
+    # if disk_orientation == "las":
+    #     sample = np.flip(np.flip(aimsvol.np, 1), 2)
+    # elif disk_orientation == "lpi":
+    #     sample = np.asarray(aimsvol)
+    # else:
+    #     raise ValueError(f"Not allowed value for disk_orientation: {disk_orientation}")
     return sample

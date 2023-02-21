@@ -232,7 +232,7 @@ def get_not_processed_subjects(src_subjects, tgt_dir, prefix="generated_"):
     if len(tgt_subjects):
         log.info(f"first tgt subject = {tgt_subjects[0]}")
 
-    not_processed_subjects = list(set(src_subjects)-set(tgt_subjects))
+    not_processed_subjects = sorted(list(set(src_subjects)-set(tgt_subjects)))
 
     return not_processed_subjects
 
@@ -283,7 +283,7 @@ def get_not_processed_subjects_transform(src_subjects, tgt_dir, prefix="ICBM2009
     
     tgt_subjects = [subject.split(".")[0] for subject in tgt_subjects]
 
-    not_processed_subjects = list(set(src_subjects)-set(tgt_subjects))
+    not_processed_subjects = sorted(list(set(src_subjects)-set(tgt_subjects)))
 
     return not_processed_subjects
 

@@ -42,7 +42,8 @@ from soma import aims
 from soma import aimsalgo
 
 from deep_folding.brainvisa.utils.padding import padd
-from deep_folding.brainvisa.utils.disk_orientation import set_disk_orientation
+from deep_folding.brainvisa.utils.disk_orientation \
+    import read_write_with_disk_orientation, set_disk_orientation
 from deep_folding.config.logs import set_file_logger
 
 # Defines logger
@@ -105,6 +106,8 @@ def generate_distmap_from_skeleton_file(skeleton_file: str,
         ' -s OUTSIDE'
     log.debug(cmd_distMap)
     os.system(cmd_distMap)
+    read_write_with_disk_orientation(distmap_file, disk_orientation)
+
 
 
 def generate_distmap_from_resampled_skeleton(skeleton_file: str,
@@ -118,3 +121,4 @@ def generate_distmap_from_resampled_skeleton(skeleton_file: str,
         ' -s OUTSIDE'
     log.debug(cmd_distMap)
     os.system(cmd_distMap)
+    read_write_with_disk_orientation(distmap_file, disk_orientation)

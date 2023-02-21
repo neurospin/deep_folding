@@ -269,7 +269,7 @@ class CropGenerator:
         if number_subjects:
 
             if os.path.isdir(self.src_dir):
-                files = glob.glob(f"{self.src_dir}/*.nii.gz")
+                files = sorted(glob.glob(f"{self.src_dir}/*.nii.gz"))
                 log.debug(f"Nifti files in {self.src_dir} = {files}")
                 log.debug(f"Regular expresson is: {self.expr}")
 
@@ -424,8 +424,7 @@ class CropGenerator:
                            tgt_dir=self.crop_dir,
                            file_basename=self.file_basename_pickle,
                            list_sample_id=list_sample_id,
-                           list_sample_file=list_sample_file,
-                           disk_orientation=self.disk_orientation)
+                           list_sample_file=list_sample_file)
 
 
 class SkeletonCropGenerator(CropGenerator):

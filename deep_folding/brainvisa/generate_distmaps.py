@@ -188,7 +188,7 @@ class SkelConvert2DistMap:
         """Loops over subjects and converts graphs into distmaps.
         """
         # Gets list fo subjects
-        filenames = glob.glob(f"{self.src_dir}/{self.side}/*.nii.gz")
+        filenames = sorted(glob.glob(f"{self.src_dir}/{self.side}/*.nii.gz"))
 
         list_subjects = [
             re.search(

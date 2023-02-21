@@ -39,10 +39,12 @@ import numpy as np
 from soma import aims
 
 from deep_folding.brainvisa.utils.graph import create_empty_volume_from_graph
+from deep_folding.brainvisa.utils.disk_orientation import set_disk_orientation 
 from deep_folding.config.logs import set_file_logger
 
 # junction type 'wide' or 'thin'
-from deep_folding.brainvisa.utils.constants import _JUNCTION_DEFAULT
+from deep_folding.brainvisa.utils.constants import \
+    _JUNCTION_DEFAULT, _DISK_ORIENTATION_DEFAULT
 
 # Defines logger
 log = set_file_logger(__file__)
@@ -197,8 +199,10 @@ def generate_foldlabel_from_graph(graph: aims.Graph,
 
 def generate_foldlabel_from_graph_file(graph_file: str,
                                        foldlabel_file: str,
-                                       junction: str = _JUNCTION_DEFAULT):
+                                       junction: str = _JUNCTION_DEFAULT,
+                                       disk_orientation = _DISK_ORIENTATION_DEFAULT):
     """Generates skeleton from graph file"""
     graph = aims.read(graph_file)
     vol_label = generate_foldlabel_from_graph(graph, junction)
+    set_disk_orientation(vol_label, disk_orientation)
     aims.write(vol_label, foldlabel_file)

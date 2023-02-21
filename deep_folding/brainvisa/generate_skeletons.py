@@ -202,7 +202,7 @@ class GraphConvert2Skeleton:
         """
         graph_path = f"{self.src_dir}/{subject}*/" +\
                      f"{self.path_to_graph}/{self.side}*.arg"
-        list_graph_file = glob.glob(graph_path)
+        list_graph_file = sorted(glob.glob(graph_path))
         log.debug(f"list_graph_file = {list_graph_file}")
         if len(list_graph_file) == 0:
             raise RuntimeError(f"No graph file! "
@@ -218,7 +218,7 @@ class GraphConvert2Skeleton:
         """Loops over subjects and converts graphs into skeletons.
         """
         # Gets list of subjects
-        filenames = glob.glob(f"{self.src_dir}/*")
+        filenames = sorted(glob.glob(f"{self.src_dir}/*"))
         list_subjects = [basename(filename) for filename in filenames
                     if not re.search('.minf$', filename)]
         list_subjects = select_good_qc(list_subjects, self.qc_path)
@@ -247,7 +247,7 @@ class GraphConvert2Skeleton:
 
         # Checks if there is expected number of generated files
         if self.bids:
-            list_graphs = [g for g in glob.glob(f"{self.src_dir}/*/{self.path_to_graph}")
+            list_graphs = [g for g in sorted(glob.glob(f"{self.src_dir}/*/{self.path_to_graph}"))
                            if not re.search('.minf$', g)]
             compare_number_aims_files_with_expected(self.skeleton_dir, list_graphs)
         else:
