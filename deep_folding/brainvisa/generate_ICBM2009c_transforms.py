@@ -52,6 +52,7 @@ import sys
 import re
 from os.path import abspath
 from os.path import basename
+import os
 
 from deep_folding.brainvisa import exception_handler
 from deep_folding.brainvisa.utils.folder import create_folder
@@ -170,17 +171,19 @@ class GraphGenerateTransform:
         log.debug(graph_path)
         list_graph_file = glob.glob(graph_path)
         log.debug(f"list_graph_file = {list_graph_file}")
-        if len(list_graph_file) == 0:
-            raise RuntimeError(f"No graph file! "
-                               f"{graph_path} doesn't exist")
-        for graph_file in list_graph_file:
-            transform_file = self.get_transform_filename(subject, graph_file)
-            graph = aims.read(graph_file)
-            g_to_icbm_template = aims.GraphManip.getICBM2009cTemplateTransform(
-                graph)
-            aims.write(g_to_icbm_template, transform_file)
-            if not self.bids:
-                break
+        if len(list_graph_file)!=0:
+            # raise RuntimeError(f"No graph file! "
+            #                    f"{graph_path} doesn't exist")
+            for graph_file in list_graph_file:
+                if os.path.exists(graph_file):
+                    #print(graph_file)
+                    transform_file = self.get_transform_filename(subject, graph_file)
+                    graph = aims.read(graph_file)
+                    g_to_icbm_template = aims.GraphManip.getICBM2009cTemplateTransform(
+                        graph)
+                    aims.write(g_to_icbm_template, transform_file)
+                    if not self.bids:
+                        break
 
     def get_transform_filename(self, subject, graph_file):
         transform_file = (
@@ -207,7 +210,7 @@ class GraphGenerateTransform:
         filenames = glob.glob(f"{self.src_dir}/*[!.minf]")
         log.info(f"filenames[:5] = {filenames[:5]}")
 
-        list_subjects = [basename(filename) for filename in filenames 
+        list_subjects = [basename(filename) for filename in filenames
                          if not re.search('.minf$', filename)]
         list_subjects = \
             get_not_processed_subjects_transform(list_subjects,
