@@ -127,7 +127,8 @@ def filter_mask(mask: aims.Volume):
     arr[:] = (arr_filter > 0.001).astype(int)
 
 
-def crop_mask(file_src, file_cropped, mask, bbmin, bbmax, no_mask=_NO_MASK_DEFAULT):
+def crop_mask(file_src, file_cropped, mask, bbmin, bbmax, side,
+              no_mask=_NO_MASK_DEFAULT):
     """Crops according to mask"""
     vol = aims.read(file_src)
 
@@ -157,7 +158,7 @@ def crop_mask(file_src, file_cropped, mask, bbmin, bbmax, no_mask=_NO_MASK_DEFAU
     file_mask = os.path.dirname(os.path.dirname(file_cropped))
     mask_cropped = aims.VolumeView(mask, bbmin, bbmax-bbmin)
     aims.write(mask_cropped,
-               f"{file_mask}/mask_cropped.nii.gz")
+               f"{file_mask}/{side}mask_cropped.nii.gz")
 
 
 class CropGenerator:
@@ -244,7 +245,8 @@ class CropGenerator:
                           self.bbmin, self.bbmax)
             else:
                 crop_mask(file_src, file_cropped,
-                          self.mask, self.bbmin, self.bbmax, self.no_mask)
+                          self.mask, self.bbmin, self.bbmax, self.side,
+                          self.no_mask)
         else:
             raise FileNotFoundError(f"{file_src} not found")
 
@@ -325,7 +327,7 @@ class CropGenerator:
             else:
                 list_subjects = []
                 log.info("There is no subject or there is no subject to process"
-                         "in the source directory")                
+                         "in the source directory")
 
             # Checks if there is expected number of generated files
             compare_number_aims_files_with_expected(self.cropped_samples_dir,
@@ -336,7 +338,7 @@ class CropGenerator:
                 compare_number_aims_files_with_number_in_source(self.cropped_samples_dir,
                                                                 self.src_dir)
             not_processed_files = get_not_processed_cropped_files(self.src_dir, self.cropped_samples_dir)
-            save_list_to_csv(not_processed_files, 
+            save_list_to_csv(not_processed_files,
                              f"{self.crop_dir}/not_processed_files.csv")
 
 
