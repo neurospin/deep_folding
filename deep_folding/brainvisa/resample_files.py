@@ -375,7 +375,7 @@ class FileResampler:
             not_processed_files = get_not_processed_files(self.src_dir,
                                                           self.resampled_dir,
                                                           self.src_filename)
-            save_list_to_csv(not_processed_files,
+            save_list_to_csv(not_processed_files, 
                              f"{self.resampled_dir}/../not_processed_files.csv")
 
 
@@ -584,12 +584,12 @@ def parse_args(argv):
         help='Voxel size of bounding box. '
              'Default is : None')
     parser.add_argument(
-        "-f", "--src_filename", type=str, default=_DISTMAP_FILENAME,
+        "-f", "--src_filename", type=str, default=_SKELETON_FILENAME,
         help='Filename of sources files. '
              'Format is : "<SIDE><src_filename><SUBJECT>.nii.gz" '
              'Default is : ' + _SKELETON_FILENAME)
     parser.add_argument(
-        "-e", "--output_filename", type=str, default=_RESAMPLED_DISTMAP_FILENAME,
+        "-e", "--output_filename", type=str, default=_RESAMPLED_SKELETON_FILENAME,
         help='Filename of output files. '
              'Format is : "<SIDE><output_filename><SUBJECT>.nii.gz" '
              'Default is : ' + _RESAMPLED_SKELETON_FILENAME)
