@@ -188,7 +188,7 @@ def save_to_numpy(cropped_dir, tgt_dir=None, file_basename=None, parallel = Fals
     if parallel:
         log.info("Reading cropped dir is done in PARALLEL")
         partial_func = partial(get_one_numpy_array, cropped_dir=cropped_dir)
-        list_result =  p_map(partial_func, listdir)
+        list_result =  p_map(partial_func, sorted(listdir))
         list_sample_id, list_sample_file =\
             [x for x, y in list_result], [y for x, y in list_result]
     else:
