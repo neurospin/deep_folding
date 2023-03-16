@@ -55,7 +55,7 @@ from os.path import basename
 
 from deep_folding.brainvisa import exception_handler
 from deep_folding.brainvisa.utils.folder import create_folder
-from deep_folding.brainvisa.utils.subjects import get_number_subjects
+from deep_folding.brainvisa.utils.subjects import get_number_subjects, is_it_a_subject
 from deep_folding.brainvisa.utils.subjects import select_subjects_int
 from deep_folding.brainvisa.utils.logs import setup_log
 from deep_folding.brainvisa.utils.parallel import define_njobs
@@ -208,7 +208,7 @@ class GraphGenerateTransform:
         log.info(f"filenames[:5] = {filenames[:5]}")
 
         list_subjects = [basename(filename) for filename in filenames 
-                         if not re.search('.minf$', filename)]
+                         if is_it_a_subject(filename)]
         list_subjects = \
             get_not_processed_subjects_transform(list_subjects,
                                        self.transform_dir,

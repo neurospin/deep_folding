@@ -99,6 +99,8 @@ def save_to_dataframe_format_from_list(cropped_dir, tgt_dir=None, file_basename=
 def compare_one_array(cropped_dir, list_basename, row):
     index = row[0]
     sub = row[1]
+    # log.info(f"type of x = {[(idx, type(x), x) for idx,x in enumerate(list_basename) if type(x)==int]}")
+    # log.info(f"type of sub = {type(sub), sub}")
     index_sub = [idx for idx,x in enumerate(list_basename) if sub in x]
     if len(index_sub):
         index_sub = index_sub[0]
@@ -116,7 +118,7 @@ def quality_checks(csv_file_path, npy_array_file_path, cropped_dir, parallel=Fal
     This is to check that the subjects list in csv file
     match the order set in numpy arrays"""
     arr = np.load(npy_array_file_path, mmap_mode='r')
-    subjects = pd.read_csv(csv_file_path)
+    subjects = pd.read_csv(csv_file_path, dtype=str)
     log.info(f"subjects.head() = {subjects.head()}")
     if parallel:
         log.info("Quality check is done in PARALLEL")
