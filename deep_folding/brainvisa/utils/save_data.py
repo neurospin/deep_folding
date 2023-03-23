@@ -99,9 +99,7 @@ def save_to_dataframe_format_from_list(cropped_dir, tgt_dir=None, file_basename=
 def compare_one_array(cropped_dir, list_basename, row):
     index = row[0]
     sub = row[1]
-    # log.info(f"type of x = {[(idx, type(x), x) for idx,x in enumerate(list_basename) if type(x)==int]}")
-    # log.info(f"type of sub = {type(sub), sub}")
-    index_sub = [idx for idx,x in enumerate(list_basename) if sub in x]
+    index_sub = [idx for idx,x in enumerate(list_basename) if str(sub) in x]
     if len(index_sub):
         index_sub = index_sub[0]
     else:
@@ -221,7 +219,7 @@ def save_to_numpy(cropped_dir, tgt_dir=None, file_basename=None, parallel = Fals
     quality_checks(
         os.path.join(tgt_dir, file_basename+'_subject.csv'),
         os.path.join(tgt_dir, file_basename+'.npy'),
-        cropped_dir, 
+        cropped_dir,
         parallel=parallel)
 
     return list_sample_id, list_sample_file
