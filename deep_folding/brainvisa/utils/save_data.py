@@ -214,8 +214,9 @@ def save_to_numpy(cropped_dir, tgt_dir=None, file_basename=None,
 
     log.info("STEP 3. Now saving to numpy array...")
     # Writes volumes as numpy arrays
-    list_sample_file = np.array(list_sample_file)
-    np.save(os.path.join(tgt_dir, file_basename+'.npy'), list_sample_file)
+    array_sample = np.array(list_sample_file)
+    log.info(f"\nnp strides of list = {array_sample.strides}")
+    np.save(os.path.join(tgt_dir, file_basename+'.npy'), array_sample)
 
     # Quality_checks
     log.info("STEP 4. Now performing checks on numpy arrays...")

@@ -65,11 +65,13 @@ def read_write_with_disk_orientation(file_nii, disk_orientation):
 
 def read_nifti_as_npy_with_orientation(file_nii, disk_orientation):
     aimsvol = aims.read(file_nii)
-    sample = np.asarray(aimsvol)
-    # if disk_orientation == "las":
-    #     sample = np.flip(np.flip(aimsvol.np, 1), 2)
-    # elif disk_orientation == "lpi":
-    #     sample = np.asarray(aimsvol)
-    # else:
-    #     raise ValueError(f"Not allowed value for disk_orientation: {disk_orientation}")
+    if disk_orientation == "las":
+        sample = np.flip(np.flip(aimsvol.np, 1), 2).copy(order='K')
+        log.info(f"\nnp shape = {sample.shape}")
+        log.info(f"\nnp strides = {sample.strides}")
+
+    elif disk_orientation == "lpi":
+        sample = aimsvol.np
+    else:
+        raise ValueError(f"Not allowed value for disk_orientation: {disk_orientation}")
     return sample
