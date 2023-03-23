@@ -56,7 +56,7 @@ from os.path import basename
 
 from deep_folding.brainvisa import exception_handler
 from deep_folding.brainvisa.utils.folder import create_folder
-from deep_folding.brainvisa.utils.subjects import get_number_subjects
+from deep_folding.brainvisa.utils.subjects import get_number_subjects, is_it_a_subject
 from deep_folding.brainvisa.utils.subjects import select_subjects_int, select_good_qc
 from deep_folding.brainvisa.utils.logs import setup_log
 from deep_folding.brainvisa.utils.parallel import define_njobs
@@ -223,7 +223,7 @@ class GraphConvert2FoldLabel:
             raise ValueError(f"{self.src_dir} does not exist!")
         filenames = glob.glob(f"{self.src_dir}/*")
         list_subjects = [basename(filename) for filename in filenames 
-                    if not re.search('.minf$', filename)]
+                    if is_it_a_subject(filename)]
         list_subjects = select_good_qc(list_subjects, self.qc_path)
         list_subjects = \
             get_not_processed_subjects(list_subjects, self.foldlabel_dir, "foldlabel_")

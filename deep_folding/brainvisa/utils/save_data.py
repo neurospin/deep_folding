@@ -116,7 +116,7 @@ def quality_checks(csv_file_path, npy_array_file_path, cropped_dir, parallel=Fal
     This is to check that the subjects list in csv file
     match the order set in numpy arrays"""
     arr = np.load(npy_array_file_path, mmap_mode='r')
-    subjects = pd.read_csv(csv_file_path)
+    subjects = pd.read_csv(csv_file_path, dtype=str)
     log.info(f"subjects.head() = {subjects.head()}")
     if parallel:
         log.info("Quality check is done in PARALLEL")
@@ -188,7 +188,7 @@ def save_to_numpy(cropped_dir, tgt_dir=None, file_basename=None, parallel = Fals
     if parallel:
         log.info("Reading cropped dir is done in PARALLEL")
         partial_func = partial(get_one_numpy_array, cropped_dir=cropped_dir)
-        list_result =  p_map(partial_func, listdir)
+        list_result =  p_map(partial_func, sorted(listdir))
         list_sample_id, list_sample_file =\
             [x for x, y in list_result], [y for x, y in list_result]
     else:

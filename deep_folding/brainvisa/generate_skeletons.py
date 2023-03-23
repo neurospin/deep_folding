@@ -55,7 +55,7 @@ from os.path import basename
 
 from deep_folding.brainvisa import exception_handler
 from deep_folding.brainvisa.utils.folder import create_folder
-from deep_folding.brainvisa.utils.subjects import get_number_subjects
+from deep_folding.brainvisa.utils.subjects import get_number_subjects, is_it_a_subject
 from deep_folding.brainvisa.utils.subjects import select_subjects_int, select_good_qc
 from deep_folding.brainvisa.utils.logs import setup_log
 from deep_folding.brainvisa.utils.parallel import define_njobs
@@ -77,7 +77,6 @@ from deep_folding.brainvisa.utils.constants import \
 
 # Defines logger
 log = set_file_logger(__file__)
-
 
 def parse_args(argv):
     """Parses command-line arguments
@@ -213,7 +212,7 @@ class GraphConvert2Skeleton:
         # Gets list of subjects
         filenames = glob.glob(f"{self.src_dir}/*")
         list_subjects = [basename(filename) for filename in filenames
-                    if not re.search('.minf$', filename)]
+                    if is_it_a_subject(filename)]
         list_subjects = select_good_qc(list_subjects, self.qc_path)
         list_subjects = \
             get_not_processed_subjects(list_subjects, self.skeleton_dir)

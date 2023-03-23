@@ -35,6 +35,7 @@
 
 import os
 import glob
+import re
 
 import pandas as pd
 
@@ -180,3 +181,14 @@ def select_good_qc(orig_list: list, qc_path: str):
 They are the following: {set(orig_list) - set(sublist)}")
 
     return sublist
+
+
+def is_it_a_subject(filename):
+    if re.search('.minf$', filename):
+        return False
+    elif re.search('.sqlite$', filename):
+        return False
+    elif re.search('.html$', filename):
+        return False
+    else:
+        return True

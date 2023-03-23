@@ -95,10 +95,18 @@ def print_info(step, description):
              "# ----------------------\n")
     return step+1
 
+def is_directory_empty(path):
+    if os.path.isdir(path):
+        if os.listdir(path)==[]:
+            return True
+        else:
+            return False
+    else:
+        return False
 
 def is_step_to_be_computed(path, log_string, save_behavior='best'):
     if ((not os.path.exists(path)) or \
-        (os.path.exists(path) and os.listdir(path)==[]) or \
+        (os.path.exists(path) and is_directory_empty(path)) or \
         (save_behavior=='best') or \
         (save_behavior=='clear_and_compute')):
         # if no output directory or
@@ -239,10 +247,10 @@ def main(argv):
         
         # never remove the mask folder -> do it by hand if you really want to
         if is_step_to_be_computed(\
-                path=path_to_sulcus_mask,
+                path=path_to_sulcus_mask+".nii.gz",
                 log_string=f"Mask with the given parameters (side={params['side']}, "
                            f"sulcus={sulcus}, voxel size={vox_size})", 
-                save_behavior='best'):
+                           save_behavior='minimal'):
             
             # set up the right parameters
             args_compute_mask = {'src_dir': params['labeled_subjects_dir'],
