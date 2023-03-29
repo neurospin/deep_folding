@@ -35,7 +35,7 @@
 
 """Write distance maps from skeleton files
 
-   Note: the generation of distance maps should be performed for each resolution
+   Note: generation of distance maps should be performed for each resolution
 
   Typical usage
   -------------
@@ -65,7 +65,8 @@ from deep_folding.brainvisa.utils.subjects import select_subjects_int
 from deep_folding.brainvisa.utils.logs import setup_log
 from deep_folding.brainvisa.utils.parallel import define_njobs
 from deep_folding.brainvisa.utils.distmap import \
-    generate_distmap_from_skeleton_file, generate_distmap_from_resampled_skeleton
+    generate_distmap_from_skeleton_file,\
+    generate_distmap_from_resampled_skeleton
 from deep_folding.brainvisa.utils.quality_checks import \
     compare_number_aims_files_with_expected, \
     get_not_processed_subjects_distmap

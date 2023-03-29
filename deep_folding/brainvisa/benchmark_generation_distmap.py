@@ -57,7 +57,8 @@ from deep_folding.brainvisa.utils.bbox import compute_max_box
 from deep_folding.brainvisa.utils.mask import compute_simple_mask
 from deep_folding.brainvisa.utils.sulcus import complete_sulci_name
 from deep_folding.brainvisa.utils.skeleton import generate_skeleton_from_graph
-from deep_folding.brainvisa.utils.foldlabel import generate_foldlabel_thin_junction
+from deep_folding.brainvisa.utils.foldlabel import \
+    generate_foldlabel_thin_junction
 import dico_toolbox as dtx
 
 
@@ -78,7 +79,7 @@ class Benchmark():
 
         Args:
             b_num: number of benchmark
-            side: hemisphere side (either L for left, or R for right hemisphere)
+            side: hemisphere side (L for left, or R for right hemisphere)
             ss_size: minimum size of simple surface to consider
             sulci_list: list of sulcus names
             data_dir: string naming full path source directories containing
@@ -148,7 +149,9 @@ class Benchmark():
                     # Transformation of SS voxels to ICBM space with
                     # voxel_size_out
                     voxels_icbm = np.asarray(
-                        [g_to_icbm_template.transform(np.array(voxel) * voxel_size_in)
+                        [g_to_icbm_template.transform(
+                            np.array(voxel) * voxel_size_in
+                            )
                          for voxel in bck_map[0].keys()])
                     voxels = np.round(np.array(voxels_icbm) /
                                       self.voxel_size_out[:3]).astype(int)

@@ -42,11 +42,16 @@ import json
 import math
 import re
 import sys
+import os
 
-from deep_folding.brainvisa.benchmark_generation import *
+from soma import aims
+from deep_folding.brainvisa.utils.bbox import compute_max_box
+from deep_folding.brainvisa.benchmark_generation_distmap import *
 from deep_folding.brainvisa.utils.resample import resample
 from deep_folding.brainvisa.utils.sulcus import complete_sulci_name
 from joblib import cpu_count
+from numpy import random
+
 ######################################################################
 # Imports and global variables definitions
 ######################################################################
@@ -116,7 +121,8 @@ def parse_args(argv):
     bbox_dir = args.bbox_dir
     subjects_list = args.subjects_list
 
-    return tgt_dir, sulcus, side, ss_size, mode, bench_size, resampling, bbox_dir, subjects_list
+    return tgt_dir, sulcus, side, ss_size, mode, \
+        bench_size, resampling, bbox_dir, subjects_list
 
 
 _SS_SIZE_DEFAULT = 1000
@@ -148,9 +154,10 @@ class BenchmarkPipe:
         Args:
             tgt_dir: name of target (output) directory with full path
             sulcus: list of sulcus names
-            side: hemisphere side (either L for left, or R for right hemisphere)
+            side: hemisphere side (L for left, or R for right hemisphere)
             ss_size: size of simple surface to delete in 'suppress' mode
-            mode: type of benchmark to create, whether 'suppress', 'add', 'random', 'asymmetry'
+            mode: type of benchmark to create,
+                  whether 'suppress', 'add', 'random', 'asymmetry'
             bench_size: size of benchmark to create
             resampling: type of resampling (sulcus based or nearest)
             bbox_dir: directory containing bbox json files
@@ -189,7 +196,9 @@ class BenchmarkPipe:
         Args:
             sub: string giving the subject ID
         """
-        dir_m = '/neurospin/dico/lguillon/skeleton/transfo_pre_process/natif_to_template_spm_' + sub + '.trm'
+        dir_m = \
+            '/neurospin/dico/lguillon/skeleton/transfo_pre_process/'\
+            + 'natif_to_template_spm_' + sub + '.trm'
         dir_r = '/neurospin/hcp/ANALYSIS/3T_morphologist/' + sub + \
             '/t1mri/default_acquisition/normalized_SPM_' + sub + '.nii'
         skel_prefix = 'output_skeleton_'
@@ -215,10 +224,17 @@ class BenchmarkPipe:
             random_x = random.randint(0, 42 - self.box_size[0] - 1)
             random_y = random.randint(0, 108 - self.box_size[1] - 1)
             random_z = random.randint(0, 91 - self.box_size[2] - 1)
-            xmax, ymax, zmax = random_x + \
-                self.box_size[0], random_y + self.box_size[1], random_z + self.box_size[2]
-            cmd_bounding_box = ' -x ' + str(random_x) + ' -y ' + str(random_y) + ' -z ' + str(
-                random_z) + ' -X ' + str(xmax) + ' -Y ' + str(ymax) + ' -Z ' + str(zmax)
+            xmax, ymax, zmax = \
+                random_x + self.box_size[0], \
+                random_y + self.box_size[1], \
+                random_z + self.box_size[2]
+            cmd_bounding_box = \
+                ' -x ' + str(random_x) + \
+                ' -y ' + str(random_y) + \
+                ' -z ' + str(random_z) + \
+                ' -X ' + str(xmax) + \
+                ' -Y ' + str(ymax) + \
+                ' -Z ' + str(zmax)
 
         else:
             if self.mode == 'asymmetry':
@@ -231,22 +247,29 @@ class BenchmarkPipe:
                         asym),
                     asym,
                     src_dir=self.bbox_dir)
-                xmin_asym, ymin_asym, zmin_asym = bbox_asym[0][0], bbox_asym[0][1], bbox_asym[0][2]
-                xmax_asym, ymax_asym, zmax_asym = bbox_asym[1][0], bbox_asym[1][1], bbox_asym[1][2]
+                xmin_asym, ymin_asym, zmin_asym = \
+                    bbox_asym[0][0], bbox_asym[0][1], bbox_asym[0][2]
+                xmax_asym, ymax_asym, zmax_asym = \
+                    bbox_asym[1][0], bbox_asym[1][1], bbox_asym[1][2]
                 # Size of crop on opposite hemisphere
                 box_size_asym = [
                     xmax_asym - xmin_asym,
                     ymax_asym - ymin_asym,
                     zmax_asym - zmin_asym]
-                # Difference (in voxel for each dimension) between crop in the hemisphere considered, self.side
+                # Difference (in voxel for each dimension)
+                # between crop in the hemisphere considered, self.side
                 # and opposite hemisphere crop
                 diff = [x - y for x, y in zip(box_size_asym, self.box_size)]
 
                 # Adaptation of considered crop based on asymmetrical crop
-                self.xmin, self.ymin, self.zmin = int(self.xmin) - math.floor(diff[0] / 2), int(
-                    self.ymin) - math.floor(diff[1] / 2), int(self.zmin) - math.floor(diff[2] / 2)
-                self.xmax, self.ymax, self.zmax = int(self.xmax) + math.ceil(diff[0] / 2), int(
-                    self.ymax) + math.ceil(diff[1] / 2), int(self.zmax) + math.ceil(diff[2] / 2)
+                self.xmin, self.ymin, self.zmin = \
+                    int(self.xmin) - math.floor(diff[0] / 2), \
+                    int(self.ymin) - math.floor(diff[1] / 2), \
+                    int(self.zmin) - math.floor(diff[2] / 2)
+                self.xmax, self.ymax, self.zmax = \
+                    int(self.xmax) + math.ceil(diff[0] / 2), \
+                    int(self.ymax) + math.ceil(diff[1] / 2), \
+                    int(self.zmax) + math.ceil(diff[2] / 2)
                 adapted_box = [
                     self.xmax - self.xmin,
                     self.ymax - self.ymin,
@@ -255,15 +278,21 @@ class BenchmarkPipe:
                 # self.xmin, self.ymin, self.zmin = '52', '50', '12'
                 # self.xmax, self.ymax, self.zmax = '74', '86', '47'
 
-            cmd_bounding_box = ' -x ' + str(self.xmin) + ' -y ' + str(self.ymin) + ' -z ' + str(
-                self.zmin) + ' -X ' + str(self.xmax) + ' -Y ' + str(self.ymax) + ' -Z ' + str(self.zmax)
+            cmd_bounding_box = \
+                ' -x ' + str(self.xmin) + \
+                ' -y ' + str(self.ymin) + \
+                ' -z ' + str(self.zmin) + \
+                ' -X ' + str(self.xmax) + \
+                ' -Y ' + str(self.ymax) + \
+                ' -Z ' + str(self.zmax)
             print(cmd_bounding_box)
         cmd_crop = "AimsSubVolume -i " + file_cropped + \
             " -o " + file_cropped + cmd_bounding_box
         os.system(cmd_crop)
 
         if self.mode == 'asymmetry':
-            cmd_flip = "AimsFlip -i " + file_cropped + " -o " + file_cropped + " -m XX"
+            cmd_flip = "AimsFlip -i " + file_cropped + " -o " + file_cropped \
+                    + " -m XX"
             os.system(cmd_flip)
 
     def launch_pipe(self):
@@ -326,8 +355,8 @@ def main(argv):
     Args:
         argv: a list containing command line arguments
     """
-    tgt_dir, sulcus, side, ss_size, mode, bench_size, resampling, bbox_dir, subjects_list = parse_args(
-        argv)
+    tgt_dir, sulcus, side, ss_size, mode, bench_size, \
+        resampling, bbox_dir, subjects_list = parse_args(argv)
 
     benchmark = BenchmarkPipe(tgt_dir, sulcus, side, ss_size, mode, bench_size,
                               resampling, bbox_dir, subjects_list)
