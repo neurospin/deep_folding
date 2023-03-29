@@ -65,7 +65,7 @@ from deep_folding.brainvisa.utils.subjects import select_subjects_int
 from deep_folding.brainvisa.utils.logs import setup_log
 from deep_folding.brainvisa.utils.parallel import define_njobs
 from deep_folding.brainvisa.utils.distmap import \
-generate_distmap_from_skeleton_file, generate_distmap_from_resampled_skeleton
+    generate_distmap_from_skeleton_file, generate_distmap_from_resampled_skeleton
 from deep_folding.brainvisa.utils.quality_checks import \
     compare_number_aims_files_with_expected, \
     get_not_processed_subjects_distmap
@@ -167,18 +167,18 @@ class SkelConvert2DistMap:
         """Generates and writes distmap for one subject.
         """
         distmap_file = f"{self.distmap_dir}/" +\
-                        f"{self.side}distmap_generated_{subject}.nii.gz"
+            f"{self.side}distmap_generated_{subject}.nii.gz"
 
         if self.resampled_skel:
-            skeleton_file = glob.glob(f"{self.src_dir}/" +\
-                                  f"*{subject}*.nii.gz")[0]
+            skeleton_file = glob.glob(f"{self.src_dir}/" +
+                                      f"*{subject}*.nii.gz")[0]
             generate_distmap_from_resampled_skeleton(skeleton_file,
-                                            distmap_file)
+                                                     distmap_file)
         else:
-            skeleton_file = glob.glob(f"{self.src_dir}/{self.side}/" +\
-                                  f"*{subject}*.nii.gz")[0]
+            skeleton_file = glob.glob(f"{self.src_dir}/{self.side}/" +
+                                      f"*{subject}*.nii.gz")[0]
             generate_distmap_from_skeleton_file(skeleton_file,
-                                            distmap_file)
+                                                distmap_file)
 
     def compute(self, number_subjects):
         """Loops over subjects and converts graphs into distmaps.
@@ -188,7 +188,7 @@ class SkelConvert2DistMap:
 
         list_subjects = [
             re.search(
-                f"({self.side}skeleton_generated_)(.*)(\.nii\.gz)",
+                f"({self.side}skeleton_generated_)(.*)(\\.nii\\.gz)",
                 filename).group(2) for filename in filenames]
         list_subjects = select_subjects_int(list_subjects, number_subjects)
         log.info(f"list_subjects[:5] before = {list_subjects[:5]}")

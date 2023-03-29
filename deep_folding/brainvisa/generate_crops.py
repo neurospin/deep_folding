@@ -65,7 +65,8 @@ from numpy import save
 import scipy.ndimage
 from deep_folding.brainvisa import exception_handler
 from deep_folding.brainvisa.utils.save_data import save_to_numpy
-from deep_folding.brainvisa.utils.save_data import save_to_dataframe_format_from_list
+from deep_folding.brainvisa.utils.save_data import \
+    save_to_dataframe_format_from_list
 from deep_folding.brainvisa.utils.bbox import compute_max_box
 from deep_folding.brainvisa.utils.folder import create_folder
 from deep_folding.brainvisa.utils.logs import LogJson
@@ -109,7 +110,7 @@ def crop_bbox(file_src: str, file_cropped: str,
     vol = aims.read(file_src)
 
     # Crops volume according to bounding box
-    vol_cropped = aims.VolumeView(vol, bbmin, bbmax-bbmin)
+    vol_cropped = aims.VolumeView(vol, bbmin, bbmax - bbmin)
     aims.write(vol_cropped, file_cropped)
 
 
@@ -152,11 +153,11 @@ def crop_mask(file_src, file_cropped, mask, bbmin, bbmax, side,
     log.debug(f"bbmax = {bbmax.tolist()}")
     log.debug(f"size = {(bbmax-bbmin).tolist()}")
     # Crops volume according to mask bounding box
-    vol_cropped = aims.VolumeView(vol, bbmin, bbmax-bbmin)
+    vol_cropped = aims.VolumeView(vol, bbmin, bbmax - bbmin)
     aims.write(vol_cropped, file_cropped)
     # Crops mask according to mask bounding box
     file_mask = os.path.dirname(os.path.dirname(file_cropped))
-    mask_cropped = aims.VolumeView(mask, bbmin, bbmax-bbmin)
+    mask_cropped = aims.VolumeView(mask, bbmin, bbmax - bbmin)
     aims.write(mask_cropped,
                f"{file_mask}/{side}mask_cropped.nii.gz")
 
@@ -187,7 +188,8 @@ class CropGenerator:
             mask_dir: directory containing mask files
                     (generated using compute_mask.py)
             list_sulci: list of sulcus names
-            side: hemisphere side (either L for left, or R for right hemisphere)
+            side: hemisphere side (either L for left,
+                                   or R for right hemisphere)
             cropping_type: cropping type, either mask, or bbox
             combine_type: if True, combines sulci (in this case, order matters)
         """
@@ -208,7 +210,8 @@ class CropGenerator:
         self.no_mask = no_mask
         print(self.no_mask)
 
-        # Names of files in function of dictionary: keys -> 'subject' and 'side'
+        # Names of files in function of dictionary:
+        #               keys -> 'subject' and 'side'
         # Generated skeleton from folding graphs
         self.src_dir = join(src_dir, self.side)
 
@@ -271,8 +274,8 @@ class CropGenerator:
 
                 # Generates list of subjects not treated yet
                 not_processed_files = get_not_processed_cropped_files(
-                                        self.src_dir,
-                                        self.cropped_samples_dir)
+                    self.src_dir,
+                    self.cropped_samples_dir)
 
                 if len(files):
                     list_all_subjects = [
@@ -285,7 +288,8 @@ class CropGenerator:
                     f"{self.src_dir} doesn't exist or is not a directory")
 
             if len(list_all_subjects):
-                # # Gives the possibility to list only the first number_subjects
+                # Gives the possibility to list
+                # only the first number_subjects
                 list_subjects = select_subjects_int(list_all_subjects,
                                                     number_subjects)
 
@@ -298,27 +302,31 @@ class CropGenerator:
                 create_folder(self.cropped_samples_dir)
 
                 # Writes number of subjects and directory names to json file
-                dict_to_add = {'nb_subjects': len(list_subjects),
-                            'src_dir': self.src_dir,
-                            'bbox_dir': self.bbox_dir,
-                            'mask_dir': self.mask_dir,
-                            'side': self.side,
-                            'list_sulci': self.list_sulci,
-                            'bbmin': self.bbmin.tolist(),
-                            'bbmax': self.bbmax.tolist(),
-                            'size': (self.bbmax-self.bbmin).tolist(),
-                            'crop_dir': self.crop_dir,
-                            'cropped_skeleton_dir': self.cropped_samples_dir,
-                            'cropping_type': self.cropping_type,
-                            'combine_type': self.combine_type,
-                            'no_mask': self.no_mask
-                            }
+                dict_to_add = {
+                    'nb_subjects': len(list_subjects),
+                    'src_dir': self.src_dir,
+                    'bbox_dir': self.bbox_dir,
+                    'mask_dir': self.mask_dir,
+                    'side': self.side,
+                    'list_sulci': self.list_sulci,
+                    'bbmin': self.bbmin.tolist(),
+                    'bbmax': self.bbmax.tolist(),
+                    'size': (
+                        self.bbmax - self.bbmin).tolist(),
+                    'crop_dir': self.crop_dir,
+                    'cropped_skeleton_dir': self.cropped_samples_dir,
+                    'cropping_type': self.cropping_type,
+                    'combine_type': self.combine_type,
+                    'no_mask': self.no_mask}
                 self.json.update(dict_to_add=dict_to_add)
 
                 if self.parallel:
                     log.info(
                         "PARALLEL MODE: subjects are in parallel")
-                    p_map(self.crop_one_file, list_subjects, num_cpus=define_njobs())
+                    p_map(
+                        self.crop_one_file,
+                        list_subjects,
+                        num_cpus=define_njobs())
                 else:
                     log.info(
                         "SERIAL MODE: subjects are scanned serially")
@@ -326,8 +334,9 @@ class CropGenerator:
                         self.crop_one_file(sub)
             else:
                 list_subjects = []
-                log.info("There is no subject or there is no subject to process"
-                         "in the source directory")
+                log.info(
+                    "There is no subject or there is no subject to process"
+                    "in the source directory")
 
             # Checks if there is expected number of generated files
             compare_number_aims_files_with_expected(self.cropped_samples_dir,
@@ -335,12 +344,13 @@ class CropGenerator:
 
             # Checks if number of generated files == number of src files
             crop_files, src_files = \
-                compare_number_aims_files_with_number_in_source(self.cropped_samples_dir,
-                                                                self.src_dir)
-            not_processed_files = get_not_processed_cropped_files(self.src_dir, self.cropped_samples_dir)
+                compare_number_aims_files_with_number_in_source(
+                    self.cropped_samples_dir,
+                    self.src_dir)
+            not_processed_files = get_not_processed_cropped_files(
+                self.src_dir, self.cropped_samples_dir)
             save_list_to_csv(not_processed_files,
                              f"{self.crop_dir}/not_processed_files.csv")
-
 
     def compute_bounding_box_or_mask(self, number_subjects):
         """Computes bounding box or mask
@@ -357,7 +367,8 @@ class CropGenerator:
                                     src_dir=self.bbox_dir)
             elif self.cropping_type == 'mask':
                 if self.combine_type:
-                    # /!\ SPECIFIC FOR THE CINGULATE REGION STUDY (2022, CHAVAS, GAUDIN & CHAVAS, GUILLON)
+                    # /!\ SPECIFIC FOR THE CINGULATE REGION STUDY
+                    # (2022, CHAVAS, GAUDIN & CHAVAS, GUILLON)
                     self.mask, self.bbmin, self.bbmax = \
                         compute_centered_mask(sulci_list=self.list_sulci,
                                               side=self.side,
@@ -369,22 +380,27 @@ class CropGenerator:
                                             mask_dir=self.mask_dir,
                                             dilation=self.dilation,
                                             threshold=self.threshold)
+                mask_filename = \
+                    f"{self.crop_dir}/{self.side}mask_{self.input_type}.nii.gz"
                 aims.write(
                     self.mask,
-                    f"{self.crop_dir}/{self.side}mask_{self.input_type}.nii.gz")
+                    mask_filename)
             elif self.cropping_type == 'mask_intersect':
                 self.mask, self.bbmin, self.bbmax = \
                     compute_intersection_mask(sulci_list=self.list_sulci,
-                                        side=self.side,
-                                        mask_dir=self.mask_dir,
-                                        dilation=self.dilation,
-                                        threshold=self.threshold)
+                                              side=self.side,
+                                              mask_dir=self.mask_dir,
+                                              dilation=self.dilation,
+                                              threshold=self.threshold)
+                mask_filename = \
+                    f"{self.crop_dir}/{self.side}mask_{self.input_type}.nii.gz"
                 aims.write(
                     self.mask,
-                    f"{self.crop_dir}/{self.side}mask_{self.input_type}.nii.gz")
+                    mask_filename)
             else:
                 raise ValueError(
-                    'cropping_type must be either \'bbox\' or \'mask\' or \'mask_intersect\'')
+                    "cropping_type must be either "
+                    "\'bbox\' or \'mask\' or \'mask_intersect\'")
 
     def compute(self, number_subjects=_ALL_SUBJECTS):
         """Main API to create numpy files
@@ -409,11 +425,12 @@ class CropGenerator:
                               tgt_dir=self.crop_dir,
                               file_basename=self.file_basename_npy,
                               parallel=self.parallel)
-            save_to_dataframe_format_from_list(cropped_dir=self.cropped_samples_dir,
-                           tgt_dir=self.crop_dir,
-                           file_basename=self.file_basename_pickle,
-                           list_sample_id=list_sample_id,
-                           list_sample_file=list_sample_file)
+            save_to_dataframe_format_from_list(
+                cropped_dir=self.cropped_samples_dir,
+                tgt_dir=self.crop_dir,
+                file_basename=self.file_basename_pickle,
+                list_sample_id=list_sample_id,
+                list_sample_file=list_sample_file)
 
 
 class SkeletonCropGenerator(CropGenerator):
@@ -434,14 +451,15 @@ class SkeletonCropGenerator(CropGenerator):
         """Inits with list of directories and list of sulci
         Args:
             src_dir: folder containing generated skeletons or labels
-            crop_dir: name of output dire/neurospin/dico/data/deep_folding/currentctory for crops with full path
+            crop_dir: name of output directory for crops with full path
             bbox_dir: directory containing bbox json files
                     (generated using compute_bounding_box.py)
             mask_dir: directory containing mask files
                     (generated using compute_mask.py)
             list_sulci: list of sulcus names
-            side: hemisphere side (either L for left, or R for right hemisphere)
-            cropping_type: cropping type, either mask, or bbox, or mask_intersect
+            side: hemisphere side (either L for left,
+                                   or R for right hemisphere)
+            cropping_type: cropping type, either mask, bbox, or mask_intersect
             combine_type: if True, combines sulci (in this case, order matters)
             parallel: if True, parallel computation
         """
@@ -456,7 +474,7 @@ class SkeletonCropGenerator(CropGenerator):
         # Directory where to store cropped skeleton files
         self.cropped_samples_dir = join(self.crop_dir, self.side + 'crops')
 
-        # Names of files in function of dictionary: keys -> 'subject' and 'side'
+        # Names of files in function of dict: keys -> 'subject' and 'side'
         # Generated skeleton from folding graphs
         self.src_file = join(
             self.src_dir,
@@ -504,8 +522,10 @@ class FoldLabelCropGenerator(CropGenerator):
             mask_dir: directory containing mask files
                     (generated using compute_mask.py)
             list_sulci: list of sulcus names
-            side: hemisphere side (either L for left, or R for right hemisphere)
-            cropping_type: cropping type, either mask, or bbox, or mask_intersect
+            side: hemisphere side (either L for left,
+                                   or R for right hemisphere)
+            cropping_type: cropping type, either mask, or bbox,
+                                   or mask_intersect
             combine_type: if True, combines sulci (in this case, order matters)
             parallel: if True, parallel computation
         """
@@ -520,7 +540,7 @@ class FoldLabelCropGenerator(CropGenerator):
         # Directory where to store cropped skeleton files
         self.cropped_samples_dir = join(self.crop_dir, self.side + 'labels')
 
-        # Names of files in function of dictionary: keys -> 'subject' and 'side'
+        # Names of files in function of dictionary: keys -> 'subject'+'side'
         # Generated skeleton from folding graphs
         self.src_file = join(
             self.src_dir,
@@ -568,8 +588,8 @@ class DistMapCropGenerator(CropGenerator):
             mask_dir: directory containing mask files
                     (generated using compute_mask.py)
             list_sulci: list of sulcus names
-            side: hemisphere side (either L for left, or R for right hemisphere)
-            cropping_type: cropping type, either mask, or bbox, or mask_intersect
+            side: hemisphere side (L for left, or R for right hemisphere)
+            cropping_type: cropping type, either mask, bbox, or mask_intersect
             combine_type: if True, combines sulci (in this case, order matters)
             parallel: if True, parallel computation
         """
@@ -584,7 +604,7 @@ class DistMapCropGenerator(CropGenerator):
         # Directory where to store cropped skeleton files
         self.cropped_samples_dir = join(self.crop_dir, self.side + 'distmaps')
 
-        # Names of files in function of dictionary: keys -> 'subject' and 'side'
+        # Names of files in function of dictionary: keys = 'subject' and 'side'
         # Generated skeleton from folding graphs
         self.src_file = join(
             self.src_dir,
@@ -694,10 +714,11 @@ def parse_args(argv):
     args = parser.parse_args(argv)
 
     # Writes command line argument to target dir for logging
-    setup_log(args,
-              log_dir=f"{args.output_dir}",
-              prog_name=basename(__file__),
-              suffix=f"right_{args.input_type}" if args.side == 'R' else 'left')
+    setup_log(
+        args,
+        log_dir=f"{args.output_dir}",
+        prog_name=basename(__file__),
+        suffix=f"right_{args.input_type}" if args.side == 'R' else 'left')
 
     params['src_dir'] = args.src_dir
     params['input_type'] = args.input_type
@@ -769,7 +790,7 @@ def generate_crops(
             no_mask=no_mask)
     else:
         raise ValueError(
-            "input_type: shall be either 'skeleton' or 'foldlabel' or 'distmap'")
+            "input_type: shall be either 'skeleton', 'foldlabel' or 'distmap'")
     crop.compute(number_subjects=number_subjects)
 
 

@@ -76,10 +76,11 @@ from deep_folding.brainvisa.utils.constants import \
     _ALL_SUBJECTS, _SRC_DIR_DEFAULT,\
     _FOLDLABEL_DIR_DEFAULT, _SIDE_DEFAULT, \
     _JUNCTION_DEFAULT, _PATH_TO_GRAPH_DEFAULT, \
-        _QC_PATH_DEFAULT
+    _QC_PATH_DEFAULT
 
 # Defines logger
 log = set_file_logger(__file__)
+
 
 def parse_args(argv):
     """Parses command-line arguments
@@ -184,7 +185,7 @@ class GraphConvert2FoldLabel:
 
     def get_foldlabel_filename(self, subject, graph_file):
         foldlabel_file = f"{self.foldlabel_dir}/" + \
-                        f"{self.side}foldlabel_{subject}"
+            f"{self.side}foldlabel_{subject}"
         if self.bids:
             session = re.search("ses-([^_/]+)", graph_file)
             acquisition = re.search("acq-([^_/]+)", graph_file)
@@ -212,7 +213,8 @@ class GraphConvert2FoldLabel:
 
         for graph_file in list_graph_file:
             foldlabel_file = self.get_foldlabel_filename(subject, graph_file)
-            generate_foldlabel_from_graph_file(graph_file, foldlabel_file, self.junction)
+            generate_foldlabel_from_graph_file(
+                graph_file, foldlabel_file, self.junction)
             if not self.bids:
                 break
 
@@ -222,18 +224,21 @@ class GraphConvert2FoldLabel:
         if not exists(self.src_dir):
             raise ValueError(f"{self.src_dir} does not exist!")
         filenames = glob.glob(f"{self.src_dir}/*")
-        list_subjects = [basename(filename) for filename in filenames 
-                    if is_it_a_subject(filename)]
+        list_subjects = [basename(filename) for filename in filenames
+                         if is_it_a_subject(filename)]
         list_subjects = select_good_qc(list_subjects, self.qc_path)
-        list_subjects = \
-            get_not_processed_subjects(list_subjects, self.foldlabel_dir, "foldlabel_")
+        list_subjects = get_not_processed_subjects(
+            list_subjects, self.foldlabel_dir, "foldlabel_")
         list_subjects = select_subjects_int(list_subjects, number_subjects)
 
         # Performs computation on all subjects either serially or in parallel
         if self.parallel:
             log.info(
                 "PARALLEL MODE: subjects are computed in parallel.")
-            p_map(self.generate_one_foldlabel, list_subjects, num_cpus=define_njobs())
+            p_map(
+                self.generate_one_foldlabel,
+                list_subjects,
+                num_cpus=define_njobs())
         else:
             log.info(
                 "SERIAL MODE: subjects are scanned serially, "
@@ -244,12 +249,13 @@ class GraphConvert2FoldLabel:
         # Checks if there is expected number of generated files
         compare_number_aims_files_with_expected(self.foldlabel_dir,
                                                 list_subjects)
-        list_subjects = [basename(filename) for filename in filenames 
-                            if not re.search('.minf$', filename)]
+        list_subjects = [basename(filename) for filename in filenames
+                         if not re.search('.minf$', filename)]
         not_processed_subjects = \
             get_not_processed_subjects(list_subjects, self.foldlabel_dir)
         save_list_to_csv(not_processed_subjects,
                          f"{self.foldlabel_dir}/../not_processed_subjects.csv")
+
 
 def generate_foldlabels(
         src_dir=_SRC_DIR_DEFAULT,
@@ -272,10 +278,11 @@ def generate_foldlabels(
         bids=bids,
         junction=junction,
         parallel=parallel,
-        qc_path = qc_path
+        qc_path=qc_path
     )
     # Actual generation of skeletons from graphs
     conversion.compute(number_subjects=number_subjects)
+
 
 @exception_handler
 def main(argv):

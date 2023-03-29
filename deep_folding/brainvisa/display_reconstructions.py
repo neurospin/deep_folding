@@ -26,7 +26,12 @@ def array_to_ana(ana_a, img, sub_id, phase, status, bucket, vs):
         vol_img = aims.Volume(img)
 
     a_vol_img = ana_a.toAObject(vol_img)
-    a_vol_img.setName(status+'_'+ str(sub_id)+'_'+str(phase)) # display name
+    a_vol_img.setName(
+        status +
+        '_' +
+        str(sub_id) +
+        '_' +
+        str(phase))  # display name
     a_vol_img.setChanged()
     a_vol_img.notifyObservers()
 
@@ -63,12 +68,14 @@ def main():
     vox_size = (vs, vs, vs)
 
     a = anatomist.Anatomist()
-    block = a.AWindowsBlock(a, 12)  # Parameter 6 corresponds to the number of columns displayed. Can be changed.
+    # Parameter 6 corresponds to the number of columns displayed. Can be
+    # changed.
+    block = a.AWindowsBlock(a, 12)
 
-    input_arr = np.load(root_dir+'input.npy') # Input
-    output_arr = np.load(root_dir+'output.npy') # Model's output
-    phase_arr = np.load(root_dir+'phase.npy') # Train or validation
-    id_arr = np.load(root_dir+'id.npy') # Subject id
+    input_arr = np.load(root_dir + 'input.npy')  # Input
+    output_arr = np.load(root_dir + 'output.npy')  # Model's output
+    phase_arr = np.load(root_dir + 'phase.npy')  # Train or validation
+    id_arr = np.load(root_dir + 'id.npy')  # Subject id
     view = 'Axial'
     for k in range(len(input_arr[0])):
         sub_id = id_arr[0][k]
@@ -78,25 +85,40 @@ def main():
         output = output_arr[0][k].astype(float)
         if bucket:
             view = '3D'
-            if len(np.unique(input))==2:
-                input = dtx.convert.volume_to_bucketMap_aims(input, voxel_size=vox_size)
-                output = dtx.convert.volume_to_bucketMap_aims(output, voxel_size=vox_size)
+            if len(np.unique(input)) == 2:
+                input = dtx.convert.volume_to_bucketMap_aims(
+                    input, voxel_size=vox_size)
+                output = dtx.convert.volume_to_bucketMap_aims(
+                    output, voxel_size=vox_size)
             else:
-                input[input>0.5] = 1
-                input[input<=0.5] = 0
-                output[output>0.5] = 1
-                output[output<=0.5] = 0
-                input = dtx.convert.volume_to_bucketMap_aims(input, voxel_size=vox_size)
-                output = dtx.convert.volume_to_bucketMap_aims(output, voxel_size=vox_size)
+                input[input > 0.5] = 1
+                input[input <= 0.5] = 0
+                output[output > 0.5] = 1
+                output[output <= 0.5] = 0
+                input = dtx.convert.volume_to_bucketMap_aims(
+                    input, voxel_size=vox_size)
+                output = dtx.convert.volume_to_bucketMap_aims(
+                    output, voxel_size=vox_size)
 
         for img, entry in [(input, 'input'), (output, 'output')]:
-            globals()['block%s%s%s' % (sub_id, phase, entry)] = a.createWindow(view, block=block)
+            globals()[
+                'block%s%s%s' %
+                (sub_id,
+                 phase,
+                 entry)] = a.createWindow(
+                view,
+                block=block)
 
-            globals()['img%s%s%s' % (sub_id, phase, entry)], globals()['a_img%s%s%s' % (sub_id, phase, entry)] = array_to_ana(a, img, sub_id, phase, status=entry, bucket=bucket, vs=vox_size)
+            globals()[
+                'img%s%s%s' %
+                (sub_id, phase, entry)], globals()[
+                'a_img%s%s%s' %
+                (sub_id, phase, entry)] = array_to_ana(
+                a, img, sub_id, phase, status=entry, bucket=bucket, vs=vox_size)
 
             globals()['block%s%s%s' % (sub_id, phase, entry)].addObjects(
-                                        globals()['a_img%s%s%s' %
-                                                    (sub_id, phase, entry)])
+                globals()['a_img%s%s%s' %
+                          (sub_id, phase, entry)])
 
 
 if __name__ == '__main__':

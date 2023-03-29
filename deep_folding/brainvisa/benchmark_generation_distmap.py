@@ -100,11 +100,11 @@ class Benchmark():
         self.voxel_size_out = (1, 1, 1, 1)
         if mask:
             # Get mask and corresponding bounding_box
-            self.mask, self.bbmin, self.bbmax = compute_simple_mask(self.sulci_list, side,
-                                                             mask_dir=mask_dir)
+            self.mask, self.bbmin, self.bbmax = compute_simple_mask(
+                self.sulci_list, side, mask_dir=mask_dir)
         else:
-            self.bbmin, self.bbmax = compute_max_box(self.sulci_list, side,
-                                talairach_box=True, src_dir=bbox_dir)
+            self.bbmin, self.bbmax = compute_max_box(
+                self.sulci_list, side, talairach_box=True, src_dir=bbox_dir)
 
         print(self.mask, self.bbmin, self.bbmax)
 
@@ -118,15 +118,16 @@ class Benchmark():
         """
 
         self.graph_file = f"{self.src_dir}/{sub}/" +\
-                     f"{self.path_to_graph}/{self.side}{sub}_deepcnn_auto.arg"
+            f"{self.path_to_graph}/{self.side}{sub}_deepcnn_auto.arg"
 
         if os.path.isdir(os.path.join(self.src_dir, str(sub) + '/')) \
-            and os.path.isfile(self.graph_file):
+                and os.path.isfile(self.graph_file):
             self.surfaces = dict()
 
             self.graph = aims.read(self.graph_file)
 
-            g_to_icbm_template = aims.GraphManip.getICBM2009cTemplateTransform(self.graph)
+            g_to_icbm_template = aims.GraphManip.getICBM2009cTemplateTransform(
+                self.graph)
             voxel_size_in = self.graph['voxel_size'][:3]
 
             for v in self.graph.vertices():
@@ -135,7 +136,8 @@ class Benchmark():
                     # Creation of a volume in ICBM space where to write voxels
                     # of the simple surface
                     hdr = aims.StandardReferentials.icbm2009cTemplateHeader()
-                    resampling_ratio = np.array(hdr['voxel_size']) / self.voxel_size_out
+                    resampling_ratio = np.array(
+                        hdr['voxel_size']) / self.voxel_size_out
                     orig_dim = hdr['volume_dimension']
                     new_dim = list((resampling_ratio * orig_dim).astype(int))
 
@@ -143,19 +145,23 @@ class Benchmark():
                     vol.copyHeaderFrom(hdr)
                     vol.header()['voxel_size'] = self.voxel_size_out
                     arr = np.asarray(vol)
-                    # Transformation of SS voxels to ICBM space with voxel_size_out
+                    # Transformation of SS voxels to ICBM space with
+                    # voxel_size_out
                     voxels_icbm = np.asarray(
                         [g_to_icbm_template.transform(np.array(voxel) * voxel_size_in)
                          for voxel in bck_map[0].keys()])
-                    voxels = np.round(np.array(voxels_icbm) / self.voxel_size_out[:3]).astype(int)
+                    voxels = np.round(np.array(voxels_icbm) /
+                                      self.voxel_size_out[:3]).astype(int)
                     # Writing of the voxels in the created volume
-                    for i,j,k in voxels:
-                        arr[i,j,k,0] = 1
+                    for i, j, k in voxels:
+                        arr[i, j, k, 0] = 1
                     # Suppression of all voxels out of the mask
-                    arr[np.array(self.mask)<1]=0
+                    arr[np.array(self.mask) < 1] = 0
                     # Selection of the ss if a mininum of voxels remains
-                    if np.count_nonzero(arr>0)>self.ss_size and np.count_nonzero(arr>0)<500:
-                        print(v['label'],bck_map[0].size())
+                    if np.count_nonzero(
+                            arr > 0) > self.ss_size and np.count_nonzero(
+                            arr > 0) < 500:
+                        print(v['label'], bck_map[0].size())
                         print(np.count_nonzero(arr == 1))
                         self.surfaces[len(self.surfaces)] = v
 
@@ -168,28 +174,30 @@ class Benchmark():
             sub: int giving the subject
         """
         # Suppression of one random simple surface (satisfying both criteria)
-        random.seed(56) #benchmark 1 : random seed = 42
-        surface = random.randint(0, len(self.surfaces)-1)
+        random.seed(56)  # benchmark 1 : random seed = 42
+        surface = random.randint(0, len(self.surfaces) - 1)
 
         bck_map = self.surfaces[surface]['aims_ss']
         for voxel in bck_map[0].keys():
             self.skel.setValue(0, voxel[0], voxel[1], voxel[2])
             if self.inpainting:
-                 self.foldlabel.setValue(0, voxel[0], voxel[1], voxel[2])
+                self.foldlabel.setValue(0, voxel[0], voxel[1], voxel[2])
 
         bck_map_bottom = self.surfaces[surface]['aims_bottom']
         for voxel in bck_map_bottom[0].keys():
             self.skel.setValue(0, voxel[0], voxel[1], voxel[2])
             if self.inpainting:
-                 self.foldlabel.setValue(0, voxel[0], voxel[1], voxel[2])
+                self.foldlabel.setValue(0, voxel[0], voxel[1], voxel[2])
 
         for k in range(len(self.surfaces[surface].edges())):
             if 'aims_junction' in self.surfaces[surface].edges()[k]:
-                bck_map_junction = self.surfaces[surface].edges()[k]['aims_junction']
+                bck_map_junction = self.surfaces[surface].edges()[
+                    k]['aims_junction']
                 for voxel in bck_map_junction[0].keys():
                     self.skel.setValue(0, voxel[0], voxel[1], voxel[2])
                     if self.inpainting:
-                         self.foldlabel.setValue(0, voxel[0], voxel[1], voxel[2])
+                        self.foldlabel.setValue(
+                            0, voxel[0], voxel[1], voxel[2])
 
         save_subject = sub
         return save_subject
@@ -215,11 +223,19 @@ class Benchmark():
         Args:
             sub: int giving the subject
         """
-        fileout = os.path.join(self.saving_dir, 'modified_skeleton_' + str(sub) + '.nii.gz')
+        fileout = os.path.join(
+            self.saving_dir,
+            'modified_skeleton_' +
+            str(sub) +
+            '.nii.gz')
         print('writing altered skeleton to', fileout)
         aims.write(self.skel, fileout)
         if self.inpainting:
-            fileout = os.path.join(self.saving_dir, 'modified_foldlabel_' + str(sub) + '.nii.gz')
+            fileout = os.path.join(
+                self.saving_dir,
+                'modified_foldlabel_' +
+                str(sub) +
+                '.nii.gz')
             print('writing altered foldlabel to', fileout)
             aims.write(self.foldlabel, fileout)
 
@@ -241,7 +257,10 @@ class Benchmark():
         df_train.to_csv(os.path.join(self.saving_dir, 'train.csv'))
 
         df_abnor_test = pd.DataFrame(abnormality_test)
-        df_abnor_test.to_csv(os.path.join(self.saving_dir, 'abnormality_test.csv'))
+        df_abnor_test.to_csv(
+            os.path.join(
+                self.saving_dir,
+                'abnormality_test.csv'))
 
         df_givers = pd.DataFrame(givers)
         df_givers.to_csv(os.path.join(self.saving_dir, 'givers.csv'))
@@ -256,7 +275,8 @@ def get_sub_list(subjects_list):
         subjects_list = list(subjects_list['subjects'])
     else:
         # Selection of right handed subjects only
-        right_handed = pd.read_csv('/neurospin/dico/lguillon/hcp_info/right_handed.csv')
+        right_handed = pd.read_csv(
+            '/neurospin/dico/lguillon/hcp_info/right_handed.csv')
         subjects_list = list(right_handed['subjects'].astype(str))
         # Check whether subjects' files exist
         hcp_sub = os.listdir(_DEFAULT_DATA_DIR)
@@ -308,6 +328,11 @@ def generate(b_num, side, ss_size, sulci_list, bench_size=150,
 ######################################################################
 
 if __name__ == '__main__':
-    generate(333, 'R', 200, sulci_list=['S.C.'],
-            subjects_list='/neurospin/dico/lguillon/distmap/data/test_list.csv',
-            bench_size=3, inpainting=False)
+    generate(
+        333,
+        'R',
+        200,
+        sulci_list=['S.C.'],
+        subjects_list='/neurospin/dico/lguillon/distmap/data/test_list.csv',
+        bench_size=3,
+        inpainting=False)

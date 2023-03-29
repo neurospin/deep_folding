@@ -207,12 +207,12 @@ class GraphGenerateTransform:
         filenames = glob.glob(f"{self.src_dir}/*[!.minf]")
         log.info(f"filenames[:5] = {filenames[:5]}")
 
-        list_subjects = [basename(filename) for filename in filenames 
+        list_subjects = [basename(filename) for filename in filenames
                          if is_it_a_subject(filename)]
         list_subjects = \
             get_not_processed_subjects_transform(list_subjects,
-                                       self.transform_dir,
-                                       prefix="ICBM2009c_")
+                                                 self.transform_dir,
+                                                 prefix="ICBM2009c_")
         list_subjects = select_subjects_int(list_subjects, number_subjects)
 
         log.info(f"Expected number of subjects = {len(list_subjects)}")
@@ -235,9 +235,10 @@ class GraphGenerateTransform:
 
         # Checks if there is expected number of generated files
         if self.bids:
-            list_graphs = [g for g in glob.glob(f"{self.src_dir}/*/{self.path_to_graph}")
-                           if not re.search('.minf$', g)]
-            compare_number_aims_files_with_expected(self.transform_dir, list_graphs)
+            list_graphs = [g for g in glob.glob(
+                f"{self.src_dir}/*/{self.path_to_graph}") if not re.search('.minf$', g)]
+            compare_number_aims_files_with_expected(
+                self.transform_dir, list_graphs)
         else:
             compare_number_aims_files_with_expected(self.transform_dir,
                                                     list_subjects)

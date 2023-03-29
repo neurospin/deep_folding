@@ -125,7 +125,8 @@ def resample_one_skeleton(input_image,
     # for the bottom value (30) and the simple surface value (60)
     # with respect to the natural order
     # We don't give background, which is the interior 0
-    values = np.array([11, 60, 30, 35, 10, 20, 40, 50, 70, 80, 90, 100, 110, 120])
+    values = np.array([11, 60, 30, 35, 10, 20, 40,
+                      50, 70, 80, 90, 100, 110, 120])
 
     # Normalization and resampling of skeleton images
     resampled = resample(input_image=input_image,
@@ -190,7 +191,10 @@ def resample_one_distmap(input_image,
 
     # definition of translation (half added voxels -> origin is in top left
     # corner)
-    translation = (100 * in_voxel_size[0], 100 * in_voxel_size[1], 100 * in_voxel_size[2])
+    translation = (
+        100 * in_voxel_size[0],
+        100 * in_voxel_size[1],
+        100 * in_voxel_size[2])
     distmap_to_padded_distmap = aims.AffineTransformation3d()
     distmap_to_padded_distmap.setTranslation(translation)
 
@@ -206,11 +210,11 @@ def resample_one_distmap(input_image,
 
     # Normalization and resampling of skeleton images
     cmd_normalize = 'AimsApplyTransform' + \
-                ' -i ' + input_image + \
-                ' -o ' + resampled_dir + \
-                ' -m ' + transfo_file + \
-                ' -r ' + ref_file + \
-                ' -t linear'
+        ' -i ' + input_image + \
+        ' -o ' + resampled_dir + \
+        ' -m ' + transfo_file + \
+        ' -r ' + ref_file + \
+        ' -t linear'
     print(cmd_normalize)
     os.system(cmd_normalize)
 
@@ -295,13 +299,9 @@ class FileResampler:
                 out_voxel_size=self.out_voxel_size,
                 transform_file=transform_file,
                 resampled_file=resampled_file)
-            #aims.write(resampled, resampled_file)
+            # aims.write(resampled, resampled_file)
         else:
             raise FileNotFoundError(f"{src_file} not found")
-
-
-
-
 
     def compute(self, number_subjects=_ALL_SUBJECTS):
         """Loops over nii files
@@ -327,9 +327,8 @@ class FileResampler:
                 create_folder(self.resampled_dir)
 
                 # Generates list of subjects not treated yet
-                not_processed_files = get_not_processed_files(self.src_dir,
-                                                              self.resampled_dir,
-                                                              self.src_filename)
+                not_processed_files = get_not_processed_files(
+                    self.src_dir, self.resampled_dir, self.src_filename)
 
                 list_all_subjects = \
                     [re.search(self.expr, os.path.basename(dI))[1]
@@ -361,8 +360,9 @@ class FileResampler:
                         self.resample_one_subject_wrapper(sub)
             else:
                 list_subjects = []
-                log.info("There is no subject or there is no subject to process "
-                         "in the source directory")
+                log.info(
+                    "There is no subject or there is no subject to process "
+                    "in the source directory")
 
             # Checks if there is expected number of generated files
             compare_number_aims_files_with_expected(self.resampled_dir,
@@ -375,8 +375,9 @@ class FileResampler:
             not_processed_files = get_not_processed_files(self.src_dir,
                                                           self.resampled_dir,
                                                           self.src_filename)
-            save_list_to_csv(not_processed_files, 
-                             f"{self.resampled_dir}/../not_processed_files.csv")
+            save_list_to_csv(
+                not_processed_files,
+                f"{self.resampled_dir}/../not_processed_files.csv")
 
 
 class SkeletonResampler(FileResampler):
@@ -406,7 +407,7 @@ class SkeletonResampler(FileResampler):
 
         # Names of files in function of dictionary: keys -> 'subject' and 'side'
         # Src directory contains either 'R' or 'L' a subdirectory
-        #self.src_file = join(
+        # self.src_file = join(
         #    self.src_dir,
         #    '%(side)sskeleton_generated_%(subject)s.nii.gz')
         self.src_file = join(self.src_dir,
@@ -554,7 +555,7 @@ def parse_args(argv):
         description='Generates resampled files (skeletons, foldlabels,...)')
     parser.add_argument(
         "-s", "--src_dir", type=str, default=_SKELETON_DIR_DEFAULT,
-        help='Source directory where inputs files (skeletons, labels or ' \
+        help='Source directory where inputs files (skeletons, labels or '
              'distmaps) lie. '
              'Default is : ' + _SKELETON_DIR_DEFAULT)
     parser.add_argument(
@@ -562,9 +563,13 @@ def parse_args(argv):
         help='Input type: \'skeleton\', \'foldlabel\', \'distmap\' '
              'Default is : ' + _INPUT_TYPE_DEFAULT)
     parser.add_argument(
-        "-o", "--output_dir", type=str, default=_RESAMPLED_SKELETON_DIR_DEFAULT,
+        "-o",
+        "--output_dir",
+        type=str,
+        default=_RESAMPLED_SKELETON_DIR_DEFAULT,
         help='Target directory where to store the resampled files. '
-             'Default is : ' + _RESAMPLED_SKELETON_DIR_DEFAULT)
+        'Default is : ' +
+        _RESAMPLED_SKELETON_DIR_DEFAULT)
     parser.add_argument(
         "-t", "--transform_dir", type=str, default=_TRANSFORM_DIR_DEFAULT,
         help='Transform directory containing transform files to ICBM2009c. '
@@ -589,10 +594,14 @@ def parse_args(argv):
              'Format is : "<SIDE><src_filename><SUBJECT>.nii.gz" '
              'Default is : ' + _SKELETON_FILENAME)
     parser.add_argument(
-        "-e", "--output_filename", type=str, default=_RESAMPLED_SKELETON_FILENAME,
+        "-e",
+        "--output_filename",
+        type=str,
+        default=_RESAMPLED_SKELETON_FILENAME,
         help='Filename of output files. '
-             'Format is : "<SIDE><output_filename><SUBJECT>.nii.gz" '
-             'Default is : ' + _RESAMPLED_SKELETON_FILENAME)
+        'Format is : "<SIDE><output_filename><SUBJECT>.nii.gz" '
+        'Default is : ' +
+        _RESAMPLED_SKELETON_FILENAME)
     parser.add_argument(
         '-v', '--verbose', action='count', default=0,
         help='Verbose mode: '
@@ -671,7 +680,7 @@ def resample_files(
             output_filename=output_filename)
     else:
         raise ValueError(
-            "input_type: shall be either 'skeleton', 'foldlabel' or "\
+            "input_type: shall be either 'skeleton', 'foldlabel' or "
             "distmap")
 
     resampler.compute(number_subjects=number_subjects)

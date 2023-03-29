@@ -252,8 +252,8 @@ class BenchmarkPipe:
                     self.ymax - self.ymin,
                     self.zmax - self.zmin]
                 assert adapted_box == box_size_asym
-                #self.xmin, self.ymin, self.zmin = '52', '50', '12'
-                #self.xmax, self.ymax, self.zmax = '74', '86', '47'
+                # self.xmin, self.ymin, self.zmin = '52', '50', '12'
+                # self.xmax, self.ymax, self.zmax = '74', '86', '47'
 
             cmd_bounding_box = ' -x ' + str(self.xmin) + ' -y ' + str(self.ymin) + ' -z ' + str(
                 self.zmin) + ' -X ' + str(self.xmax) + ' -Y ' + str(self.ymax) + ' -Z ' + str(self.zmax)

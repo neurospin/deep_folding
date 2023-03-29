@@ -178,7 +178,7 @@ def get_bounding_boxes(subjects, sulcus):
             raise RuntimeError(f"No graph file! "
                                f"{sub['dir']} doesn't contain {graph_file}")
         sulci_pattern = list_graph_file[0]
-        
+
         bbox_min, bbox_max = \
             get_one_bounding_box(sulci_pattern % sub, sulcus)
         if bbox_min is not None:
@@ -211,7 +211,7 @@ def compute_box_voxel(bbmin_mni152, bbmax_mni152, voxel_size_out):
     Returns:
         tuple (bbmin_vox, bbmax_vox) with
             bbmin_vox: numpy array with the coordinates of the upper right corner
-                of the box (voxels in MNI space); 
+                of the box (voxels in MNI space);
             bbmax_vox: numpy array with the coordinates of the lower left corner
                     of the box (voxels in MNI space)
     """

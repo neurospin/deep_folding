@@ -55,8 +55,10 @@ from os.path import basename
 
 from deep_folding.brainvisa import exception_handler
 from deep_folding.brainvisa.utils.folder import create_folder
-from deep_folding.brainvisa.utils.subjects import get_number_subjects, is_it_a_subject
-from deep_folding.brainvisa.utils.subjects import select_subjects_int, select_good_qc
+from deep_folding.brainvisa.utils.subjects import \
+    get_number_subjects, is_it_a_subject
+from deep_folding.brainvisa.utils.subjects import \
+    select_subjects_int, select_good_qc
 from deep_folding.brainvisa.utils.logs import setup_log
 from deep_folding.brainvisa.utils.parallel import define_njobs
 from deep_folding.brainvisa.utils.skeleton import \
@@ -77,6 +79,7 @@ from deep_folding.brainvisa.utils.constants import \
 
 # Defines logger
 log = set_file_logger(__file__)
+
 
 def parse_args(argv):
     """Parses command-line arguments
@@ -189,7 +192,7 @@ class GraphConvert2Skeleton:
                 skeleton_file += f"_{run[0]}"
         skeleton_file += ".nii.gz"
         return skeleton_file
-        
+
     def generate_one_skeleton(self, subject: str):
         """Generates and writes skeleton for one subject.
         """
@@ -202,7 +205,9 @@ class GraphConvert2Skeleton:
                                f"{graph_path} does not exist")
         for graph_file in list_graph_file:
             skeleton_file = self.get_skeleton_filename(subject, graph_file)
-            generate_skeleton_from_graph_file(graph_file, skeleton_file, self.junction)
+            generate_skeleton_from_graph_file(graph_file,
+                                              skeleton_file,
+                                              self.junction)
             if not self.bids:
                 break
 
@@ -212,11 +217,11 @@ class GraphConvert2Skeleton:
         # Gets list of subjects
         filenames = glob.glob(f"{self.src_dir}/*")
         list_subjects = [basename(filename) for filename in filenames
-                    if is_it_a_subject(filename)]
+                         if is_it_a_subject(filename)]
         list_subjects = select_good_qc(list_subjects, self.qc_path)
         list_subjects = \
             get_not_processed_subjects(list_subjects, self.skeleton_dir)
- 
+
         list_subjects = select_subjects_int(list_subjects, number_subjects)
 
         log.info(f"Expected number of subjects = {len(list_subjects)}")
@@ -228,8 +233,8 @@ class GraphConvert2Skeleton:
             log.info(
                 "PARALLEL MODE: subjects are computed in parallel.")
             p_map(self.generate_one_skeleton,
-                 list_subjects,
-                 num_cpus=define_njobs())
+                  list_subjects,
+                  num_cpus=define_njobs())
         else:
             log.info(
                 "SERIAL MODE: subjects are scanned serially, "
@@ -239,11 +244,14 @@ class GraphConvert2Skeleton:
 
         # Checks if there is expected number of generated files
         if self.bids:
-            list_graphs = [g for g in glob.glob(f"{self.src_dir}/*/{self.path_to_graph}")
-                           if not re.search('.minf$', g)]
-            compare_number_aims_files_with_expected(self.skeleton_dir, list_graphs)
+            list_graphs = \
+                [g for g in glob.glob(f"{self.src_dir}/*/{self.path_to_graph}")
+                 if not re.search('.minf$', g)]
+            compare_number_aims_files_with_expected(self.skeleton_dir,
+                                                    list_graphs)
         else:
-            compare_number_aims_files_with_expected(self.skeleton_dir, list_subjects)
+            compare_number_aims_files_with_expected(self.skeleton_dir,
+                                                    list_subjects)
 
 
 def generate_skeletons(
