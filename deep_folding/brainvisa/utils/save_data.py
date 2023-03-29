@@ -110,13 +110,8 @@ def compare_one_array(cropped_dir, list_basename, row):
     return arr_ref
 
 
-def quality_checks(csv_file_path, npy_array_file_path, cropped_dir, parallel=False):
-    """Checks that the numpy arrays are equal to subject nifti files.
-
-    This is to check that the subjects list in csv file
-    match the order set in numpy arrays"""
-    arr = np.load(npy_array_file_path, mmap_mode='r')
-    subjects = pd.read_csv(csv_file_path, dtype=str)
+def compare_array_aims_files(subjects, arr, cropped_dir, parallel=True):
+    """Compares numpy arrays to subject nifti files"""
     log.info(f"subjects.head() = {subjects.head()}")
     if parallel:
         log.info("Quality check is done in PARALLEL")
@@ -142,6 +137,16 @@ def quality_checks(csv_file_path, npy_array_file_path, cropped_dir, parallel=Fal
             if not np.array_equal(arr_ref, arr_from_array):
                 raise ValueError(f"For subject = {sub} and index = {index}\n"
                                 "arrays do not match")
+    
+
+def quality_checks(csv_file_path, npy_array_file_path, cropped_dir, parallel=False):
+    """Checks that the numpy arrays are equal to subject nifti files.
+
+    This is to check that the subjects list in csv file
+    match the order set in numpy arrays"""
+    arr = np.load(npy_array_file_path, mmap_mode='r')
+    subjects = pd.read_csv(csv_file_path, dtype=str)
+    compare_array_aims_files(subjects, arr, cropped_dir, parallel)
 
 
 def get_one_numpy_array(filename, cropped_dir):
