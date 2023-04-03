@@ -55,7 +55,8 @@ from os.path import basename
 
 from deep_folding.brainvisa import exception_handler
 from deep_folding.brainvisa.utils.folder import create_folder
-from deep_folding.brainvisa.utils.subjects import get_number_subjects, is_it_a_subject
+from deep_folding.brainvisa.utils.subjects import get_number_subjects,\
+                                                  is_it_a_subject
 from deep_folding.brainvisa.utils.subjects import select_subjects_int
 from deep_folding.brainvisa.utils.logs import setup_log
 from deep_folding.brainvisa.utils.parallel import define_njobs
@@ -235,8 +236,9 @@ class GraphGenerateTransform:
 
         # Checks if there is expected number of generated files
         if self.bids:
-            list_graphs = [g for g in glob.glob(
-                f"{self.src_dir}/*/{self.path_to_graph}") if not re.search('.minf$', g)]
+            list_graphs = [g for g in
+                           glob.glob(f"{self.src_dir}/*/{self.path_to_graph}")
+                           if not re.search('.minf$', g)]
             compare_number_aims_files_with_expected(
                 self.transform_dir, list_graphs)
         else:

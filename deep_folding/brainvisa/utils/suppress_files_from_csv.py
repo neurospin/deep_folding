@@ -59,6 +59,7 @@ def parse_args(argv):
 
     return args
 
+
 def suppress(csv_file_name):
     """Suppress files listed in csv
     """

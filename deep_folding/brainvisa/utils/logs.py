@@ -207,7 +207,7 @@ def setup_log(args: Namespace,
     """Setups log for command line programs"""
 
     # Sets level of root logger
-    set_root_logger_level(args.verbose+1)
+    set_root_logger_level(args.verbose + 1)
     # Sets handler for deep_folding logger
     set_file_log_handler(file_dir=log_dir,
                          suffix=suffix)

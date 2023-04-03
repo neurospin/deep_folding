@@ -86,7 +86,9 @@ def remove_ventricle_from_one_skeleton(skeleton_file, labelled_graph_file):
             label = vertex["label"]
             if label.startswith("ventricle"):
                 for bucket_name, value in {
-                        'aims_other': 100, 'aims_ss': 60, 'aims_bottom': 30}.items():
+                        'aims_other': 100,
+                        'aims_ss': 60,
+                        'aims_bottom': 30}.items():
                     bucket = vertex.get(bucket_name)
                     if bucket is not None:
                         voxels = np.array(bucket[0].keys())
@@ -111,7 +113,8 @@ def parse_args(argv):
         description="Generate skeleton files without ventricle.")
     parser.add_argument(
         "-s", "--skeleton_dir", type=str,
-        help="Directory where are the skeletons you want ventricle to be removed from")
+        help="Directory where are the skeletons you want ventricle "
+             "to be removed from")
     parser.add_argument(
         "-o", "--output_dir", type=str, default=_OUTPUT_DIR_DEFAULT,
         help="Output directory where to put skeleton files without ventricle. "
@@ -119,7 +122,8 @@ def parse_args(argv):
     parser.add_argument(
         "-m", "--morpho_dir", type=str, default=_SRC_DIR_DEFAULT,
         help="Directory where the graph data lies. It has to point directly to"
-             "the morphologist directory containing the subjects as subdirectories. "
+             "the morphologist directory containing the subjects "
+             "as subdirectories. "
              f"Default is : {_SRC_DIR_DEFAULT}")
     parser.add_argument(
         "-p",
@@ -127,7 +131,8 @@ def parse_args(argv):
         type=str,
         default=_PATH_TO_GRAPH_DEFAULT,
         help="Relative path to graph. "
-        "In BIDS format, the session_acquisition_run directory have to be replaced by *. "
+        "In BIDS format, the session_acquisition_run directory "
+        "have to be replaced by *. "
         f"Default is :  {_PATH_TO_GRAPH_DEFAULT}")
     parser.add_argument(
         "-f",

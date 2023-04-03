@@ -46,6 +46,7 @@ from deep_folding.config.logs import set_file_logger
 # Defines logger
 log = set_file_logger(__file__)
 
+
 def complete_sulci_name(sulci_list, side):
     """Function gathering sulci and side to obtain full name of sulci
 

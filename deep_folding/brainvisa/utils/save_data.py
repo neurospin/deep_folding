@@ -37,7 +37,11 @@ def is_file_nii(filename):
     return is_file_nii
 
 
-def save_to_pickle(cropped_dir, tgt_dir=None, file_basename=None, parallel=False):
+def save_to_pickle(
+        cropped_dir,
+        tgt_dir=None,
+        file_basename=None,
+        parallel=False):
     """
     Creates a dataframe of data with a column for each subject and associated
     np.array. Saved these this dataframe to pkl format on the target
@@ -69,8 +73,12 @@ def save_to_pickle(cropped_dir, tgt_dir=None, file_basename=None, parallel=False
     dataframe.to_pickle(file_pickle)
 
 
-def save_to_dataframe_format_from_list(cropped_dir, tgt_dir=None, file_basename=None,
-                             list_sample_id=None, list_sample_file=None):
+def save_to_dataframe_format_from_list(
+        cropped_dir,
+        tgt_dir=None,
+        file_basename=None,
+        list_sample_id=None,
+        list_sample_file=None):
     """
     Creates a dataframe of data with a column for each subject and associated
     np.array. Saved these this dataframe to pkl format on the target
@@ -87,8 +95,8 @@ def save_to_dataframe_format_from_list(cropped_dir, tgt_dir=None, file_basename=
     log.info("Now generating pickle file...")
     log.debug(f"cropped_dir = {cropped_dir}")
 
-    data_dict = {list_sample_id[i]: [list_sample_file[i]] \
-                   for i in range(len(list_sample_id))}
+    data_dict = {list_sample_id[i]: [list_sample_file[i]]
+                 for i in range(len(list_sample_id))}
     dataframe = pd.DataFrame.from_dict(data_dict)
 
     file_pickle_basename = file_basename + '.pkl'
@@ -99,7 +107,7 @@ def save_to_dataframe_format_from_list(cropped_dir, tgt_dir=None, file_basename=
 def compare_one_array(cropped_dir, list_basename, row):
     index = row[0]
     sub = row[1]
-    index_sub = [idx for idx,x in enumerate(list_basename) if str(sub) in x]
+    index_sub = [idx for idx, x in enumerate(list_basename) if str(sub) in x]
     if len(index_sub):
         index_sub = index_sub[0]
     else:
@@ -123,9 +131,11 @@ def compare_array_aims_files(subjects, arr, cropped_dir, parallel=True):
         log.info(f"enum subjects[:3] = {enum[:3]}")
         list_arr = p_map(partial_func, enum)
         for index, arr_ref in enumerate(list_arr):
-            if not np.array_equal(arr_ref, arr[index,...]):
-                raise ValueError(f"For subject = {list_basename[index]} and index = {index}\n"
-                                "arrays do not match")
+            if not np.array_equal(arr_ref, arr[index, ...]):
+                raise ValueError(
+                    f"For subject = {list_basename[index]} "
+                    f"and index = {index}\n"
+                    "arrays do not match")
     else:
         log.info("Quality check is done SERIALLY")
         for index, row in tqdm(subjects.iterrows()):
@@ -133,13 +143,17 @@ def compare_array_aims_files(subjects, arr, cropped_dir, parallel=True):
             subject_file = glob.glob(f"{cropped_dir}/{sub}*.nii.gz")[0]
             vol = aims.read(subject_file)
             arr_ref = np.asarray(vol)
-            arr_from_array = arr[index,...]
+            arr_from_array = arr[index, ...]
             if not np.array_equal(arr_ref, arr_from_array):
                 raise ValueError(f"For subject = {sub} and index = {index}\n"
-                                "arrays do not match")
-    
+                                 "arrays do not match")
 
-def quality_checks(csv_file_path, npy_array_file_path, cropped_dir, parallel=False):
+
+def quality_checks(
+        csv_file_path,
+        npy_array_file_path,
+        cropped_dir,
+        parallel=False):
     """Checks that the numpy arrays are equal to subject nifti files.
 
     This is to check that the subjects list in csv file
@@ -156,18 +170,22 @@ def get_one_numpy_array(filename, cropped_dir):
         sample = np.asarray(aimsvol)
         subject = re.search('(.*)_cropped_(.*)', file_nii).group(1)
         id = os.path.basename(subject)
-        if type(sample) is np.ndarray:
+        if isinstance(sample, np.ndarray):
             return id, sample
         else:
-            raise ValueError(\
+            raise ValueError(
                 f"For file={file_nii} and id={id}, "
                 "no numpy array has been generated. ")
     else:
-        raise ValueError(\
-                f"file={file_nii} does not look like a nifti file")
+        raise ValueError(
+            f"file={file_nii} does not look like a nifti file")
 
 
-def save_to_numpy(cropped_dir, tgt_dir=None, file_basename=None, parallel = False):
+def save_to_numpy(
+        cropped_dir,
+        tgt_dir=None,
+        file_basename=None,
+        parallel=False):
     """
     Creates a numpy array for each subject.
 
@@ -188,12 +206,12 @@ def save_to_numpy(cropped_dir, tgt_dir=None, file_basename=None, parallel = Fals
     log.debug(f"cropped_dir = {cropped_dir}")
     log.info("STEP 1. Now reading cropped dir...")
     listdir = os.listdir(cropped_dir)
-    listdir = [filename for filename in listdir \
-        if is_file_nii(os.path.join(cropped_dir, filename))]
+    listdir = [filename for filename in listdir
+               if is_file_nii(os.path.join(cropped_dir, filename))]
     if parallel:
         log.info("Reading cropped dir is done in PARALLEL")
         partial_func = partial(get_one_numpy_array, cropped_dir=cropped_dir)
-        list_result =  p_map(partial_func, sorted(listdir))
+        list_result = p_map(partial_func, sorted(listdir))
         list_sample_id, list_sample_file =\
             [x for x, y in list_result], [y for x, y in list_result]
     else:
@@ -210,20 +228,20 @@ def save_to_numpy(cropped_dir, tgt_dir=None, file_basename=None, parallel = Fals
     log.info("STEP 2. Now writing subject name file...")
     # Writes subject ID csv file
     subject_df = pd.DataFrame(list_sample_id, columns=["Subject"])
-    subject_df.to_csv(os.path.join(tgt_dir, file_basename+'_subject.csv'),
+    subject_df.to_csv(os.path.join(tgt_dir, file_basename + '_subject.csv'),
                       index=False)
     np.save(os.path.join(tgt_dir, 'sub_id.npy'), list_sample_id)
 
     log.info("STEP 3. Now saving to numpy array...")
     # Writes volumes as numpy arrays
     list_sample_file = np.array(list_sample_file)
-    np.save(os.path.join(tgt_dir, file_basename+'.npy'), list_sample_file)
+    np.save(os.path.join(tgt_dir, file_basename + '.npy'), list_sample_file)
 
     # Quality_checks
     log.info("STEP 4. Now performing checks on numpy arrays...")
     quality_checks(
-        os.path.join(tgt_dir, file_basename+'_subject.csv'),
-        os.path.join(tgt_dir, file_basename+'.npy'),
+        os.path.join(tgt_dir, file_basename + '_subject.csv'),
+        os.path.join(tgt_dir, file_basename + '.npy'),
         cropped_dir,
         parallel=parallel)
 

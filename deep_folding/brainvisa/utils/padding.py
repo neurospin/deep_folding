@@ -35,7 +35,7 @@
 
 """Padds a numpy array
 
-Taken from: 
+Taken from:
 https://github.com/neurospin/pynet/blob/master/pynet/preprocessing/spatial.py
 """
 

@@ -45,14 +45,15 @@ from deep_folding.config.logs import set_file_logger
 # Defines logger
 log = set_file_logger(__file__)
 
+
 def get_number_subjects(nb_subjects: str) -> int:
     """Returns nb_subjects as int
-    
+
     If it is \"all\", it returns -1
 
     Args:
         nb_subjects: string giving nb of subjects (\"all\" if all subjects)
-    
+
     Returns:
         nb_subjects_int: int giving nb of subjects (-1 if all subjects)
     """
@@ -77,7 +78,7 @@ def select_subjects_int(orig_list: list, nb_subjects: int) -> list:
     Args:
         orig_list: list of strings, the origin list of subjects
         nb_subjects: intgiving nb of subjects (-1 if all subjects)
-    
+
     Returns:
         sublist: list of strings, being the select number of subjects
     """
@@ -94,11 +95,11 @@ def select_subjects(orig_list: list, nb_subjects: str) -> list:
 
     if nb_subjects == \"all\", it returns the original list
     Otherwise it returns the nb_subjects first elements of orig_list
-    
+
     Args:
         orig_list: list of strings, the origin list of subjects
         nb_subjects: string giving nb of subjects ("all" if all subjects)
-    
+
     Returns:
         sublist: list of strings, being the select number of subjects
     """
@@ -147,13 +148,13 @@ def get_all_subjects_as_dictionary(src_dir_list,
 
 
 def select_good_qc(orig_list: list, qc_path: str):
-    """Return the sublist of orig_list where all the data with bad qc have been removed.
-    /!\ Also removes subjects that are not mentioned in the qc file.
+    """Return the sublist of orig_list where all data with bad qc are removed.
+    /!\\ Also removes subjects that are not mentioned in the qc file.
 
     Args:
         orig_list: list of strings, the origin list of subjects
-        qc_path: string giving the path to the file containing the relevant information.
-            It is supposed to be a .csv (or .tsv) with a 'participant_id' and a 'qc' columns.
+        qc_path: string giving the file path with the relevant information.
+            It is  a .csv (or .tsv) with a 'participant_id' and 'qc' columns.
             qc values are supposed to be either 0 or 1.
             If qc_path is set to None, then no QC are applied.
 
@@ -163,7 +164,7 @@ def select_good_qc(orig_list: list, qc_path: str):
     if qc_path == '':
         # then no QC are applied
         sublist = orig_list
-    
+
     else:
         log.info(f'Treat quality checks from {qc_path}')
         if '.tsv' in qc_path:
@@ -175,10 +176,13 @@ def select_good_qc(orig_list: list, qc_path: str):
 
         qc_file = qc_file[qc_file.qc != 0]
 
-        sublist = [name for name in orig_list if name in qc_file.participant_id.values]
+        sublist = [name for name in orig_list
+                   if name in qc_file.participant_id.values]
 
-        log.info(f"{len(set(orig_list) - set(sublist))} subjects have been removed because of the qc. \
-They are the following: {set(orig_list) - set(sublist)}")
+        log.info(
+            f"{len(set(orig_list) - set(sublist))} "
+            f"subjects have been removed because of the qc. "
+            f"They are the following: {set(orig_list) - set(sublist)}")
 
     return sublist
 

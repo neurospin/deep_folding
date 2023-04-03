@@ -72,15 +72,20 @@ def check(
 
     for subject in subject_list:
         # Loading of subject graph
-        graph_dir = f"{morpho_dir}/{subject}/t1mri/default_acquisition/default_analysis/folds/3.1/default_session_auto/R{subject}_default_session_auto.arg"
+        graph_dir = f"{morpho_dir}/{subject}/" + \
+                    "t1mri/default_acquisition/default_analysis/folds/3.1/" + \
+                    f"default_session_auto/R{subject}_default_session_auto.arg"
         graph = aims.read(graph_dir)
 
         # Loading of subject skeleton
-        skeleton_dir = f"{morpho_dir}/{subject}/t1mri/default_acquisition/default_analysis/segmentation/Rskeleton_{subject}.nii.gz"
+        skeleton_dir = f"{morpho_dir}/{subject}/" +\
+                       "t1mri/default_acquisition/default_analysis/" + \
+                       f"segmentation/Rskeleton_{subject}.nii.gz"
         skeleton = aims.read(skeleton_dir)
 
         masked_resampled = aims.Volume(
-            skeleton.header()['volume_dimension'][:3], dtype=skeleton.__array__().dtype)
+            skeleton.header()['volume_dimension'][:3],
+            dtype=skeleton.__array__().dtype)
         masked_resampled.header()['voxel_size'] = skeleton.header()[
             'voxel_size'][:3]
 
@@ -112,7 +117,8 @@ def check(
 
         aims.write(
             masked_resampled_f,
-            f"{_OUTPUT_DIR_DEFAULT}/{vs}mm/mask_resampled_{subject}_{sulcus}_{side}.nii.gz")
+            f"{_OUTPUT_DIR_DEFAULT}/{vs}mm/"
+            f"mask_resampled_{subject}_{sulcus}_{side}.nii.gz")
 
 
 def parse_args(argv):

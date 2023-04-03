@@ -1,4 +1,4 @@
-""" The aim of this script is to display saved model outputs thanks to Anatomist.
+""" The aim of this script is to display saved model outputs with Anatomist.
 Model outputs are stored as numpy arrays.
 """
 import argparse
@@ -114,7 +114,8 @@ def main():
                 (sub_id, phase, entry)], globals()[
                 'a_img%s%s%s' %
                 (sub_id, phase, entry)] = array_to_ana(
-                a, img, sub_id, phase, status=entry, bucket=bucket, vs=vox_size)
+                    a, img, sub_id, phase,
+                    status=entry, bucket=bucket, vs=vox_size)
 
             globals()['block%s%s%s' % (sub_id, phase, entry)].addObjects(
                 globals()['a_img%s%s%s' %

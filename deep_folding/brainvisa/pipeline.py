@@ -56,7 +56,8 @@ from deep_folding.brainvisa.compute_mask import compute_mask
 from deep_folding.brainvisa.generate_crops import generate_crops
 from deep_folding.brainvisa.generate_distmaps import generate_distmaps
 from deep_folding.brainvisa.generate_foldlabels import generate_foldlabels
-from deep_folding.brainvisa.generate_ICBM2009c_transforms import generate_ICBM2009c_transforms
+from deep_folding.brainvisa.generate_ICBM2009c_transforms import \
+    generate_ICBM2009c_transforms
 from deep_folding.brainvisa.generate_skeletons import generate_skeletons
 from deep_folding.brainvisa.resample_files import resample_files
 
@@ -69,7 +70,8 @@ log = set_file_logger(__file__)
 def get_sulci_list(
         region_name,
         side,
-        json_path='/neurospin/dico/data/deep_folding/current/sulci_regions_overlap.json'):
+        json_path='/neurospin/dico/data/deep_folding/current/'
+                  'sulci_regions_overlap.json'):
     with open(json_path, 'r') as file:
         brain_regions = json.load(file)
 
@@ -79,7 +81,8 @@ def get_sulci_list(
         side_full = '_left'
     else:
         raise ValueError(
-            f"Side argument with an inadequate value. Should be in 'R' or 'L', but is {side}")
+            f"Side argument with an inadequate value. "
+            f"Should be in 'R' or 'L', but is {side}")
 
     try:
         full_name = region_name + side_full
@@ -88,7 +91,8 @@ def get_sulci_list(
             sulci_list[i] = sulcus.replace(side_full, '')
     except ValueError:
         print(
-            f"The given region {region_name} is not in the dictonary at {json_path}")
+            f"The given region {region_name} "
+            f"is not in the dictonary at {json_path}")
 
     return sulci_list
 
@@ -132,8 +136,10 @@ def is_step_to_be_computed(path, log_string, save_behavior='best'):
         return False
     else:
         raise ValueError(
-            f"Unknown value for save_behavior: {save_behavior}. Choose between 'best' (recommanded)\
-minimal and clear_and_compute. Refer to the README for more information.")
+            f"Unknown value for save_behavior: {save_behavior}."
+            f"Choose between 'best' (recommanded)"
+            "minimal and clear_and_compute. "
+            "Refer to the README for more information.")
 
 
 def parse_args(argv: list) -> dict:
@@ -176,12 +182,12 @@ def parse_args(argv: list) -> dict:
 
 @exception_handler
 def main(argv):
-    """Main function to compute the pipeline, i.e. to compute crops from graphs.
+    """Main function to compute the pipeline, i.e. to compute crops from graphs
 
     Args:
         argv: a list containing command line arguments which are
-            - params_path: path to the json file where the parameters for the functions called
-              by pipeline are stored.
+            - params_path: path to the json file where the parameters
+                for the functions called by pipeline are stored.
             - verbose: If no option is provided then logging.INFO is selected.
               If one option -v (or -vv) or more is provided
               then logging.DEBUG is selected.
@@ -255,7 +261,8 @@ def main(argv):
         # never remove the mask folder -> do it by hand if you really want to
         if is_step_to_be_computed(
                 path=path_to_sulcus_mask + ".nii.gz",
-                log_string=f"Mask with the given parameters (side={params['side']}, "
+                log_string=f"Mask with the given parameters "
+                           f"(side={params['side']}, "
                            f"sulcus={sulcus}, voxel size={vox_size})",
                            save_behavior='minimal'):
 
@@ -274,7 +281,10 @@ def main(argv):
 
             # write the logs as if the command line compute_mask.py was
             # executed
-            new_sulcus = args_compute_mask['new_sulcus'] if args_compute_mask['new_sulcus'] else args_compute_mask['sulcus']
+            new_sulcus = (
+                args_compute_mask['new_sulcus']
+                if args_compute_mask['new_sulcus']
+                else args_compute_mask['sulcus'])
             setup_log(Namespace(**{'verbose': log.level,
                                    **args_compute_mask}),
                       log_dir=f"{args_compute_mask['mask_dir']}",
@@ -525,13 +535,16 @@ def main(argv):
         setup_log(Namespace(**{'verbose': log.level, **args_generate_crops}),
                   log_dir=f"{args_generate_crops['crop_dir']}",
                   prog_name='pipeline_generate_crops.py',
-                  suffix=full_side[1:] + '_' + args_generate_crops['input_type'])
+                  suffix=full_side[1:] + '_' +
+                  args_generate_crops['input_type'])
 
         generate_crops(**args_generate_crops)
         log.info('Crops generated')
 
         # save params json where the crops lie
-        with open(path_to_crops + f'/pipeline_params_{cropdir_name}s.json', 'w') as file:
+        with open(path_to_crops +
+                  f'/pipeline_params_{cropdir_name}s.json',
+                  'w') as file:
             json.dump(params, file, indent=2)
 
 

@@ -45,7 +45,7 @@ from tqdm import tqdm
 
 
 def read_convert_write(vol_filename, bucket_filename, mask_dir=None,
-                        distmap=False, mesh=False):
+                       distmap=False, mesh=False):
     """Reads volume, converts and writes back bucket.
 
     Args:
@@ -58,14 +58,14 @@ def read_convert_write(vol_filename, bucket_filename, mask_dir=None,
         mask = aims.read(mask_dir)
         mask_arr = np.asarray(mask)
         # Apply mask
-        vol_arr[mask_arr==0] = 0
+        vol_arr[mask_arr == 0] = 0
 
         if distmap:
             # Apply mask
-            vol_arr[mask_arr==0] = 10
+            vol_arr[mask_arr == 0] = 10
             # Threshold distmap
-            vol_arr[vol_arr<=1] = 1
-            vol_arr[vol_arr>1] = 0
+            vol_arr[vol_arr <= 1] = 1
+            vol_arr[vol_arr > 1] = 0
 
         bucket_map = dtx.convert.volume_to_bucketMap_aims(vol_arr)
         if mesh:
@@ -99,13 +99,13 @@ def parse_args(argv):
         help='Output directory where to put bucket files.')
     parser.add_argument(
         "-m", "--mask_dir", type=str, required=False,
-            help='Mask directory.')
+        help='Mask directory.')
     parser.add_argument(
         "-b", "--mesh", type=bool, required=False,
-            help='Whether to output buckets or meshes.')
+        help='Whether to output buckets or meshes.')
     parser.add_argument(
         "-d", "--distmap", type=bool, required=False,
-            help='Type of input: skeleton or distmap.')
+        help='Type of input: skeleton or distmap.')
 
     args = parser.parse_args(argv)
 
@@ -115,7 +115,7 @@ def parse_args(argv):
 def get_basename_without_extension(filename):
     """Returns file basename without extension"""
     basename = os.path.basename(filename)
-    
+
     without_extension = basename.split('.')[0]
     return without_extension
 
@@ -127,12 +127,13 @@ def build_bucket_filename(subject, tgt_dir, mesh):
     else:
         return f"{tgt_dir}/{subject}.bck"
 
+
 def loop_over_directory(src_dir, tgt_dir, mask_dir, mesh, distmap):
     """Loops conversion over input directory
     """
     # Gets and creates all filenames
     filenames = glob.glob(f"{src_dir}/*.nii.gz")
-    subjects = [get_basename_without_extension(filename) 
+    subjects = [get_basename_without_extension(filename)
                 for filename in filenames]
     bucket_filenames = [
         build_bucket_filename(
@@ -141,9 +142,10 @@ def loop_over_directory(src_dir, tgt_dir, mask_dir, mesh, distmap):
             mesh) for subject in subjects]
     create_folder(tgt_dir)
 
-    # Creates target d    # python3 convert_volume_to_bucket.py \
-    # -s /neurospin/dico/data/deep_folding/current/crops/CINGULATE/mask/sulcus_based/2mm/simple_combined/Rcrops \
-    # -t /neurospin/di
+    # Creates target directory
+    # python3 convert_volume_to_bucket.py \
+    # -s /path/to/Rcrops \
+    # -t /path/to/Rbuckets
     # Makes the actual conversion
     for vol_filename, bucket_filename in tqdm(
             zip(filenames, bucket_filenames), total=len(filenames)):
@@ -180,5 +182,5 @@ if __name__ == '__main__':
 
     # Example of use:
     # python3 convert_volume_to_bucket.py \
-    # -s /neurospin/dico/data/deep_folding/current/crops/CINGULATE/mask/sulcus_based/2mm/simple_combined/Rcrops \
-    # -t /neurospin/dico/data/deep_folding/current/crops/CINGULATE/mask/sulcus_based/2mm/simple_combined/Rbuckets
+    # -s /path/to/Rcrops \
+    # -t /path/to/Rbuckets

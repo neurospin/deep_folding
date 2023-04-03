@@ -64,11 +64,11 @@ def generate_foldlabel_thin_junction(
     # Sorted in ascendent priority
     val_aims_ss = 1000
     add_val = {'aims_other': -1000,
-                'aims_ss': 0,
-                'aims_top': 7000,
-                'aims_bottom': 6000,
-                'aims_junction': 5000,
-                'aims_plidepassage': 4000}
+               'aims_ss': 0,
+               'aims_top': 7000,
+               'aims_bottom': 6000,
+               'aims_junction': 5000,
+               'aims_plidepassage': 4000}
 
     for vertex in graph.vertices():
         val_aims_ss += 1
@@ -76,50 +76,43 @@ def generate_foldlabel_thin_junction(
         for edge in range(len(vertex.edges())):
             if 'aims_plidepassage' in vertex.edges()[edge]:
                 voxels_plidepassage = np.array(
-                                vertex.edges()[edge]['aims_plidepassage'][0].keys())
+                    vertex.edges()[edge]['aims_plidepassage'][0].keys())
                 if voxels_plidepassage.shape == (0,):
                     continue
                 for i, j, k in voxels_plidepassage:
-                    if arr_label[i, j, k]>2000:
-                        arr_label[i, j, k] = val_aims_ss + add_val['aims_plidepassage']
-            
-            # e = vertex.edges()[edge]   
-            # if e.getSyntax() == 'hull_junction':
-            #     bucket = e.get('aims_junction')
-            #     if bucket is not None:
-            #         voxels = np.array(bucket[0].keys())
-            #         if voxels.shape == (0,):
-            #             continue
-            #         for i, j, k in voxels:
-            #             arr_label[i, j, k] = val_aims_ss + add_val['aims_top']
-                
+                    if arr_label[i, j, k] > 2000:
+                        arr_label[i, j, k] = val_aims_ss + \
+                            add_val['aims_plidepassage']
 
-        for bucket_name, value in {'aims_bottom':6000, 'aims_other':-1000, 'aims_ss':0}.items():
+        for bucket_name, value in {'aims_bottom': 6000,
+                                   'aims_other': -1000, 'aims_ss': 0}.items():
             bucket = vertex.get(bucket_name)
             if bucket is not None:
                 voxels = np.array(bucket[0].keys())
                 for edge in range(len(vertex.edges())):
                     if 'aims_junction' in vertex.edges()[edge]:
                         voxels_junction = np.array(
-                                         vertex.edges()[edge]['aims_junction'][0].keys())
+                            vertex.edges()[edge]['aims_junction'][0].keys())
                         if voxels_junction.shape == (0,):
                             continue
                         for i, j, k in voxels_junction:
-                            if arr_label[i, j, k]==0:
-                                arr_label[i, j, k] = val_aims_ss + add_val['aims_junction']
+                            if arr_label[i, j, k] == 0:
+                                arr_label[i, j, k] = val_aims_ss + \
+                                    add_val['aims_junction']
 
-                    e = vertex.edges()[edge]   
+                    e = vertex.edges()[edge]
                     if e.getSyntax() == 'hull_junction':
                         if 'aims_junction' in vertex.edges()[edge]:
                             voxels_junction = np.array(
-                                            vertex.edges()[edge]['aims_junction'][0].keys())
+                                vertex.edges()[edge]['aims_junction'][0].keys()
+                                )
                             if voxels_junction.shape == (0,):
                                 continue
                             for i, j, k in voxels_junction:
-                                if arr_label[i, j, k]==0:
-                                    arr_label[i, j, k] = val_aims_ss + add_val['aims_top']
+                                if arr_label[i, j, k] == 0:
+                                    arr_label[i, j, k] = val_aims_ss + \
+                                        add_val['aims_top']
 
-                        
                 if voxels.shape == (0,):
                     continue
                 for i, j, k in voxels:
@@ -185,8 +178,10 @@ def generate_foldlabel_wide_junction(
 
     return vol_label
 
-def generate_foldlabel_from_graph(graph: aims.Graph,
-                                  junction: str = _JUNCTION_DEFAULT) -> aims.Volume:
+
+def generate_foldlabel_from_graph(
+        graph: aims.Graph,
+        junction: str = _JUNCTION_DEFAULT) -> aims.Volume:
     """Generates foldlabel from graph"""
     if junction == 'wide':
         vol_label = generate_foldlabel_wide_junction(graph)

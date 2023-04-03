@@ -56,8 +56,10 @@ from os.path import basename
 
 from deep_folding.brainvisa import exception_handler
 from deep_folding.brainvisa.utils.folder import create_folder
-from deep_folding.brainvisa.utils.subjects import get_number_subjects, is_it_a_subject
-from deep_folding.brainvisa.utils.subjects import select_subjects_int, select_good_qc
+from deep_folding.brainvisa.utils.subjects import get_number_subjects,\
+                                                  is_it_a_subject
+from deep_folding.brainvisa.utils.subjects import select_subjects_int,\
+                                                  select_good_qc
 from deep_folding.brainvisa.utils.logs import setup_log
 from deep_folding.brainvisa.utils.parallel import define_njobs
 from deep_folding.brainvisa.utils.foldlabel import \

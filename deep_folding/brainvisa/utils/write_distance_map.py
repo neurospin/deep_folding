@@ -62,6 +62,7 @@ from deep_folding.config.logs import set_file_logger
 # Defines logger
 log = set_file_logger(__file__)
 
+
 def parse_args(argv):
     """Parses command-line arguments
 
@@ -123,7 +124,7 @@ def skel_2_distMap(subject):
 
 def get_subject_name(filename):
     "Returns file basename without extension"
-    subject = re.search('(\d{6})', filename).group(1)
+    subject = re.search('(\\d{6})', filename).group(1)
     return subject
 
 
@@ -140,7 +141,8 @@ def loop_over_directory(src_dir, tgt_dir):
     subjects = [get_subject_name(filename) for filename in filenames]
     log.info(f"subjects[:5] = {subjects[:5]}")
     log.debug(subjects)
-    #distMap_filenames = [build_distMap_filename(subject, tgt_dir) for subject in subjects]
+    # distMap_filenames = [build_distMap_filename(subject, tgt_dir)
+    # for subject in subjects]
 
     # for sub in tqdm(subjects):
     #    skel_2_distMap(sub)

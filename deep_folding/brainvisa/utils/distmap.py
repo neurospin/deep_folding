@@ -49,11 +49,11 @@ log = set_file_logger(__file__)
 
 
 def generate_distmap_from_skeleton_file(skeleton_file: str,
-                                      distmap_file: str):
+                                        distmap_file: str):
     """Generates distmap from skeleton file.
     Distmaps files are padded to avoid 0-background close to skeleton voxels
     when going to ICBMc referential.
-    /!\ skeleton files have various dimensions"""
+    /!\\ skeleton files have various dimensions"""
     # temporary directory
     temp_dir = tempfile.mkdtemp()
 
@@ -69,21 +69,26 @@ def generate_distmap_from_skeleton_file(skeleton_file: str,
     dim_ini = orig_skel_arr.shape
     dim = tuple(map(sum, zip(dim_ini, dim_padd)))
 
-    # creation of an empty volume of new dimension: original dim + padded_voxels
+    # creation of an empty volume of new dimension: original dim +
+    # padded_voxels
     vol_ref = aims.Volume(dim, dtype='S16')
     vol_ref.copyHeaderFrom(orig_skel.header())
     in_voxel_size = orig_skel.header()['voxel_size']
 
     # definition of translation (half added voxels -> origin is in top left
     # corner)
-    translation = (nb_vox * in_voxel_size[0], nb_vox * in_voxel_size[1], nb_vox * in_voxel_size[2])
+    translation = (
+        nb_vox * in_voxel_size[0],
+        nb_vox * in_voxel_size[1],
+        nb_vox * in_voxel_size[2])
     distmap_to_padded_distmap = aims.AffineTransformation3d()
     distmap_to_padded_distmap.setTranslation(translation)
 
     list_transfo = []
     # combination of translation with header existing transformations
     for transfo in orig_skel.header()['transformations']:
-        new_transfo = np.asarray(transfo) * np.asarray(distmap_to_padded_distmap.inverse().toVector())
+        new_transfo = np.asarray(transfo) * \
+            np.asarray(distmap_to_padded_distmap.inverse().toVector())
         list_transfo.append(new_transfo)
     # writing of new transformations that take into account translation
     # due to padding
@@ -106,7 +111,7 @@ def generate_distmap_from_skeleton_file(skeleton_file: str,
 
 
 def generate_distmap_from_resampled_skeleton(skeleton_file: str,
-                                      distmap_file: str):
+                                             distmap_file: str):
     """Generates distmap from resampled skeleton file."""
 
     # Generation of distmap from padded skeletons

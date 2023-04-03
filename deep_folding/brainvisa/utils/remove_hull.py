@@ -59,17 +59,19 @@ _EXTERNAL = 11  # Value of external part
 _INTERNAL = 0  # Value of the internal part of the brain
 
 _DEFAULT_PADDING = 1  # local window in which to look for external valye
-_DEFAULT_THRESHOLD = 12  # Looks for skeleton values equal or above to _DEFAULT_THRESHOLD
+_DEFAULT_THRESHOLD = 12  # Looks for skeleton values >= _DEFAULT_THRESHOLD
 
 _ALL_SUBJECTS = -1
 
 # Input directory contaning the morphologist analysis of the HCP database
-_SRC_DIR_DEFAULT = '/nfs/neurospin/dico/data/deep_folding/data/crops/SC/sulcus_based/2mm/'
+_SRC_DIR_DEFAULT = \
+    '/nfs/neurospin/dico/data/deep_folding/data/crops/SC/sulcus_based/2mm/'
 
 # Directory containing subjects meshes without hull once created
 # default corresponds to
 # -------------------------
-_TGT_DIR_DEFAULT = '/nfs/neurospin/dico/data/deep_folding/data/crops/SC/sulcus_based/2mm/meshes/'
+_TGT_DIR_DEFAULT = \
+    '/neurospin/dico/data/deep_folding/data/crops/SC/sulcus_based/2mm/meshes/'
 
 _SIDE_DEFAULT = 'R'
 
@@ -84,23 +86,28 @@ def define_njobs():
 def remove_hull(arr, padding=_DEFAULT_PADDING, ext=_DEFAULT_PADDING):
     """Removes the pixels on the hull.
 
-    Pixels on the hull are defined as being in contact with both the internal and external part.
+    Pixels on the hull are defined as being in contact
+    with both the internal and external part.
     This function removes the hull in place
 
     Args:
         arr: numpy array modified in the array
         padding: padding of the image, equal to the extension ext
-        ext: local array extension in which to look for external and internal pixels
+        ext: local array extension in which to look for extern/internal pixels
     """
-    arr_pad = np.pad(arr, ((padding, padding), (padding, padding),
-                     (padding, padding), (0, 0)), 'constant', constant_values=0)
+    arr_pad = np.pad(arr,
+                     ((padding, padding),
+                      (padding, padding),
+                      (padding, padding),
+                      (0, 0)),
+                     'constant',
+                     constant_values=0)
 
-    l = 0  # last t dimension
     coords = np.argwhere(arr_pad > _EXTERNAL)
 
     for i, j, k, l in coords:
-        if arr_pad[i, j, k,l] != _EXTERNAL \
-           and arr_pad[i, j, k,l] != _INTERNAL:
+        if arr_pad[i, j, k, l] != _EXTERNAL \
+           and arr_pad[i, j, k, l] != _INTERNAL:
             local_array = arr_pad[i - ext:i + ext + 1,
                                   j - ext:j + ext + 1, k - ext:k + ext + 1, l]
             if np.any(
@@ -177,7 +184,7 @@ class DatasetHullRemoved:
             src_dir: string naming full path source directory,
                     containing crops images
             tgt_dir: name of target (output) directory with full path
-            side: hemisphere side (either L for left, or R for right hemisphere)
+            side: hemisphere side (L for left, or R for right hemisphere)
         """
         self.side = side
         self.src_dir = os.path.join(src_dir, f"{self.side}crops")
@@ -192,8 +199,10 @@ class DatasetHullRemoved:
         else:
             if number_subjects:
                 # subjects are detected as the directory names under src_dir
-                list_all_subjects = [dI[:6] for dI in os.listdir(
-                    self.src_dir) if os.path.isdir(self.src_dir) and 'minf' not in dI]
+                list_all_subjects = [
+                    dI[:6] for dI in os.listdir(self.src_dir)
+                    if ((os.path.isdir(self.src_dir)) and ('minf' not in dI))
+                    ]
 
                 # Gives the possibility to list only the first number_subjects
                 self.list_subjects = (

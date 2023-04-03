@@ -305,7 +305,9 @@ class BenchmarkPipe:
         print('Chosen Benchmark size: ', self.bench_size)
         print(' ')
 
-        print('=================== Selection and possible alteration of benchmark skeletons ===================')
+        print('==================='
+              'Selection and possible alteration of benchmark skeletons '
+              '===================')
         generate(
             self.b_num,
             self.side,
@@ -334,7 +336,9 @@ class BenchmarkPipe:
                          int(self.zmin)]
 
         print(' ')
-        print('=================== Normalization and crop of skeletons ==================')
+        print('==================='
+              'Normalization and crop of skeletons '
+              '==================')
 
         list_subjects = self.get_sub_list()
         pqdm(list_subjects, self.crop_one_file, n_jobs=define_njobs())

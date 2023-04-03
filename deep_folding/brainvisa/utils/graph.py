@@ -41,6 +41,7 @@ from deep_folding.config.logs import set_file_logger
 # Defines logger
 log = set_file_logger(__file__)
 
+
 def create_empty_volume_from_graph(graph: aims.Graph) -> aims.Volume:
     """Creates empty volume with graph header"""
 

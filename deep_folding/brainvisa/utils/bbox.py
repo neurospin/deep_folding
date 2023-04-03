@@ -63,7 +63,7 @@ def compute_max(list_bbmin: list, list_bbmax: list) -> tuple:
     Returns:
     tuple (bbmin, bbmax) with
         bbmin: numpy array with the x,y,z coordinates
-                    of the upper right corner of the box; 
+                    of the upper right corner of the box;
         bbMax: numpy array with the x,y,z coordinates
                     of the lower left corner of the box
     """
@@ -100,8 +100,8 @@ def compute_max_box(
 
     Returns:
         tuple (bbminx, bbmax) with
-            bbmin: an array of minimum coordinates of bounding box of given sulci;
-            bbmax: an array of maximum coordinates of bounding box of given sulci
+            bbmin: an array of minimum bounding box coordinates of given sulci;
+            bbmax: an array of maximum bouding box coordinates of given sulci
     """
 
     list_bbmin, list_bbmax = [], []

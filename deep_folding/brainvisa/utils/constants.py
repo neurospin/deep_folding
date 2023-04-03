@@ -12,7 +12,8 @@ _PATH_TO_GRAPH_SUPERVISED_DEFAULT = \
 
 # Default directory in which lies the dataset
 # It points to HCP directory
-_SRC_DIR_DEFAULT = "/neurospin/dico/data/bv_databases/human/not_labeled/hcp/hcp"
+_SRC_DIR_DEFAULT = \
+    "/neurospin/dico/data/bv_databases/human/not_labeled/hcp/hcp"
 
 # Gives the relative path to the labelled graph .arg
 # in a "morphologist-like" dataset
@@ -78,7 +79,8 @@ _COMBINE_TYPE_DEFAULT = False
 _NO_MASK_DEFAULT = False
 
 # path to the brain regions' json
-_BRAIN_REGION_JSON = '/neurospin/dico/data/deep_folding/current/sulci_regions_overlap.json'
+_BRAIN_REGION_JSON = \
+    '/neurospin/dico/data/deep_folding/current/sulci_regions_overlap.json'
 
 # path to the qc csv
 _QC_PATH_DEFAULT = ''

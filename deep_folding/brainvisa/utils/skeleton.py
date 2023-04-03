@@ -47,10 +47,12 @@ from deep_folding.brainvisa.utils.constants import _JUNCTION_DEFAULT
 # Defines logger
 log = set_file_logger(__file__)
 
+
 def is_skeleton(arr):
     """checks if arr is a skeleton"""
     skel_values = np.array([0, 30, 35, 60, 100, 110, 120])
     return np.isin(arr, skel_values).all()
+
 
 def generate_skeleton_thin_junction(
         graph: aims.Graph) -> aims.Volume:
@@ -74,7 +76,7 @@ def generate_skeleton_thin_junction(
                 for i, j, k in voxels:
                     arr_skel[i, j, k] = value
 
-    for edge in graph.edges():             
+    for edge in graph.edges():
         if edge.getSyntax() == 'hull_junction':
             bucket = edge.get('aims_junction')
             if bucket is not None:
@@ -82,7 +84,7 @@ def generate_skeleton_thin_junction(
                 if voxels.shape == (0,):
                     continue
                 for i, j, k in voxels:
-                    arr_skel[i, j, k] = 35      
+                    arr_skel[i, j, k] = 35
 
     for edge in graph.edges():
         for bucket_name, value in {'aims_plidepassage': 120}.items():
@@ -160,8 +162,9 @@ def generate_skeleton_wide_junction(
     return vol_skel
 
 
-def generate_skeleton_from_graph(graph: aims.Graph,
-                                 junction: str = _JUNCTION_DEFAULT) -> aims.Volume:
+def generate_skeleton_from_graph(
+        graph: aims.Graph,
+        junction: str = _JUNCTION_DEFAULT) -> aims.Volume:
     """Generates skeleton from graph"""
     if junction == 'wide':
         vol_skel = generate_skeleton_wide_junction(graph)

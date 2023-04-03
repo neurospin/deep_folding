@@ -199,7 +199,8 @@ def resample_one_distmap(input_image,
     distmap_to_padded_distmap.setTranslation(translation)
 
     # combination of translation with graph_to_icbm transformation
-    padded_distmap_to_icbm = graph_to_icbm * distmap_to_padded_distmap.inverse()
+    padded_distmap_to_icbm = \
+        graph_to_icbm * distmap_to_padded_distmap.inverse()
 
     transfo_file = f"{temp_dir}/padded_distmap_to_icbm.trm"
     aims.write(padded_distmap_to_icbm, transfo_file)
@@ -241,7 +242,7 @@ class FileResampler:
         self.side = side
         self.parallel = parallel
 
-        # Names of files in function of dictionary: keys -> 'subject' and 'side'
+        # Names of files in function of dictionary: keys = 'subject' and 'side'
         # Src directory contains either 'R' or 'L' a subdirectory
         self.src_dir = join(src_dir, self.side)
 
@@ -370,8 +371,8 @@ class FileResampler:
 
             # Checks if number of generated files == number of src files
             resampled_files, src_files = \
-                compare_number_aims_files_with_number_in_source(self.resampled_dir,
-                                                                self.src_dir)
+                compare_number_aims_files_with_number_in_source(
+                    self.resampled_dir, self.src_dir)
             not_processed_files = get_not_processed_files(self.src_dir,
                                                           self.resampled_dir,
                                                           self.src_filename)
@@ -397,15 +398,17 @@ class SkeletonResampler(FileResampler):
             side: either 'L' or 'R', hemisphere side
             out_voxel_size: float giving voxel size in mm
             parallel: does parallel computation if True
-            src_filename : name of skeleton files (format : "<SIDE><src_filename><SUBJECT>.nii.gz")
-            output_filename : name of generated files (format : "<SIDE><output_filename><SUBJECT>.nii.gz")
+            src_filename : name of skeleton files
+                          (format : "<SIDE><src_filename><SUBJECT>.nii.gz")
+            output_filename : name of generated files
+                          (format : "<SIDE><output_filename><SUBJECT>.nii.gz")
         """
         super(SkeletonResampler, self).__init__(
             src_dir=src_dir, resampled_dir=resampled_dir,
             transform_dir=transform_dir, side=side,
             out_voxel_size=out_voxel_size, parallel=parallel)
 
-        # Names of files in function of dictionary: keys -> 'subject' and 'side'
+        # Names of files in function of dictionary: keys = 'subject' and 'side'
         # Src directory contains either 'R' or 'L' a subdirectory
         # self.src_file = join(
         #    self.src_dir,
@@ -455,15 +458,17 @@ class FoldLabelResampler(FileResampler):
             side: either 'L' or 'R', hemisphere side
             out_voxel_size: float giving voxel size in mm
             parallel: does parallel computation if True
-            src_filename : name of fold label files (format : "<SIDE><src_filename><SUBJECT>.nii.gz")
-            output_filename : name of generated files (format : "<SIDE><output_filename><SUBJECT>.nii.gz")
+            src_filename : name of fold label files
+                          (format : "<SIDE><src_filename><SUBJECT>.nii.gz")
+            output_filename : name of generated files
+                          (format : "<SIDE><output_filename><SUBJECT>.nii.gz")
         """
         super(FoldLabelResampler, self).__init__(
             src_dir=src_dir, resampled_dir=resampled_dir,
             transform_dir=transform_dir, side=side,
             out_voxel_size=out_voxel_size, parallel=parallel)
 
-        # Names of files in function of dictionary: keys -> 'subject' and 'side'
+        # Names of files in function of dictionary: keys = 'subject' and 'side'
         # Src directory contains either 'R' or 'L' a subdirectory
         self.src_file = join(
             self.src_dir,
@@ -512,7 +517,7 @@ class DistMapResampler(FileResampler):
             transform_dir=transform_dir, side=side,
             out_voxel_size=out_voxel_size, parallel=parallel)
 
-        # Names of files in function of dictionary: keys -> 'subject' and 'side'
+        # Names of files in function of dictionary: keys = 'subject' and 'side'
         # Src directory contains either 'R' or 'L' a subdirectory
         self.src_file = join(
             self.src_dir,
@@ -645,8 +650,12 @@ def resample_files(
         output_filename=_RESAMPLED_SKELETON_FILENAME):
 
     if input_type == "skeleton":
-        src_filename = _SKELETON_FILENAME if src_filename is None else src_filename
-        output_filename = _RESAMPLED_SKELETON_FILENAME if output_filename is None else output_filename
+        src_filename = (_SKELETON_FILENAME
+                        if src_filename is None
+                        else src_filename)
+        output_filename = (_RESAMPLED_SKELETON_FILENAME
+                           if output_filename is None
+                           else output_filename)
         resampler = SkeletonResampler(
             src_dir=src_dir,
             resampled_dir=resampled_dir,
@@ -657,8 +666,12 @@ def resample_files(
             src_filename=src_filename,
             output_filename=output_filename)
     elif input_type == "foldlabel":
-        src_filename = _FOLDLABEL_FILENAME if src_filename is None else src_filename
-        output_filename = _RESAMPLED_FOLDLABEL_FILENAME if output_filename is None else output_filename
+        src_filename = (_FOLDLABEL_FILENAME
+                        if src_filename is None
+                        else src_filename)
+        output_filename = (_RESAMPLED_FOLDLABEL_FILENAME
+                           if output_filename is None
+                           else output_filename)
         resampler = FoldLabelResampler(
             src_dir=src_dir,
             resampled_dir=resampled_dir,

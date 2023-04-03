@@ -53,8 +53,8 @@ def compare_number_aims_files_with_expected(output_dir: str,
 
     all_files = glob.glob(f"{output_dir}/*")
 
-    generated_files = [f for f in all_files 
-                         if not re.search('.minf$', f)]
+    generated_files = [f for f in all_files
+                       if not re.search('.minf$', f)]
     log.debug(f"Output directory = {output_dir}")
     log.debug(f"Generated_files = {generated_files}")
 
@@ -75,15 +75,15 @@ def compare_number_aims_files_with_number_in_source(output_dir: str,
 
     all_files = glob.glob(f"{output_dir}/*")
 
-    generated_files = [f for f in all_files 
-                         if not re.search('.minf$', f)]
+    generated_files = [f for f in all_files
+                       if not re.search('.minf$', f)]
     log.debug(f"Output directory = {output_dir}")
     log.debug(f"Generated_files = {generated_files}")
 
     src_files = glob.glob(f"{src_dir}/*")
 
-    src_files = [f for f in src_files 
-                         if not re.search('.minf$', f)]
+    src_files = [f for f in src_files
+                 if not re.search('.minf$', f)]
 
     nb_generated_files = len(generated_files)
     nb_expected_files = len(src_files)
@@ -101,10 +101,10 @@ def compare_number_aims_files_with_number_in_source(output_dir: str,
 
 def get_not_processed_files(src_dir, tgt_dir, src_filename):
     """Returns list of source files not yet processed.
-    
+
     This is done by comparing subjects in src and tgt directories"""
 
-    if type(src_dir) == str:
+    if isinstance(src_dir, str):
         src_files = glob.glob(f"{src_dir}/*.nii.gz")
     log.info(f"number of source files = {len(src_files)}")
     if len(src_files):
@@ -115,8 +115,10 @@ def get_not_processed_files(src_dir, tgt_dir, src_filename):
     log.info(f"number of target files = {len(tgt_files)}")
     if len(tgt_files):
         log.info(f"first target file = {tgt_files[0]}")
-        tgt_subjects = [subject.split("resampled_")[-1] for subject in tgt_files]
-        tgt_subjects = ['_'.join(subject.split("_")[1:]) for subject in tgt_subjects]
+        tgt_subjects = [subject.split("resampled_")[-1]
+                        for subject in tgt_files]
+        tgt_subjects = ['_'.join(subject.split("_")[1:])
+                        for subject in tgt_subjects]
         tgt_subjects = [subject.split(".")[0] for subject in tgt_subjects]
         log.info(f"first target subject = {tgt_subjects[0]}")
     else:
@@ -127,22 +129,24 @@ def get_not_processed_files(src_dir, tgt_dir, src_filename):
     src_subjects = [subject.split(".")[0] for subject in src_subjects]
     log.info("Src subjects after . split: " + src_subjects[0])
 
-    not_processed_subjects = list(set(src_subjects)-set(tgt_subjects))
+    not_processed_subjects = list(set(src_subjects) - set(tgt_subjects))
 
     root = src_files[0].split(src_filename)[0]
     log.info("src_filename: " + src_filename)
     log.info("root: " + root)
-    not_processed_files = [f"{root}{src_filename}{subject}.nii.gz" for subject in not_processed_subjects]
+    not_processed_files = [
+        f"{root}{src_filename}{subject}.nii.gz"
+        for subject in not_processed_subjects]
     log.info(f"number of not processed subjects = {len(not_processed_files)}")
     if len(not_processed_files):
         log.info(f"first not_processed file = {not_processed_files[0]}")
-    
+
     return not_processed_files
 
 
 def get_not_processed_subjects_dict(subjects, tgt_dir):
     """Returns list of subjects not yet processed.
-    
+
     This is done by comparing subjects in subject dict and tgt directories"""
 
     log.info(f"first subject start of fucntion= {subjects[0]}")
@@ -160,7 +164,7 @@ def get_not_processed_subjects_dict(subjects, tgt_dir):
 
     tgt_subjects = [subject.split(".")[0] for subject in tgt_subjects]
 
-    not_processed_subjects = list(set(src_subjects)-set(tgt_subjects))
+    not_processed_subjects = list(set(src_subjects) - set(tgt_subjects))
 
     not_processed_subjects_dict = []
     for sub in not_processed_subjects:
@@ -168,20 +172,23 @@ def get_not_processed_subjects_dict(subjects, tgt_dir):
             if s['subject'] == sub:
                 not_processed_subjects_dict.append(s)
 
-    log.info(f"number of not processed subjects = {len(not_processed_subjects_dict)}")
+    log.info(
+        f"number of not processed subjects = "
+        f"{len(not_processed_subjects_dict)}")
     if len(not_processed_subjects):
-        log.info(f"first not_processed subject = {not_processed_subjects_dict[0]}")
+        log.info(
+            f"first not_processed subject = {not_processed_subjects_dict[0]}")
 
     return not_processed_subjects_dict
 
 
 def get_not_processed_cropped_files(src_dir, tgt_dir):
     """Returns list of source files not yet processed.
-    
+
     this one is specific toc rop directory.
     This is done by comparing subjects in src and tgt directories"""
 
-    if type(src_dir) == str:
+    if isinstance(src_dir, str):
         src_files = glob.glob(f"{src_dir}/*.nii.gz")
     log.info(f"number of source files = {len(src_files)}")
     if len(src_files):
@@ -194,26 +201,30 @@ def get_not_processed_cropped_files(src_dir, tgt_dir):
         log.info(f"first target file = {tgt_files[0]}")
 
     src_subjects = [subject.split("resampled_")[-1] for subject in src_files]
-    src_subjects = ['_'.join(subject.split("_")[1:]) for subject in src_subjects]
+    src_subjects = ['_'.join(subject.split("_")[1:])
+                    for subject in src_subjects]
     src_subjects = [subject.split(".")[0] for subject in src_subjects]
 
     tgt_subjects = [subject.split("_cropped")[0] for subject in tgt_files]
     tgt_subjects = [subject.split("/")[-1] for subject in tgt_subjects]
 
-    not_processed_subjects = list(set(src_subjects)-set(tgt_subjects))
+    not_processed_subjects = list(set(src_subjects) - set(tgt_subjects))
 
     root = src_files[0].split("resampled_")[0]
     root2 = src_files[0].split("resampled_")[1].split('_')[0]
-    not_processed_files = [f"{root}resampled_{root2}_{subject}.nii.gz" for subject in not_processed_subjects]
+    not_processed_files = [
+        f"{root}resampled_{root2}_{subject}.nii.gz"
+        for subject in not_processed_subjects]
     log.info(f"number of not processed subjects = {len(not_processed_files)}")
     if len(not_processed_files):
         log.info(f"first not_processed file = {not_processed_files[0]}")
 
     return not_processed_files
 
+
 def get_not_processed_subjects(src_subjects, tgt_dir, prefix="generated_"):
     """Returns list of source files not yet processed.
-    
+
     This is done by comparing subjects in src and tgt directories"""
 
     log.info(f"number of source subjects = {len(src_subjects)}")
@@ -232,14 +243,15 @@ def get_not_processed_subjects(src_subjects, tgt_dir, prefix="generated_"):
     if len(tgt_subjects):
         log.info(f"first tgt subject = {tgt_subjects[0]}")
 
-    not_processed_subjects = list(set(src_subjects)-set(tgt_subjects))
+    not_processed_subjects = list(set(src_subjects) - set(tgt_subjects))
 
     return not_processed_subjects
 
 
-def get_not_processed_subjects_distmap(src_subjects, tgt_dir, prefix="generated_"):
+def get_not_processed_subjects_distmap(
+        src_subjects, tgt_dir, prefix="generated_"):
     """Returns list of source files not yet processed.
-    
+
     This is done by comparing subjects in src and tgt directories"""
 
     log.info(f"number of source subjects = {len(src_subjects)}")
@@ -258,16 +270,17 @@ def get_not_processed_subjects_distmap(src_subjects, tgt_dir, prefix="generated_
     if len(tgt_subjects):
         log.info(f"first tgt subject = {tgt_subjects[0]}")
 
-    not_processed_subjects = list(set(src_subjects)-set(tgt_subjects))
-    over_processed_subjects = list(set(tgt_subjects)-set(src_subjects))
+    not_processed_subjects = list(set(src_subjects) - set(tgt_subjects))
+    over_processed_subjects = list(set(tgt_subjects) - set(src_subjects))
     log.info(f"Over processed subjects = {over_processed_subjects}")
 
     return not_processed_subjects
 
 
-def get_not_processed_subjects_transform(src_subjects, tgt_dir, prefix="ICBM2009c_"):
+def get_not_processed_subjects_transform(
+        src_subjects, tgt_dir, prefix="ICBM2009c_"):
     """Returns list of source files not yet processed.
-    
+
     This is done by comparing subjects in src and tgt directories"""
 
     log.info(f"number of source subjects = {len(src_subjects)}")
@@ -280,10 +293,10 @@ def get_not_processed_subjects_transform(src_subjects, tgt_dir, prefix="ICBM2009
 
     tgt_subjects = [subject.split(prefix)[-1] for subject in tgt_files]
     tgt_subjects = [subject.split("_")[0] for subject in tgt_subjects]
-    
+
     tgt_subjects = [subject.split(".")[0] for subject in tgt_subjects]
 
-    not_processed_subjects = list(set(src_subjects)-set(tgt_subjects))
+    not_processed_subjects = list(set(src_subjects) - set(tgt_subjects))
 
     return not_processed_subjects
 
@@ -295,5 +308,3 @@ def save_list_to_csv(not_processed_files, csv_file_name):
     with open(csv_file_name, 'w') as f:
         wr = csv.writer(f)
         wr.writerows(list_of_lists)
-
-

@@ -41,6 +41,7 @@ from deep_folding.config.logs import set_file_logger
 # Defines logger
 log = set_file_logger(__file__)
 
+
 def generate_ref_volume_ICBM2009c(out_voxel_size: tuple) -> aims.Volume:
     """Defines MNI 2009 reference aims volume with output voxel size
 
@@ -51,7 +52,7 @@ def generate_ref_volume_ICBM2009c(out_voxel_size: tuple) -> aims.Volume:
     Returns:
         vol: volume (aims.Volume_S16) filled with 0 in MNI2009 referential
             and with requested voxel_size
-            
+
     """
     hdr = aims.StandardReferentials.icbm2009cTemplateHeader()
     voxel_size = np.concatenate((out_voxel_size, [1]))

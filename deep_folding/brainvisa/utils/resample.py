@@ -37,7 +37,8 @@ def resample(input_image: Union[str, aims.Volume],
         background: int
             Background value (default: 0)
         values: []
-            Array of unique values ordered by ascendent priority without background. If not given,
+            Array of unique values ordered by ascendent priority
+            without background. If not given,
             priority is set by ascendent values
 
         Return
@@ -140,7 +141,7 @@ def resample(input_image: Union[str, aims.Volume],
         log.debug("Time for value {} ({} voxels): {}s".format(
             v, np.sum(np.where(vol_dt == v)), time() - tic))
         log.debug("\t{}s to create the bucket\n\t{}s to resample bucket\n"
-                 "\t{}s to assign values".format(t_bck, t_rs, time() - toc))
+                  "\t{}s to assign values".format(t_bck, t_rs, time() - toc))
         tic = time()
 
     return resampled

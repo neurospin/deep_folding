@@ -125,7 +125,8 @@ def get_one_bounding_box(graph_filename, sulcus):
             bucket = vertex.get(bucket_name)
             if bucket is not None:
                 voxels = np.asarray(
-                    [g_to_icbm_template.transform(np.array(voxel) * voxel_size_in)
+                    [g_to_icbm_template.transform(np.array(voxel)
+                                                  * voxel_size_in)
                         for voxel in bucket[0].keys()])
                 if voxels.shape == (0,):
                     continue
@@ -202,17 +203,17 @@ def compute_box_voxel(bbmin_mni152, bbmax_mni152, voxel_size_out):
     Coordinates of the box in voxels are determined in the MNI referential
 
     Args:
-        bbmin_mni152: numpy array with the coordinates of the upper right corner
+        bbmin_mni152: numpy array with coordinates of the upper right corner
                 of the box (MNI152 space)
-        bbmax_mni152: numpy array with the coordinates of the lower left corner
+        bbmax_mni152: numpy array with coordinates of the lower left corner
                 of the box (MNI152 space)
         voxel_size: voxel size (in MNI referential or HCP normalized SPM space)
 
     Returns:
         tuple (bbmin_vox, bbmax_vox) with
-            bbmin_vox: numpy array with the coordinates of the upper right corner
+            bbmin_vox: numpy array with coordinates of the upper right corner
                 of the box (voxels in MNI space);
-            bbmax_vox: numpy array with the coordinates of the lower left corner
+            bbmax_vox: numpy array with coordinates of the lower left corner
                     of the box (voxels in MNI space)
     """
 
@@ -249,7 +250,7 @@ class BoundingBoxMax:
             bbox_dir: name of target directory with full path
             sulcus: sulcus name
             new_sulcus: new sulcus name
-            side: hemisphere side (either L for left, or R for right hemisphere)
+            side: hemisphere side (L for left, or R for right hemisphere)
             out_voxel_size: float for voxel size in mm
         """
 
@@ -408,7 +409,8 @@ def parse_args(argv: list) -> dict:
         prog=basename(__file__),
         description='Computes bounding box around the named sulcus')
     parser.add_argument(
-        "-s", "--src_dir", type=str, default=_SUPERVISED_SRC_DIR_DEFAULT, nargs='+',
+        "-s", "--src_dir", type=str, default=_SUPERVISED_SRC_DIR_DEFAULT,
+        nargs='+',
         help='Source directory where the MRI data lies. '
              'If there are several directories, add all directories '
              'one after the other. Example: -s DIR_1 DIR_2. '
