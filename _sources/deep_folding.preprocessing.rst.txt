@@ -20,10 +20,26 @@ deep\_folding\.preprocessing\.datasets module
     :undoc-members:
     :show-inheritance:
 
+deep\_folding\.preprocessing\.generate\_numpy\_array module
+-----------------------------------------------------------
+
+.. automodule:: deep_folding.preprocessing.generate_numpy_array
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 deep\_folding\.preprocessing\.pynet\_transforms module
 ------------------------------------------------------
 
 .. automodule:: deep_folding.preprocessing.pynet_transforms
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+deep\_folding\.preprocessing\.transforms module
+-----------------------------------------------
+
+.. automodule:: deep_folding.preprocessing.transforms
     :members:
     :undoc-members:
     :show-inheritance:

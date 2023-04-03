@@ -61,7 +61,9 @@
 <li class="toctree-l4"><a class="reference internal" href="#submodules">Submodules</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-deep_folding.preprocessing.create_sets">deep_folding.preprocessing.create_sets module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-deep_folding.preprocessing.datasets">deep_folding.preprocessing.datasets module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-deep_folding.preprocessing.generate_numpy_array">deep_folding.preprocessing.generate_numpy_array module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-deep_folding.preprocessing.pynet_transforms">deep_folding.preprocessing.pynet_transforms module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#deep-folding-preprocessing-transforms-module">deep_folding.preprocessing.transforms module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-deep_folding.preprocessing">Module contents</a></li>
 </ul>
 </li>
@@ -215,6 +217,29 @@ skeleton: boolean, whether input is skeleton images or not</div></blockquote>
 </dd></dl>
 
 </div>
+<div class="section" id="module-deep_folding.preprocessing.generate_numpy_array">
+<span id="deep-folding-preprocessing-generate-numpy-array-module"></span><h2>deep_folding.preprocessing.generate_numpy_array module<a class="headerlink" href="#module-deep_folding.preprocessing.generate_numpy_array" title="Permalink to this headline">¶</a></h2>
+<p>Create numpy arrays from folders containing skeletons, distance maps…</p>
+<div class="section" id="typical-usage">
+<h3>Typical usage<a class="headerlink" href="#typical-usage" title="Permalink to this headline">¶</a></h3>
+<p>You can use this program by first entering in the brainvisa environment
+(here brainvisa 5.0.0 installed with singurity) and launching the script
+from the terminal:
+&gt;&gt;&gt; bv bash
+&gt;&gt;&gt; python generate_numpy_array.py</p>
+<dl class="function">
+<dt id="deep_folding.preprocessing.generate_numpy_array.generate_np_array">
+<code class="descclassname">deep_folding.preprocessing.generate_numpy_array.</code><code class="descname">generate_np_array</code><span class="sig-paren">(</span><em>src_dir</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.preprocessing.generate_numpy_array.generate_np_array" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a numpy array of all nii.gz files from a given folder</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="deep_folding.preprocessing.generate_numpy_array.main">
+<code class="descclassname">deep_folding.preprocessing.generate_numpy_array.</code><code class="descname">main</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.preprocessing.generate_numpy_array.main" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+</div>
 <div class="section" id="module-deep_folding.preprocessing.pynet_transforms">
 <span id="deep-folding-preprocessing-pynet-transforms-module"></span><h2>deep_folding.preprocessing.pynet_transforms module<a class="headerlink" href="#module-deep_folding.preprocessing.pynet_transforms" title="Permalink to this headline">¶</a></h2>
 <p>Module that defines common transformations that can be applied when the dataset
@@ -263,6 +288,9 @@ grey and white voxels: 1</p>
 <p>A class to pad a tensor</p>
 </dd></dl>
 
+</div>
+<div class="section" id="deep-folding-preprocessing-transforms-module">
+<h2>deep_folding.preprocessing.transforms module<a class="headerlink" href="#deep-folding-preprocessing-transforms-module" title="Permalink to this headline">¶</a></h2>
 </div>
 <div class="section" id="module-deep_folding.preprocessing">
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-deep_folding.preprocessing" title="Permalink to this headline">¶</a></h2>

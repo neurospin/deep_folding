@@ -59,15 +59,19 @@
 <li class="toctree-l3 current"><a class="reference internal" href="deep_folding.brainvisa.html">deep_folding.brainvisa package</a><ul class="current">
 <li class="toctree-l4 current"><a class="reference internal" href="deep_folding.brainvisa.html#subpackages">Subpackages</a></li>
 <li class="toctree-l4"><a class="reference internal" href="deep_folding.brainvisa.html#submodules">Submodules</a></li>
-<li class="toctree-l4"><a class="reference internal" href="deep_folding.brainvisa.html#module-deep_folding.brainvisa.benchmark_generation">deep_folding.brainvisa.benchmark_generation module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="deep_folding.brainvisa.html#module-deep_folding.brainvisa.benchmark_generation_distmap">deep_folding.brainvisa.benchmark_generation_distmap module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="deep_folding.brainvisa.html#module-deep_folding.brainvisa.benchmark_pipeline">deep_folding.brainvisa.benchmark_pipeline module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="deep_folding.brainvisa.html#module-deep_folding.brainvisa.compute_bounding_box">deep_folding.brainvisa.compute_bounding_box module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="deep_folding.brainvisa.html#module-deep_folding.brainvisa.compute_mask">deep_folding.brainvisa.compute_mask module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="deep_folding.brainvisa.html#module-deep_folding.brainvisa.display">deep_folding.brainvisa.display module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="deep_folding.brainvisa.html#module-deep_folding.brainvisa.display_reconstructions">deep_folding.brainvisa.display_reconstructions module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="deep_folding.brainvisa.html#module-deep_folding.brainvisa.generate_ICBM2009c_transforms">deep_folding.brainvisa.generate_ICBM2009c_transforms module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="deep_folding.brainvisa.html#module-deep_folding.brainvisa.generate_crops">deep_folding.brainvisa.generate_crops module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="deep_folding.brainvisa.html#module-deep_folding.brainvisa.generate_distmaps">deep_folding.brainvisa.generate_distmaps module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="deep_folding.brainvisa.html#module-deep_folding.brainvisa.generate_foldlabels">deep_folding.brainvisa.generate_foldlabels module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="deep_folding.brainvisa.html#module-deep_folding.brainvisa.generate_skeletons">deep_folding.brainvisa.generate_skeletons module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="deep_folding.brainvisa.html#module-deep_folding.brainvisa.mask_qc">deep_folding.brainvisa.mask_qc module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="deep_folding.brainvisa.html#module-deep_folding.brainvisa.pipeline">deep_folding.brainvisa.pipeline module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="deep_folding.brainvisa.html#module-deep_folding.brainvisa.remove_ventricle">deep_folding.brainvisa.remove_ventricle module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="deep_folding.brainvisa.html#module-deep_folding.brainvisa.resample_files">deep_folding.brainvisa.resample_files module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="deep_folding.brainvisa.html#module-deep_folding.brainvisa">Module contents</a></li>
 </ul>
@@ -159,8 +163,8 @@ Each json file is the name of the sulcus + ‘json’</p>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><dl class="docutils">
 <dt>tuple (bbminx, bbmax) with</dt>
-<dd><p class="first last">bbmin: an array of minimum coordinates of bounding box of given sulci;
-bbmax: an array of maximum coordinates of bounding box of given sulci</p>
+<dd><p class="first last">bbmin: an array of minimum bounding box coordinates of given sulci;
+bbmax: an array of maximum bouding box coordinates of given sulci</p>
 </dd>
 </dl>
 </p>
@@ -171,13 +175,16 @@ bbmax: an array of maximum coordinates of bounding box of given sulci</p>
 </dd></dl>
 
 </div>
+<div class="section" id="module-deep_folding.brainvisa.utils.constants">
+<span id="deep-folding-brainvisa-utils-constants-module"></span><h2>deep_folding.brainvisa.utils.constants module<a class="headerlink" href="#module-deep_folding.brainvisa.utils.constants" title="Permalink to this headline">¶</a></h2>
+</div>
 <div class="section" id="module-deep_folding.brainvisa.utils.convert_volume_to_bucket">
 <span id="deep-folding-brainvisa-utils-convert-volume-to-bucket-module"></span><h2>deep_folding.brainvisa.utils.convert_volume_to_bucket module<a class="headerlink" href="#module-deep_folding.brainvisa.utils.convert_volume_to_bucket" title="Permalink to this headline">¶</a></h2>
 <p>This program converts volumes contained in a folder into buckets.
 It writes bucket files in the output folder</p>
 <dl class="function">
 <dt id="deep_folding.brainvisa.utils.convert_volume_to_bucket.build_bucket_filename">
-<code class="descclassname">deep_folding.brainvisa.utils.convert_volume_to_bucket.</code><code class="descname">build_bucket_filename</code><span class="sig-paren">(</span><em>subject</em>, <em>tgt_dir</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.utils.convert_volume_to_bucket.build_bucket_filename" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">deep_folding.brainvisa.utils.convert_volume_to_bucket.</code><code class="descname">build_bucket_filename</code><span class="sig-paren">(</span><em>subject</em>, <em>tgt_dir</em>, <em>mesh</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.utils.convert_volume_to_bucket.build_bucket_filename" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns bucket filename</p>
 </dd></dl>
 
@@ -189,7 +196,7 @@ It writes bucket files in the output folder</p>
 
 <dl class="function">
 <dt id="deep_folding.brainvisa.utils.convert_volume_to_bucket.loop_over_directory">
-<code class="descclassname">deep_folding.brainvisa.utils.convert_volume_to_bucket.</code><code class="descname">loop_over_directory</code><span class="sig-paren">(</span><em>src_dir</em>, <em>tgt_dir</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.utils.convert_volume_to_bucket.loop_over_directory" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">deep_folding.brainvisa.utils.convert_volume_to_bucket.</code><code class="descname">loop_over_directory</code><span class="sig-paren">(</span><em>src_dir</em>, <em>tgt_dir</em>, <em>mask_dir</em>, <em>mesh</em>, <em>distmap</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.utils.convert_volume_to_bucket.loop_over_directory" title="Permalink to this definition">¶</a></dt>
 <dd><p>Loops conversion over input directory</p>
 </dd></dl>
 
@@ -225,7 +232,7 @@ It writes bucket files in the output folder</p>
 
 <dl class="function">
 <dt id="deep_folding.brainvisa.utils.convert_volume_to_bucket.read_convert_write">
-<code class="descclassname">deep_folding.brainvisa.utils.convert_volume_to_bucket.</code><code class="descname">read_convert_write</code><span class="sig-paren">(</span><em>vol_filename</em>, <em>bucket_filename</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.utils.convert_volume_to_bucket.read_convert_write" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">deep_folding.brainvisa.utils.convert_volume_to_bucket.</code><code class="descname">read_convert_write</code><span class="sig-paren">(</span><em>vol_filename</em>, <em>bucket_filename</em>, <em>mask_dir=None</em>, <em>distmap=False</em>, <em>mesh=False</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.utils.convert_volume_to_bucket.read_convert_write" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reads volume, converts and writes back bucket.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -255,12 +262,77 @@ It writes bucket files in the output folder</p>
 <dd></dd></dl>
 
 </div>
+<div class="section" id="module-deep_folding.brainvisa.utils.distmap">
+<span id="deep-folding-brainvisa-utils-distmap-module"></span><h2>deep_folding.brainvisa.utils.distmap module<a class="headerlink" href="#module-deep_folding.brainvisa.utils.distmap" title="Permalink to this headline">¶</a></h2>
+<p>Utilities to generate distance maps from skeleton files</p>
+<dl class="function">
+<dt id="deep_folding.brainvisa.utils.distmap.generate_distmap_from_resampled_skeleton">
+<code class="descclassname">deep_folding.brainvisa.utils.distmap.</code><code class="descname">generate_distmap_from_resampled_skeleton</code><span class="sig-paren">(</span><em>skeleton_file: str</em>, <em>distmap_file: str</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.utils.distmap.generate_distmap_from_resampled_skeleton" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates distmap from resampled skeleton file.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="deep_folding.brainvisa.utils.distmap.generate_distmap_from_skeleton_file">
+<code class="descclassname">deep_folding.brainvisa.utils.distmap.</code><code class="descname">generate_distmap_from_skeleton_file</code><span class="sig-paren">(</span><em>skeleton_file: str</em>, <em>distmap_file: str</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.utils.distmap.generate_distmap_from_skeleton_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates distmap from skeleton file.
+Distmaps files are padded to avoid 0-background close to skeleton voxels
+when going to ICBMc referential.
+/!skeleton files have various dimensions</p>
+</dd></dl>
+
+</div>
 <div class="section" id="module-deep_folding.brainvisa.utils.folder">
 <span id="deep-folding-brainvisa-utils-folder-module"></span><h2>deep_folding.brainvisa.utils.folder module<a class="headerlink" href="#module-deep_folding.brainvisa.utils.folder" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt id="deep_folding.brainvisa.utils.folder.create_folder">
 <code class="descclassname">deep_folding.brainvisa.utils.folder.</code><code class="descname">create_folder</code><span class="sig-paren">(</span><em>folder: str</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#deep_folding.brainvisa.utils.folder.create_folder" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creates folder if it doesn’t exist</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-deep_folding.brainvisa.utils.foldlabel">
+<span id="deep-folding-brainvisa-utils-foldlabel-module"></span><h2>deep_folding.brainvisa.utils.foldlabel module<a class="headerlink" href="#module-deep_folding.brainvisa.utils.foldlabel" title="Permalink to this headline">¶</a></h2>
+<p>Utilities to generate foldlabels from graph</p>
+<dl class="function">
+<dt id="deep_folding.brainvisa.utils.foldlabel.generate_foldlabel_from_graph">
+<code class="descclassname">deep_folding.brainvisa.utils.foldlabel.</code><code class="descname">generate_foldlabel_from_graph</code><span class="sig-paren">(</span><em>graph: soma.aims.Graph</em>, <em>junction: str = 'thin'</em><span class="sig-paren">)</span> &#x2192; &lt;function Volume at 0x7f32bb7240d0&gt;<a class="headerlink" href="#deep_folding.brainvisa.utils.foldlabel.generate_foldlabel_from_graph" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates foldlabel from graph</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="deep_folding.brainvisa.utils.foldlabel.generate_foldlabel_from_graph_file">
+<code class="descclassname">deep_folding.brainvisa.utils.foldlabel.</code><code class="descname">generate_foldlabel_from_graph_file</code><span class="sig-paren">(</span><em>graph_file: str</em>, <em>foldlabel_file: str</em>, <em>junction: str = 'thin'</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.utils.foldlabel.generate_foldlabel_from_graph_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates skeleton from graph file</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="deep_folding.brainvisa.utils.foldlabel.generate_foldlabel_thin_junction">
+<code class="descclassname">deep_folding.brainvisa.utils.foldlabel.</code><code class="descname">generate_foldlabel_thin_junction</code><span class="sig-paren">(</span><em>graph: soma.aims.Graph</em><span class="sig-paren">)</span> &#x2192; &lt;function Volume at 0x7f32bb7240d0&gt;<a class="headerlink" href="#deep_folding.brainvisa.utils.foldlabel.generate_foldlabel_thin_junction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts an aims graph into skeleton and foldlabel volumes</p>
+<p>It should produce thin junctions as vertices (aims_ss, aims_bottom)
+are written after edges (junction, plidepassage).
+Thus, when voxels are present in both, simple and bottom surfaces override
+junctions</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="deep_folding.brainvisa.utils.foldlabel.generate_foldlabel_wide_junction">
+<code class="descclassname">deep_folding.brainvisa.utils.foldlabel.</code><code class="descname">generate_foldlabel_wide_junction</code><span class="sig-paren">(</span><em>graph: soma.aims.Graph</em><span class="sig-paren">)</span> &#x2192; &lt;function Volume at 0x7f32bb7240d0&gt;<a class="headerlink" href="#deep_folding.brainvisa.utils.foldlabel.generate_foldlabel_wide_junction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts an aims graph into skeleton and foldlabel volumes</p>
+<p>It should produce wide junctions as edges (junction, plidepassage)
+are written after vertices (aims_ss, aims_bottom).
+Thus, when voxels are present in both, junction voxels override
+simple surface and bottom voxels</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-deep_folding.brainvisa.utils.graph">
+<span id="deep-folding-brainvisa-utils-graph-module"></span><h2>deep_folding.brainvisa.utils.graph module<a class="headerlink" href="#module-deep_folding.brainvisa.utils.graph" title="Permalink to this headline">¶</a></h2>
+<p>Utilities on graphs</p>
+<dl class="function">
+<dt id="deep_folding.brainvisa.utils.graph.create_empty_volume_from_graph">
+<code class="descclassname">deep_folding.brainvisa.utils.graph.</code><code class="descname">create_empty_volume_from_graph</code><span class="sig-paren">(</span><em>graph: soma.aims.Graph</em><span class="sig-paren">)</span> &#x2192; &lt;function Volume at 0x7f32bb7240d0&gt;<a class="headerlink" href="#deep_folding.brainvisa.utils.graph.create_empty_volume_from_graph" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates empty volume with graph header</p>
 </dd></dl>
 
 </div>
@@ -360,8 +432,37 @@ bbmax: an array of maximum coordinates of max_box around the mask</p>
 </dd></dl>
 
 <dl class="function">
+<dt id="deep_folding.brainvisa.utils.mask.compute_intersection_mask">
+<code class="descclassname">deep_folding.brainvisa.utils.mask.</code><code class="descname">compute_intersection_mask</code><span class="sig-paren">(</span><em>sulci_list</em>, <em>side</em>, <em>mask_dir='test/mask/1mm'</em>, <em>dilation=5.0</em>, <em>threshold=0.0</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.utils.mask.compute_intersection_mask" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function returning mask making intersection of masks over several sulci</p>
+<p>It reads mask files in the source mask directory and combines them.
+They are listed in subdirectory ‘L’ or ‘R’ according the hemisphere</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>sulci_list</strong> – a list of sulci</li>
+<li><strong>side</strong> – a string corresponding to the hemisphere, whether ‘L’ or ‘R’</li>
+<li><strong>mask_dir</strong> – path to source directory containing masks</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">AIMS volume containing combined mask
+bbmin: an array of minimum coordinates of min box around the mask
+bbmax: an array of maximum coordinates of max_box around the mask</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">mask_result</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
 <dt id="deep_folding.brainvisa.utils.mask.compute_simple_mask">
-<code class="descclassname">deep_folding.brainvisa.utils.mask.</code><code class="descname">compute_simple_mask</code><span class="sig-paren">(</span><em>sulci_list</em>, <em>side</em>, <em>mask_dir='test/mask/1mm'</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.utils.mask.compute_simple_mask" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">deep_folding.brainvisa.utils.mask.</code><code class="descname">compute_simple_mask</code><span class="sig-paren">(</span><em>sulci_list</em>, <em>side</em>, <em>mask_dir='test/mask/1mm'</em>, <em>dilation=5.0</em>, <em>threshold=0.0</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.utils.mask.compute_simple_mask" title="Permalink to this definition">¶</a></dt>
 <dd><p>Function returning mask combining mask over several sulci</p>
 <p>It reads mask files in the source mask directory and combines them.
 They are listed in subdirectory ‘L’ or ‘R’ according the hemisphere</p>
@@ -388,6 +489,40 @@ bbmax: an array of maximum coordinates of max_box around the mask</p>
 </table>
 </dd></dl>
 
+<dl class="function">
+<dt id="deep_folding.brainvisa.utils.mask.intersect_binary">
+<code class="descclassname">deep_folding.brainvisa.utils.mask.</code><code class="descname">intersect_binary</code><span class="sig-paren">(</span><em>a</em>, <em>b</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.utils.mask.intersect_binary" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns intersection of two binary arrays</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-deep_folding.brainvisa.utils.padding">
+<span id="deep-folding-brainvisa-utils-padding-module"></span><h2>deep_folding.brainvisa.utils.padding module<a class="headerlink" href="#module-deep_folding.brainvisa.utils.padding" title="Permalink to this headline">¶</a></h2>
+<p>Padds a numpy array</p>
+<p>Taken from:
+<a class="reference external" href="https://github.com/neurospin/pynet/blob/master/pynet/preprocessing/spatial.py">https://github.com/neurospin/pynet/blob/master/pynet/preprocessing/spatial.py</a></p>
+<dl class="function">
+<dt id="deep_folding.brainvisa.utils.padding.padd">
+<code class="descclassname">deep_folding.brainvisa.utils.padding.</code><code class="descname">padd</code><span class="sig-paren">(</span><em>arr</em>, <em>shape</em>, <em>fill_value=0</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.utils.padding.padd" title="Permalink to this definition">¶</a></dt>
+<dd><p>Apply a padding.
+:param arr: the input data.
+:type arr: array
+:param shape: the desired shape.
+:type shape: list of int
+:param fill_value: the value used to fill the array.
+:type fill_value: int, default 0</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><strong>transformed</strong> – the transformed input data.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">array</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 </div>
 <div class="section" id="module-deep_folding.brainvisa.utils.parallel">
 <span id="deep-folding-brainvisa-utils-parallel-module"></span><h2>deep_folding.brainvisa.utils.parallel module<a class="headerlink" href="#module-deep_folding.brainvisa.utils.parallel" title="Permalink to this headline">¶</a></h2>
@@ -397,6 +532,71 @@ for parallel computing</p>
 <dt id="deep_folding.brainvisa.utils.parallel.define_njobs">
 <code class="descclassname">deep_folding.brainvisa.utils.parallel.</code><code class="descname">define_njobs</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.utils.parallel.define_njobs" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns number of cpus used by main loop</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-deep_folding.brainvisa.utils.quality_checks">
+<span id="deep-folding-brainvisa-utils-quality-checks-module"></span><h2>deep_folding.brainvisa.utils.quality_checks module<a class="headerlink" href="#module-deep_folding.brainvisa.utils.quality_checks" title="Permalink to this headline">¶</a></h2>
+<p>Utilities to perform quality checks</p>
+<dl class="function">
+<dt id="deep_folding.brainvisa.utils.quality_checks.compare_number_aims_files_with_expected">
+<code class="descclassname">deep_folding.brainvisa.utils.quality_checks.</code><code class="descname">compare_number_aims_files_with_expected</code><span class="sig-paren">(</span><em>output_dir: str</em>, <em>list_subjects: list</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.utils.quality_checks.compare_number_aims_files_with_expected" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compares number of generated files and expected number</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="deep_folding.brainvisa.utils.quality_checks.compare_number_aims_files_with_number_in_source">
+<code class="descclassname">deep_folding.brainvisa.utils.quality_checks.</code><code class="descname">compare_number_aims_files_with_number_in_source</code><span class="sig-paren">(</span><em>output_dir: str</em>, <em>src_dir: str</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.utils.quality_checks.compare_number_aims_files_with_number_in_source" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compares number of generated files and source files</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="deep_folding.brainvisa.utils.quality_checks.get_not_processed_cropped_files">
+<code class="descclassname">deep_folding.brainvisa.utils.quality_checks.</code><code class="descname">get_not_processed_cropped_files</code><span class="sig-paren">(</span><em>src_dir</em>, <em>tgt_dir</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.utils.quality_checks.get_not_processed_cropped_files" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns list of source files not yet processed.</p>
+<p>this one is specific toc rop directory.
+This is done by comparing subjects in src and tgt directories</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="deep_folding.brainvisa.utils.quality_checks.get_not_processed_files">
+<code class="descclassname">deep_folding.brainvisa.utils.quality_checks.</code><code class="descname">get_not_processed_files</code><span class="sig-paren">(</span><em>src_dir</em>, <em>tgt_dir</em>, <em>src_filename</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.utils.quality_checks.get_not_processed_files" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns list of source files not yet processed.</p>
+<p>This is done by comparing subjects in src and tgt directories</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="deep_folding.brainvisa.utils.quality_checks.get_not_processed_subjects">
+<code class="descclassname">deep_folding.brainvisa.utils.quality_checks.</code><code class="descname">get_not_processed_subjects</code><span class="sig-paren">(</span><em>src_subjects</em>, <em>tgt_dir</em>, <em>prefix='generated_'</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.utils.quality_checks.get_not_processed_subjects" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns list of source files not yet processed.</p>
+<p>This is done by comparing subjects in src and tgt directories</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="deep_folding.brainvisa.utils.quality_checks.get_not_processed_subjects_dict">
+<code class="descclassname">deep_folding.brainvisa.utils.quality_checks.</code><code class="descname">get_not_processed_subjects_dict</code><span class="sig-paren">(</span><em>subjects</em>, <em>tgt_dir</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.utils.quality_checks.get_not_processed_subjects_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns list of subjects not yet processed.</p>
+<p>This is done by comparing subjects in subject dict and tgt directories</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="deep_folding.brainvisa.utils.quality_checks.get_not_processed_subjects_distmap">
+<code class="descclassname">deep_folding.brainvisa.utils.quality_checks.</code><code class="descname">get_not_processed_subjects_distmap</code><span class="sig-paren">(</span><em>src_subjects</em>, <em>tgt_dir</em>, <em>prefix='generated_'</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.utils.quality_checks.get_not_processed_subjects_distmap" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns list of source files not yet processed.</p>
+<p>This is done by comparing subjects in src and tgt directories</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="deep_folding.brainvisa.utils.quality_checks.get_not_processed_subjects_transform">
+<code class="descclassname">deep_folding.brainvisa.utils.quality_checks.</code><code class="descname">get_not_processed_subjects_transform</code><span class="sig-paren">(</span><em>src_subjects</em>, <em>tgt_dir</em>, <em>prefix='ICBM2009c_'</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.utils.quality_checks.get_not_processed_subjects_transform" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns list of source files not yet processed.</p>
+<p>This is done by comparing subjects in src and tgt directories</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="deep_folding.brainvisa.utils.quality_checks.save_list_to_csv">
+<code class="descclassname">deep_folding.brainvisa.utils.quality_checks.</code><code class="descname">save_list_to_csv</code><span class="sig-paren">(</span><em>not_processed_files</em>, <em>csv_file_name</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.utils.quality_checks.save_list_to_csv" title="Permalink to this definition">¶</a></dt>
+<dd><p>Saves list of not_processed files to csv</p>
 </dd></dl>
 
 </div>
@@ -410,7 +610,7 @@ for parallel computing</p>
 
 <dl class="function">
 <dt id="deep_folding.brainvisa.utils.referentials.generate_ref_volume_ICBM2009c">
-<code class="descclassname">deep_folding.brainvisa.utils.referentials.</code><code class="descname">generate_ref_volume_ICBM2009c</code><span class="sig-paren">(</span><em>out_voxel_size: tuple</em><span class="sig-paren">)</span> &#x2192; &lt;function Volume at 0x7fdc73bf5a60&gt;<a class="headerlink" href="#deep_folding.brainvisa.utils.referentials.generate_ref_volume_ICBM2009c" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">deep_folding.brainvisa.utils.referentials.</code><code class="descname">generate_ref_volume_ICBM2009c</code><span class="sig-paren">(</span><em>out_voxel_size: tuple</em><span class="sig-paren">)</span> &#x2192; &lt;function Volume at 0x7f32bb7240d0&gt;<a class="headerlink" href="#deep_folding.brainvisa.utils.referentials.generate_ref_volume_ICBM2009c" title="Permalink to this definition">¶</a></dt>
 <dd><p>Defines MNI 2009 reference aims volume with output voxel size</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -439,7 +639,7 @@ Output voxel size (default: None, no resampling)</td>
 hull and to use this new volume for visualization if needed.</p>
 <dl class="class">
 <dt id="deep_folding.brainvisa.utils.remove_hull.DatasetHullRemoved">
-<em class="property">class </em><code class="descclassname">deep_folding.brainvisa.utils.remove_hull.</code><code class="descname">DatasetHullRemoved</code><span class="sig-paren">(</span><em>src_dir='/nfs/neurospin/dico/data/deep_folding/data/crops/SC/sulcus_based/2mm/'</em>, <em>tgt_dir='/nfs/neurospin/dico/data/deep_folding/data/crops/SC/sulcus_based/2mm/meshes/'</em>, <em>side='R'</em>, <em>number_subjects=-1</em>, <em>list_subjects=None</em>, <em>file_subjects=None</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.utils.remove_hull.DatasetHullRemoved" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">deep_folding.brainvisa.utils.remove_hull.</code><code class="descname">DatasetHullRemoved</code><span class="sig-paren">(</span><em>src_dir='/nfs/neurospin/dico/data/deep_folding/data/crops/SC/sulcus_based/2mm/'</em>, <em>tgt_dir='/neurospin/dico/data/deep_folding/data/crops/SC/sulcus_based/2mm/meshes/'</em>, <em>side='R'</em>, <em>number_subjects=-1</em>, <em>list_subjects=None</em>, <em>file_subjects=None</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.utils.remove_hull.DatasetHullRemoved" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
 <p>Generates meshes of crops without hull</p>
 <dl class="method">
@@ -529,7 +729,8 @@ hull and to use this new volume for visualization if needed.</p>
 <dt id="deep_folding.brainvisa.utils.remove_hull.remove_hull">
 <code class="descclassname">deep_folding.brainvisa.utils.remove_hull.</code><code class="descname">remove_hull</code><span class="sig-paren">(</span><em>arr</em>, <em>padding=1</em>, <em>ext=1</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.utils.remove_hull.remove_hull" title="Permalink to this definition">¶</a></dt>
 <dd><p>Removes the pixels on the hull.</p>
-<p>Pixels on the hull are defined as being in contact with both the internal and external part.
+<p>Pixels on the hull are defined as being in contact
+with both the internal and external part.
 This function removes the hull in place</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -538,7 +739,7 @@ This function removes the hull in place</p>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>arr</strong> – numpy array modified in the array</li>
 <li><strong>padding</strong> – padding of the image, equal to the extension ext</li>
-<li><strong>ext</strong> – local array extension in which to look for external and internal pixels</li>
+<li><strong>ext</strong> – local array extension in which to look for extern/internal pixels</li>
 </ul>
 </td>
 </tr>
@@ -566,7 +767,7 @@ This function removes the hull in place</p>
 <p>Resample a volume that contains discret values</p>
 <dl class="function">
 <dt id="deep_folding.brainvisa.utils.resample.resample">
-<code class="descclassname">deep_folding.brainvisa.utils.resample.</code><code class="descname">resample</code><span class="sig-paren">(</span><em>input_image: typing.Union[str, Volume], transformation: typing.Union[str, soma.aims.aims.AffineTransformation3d], output_vs: tuple = None, background: int = 0, values: &lt;built-in function array&gt; = None, verbose: bool = False</em><span class="sig-paren">)</span> &#x2192; &lt;function Volume at 0x7fdc73bf5a60&gt;<a class="headerlink" href="#deep_folding.brainvisa.utils.resample.resample" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">deep_folding.brainvisa.utils.resample.</code><code class="descname">resample</code><span class="sig-paren">(</span><em>input_image: typing.Union[str, Volume], transformation: typing.Union[str, soma.aims.aims.AffineTransformation3d], output_vs: tuple = None, background: int = 0, values: &lt;built-in function array&gt; = None, verbose: bool = False</em><span class="sig-paren">)</span> &#x2192; &lt;function Volume at 0x7f32bb7240d0&gt;<a class="headerlink" href="#deep_folding.brainvisa.utils.resample.resample" title="Permalink to this definition">¶</a></dt>
 <dd><p>Transforms and resamples a volume that has discret values</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -577,7 +778,8 @@ This function removes the hull in place</p>
 <li><strong>transformation</strong> (<em>path to file</em>) – Linear transformation file (.trm file)</li>
 <li><strong>output_vs</strong> (<em>tuple</em>) – Output voxel size (default: None, no resampling)</li>
 <li><strong>background</strong> (<em>int</em>) – Background value (default: 0)</li>
-<li><strong>values</strong> (<em>[</em><em>]</em>) – Array of unique values ordered by ascendent priority without background. If not given,
+<li><strong>values</strong> (<em>[</em><em>]</em>) – Array of unique values ordered by ascendent priority
+without background. If not given,
 priority is set by ascendent values</li>
 </ul>
 </td>
@@ -590,6 +792,158 @@ priority is set by ascendent values</li>
 </tr>
 </tbody>
 </table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-deep_folding.brainvisa.utils.save_data">
+<span id="deep-folding-brainvisa-utils-save-data-module"></span><h2>deep_folding.brainvisa.utils.save_data module<a class="headerlink" href="#module-deep_folding.brainvisa.utils.save_data" title="Permalink to this headline">¶</a></h2>
+<p>Scripts that enables to create a dataframe of numpy arrays from .nii.gz or .nii
+images.</p>
+<dl class="function">
+<dt id="deep_folding.brainvisa.utils.save_data.compare_array_aims_files">
+<code class="descclassname">deep_folding.brainvisa.utils.save_data.</code><code class="descname">compare_array_aims_files</code><span class="sig-paren">(</span><em>subjects</em>, <em>arr</em>, <em>cropped_dir</em>, <em>parallel=True</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.utils.save_data.compare_array_aims_files" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compares numpy arrays to subject nifti files</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="deep_folding.brainvisa.utils.save_data.compare_one_array">
+<code class="descclassname">deep_folding.brainvisa.utils.save_data.</code><code class="descname">compare_one_array</code><span class="sig-paren">(</span><em>cropped_dir</em>, <em>list_basename</em>, <em>row</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.utils.save_data.compare_one_array" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="deep_folding.brainvisa.utils.save_data.get_one_numpy_array">
+<code class="descclassname">deep_folding.brainvisa.utils.save_data.</code><code class="descname">get_one_numpy_array</code><span class="sig-paren">(</span><em>filename</em>, <em>cropped_dir</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.utils.save_data.get_one_numpy_array" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="deep_folding.brainvisa.utils.save_data.is_file_nii">
+<code class="descclassname">deep_folding.brainvisa.utils.save_data.</code><code class="descname">is_file_nii</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.utils.save_data.is_file_nii" title="Permalink to this definition">¶</a></dt>
+<dd><p>Tests if file is nii file</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>filename</strong> – string giving file name with full path</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">boolean stating if file is nii file</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#deep_folding.brainvisa.utils.save_data.is_file_nii" title="deep_folding.brainvisa.utils.save_data.is_file_nii">is_file_nii</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="deep_folding.brainvisa.utils.save_data.quality_checks">
+<code class="descclassname">deep_folding.brainvisa.utils.save_data.</code><code class="descname">quality_checks</code><span class="sig-paren">(</span><em>csv_file_path</em>, <em>npy_array_file_path</em>, <em>cropped_dir</em>, <em>parallel=False</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.utils.save_data.quality_checks" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks that the numpy arrays are equal to subject nifti files.</p>
+<p>This is to check that the subjects list in csv file
+match the order set in numpy arrays</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="deep_folding.brainvisa.utils.save_data.save_to_dataframe_format_from_list">
+<code class="descclassname">deep_folding.brainvisa.utils.save_data.</code><code class="descname">save_to_dataframe_format_from_list</code><span class="sig-paren">(</span><em>cropped_dir</em>, <em>tgt_dir=None</em>, <em>file_basename=None</em>, <em>list_sample_id=None</em>, <em>list_sample_file=None</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.utils.save_data.save_to_dataframe_format_from_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a dataframe of data with a column for each subject and associated
+np.array. Saved these this dataframe to pkl format on the target
+directory</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>cropped_dir</strong> – directory containing cropped images</li>
+<li><strong>tgt_dir</strong> – directory where to save the pickle file</li>
+<li><strong>file_basename</strong> – final file name = file_basename.pkl</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="deep_folding.brainvisa.utils.save_data.save_to_numpy">
+<code class="descclassname">deep_folding.brainvisa.utils.save_data.</code><code class="descname">save_to_numpy</code><span class="sig-paren">(</span><em>cropped_dir</em>, <em>tgt_dir=None</em>, <em>file_basename=None</em>, <em>parallel=False</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.utils.save_data.save_to_numpy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a numpy array for each subject.</p>
+<p>Saved these this dataframe to npy format on the target
+directory</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>cropped_dir</strong> – directory containing cropped images</li>
+<li><strong>tgt_dir</strong> – directory where to save the numpy array file</li>
+<li><strong>file_basename</strong> – final file name = file_basename.npy</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="deep_folding.brainvisa.utils.save_data.save_to_pickle">
+<code class="descclassname">deep_folding.brainvisa.utils.save_data.</code><code class="descname">save_to_pickle</code><span class="sig-paren">(</span><em>cropped_dir</em>, <em>tgt_dir=None</em>, <em>file_basename=None</em>, <em>parallel=False</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.utils.save_data.save_to_pickle" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a dataframe of data with a column for each subject and associated
+np.array. Saved these this dataframe to pkl format on the target
+directory</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>cropped_dir</strong> – directory containing cropped images</li>
+<li><strong>tgt_dir</strong> – directory where to save the pickle file</li>
+<li><strong>file_basename</strong> – final file name = file_basename.pkl</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-deep_folding.brainvisa.utils.skeleton">
+<span id="deep-folding-brainvisa-utils-skeleton-module"></span><h2>deep_folding.brainvisa.utils.skeleton module<a class="headerlink" href="#module-deep_folding.brainvisa.utils.skeleton" title="Permalink to this headline">¶</a></h2>
+<p>Utilities to generate skeletons from graph</p>
+<dl class="function">
+<dt id="deep_folding.brainvisa.utils.skeleton.generate_skeleton_from_graph">
+<code class="descclassname">deep_folding.brainvisa.utils.skeleton.</code><code class="descname">generate_skeleton_from_graph</code><span class="sig-paren">(</span><em>graph: soma.aims.Graph</em>, <em>junction: str = 'thin'</em><span class="sig-paren">)</span> &#x2192; &lt;function Volume at 0x7f32bb7240d0&gt;<a class="headerlink" href="#deep_folding.brainvisa.utils.skeleton.generate_skeleton_from_graph" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates skeleton from graph</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="deep_folding.brainvisa.utils.skeleton.generate_skeleton_from_graph_file">
+<code class="descclassname">deep_folding.brainvisa.utils.skeleton.</code><code class="descname">generate_skeleton_from_graph_file</code><span class="sig-paren">(</span><em>graph_file: str</em>, <em>skeleton_file: str</em>, <em>junction: str = 'thin'</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.utils.skeleton.generate_skeleton_from_graph_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates skeleton from graph file</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="deep_folding.brainvisa.utils.skeleton.generate_skeleton_thin_junction">
+<code class="descclassname">deep_folding.brainvisa.utils.skeleton.</code><code class="descname">generate_skeleton_thin_junction</code><span class="sig-paren">(</span><em>graph: soma.aims.Graph</em><span class="sig-paren">)</span> &#x2192; &lt;function Volume at 0x7f32bb7240d0&gt;<a class="headerlink" href="#deep_folding.brainvisa.utils.skeleton.generate_skeleton_thin_junction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts an aims graph into skeleton volumes</p>
+<p>It should produce thin junctions as vertices (aims_ss, aims_bottom)
+are written after edges (junction, plidepassage).
+Thus, when voxels are present in both, simple and bottom surfaces override
+junctions</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="deep_folding.brainvisa.utils.skeleton.generate_skeleton_wide_junction">
+<code class="descclassname">deep_folding.brainvisa.utils.skeleton.</code><code class="descname">generate_skeleton_wide_junction</code><span class="sig-paren">(</span><em>graph: soma.aims.Graph</em><span class="sig-paren">)</span> &#x2192; &lt;function Volume at 0x7f32bb7240d0&gt;<a class="headerlink" href="#deep_folding.brainvisa.utils.skeleton.generate_skeleton_wide_junction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts an aims graph into skeleton volumes</p>
+<p>It should produce wide junctions as edges (junction, plidepassage)
+are written after vertices (aims_ss, aims_bottom).
+Thus, when voxels are present in both, junction voxels override
+simple surface and bottom voxels</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="deep_folding.brainvisa.utils.skeleton.is_skeleton">
+<code class="descclassname">deep_folding.brainvisa.utils.skeleton.</code><code class="descname">is_skeleton</code><span class="sig-paren">(</span><em>arr</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.utils.skeleton.is_skeleton" title="Permalink to this definition">¶</a></dt>
+<dd><p>checks if arr is a skeleton</p>
 </dd></dl>
 
 </div>
@@ -626,6 +980,39 @@ priority is set by ascendent values</li>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">int giving nb of subjects (-1 if all subjects)</td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">nb_subjects_int</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="deep_folding.brainvisa.utils.subjects.is_it_a_subject">
+<code class="descclassname">deep_folding.brainvisa.utils.subjects.</code><code class="descname">is_it_a_subject</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.utils.subjects.is_it_a_subject" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="deep_folding.brainvisa.utils.subjects.select_good_qc">
+<code class="descclassname">deep_folding.brainvisa.utils.subjects.</code><code class="descname">select_good_qc</code><span class="sig-paren">(</span><em>orig_list: list</em>, <em>qc_path: str</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.utils.subjects.select_good_qc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the sublist of orig_list where all data with bad qc are removed.
+/!Also removes subjects that are not mentioned in the qc file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>orig_list</strong> – list of strings, the origin list of subjects</li>
+<li><strong>qc_path</strong> – string giving the file path with the relevant information.
+It is  a .csv (or .tsv) with a ‘participant_id’ and ‘qc’ columns.
+qc values are supposed to be either 0 or 1.
+If qc_path is set to None, then no QC are applied.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">list of strings, being the subjects with acceptable qc.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#module-deep_folding.brainvisa.utils.subjects" title="deep_folding.brainvisa.utils.subjects">subjects</a></p>
+</td>
 </tr>
 </tbody>
 </table>
@@ -713,6 +1100,47 @@ side.</p>
 </tr>
 </tbody>
 </table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-deep_folding.brainvisa.utils.suppress_files_from_csv">
+<span id="deep-folding-brainvisa-utils-suppress-files-from-csv-module"></span><h2>deep_folding.brainvisa.utils.suppress_files_from_csv module<a class="headerlink" href="#module-deep_folding.brainvisa.utils.suppress_files_from_csv" title="Permalink to this headline">¶</a></h2>
+<p>This program converts volumes contained in a folder into buckets.
+It writes bucket files in the output folder</p>
+<dl class="function">
+<dt id="deep_folding.brainvisa.utils.suppress_files_from_csv.main">
+<code class="descclassname">deep_folding.brainvisa.utils.suppress_files_from_csv.</code><code class="descname">main</code><span class="sig-paren">(</span><em>argv</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.utils.suppress_files_from_csv.main" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads argument line and creates cropped files and pickle file</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>argv</strong> – a list containing command line arguments</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="deep_folding.brainvisa.utils.suppress_files_from_csv.parse_args">
+<code class="descclassname">deep_folding.brainvisa.utils.suppress_files_from_csv.</code><code class="descname">parse_args</code><span class="sig-paren">(</span><em>argv</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.utils.suppress_files_from_csv.parse_args" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parses command-line arguments</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>argv</strong> – a list containing command line arguments</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">args</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="deep_folding.brainvisa.utils.suppress_files_from_csv.suppress">
+<code class="descclassname">deep_folding.brainvisa.utils.suppress_files_from_csv.</code><code class="descname">suppress</code><span class="sig-paren">(</span><em>csv_file_name</em><span class="sig-paren">)</span><a class="headerlink" href="#deep_folding.brainvisa.utils.suppress_files_from_csv.suppress" title="Permalink to this definition">¶</a></dt>
+<dd><p>Suppress files listed in csv</p>
 </dd></dl>
 
 </div>

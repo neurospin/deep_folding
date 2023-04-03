@@ -12,6 +12,14 @@ deep\_folding\.brainvisa\.utils\.bbox module
     :undoc-members:
     :show-inheritance:
 
+deep\_folding\.brainvisa\.utils\.constants module
+-------------------------------------------------
+
+.. automodule:: deep_folding.brainvisa.utils.constants
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 deep\_folding\.brainvisa\.utils\.convert\_volume\_to\_bucket module
 -------------------------------------------------------------------
 
@@ -28,10 +36,34 @@ deep\_folding\.brainvisa\.utils\.dilate\_mask module
     :undoc-members:
     :show-inheritance:
 
+deep\_folding\.brainvisa\.utils\.distmap module
+-----------------------------------------------
+
+.. automodule:: deep_folding.brainvisa.utils.distmap
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 deep\_folding\.brainvisa\.utils\.folder module
 ----------------------------------------------
 
 .. automodule:: deep_folding.brainvisa.utils.folder
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+deep\_folding\.brainvisa\.utils\.foldlabel module
+-------------------------------------------------
+
+.. automodule:: deep_folding.brainvisa.utils.foldlabel
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+deep\_folding\.brainvisa\.utils\.graph module
+---------------------------------------------
+
+.. automodule:: deep_folding.brainvisa.utils.graph
     :members:
     :undoc-members:
     :show-inheritance:
@@ -52,10 +84,26 @@ deep\_folding\.brainvisa\.utils\.mask module
     :undoc-members:
     :show-inheritance:
 
+deep\_folding\.brainvisa\.utils\.padding module
+-----------------------------------------------
+
+.. automodule:: deep_folding.brainvisa.utils.padding
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 deep\_folding\.brainvisa\.utils\.parallel module
 ------------------------------------------------
 
 .. automodule:: deep_folding.brainvisa.utils.parallel
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+deep\_folding\.brainvisa\.utils\.quality\_checks module
+-------------------------------------------------------
+
+.. automodule:: deep_folding.brainvisa.utils.quality_checks
     :members:
     :undoc-members:
     :show-inheritance:
@@ -84,6 +132,22 @@ deep\_folding\.brainvisa\.utils\.resample module
     :undoc-members:
     :show-inheritance:
 
+deep\_folding\.brainvisa\.utils\.save\_data module
+--------------------------------------------------
+
+.. automodule:: deep_folding.brainvisa.utils.save_data
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+deep\_folding\.brainvisa\.utils\.skeleton module
+------------------------------------------------
+
+.. automodule:: deep_folding.brainvisa.utils.skeleton
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 deep\_folding\.brainvisa\.utils\.subjects module
 ------------------------------------------------
 
@@ -96,6 +160,14 @@ deep\_folding\.brainvisa\.utils\.sulcus module
 ----------------------------------------------
 
 .. automodule:: deep_folding.brainvisa.utils.sulcus
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+deep\_folding\.brainvisa\.utils\.suppress\_files\_from\_csv module
+------------------------------------------------------------------
+
+.. automodule:: deep_folding.brainvisa.utils.suppress_files_from_csv
     :members:
     :undoc-members:
     :show-inheritance:

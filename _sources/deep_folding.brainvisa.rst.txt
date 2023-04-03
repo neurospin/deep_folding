@@ -11,10 +11,10 @@ Subpackages
 Submodules
 ----------
 
-deep\_folding\.brainvisa\.benchmark\_generation module
-------------------------------------------------------
+deep\_folding\.brainvisa\.benchmark\_generation\_distmap module
+---------------------------------------------------------------
 
-.. automodule:: deep_folding.brainvisa.benchmark_generation
+.. automodule:: deep_folding.brainvisa.benchmark_generation_distmap
     :members:
     :undoc-members:
     :show-inheritance:
@@ -43,10 +43,18 @@ deep\_folding\.brainvisa\.compute\_mask module
     :undoc-members:
     :show-inheritance:
 
-deep\_folding\.brainvisa\.display module
-----------------------------------------
+deep\_folding\.brainvisa\.display\_reconstructions module
+---------------------------------------------------------
 
-.. automodule:: deep_folding.brainvisa.display
+.. automodule:: deep_folding.brainvisa.display_reconstructions
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+deep\_folding\.brainvisa\.generate\_ICBM2009c\_transforms module
+----------------------------------------------------------------
+
+.. automodule:: deep_folding.brainvisa.generate_ICBM2009c_transforms
     :members:
     :undoc-members:
     :show-inheritance:
@@ -55,6 +63,14 @@ deep\_folding\.brainvisa\.generate\_crops module
 ------------------------------------------------
 
 .. automodule:: deep_folding.brainvisa.generate_crops
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+deep\_folding\.brainvisa\.generate\_distmaps module
+---------------------------------------------------
+
+.. automodule:: deep_folding.brainvisa.generate_distmaps
     :members:
     :undoc-members:
     :show-inheritance:
@@ -75,11 +91,26 @@ deep\_folding\.brainvisa\.generate\_skeletons module
     :undoc-members:
     :show-inheritance:
 
-
 deep\_folding\.brainvisa\.mask\_qc module
 -----------------------------------------
 
 .. automodule:: deep_folding.brainvisa.mask_qc
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+deep\_folding\.brainvisa\.pipeline module
+-----------------------------------------
+
+.. automodule:: deep_folding.brainvisa.pipeline
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+deep\_folding\.brainvisa\.remove\_ventricle module
+--------------------------------------------------
+
+.. automodule:: deep_folding.brainvisa.remove_ventricle
     :members:
     :undoc-members:
     :show-inheritance:
