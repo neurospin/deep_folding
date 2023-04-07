@@ -228,6 +228,7 @@ class GraphConvert2FoldLabel:
         filenames = glob.glob(f"{self.src_dir}/*")
         list_subjects = [basename(filename) for filename in filenames
                          if is_it_a_subject(filename)]
+        log.info(f"Number of subjects before qc = {len(list_subjects)}")
         list_subjects = select_good_qc(list_subjects, self.qc_path)
         list_subjects = get_not_processed_subjects(
             list_subjects, self.foldlabel_dir, "foldlabel_")
