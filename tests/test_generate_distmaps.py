@@ -47,10 +47,10 @@ def test_generate_distmaps():
                         number_subjects=1)
 
     distmap_target = aims.read(os.path.join(
-        tgt_dir, 'R', 'Rdistmap_generated_126426.nii.gz')).arraydata()
+        tgt_dir, 'R', 'Rdistmap_generated_146533.nii.gz')).arraydata()
 
     distmap_ref = aims.read(os.path.join(
-        ref_dir, 'Rdistmap_generated_126426.nii.gz')).arraydata()
+        ref_dir, 'Rdistmap_generated_146533.nii.gz')).arraydata()
 
     equal_dist = equal_distmaps(distmap_ref, distmap_target)
 
