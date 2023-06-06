@@ -543,7 +543,7 @@ def main(argv):
 
         # save params json where the crops lie
         with open(path_to_crops +
-                  f'/pipeline_params_{cropdir_name}s.json',
+                  f"/pipeline_params_{params['side']}{cropdir_name}s.json",
                   'w') as file:
             json.dump(params, file, indent=2)
 
