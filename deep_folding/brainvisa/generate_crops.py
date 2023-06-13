@@ -54,15 +54,12 @@ import glob
 import os
 import re
 import sys
-import tempfile
-from os import listdir
 from os.path import join
 from os.path import basename
-import csv
 
 import numpy as np
-from numpy import save
 import scipy.ndimage
+
 from deep_folding.brainvisa import exception_handler
 from deep_folding.brainvisa.utils.save_data import save_to_numpy
 from deep_folding.brainvisa.utils.save_data import \
@@ -84,7 +81,6 @@ from deep_folding.brainvisa.utils.quality_checks import \
     save_list_to_csv
 from deep_folding.brainvisa.utils.sulcus import complete_sulci_name
 from deep_folding.config.logs import set_file_logger
-from pqdm.processes import pqdm
 from p_tqdm import p_map
 from soma import aims
 
@@ -226,7 +222,7 @@ class CropGenerator:
         """
 
         # Identifies 'subject' in a mapping (for file and directory namings)
-        subject = {'subject': subject_id, 'side': self.side}
+        # subject = {'subject': subject_id, 'side': self.side}
         # FOR TISSIER
         # subject_id = re.search('([ae\d]{5,6})', subject_id).group(0)
 
@@ -447,7 +443,9 @@ class SkeletonCropGenerator(CropGenerator):
                  cropping_type=_CROPPING_TYPE_DEFAULT,
                  combine_type=_COMBINE_TYPE_DEFAULT,
                  parallel=False,
-                 no_mask=_NO_MASK_DEFAULT):
+                 no_mask=_NO_MASK_DEFAULT,
+                 threshold=_THRESHOLD_DEFAULT,
+                 dilation=_DILATION_DEFAULT):
         """Inits with list of directories and list of sulci
         Args:
             src_dir: folder containing generated skeletons or labels
@@ -468,7 +466,8 @@ class SkeletonCropGenerator(CropGenerator):
             bbox_dir=bbox_dir, mask_dir=mask_dir,
             list_sulci=list_sulci, side=side,
             cropping_type=cropping_type, combine_type=combine_type,
-            parallel=parallel, no_mask=no_mask
+            parallel=parallel, no_mask=no_mask,
+            threshold=threshold, dilation=dilation
         )
 
         # Directory where to store cropped skeleton files
@@ -512,7 +511,9 @@ class FoldLabelCropGenerator(CropGenerator):
                  cropping_type=_CROPPING_TYPE_DEFAULT,
                  combine_type=_COMBINE_TYPE_DEFAULT,
                  parallel=False,
-                 no_mask=_NO_MASK_DEFAULT):
+                 no_mask=_NO_MASK_DEFAULT,
+                 threshold=_THRESHOLD_DEFAULT,
+                 dilation=_DILATION_DEFAULT):
         """Inits with list of directories and list of sulci
         Args:
             src_dir: folder containing generated skeletons or labels
@@ -534,7 +535,8 @@ class FoldLabelCropGenerator(CropGenerator):
             bbox_dir=bbox_dir, mask_dir=mask_dir,
             list_sulci=list_sulci, side=side,
             cropping_type=cropping_type, combine_type=combine_type,
-            parallel=parallel, no_mask=no_mask
+            parallel=parallel, no_mask=no_mask,
+            threshold=threshold, dilation=dilation
         )
 
         # Directory where to store cropped skeleton files
@@ -578,7 +580,9 @@ class DistMapCropGenerator(CropGenerator):
                  cropping_type=_CROPPING_TYPE_DEFAULT,
                  combine_type=_COMBINE_TYPE_DEFAULT,
                  parallel=False,
-                 no_mask=_NO_MASK_DEFAULT):
+                 no_mask=_NO_MASK_DEFAULT,
+                 threshold=_THRESHOLD_DEFAULT,
+                 dilation=_DILATION_DEFAULT):
         """Inits with list of directories and list of sulci
         Args:
             src_dir: folder containing generated skeletons, labels or distmaps
@@ -598,7 +602,8 @@ class DistMapCropGenerator(CropGenerator):
             bbox_dir=bbox_dir, mask_dir=mask_dir,
             list_sulci=list_sulci, side=side,
             cropping_type=cropping_type, combine_type=combine_type,
-            parallel=parallel, no_mask=no_mask
+            parallel=parallel, no_mask=no_mask,
+            threshold=threshold, dilation=dilation
         )
 
         # Directory where to store cropped skeleton files
@@ -731,6 +736,8 @@ def parse_args(argv):
     params['combine_type'] = args.combine_type
     params['parallel'] = args.parallel
     params['no_mask'] = args.no_mask
+    params['threshold'] = args.threshold
+    params['dilation'] = args.dilation
 
     # Checks if nb_subjects is either the string "all" or a positive integer
     params['nb_subjects'] = get_number_subjects(args.nb_subjects)
@@ -750,7 +757,10 @@ def generate_crops(
         cropping_type=_CROPPING_TYPE_DEFAULT,
         combine_type=_COMBINE_TYPE_DEFAULT,
         parallel=False,
-        no_mask=True):
+        no_mask=True,
+        threshold=_THRESHOLD_DEFAULT,
+        dilation=_DILATION_DEFAULT
+        ):
 
     if input_type == "skeleton":
         crop = SkeletonCropGenerator(
@@ -763,7 +773,9 @@ def generate_crops(
             cropping_type=cropping_type,
             combine_type=combine_type,
             parallel=parallel,
-            no_mask=no_mask)
+            no_mask=no_mask,
+            threshold=threshold,
+            dilation=dilation)
     elif input_type == "foldlabel":
         crop = FoldLabelCropGenerator(
             src_dir=src_dir,
@@ -775,7 +787,9 @@ def generate_crops(
             cropping_type=cropping_type,
             combine_type=combine_type,
             parallel=parallel,
-            no_mask=no_mask)
+            no_mask=no_mask,
+            threshold=threshold,
+            dilation=dilation)
     elif input_type == "distmap":
         crop = DistMapCropGenerator(
             src_dir=src_dir,
@@ -787,7 +801,9 @@ def generate_crops(
             cropping_type=cropping_type,
             combine_type=combine_type,
             parallel=parallel,
-            no_mask=no_mask)
+            no_mask=no_mask,
+            threshold=threshold,
+            dilation=dilation)
     else:
         raise ValueError(
             "input_type: shall be either 'skeleton', 'foldlabel' or 'distmap'")
@@ -817,7 +833,9 @@ def main(argv):
         combine_type=params['combine_type'],
         parallel=params['parallel'],
         number_subjects=params['nb_subjects'],
-        no_mask=params['no_mask'])
+        no_mask=params['no_mask'],
+        threshold=params['threshold'],
+        dilation=params['dilation'])
 
 
 ######################################################################

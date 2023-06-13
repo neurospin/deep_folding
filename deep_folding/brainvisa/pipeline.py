@@ -510,7 +510,7 @@ def main(argv):
     step = print_info(step, f"generate {params['input_type']} crops")
     if is_step_to_be_computed(
             path=path_to_crops_complete,
-            log_string=f"Crops",
+            log_string="Crops",
             save_behavior=save_behavior):
         if save_behavior == 'clear_and_compute' and os.path.exists(
                 path_to_crops_complete):
@@ -530,7 +530,9 @@ def main(argv):
             'combine_type': params['combine_type'],
             'parallel': params['parallel'],
             'number_subjects': params['nb_subjects'],
-            'no_mask': params['no_mask']}
+            'no_mask': params['no_mask'],
+            'threshold': params['threshold'],
+            'dilation': params['dilation']}
 
         setup_log(Namespace(**{'verbose': log.level, **args_generate_crops}),
                   log_dir=f"{args_generate_crops['crop_dir']}",

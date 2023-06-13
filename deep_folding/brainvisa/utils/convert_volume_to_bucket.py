@@ -116,7 +116,7 @@ def get_basename_without_extension(filename):
     """Returns file basename without extension"""
     basename = os.path.basename(filename)
 
-    without_extension = basename.split('.')[0]
+    without_extension = basename.split('.nii.gz')[0]
     return without_extension
 
 

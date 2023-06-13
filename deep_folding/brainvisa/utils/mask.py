@@ -40,7 +40,6 @@ a specified hemisphere.
 
 """
 
-import json
 from os.path import join
 
 import deep_folding.brainvisa.utils.dilate_mask as dl
@@ -104,6 +103,7 @@ def compute_simple_mask(
 
     # Initializes and fills list of masks, each repreented as an aims volume
     list_masks = []
+    hdr = aims.StandardReferentials.icbm2009cTemplateHeader()
 
     for sulcus in sulci_list:
         mask_file = join(mask_dir, side, sulcus + '.nii.gz')
@@ -111,7 +111,12 @@ def compute_simple_mask(
         list_masks.append(aims.read(mask_file))
 
     # Computes the mask being a combination of all masks
-    mask_result = list_masks[0]
+    mask_result = aims.Volume(list_masks[0].shape, dtype='S16')
+    mask_result.copyHeaderFrom(hdr)
+    mask_result.header()['voxel_size'] = list_masks[0].header()['voxel_size']
+    mask_result_arr = np.asarray(mask_result)
+    mask_result_arr[:] = (np.asarray(list_masks[0])).copy()
+
     if len(list_masks) == 1:
         log.info(f"only one sulcus: {sulci_list[0]}")
         mask_result[np.asarray(mask_result) <= threshold] = 0
@@ -126,7 +131,7 @@ def compute_simple_mask(
             arr = np.asarray(mask)
             arr_result += arr
 
-        mask_result[np.asarray(mask_result) <= threshold] = 0
+        arr_result[arr_result <= threshold] = 0
         arr_result = np.asarray(dl.dilate(mask_result, radius=dilation))
         np.asarray(mask_result)[:] = arr_result
 
