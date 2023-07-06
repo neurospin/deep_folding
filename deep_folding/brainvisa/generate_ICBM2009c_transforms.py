@@ -50,7 +50,7 @@ import argparse
 import glob
 import sys
 import re
-from os.path import abspath
+from os.path import abspath, basename, join, dirname
 from os.path import basename
 
 from deep_folding.brainvisa import exception_handler
@@ -199,6 +199,23 @@ class GraphGenerateTransform:
                 transform_file += f"_{run[0]}"
         transform_file += ".trm"
         return transform_file
+
+    @staticmethod
+    def get_left_and_right_graph_files(graph_file, list_graph_file):
+        graph_name = basename(graph_file)
+        if graph_name.startswith("L"):
+            graph_file_left = graph_file
+            graph_file_right = join(dirname(graph_file), f"R{graph_name[1:]}")
+            if graph_file_right not in list_graph_file:
+                raise DeepFoldingError(f"Right graph is missing : {graph_file_right}")
+            graph_to_remove = graph_file_right
+        else:
+            graph_file_right = graph_file
+            graph_file_left = join(dirname(graph_file), f"L{graph_name[1:]}")
+            if graph_file_left not in list_graph_file:
+                raise DeepFoldingError(f"Left graph is missing : {graph_file_left}")
+            graph_to_remove = graph_file_left
+        return graph_file_left, graph_file_right, graph_to_remove
 
     def compute(self, number_subjects):
         """Loops over subjects to generate transforms to ICBM2009c from graphs.
