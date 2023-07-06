@@ -33,21 +33,18 @@
 # The fact that you are presently reading this means that you have had
 # knowledge of the CeCILL license version 2 and that you accept its terms.
 
-""" Remove ventricle from a skeleton through the automatic labelled graph
+""" Remove ventricle from a volume through the automatic labelled graph
 by Morphologist.
-Be careful : the script will not work if there are '_' in subject ids
-(for database in BIDS format).
+Be careful :
+With the BIDS argument, the session-acquisition-run Morphologist folder
+should be replaced by a '*' in the <path_to_graph> argument.
 """
 
 import argparse
 import glob
 import re
 import sys
-from os.path import abspath
-from os.path import basename
-from os.path import join
-from os.path import exists
-from os.path import isdir
+from os.path import abspath, basename, join, exists, isdir
 
 from soma import aims
 import numpy as np
@@ -72,6 +69,7 @@ from deep_folding.brainvisa.utils.constants import \
 _OUTPUT_DIR_DEFAULT = join(_SKELETON_DIR_DEFAULT, "without_ventricle")
 _SKELETON_FILENAME_DEFAULT = "skeleton_generated"
 _OUTPUT_FILENAME_DEFAULT = "skeleton_generated_without_ventricle"
+_LABELLING_SESSION_DEFAULT = "deepcnn_session_auto"
 
 # Defines logger
 log = set_file_logger(__file__)
@@ -134,6 +132,11 @@ def parse_args(argv):
         "In BIDS format, the session_acquisition_run directory "
         "have to be replaced by *. "
         f"Default is :  {_PATH_TO_GRAPH_DEFAULT}")
+    parser.add_argument(
+        "-l", "--labelling_session",
+        default=_LABELLING_SESSION_DEFAULT,
+        help="Name of the labelling session in Morphologist tree. "
+             f"Default is : {_LABELLING_SESSION_DEFAULT}")
     parser.add_argument(
         "-f",
         "--skeleton_filename",
@@ -199,7 +202,7 @@ class RemoveVentricleFromSkeleton:
     """
 
     def __init__(self, skeleton_dir, output_dir,
-                 morpho_dir, path_to_graph,
+                 morpho_dir, path_to_graph, labelling_session,
                  skeleton_filename, output_filename,
                  side, bids, parallel):
 
@@ -208,6 +211,7 @@ class RemoveVentricleFromSkeleton:
         self.parallel = parallel
         self.morpho_dir = morpho_dir
         self.path_to_graph = path_to_graph
+        self.labelling_session = labelling_session
         self.skeleton_dir = join(skeleton_dir, self.side)
         self.output_dir = join(output_dir, self.side)
         create_folder(abspath(self.output_dir))
@@ -255,7 +259,6 @@ class RemoveVentricleFromSkeleton:
         """
         labelled_graph_list = []
         side_list = ["L", "R"] if self.side == "F" else [self.side]
-        labelling_session = "deepcnn_session_auto"
         if subject.startswith("_"):
             subject = subject[1:]
         for side in side_list:
@@ -264,17 +267,20 @@ class RemoveVentricleFromSkeleton:
                 subject_id = split[0]
                 if len(split) > 1:
                     keys = "_".join(split[1:])
-                filename = f"{side}{subject_id}_{labelling_session}.arg"
+                else:
+                    keys = ""
+                    log.warning(f"The subject {subject} has no session, acquisition or run.")
+                filename = f"{side}{subject_id}_{self.labelling_session}.arg"
                 labelled_graph_file = join(
                     self.morpho_dir, subject_id, self.path_to_graph.replace(
-                        "*", keys), labelling_session, filename)
+                        "*", keys), self.labelling_session, filename)
             else:
-                filename = f"{side}{subject}_{labelling_session}.arg"
+                filename = f"{side}{subject}_{self.labelling_session}.arg"
                 labelled_graph_file = join(
                     self.morpho_dir,
                     subject,
                     self.path_to_graph,
-                    labelling_session,
+                    self.labelling_session,
                     filename)
             labelled_graph_list.append(labelled_graph_file)
         return labelled_graph_list
@@ -294,6 +300,9 @@ class RemoveVentricleFromSkeleton:
                              for filename in filenames
                              if not re.search('.minf$', filename)]
             list_subjects = select_subjects_int(list_subjects, number_subjects)
+        else:
+            raise NotADirectoryError(
+                f"{self.src_dir} doesn't exist or is not a directory")
 
         log.info(f"Expected number of subjects = {len(list_subjects)}")
         log.info(f"list_subjects[:5] = {list_subjects[:5]}")
@@ -321,6 +330,7 @@ def remove_ventricle(skeleton_dir=_SKELETON_DIR_DEFAULT,
                      output_dir=_OUTPUT_DIR_DEFAULT,
                      morpho_dir=_SRC_DIR_DEFAULT,
                      path_to_graph=_PATH_TO_GRAPH_DEFAULT,
+                     labelling_session=_LABELLING_SESSION_DEFAULT,
                      skeleton_filename=_SKELETON_FILENAME_DEFAULT,
                      output_filename=_OUTPUT_FILENAME_DEFAULT,
                      side=_SIDE_DEFAULT,
@@ -336,6 +346,7 @@ def remove_ventricle(skeleton_dir=_SKELETON_DIR_DEFAULT,
         output_dir=output_dir,
         morpho_dir=morpho_dir,
         path_to_graph=path_to_graph,
+        labelling_session=labelling_session,
         skeleton_filename=skeleton_filename,
         output_filename=output_filename,
         side=side,
@@ -360,6 +371,7 @@ def main(argv):
         output_dir=params["output_dir"],
         morpho_dir=params["morpho_dir"],
         path_to_graph=params["path_to_graph"],
+        labelling_session=params["labelling_session"],
         skeleton_filename=params["skeleton_filename"],
         output_filename=params["output_filename"],
         side=params["side"],
