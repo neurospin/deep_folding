@@ -15,3 +15,8 @@ def exception_handler(func):
             if exc.code != 0:
                 reraise(*exc_info())
     return inner_function
+
+
+class DeepFoldingError(BaseException):
+    pass
+
