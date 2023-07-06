@@ -40,7 +40,7 @@ The aim of this script is to resample skeletons, foldlabels and distmaps.
   Typical usage
   -------------
   You can use this program by first entering in the brainvisa environment
-  (here brainvisa 5.0.0 installed with singurity) and launching the script
+  (here brainvisa 5.0.0 installed with singularity) and launching the script
   from the terminal:
   >>> bv bash
   >>> python resample_files.py
@@ -618,10 +618,11 @@ def parse_args(argv):
 
     args = parser.parse_args(argv)
 
+    dico_suffix = {"R": "right", "L": "left", "F": "full"}
     setup_log(args,
               log_dir=f"{args.output_dir}",
               prog_name=basename(__file__),
-              suffix='right' if args.side == 'R' else 'left')
+              suffix=dico_suffix[args.side])
 
     params['src_dir'] = args.src_dir
     params['input_type'] = args.input_type
