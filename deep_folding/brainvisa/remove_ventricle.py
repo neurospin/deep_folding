@@ -48,6 +48,7 @@ from os.path import abspath, basename, join, exists, isdir
 
 from soma import aims
 import numpy as np
+from p_tqdm import p_map
 
 from deep_folding.brainvisa import exception_handler
 from deep_folding.brainvisa.utils.folder import create_folder
@@ -57,7 +58,6 @@ from deep_folding.brainvisa.utils.logs import setup_log
 from deep_folding.brainvisa.utils.parallel import define_njobs
 from deep_folding.brainvisa.utils.quality_checks import \
     compare_number_aims_files_with_expected
-from pqdm.processes import pqdm
 from deep_folding.config.logs import set_file_logger
 
 # Import constants
@@ -312,9 +312,9 @@ class RemoveVentricleFromSkeleton:
         if self.parallel:
             log.info(
                 "PARALLEL MODE: subjects are computed in parallel.")
-            pqdm(list_subjects,
-                 self.remove_ventricle_from_one_subject,
-                 n_jobs=define_njobs())
+            p_map(self.remove_ventricle_from_one_subject,
+                  list_subjects,
+                  num_cpus=define_njobs())
         else:
             log.info(
                 "SERIAL MODE: subjects are scanned serially, "
