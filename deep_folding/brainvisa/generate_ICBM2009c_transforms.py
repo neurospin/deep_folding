@@ -129,10 +129,11 @@ def parse_args(argv):
 
     args = parser.parse_args(argv)
 
+    suffix = {"R": "right", "L": "left", "F": "full"}
     setup_log(args,
               log_dir=f"{args.output_dir}",
               prog_name=basename(__file__),
-              suffix='right' if args.side == 'R' else 'left')
+              suffix=suffix[args.side])
 
     params = vars(args)
 
@@ -175,13 +176,32 @@ class GraphGenerateTransform:
             raise RuntimeError(f"No graph file! "
                                f"{graph_path} doesn't exist")
         for graph_file in list_graph_file:
-            transform_file = self.get_transform_filename(subject, graph_file)
-            graph = aims.read(graph_file)
-            g_to_icbm_template = aims.GraphManip.getICBM2009cTemplateTransform(
-                graph)
-            aims.write(g_to_icbm_template, transform_file)
-            if not self.bids:
-                break
+            try:
+                transform_file = self.get_transform_filename(subject, graph_file)
+                if self.side == "F":
+                    graph_file_left, graph_file_right, graph_to_remove = \
+                            self.get_left_and_right_graph_files(graph_file, list_graph_file)
+                    list_graph_file.remove(graph_to_remove)
+                    graph_left = aims.read(graph_file_left)
+                    graph_right = aims.read(graph_file_right)
+                    g_to_icbm_template_left = aims.GraphManip.getICBM2009cTemplateTransform(
+                        graph_left)
+                    g_to_icbm_template_right = aims.GraphManip.getICBM2009cTemplateTransform(
+                        graph_right)
+                    if g_to_icbm_template_left != g_to_icbm_template_right:
+                        raise DeepFoldingError(f"Left and right transformations files are not the same: "
+                                               f"{g_to_icbm_template_left} and {g_to_icbm_template_right}")
+                    aims.write(g_to_icbm_template_left, transform_file)
+                else:
+                    graph = aims.read(graph_file)
+                    g_to_icbm_template = aims.GraphManip.getICBM2009cTemplateTransform(
+                        graph)
+                    aims.write(g_to_icbm_template, transform_file)
+                if not self.bids:
+                    break
+            except DeepFoldingError as e:
+                log.error(f"Graph file {graph_file} : {e}")
+                continue
 
     def get_transform_filename(self, subject, graph_file):
         transform_file = (
