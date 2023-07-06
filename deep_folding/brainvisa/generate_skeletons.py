@@ -61,7 +61,7 @@ from deep_folding.brainvisa.utils.subjects import \
 from deep_folding.brainvisa.utils.logs import setup_log
 from deep_folding.brainvisa.utils.parallel import define_njobs
 from deep_folding.brainvisa.utils.skeleton import \
-    generate_skeleton_from_graph_file
+    generate_skeleton_from_graph_file, generate_full_skeleton
 from deep_folding.brainvisa.utils.quality_checks import \
     compare_number_aims_files_with_expected, \
     get_not_processed_subjects
@@ -140,10 +140,11 @@ def parse_args(argv):
 
     args = parser.parse_args(argv)
 
+    suffix = {"R": "right", "L": "left", "F": "full"}
     setup_log(args,
               log_dir=f"{args.output_dir}",
               prog_name=basename(__file__),
-              suffix='right' if args.side == 'R' else 'left')
+              suffix=suffix[args.side])
 
     params = vars(args)
 
@@ -195,20 +196,41 @@ class GraphConvert2Skeleton:
     def generate_one_skeleton(self, subject: str):
         """Generates and writes skeleton for one subject.
         """
-        graph_path = f"{self.src_dir}/{subject}*/" +\
-                     f"{self.path_to_graph}/{self.side}*.arg"
+        if self.side == "F":
+            graph_path = f"{self.src_dir}/{subject}*/" + \
+                         f"{self.path_to_graph}/?{subject}*.arg"
+        else:
+            graph_path = f"{self.src_dir}/{subject}*/" + \
+                         f"{self.path_to_graph}/{self.side}{subject}*.arg"
         list_graph_file = glob.glob(graph_path)
         log.debug(f"list_graph_file = {list_graph_file}")
-        if len(list_graph_file) == 0:
-            raise RuntimeError(f"No graph file! "
-                               f"{graph_path} does not exist")
+        try:
+            if len(list_graph_file) == 0:
+                raise FileNotFoundError(f"No graph file! "
+                                        f"{graph_path} doesn't exist")
+        except FileNotFoundError as e:
+            log.error(f"Subject {subject} : {e}")
         for graph_file in list_graph_file:
-            skeleton_file = self.get_skeleton_filename(subject, graph_file)
-            generate_skeleton_from_graph_file(graph_file,
-                                              skeleton_file,
-                                              self.junction)
-            if not self.bids:
-                break
+            try:
+                skeleton_file = self.get_skeleton_filename(subject, graph_file)
+                if self.side == "F":
+                    graph_file_left, graph_file_right, graph_to_remove = \
+                        self.get_left_and_right_graph_files(graph_file, list_graph_file)
+                    if graph_to_remove:
+                        list_graph_file.remove(graph_to_remove)
+                        generate_full_skeleton(graph_file_left,
+                                               graph_file_right,
+                                               skeleton_file,
+                                               self.junction)
+                else:
+                    generate_skeleton_from_graph_file(graph_file,
+                                                      skeleton_file,
+                                                      self.junction)
+                if not self.bids:
+                    break
+            except DeepFoldingError as e:
+                log.error(f"Graph file {graph_file} : {e}")
+                continue
 
     @staticmethod
     def get_left_and_right_graph_files(graph_file, list_graph_file):
@@ -244,8 +266,8 @@ class GraphConvert2Skeleton:
         list_subjects = select_subjects_int(list_subjects, number_subjects)
 
         log.info(f"Expected number of subjects = {len(list_subjects)}")
-        log.info(f"list_subjects[:5] = {list_subjects[:5]}")
-        log.debug(f"list_subjects = {list_subjects}")
+        log.info(f"list_subjects[:5] = {list_subjects[:5]}")
+        log.debug(f"list_subjects = {list_subjects}")
 
         # Performs computation on all subjects either serially or in parallel
         if self.parallel:
