@@ -42,13 +42,14 @@ from deep_folding.config.logs import set_file_logger
 log = set_file_logger(__file__)
 
 
-def create_empty_volume_from_graph(graph: aims.Graph) -> aims.Volume:
+def create_empty_volume_from_graph(graph: aims.Graph, dimensions: list = None) -> aims.Volume:
     """Creates empty volume with graph header"""
 
     voxel_size = graph['voxel_size'][:3]
-    # Adds 1 for each x,y,z dimension
-    dimensions = [i + j for i,
-                  j in zip(graph['boundingbox_max'], [1, 1, 1, 0])]
+    if dimensions is None:
+        # Adds 1 for each x,y,z dimension
+        dimensions = [i + j for i,
+                                j in zip(graph['boundingbox_max'], [1, 1, 1, 0])]
 
     vol = aims.Volume(dimensions, dtype='S16')
     vol.header()['voxel_size'] = voxel_size
