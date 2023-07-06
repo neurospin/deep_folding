@@ -50,7 +50,7 @@ log = set_file_logger(__file__)
 
 
 def generate_foldlabel_thin_junction(
-        graph: aims.Graph) -> aims.Volume:
+        graph: aims.Graph, volume: aims.Volume) -> aims.Volume:
     """Converts an aims graph into skeleton and foldlabel volumes
 
     It should produce thin junctions as vertices (aims_ss, aims_bottom)
@@ -59,7 +59,7 @@ def generate_foldlabel_thin_junction(
     junctions
     """
 
-    vol_label = create_empty_volume_from_graph(graph)
+    vol_label = volume
     arr_label = np.asarray(vol_label)
 
     # Sorted in ascendent priority
@@ -123,7 +123,7 @@ def generate_foldlabel_thin_junction(
 
 
 def generate_foldlabel_wide_junction(
-        graph: aims.Graph) -> aims.Volume:
+        graph: aims.Graph, volume: aims.Volume) -> aims.Volume:
     """Converts an aims graph into skeleton and foldlabel volumes
 
     It should produce wide junctions as edges (junction, plidepassage)
@@ -132,7 +132,7 @@ def generate_foldlabel_wide_junction(
     simple surface and bottom voxels
     """
 
-    vol_label = create_empty_volume_from_graph(graph)
+    vol_label = volume
     arr_label = np.asarray(vol_label)
 
     # Sorted in ascendent priority
@@ -184,10 +184,11 @@ def generate_foldlabel_from_graph(
         graph: aims.Graph,
         junction: str = _JUNCTION_DEFAULT) -> aims.Volume:
     """Generates foldlabel from graph"""
+    volume = create_empty_volume_from_graph(graph)
     if junction == 'wide':
-        vol_label = generate_foldlabel_wide_junction(graph)
+        vol_label = generate_foldlabel_wide_junction(graph, volume)
     else:
-        vol_label = generate_foldlabel_thin_junction(graph)
+        vol_label = generate_foldlabel_thin_junction(graph, volume)
     return vol_label
 
 
