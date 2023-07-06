@@ -84,19 +84,17 @@ from soma import aims
 
 # Import constants
 from deep_folding.brainvisa.utils.constants import \
-    _ALL_SUBJECTS, _INPUT_TYPE_DEFAULT, _SKELETON_DIR_DEFAULT,\
-    _TRANSFORM_DIR_DEFAULT, _RESAMPLED_SKELETON_DIR_DEFAULT,\
+    _ALL_SUBJECTS, _INPUT_TYPE_DEFAULT, _SKELETON_DIR_DEFAULT, \
+    _TRANSFORM_DIR_DEFAULT, _RESAMPLED_SKELETON_DIR_DEFAULT, \
     _RESAMPLED_FOLDLABEL_DIR_DEFAULT, \
     _SIDE_DEFAULT, _VOXEL_SIZE_DEFAULT
 
-_SKELETON_FILENAME = "skeleton_generated_"
-_FOLDLABEL_FILENAME = "foldlabel_"
+_SKELETON_FILENAME = "skeleton_generated"
+_FOLDLABEL_FILENAME = "foldlabel"
 _DISTMAP_FILENAME = "distmap_generated_"
-_RESAMPLED_SKELETON_FILENAME = "resampled_skeleton_"
-_RESAMPLED_FOLDLABEL_FILENAME = "resampled_foldlabel_"
+_RESAMPLED_SKELETON_FILENAME = "resampled_skeleton"
+_RESAMPELD_FOLDLABEL_FILENAME = "resampled_foldlabel"
 _RESAMPLED_DISTMAP_FILENAME = "resampled_distmap_"
-
-
 # Defines logger
 log = set_file_logger(__file__)
 
@@ -126,7 +124,7 @@ def resample_one_skeleton(input_image,
     # with respect to the natural order
     # We don't give background, which is the interior 0
     values = np.array([11, 60, 30, 35, 10, 20, 40,
-                      50, 70, 80, 90, 100, 110, 120])
+                       50, 70, 80, 90, 100, 110, 120])
 
     # Normalization and resampling of skeleton images
     resampled = resample(input_image=input_image,
@@ -211,11 +209,11 @@ def resample_one_distmap(input_image,
 
     # Normalization and resampling of skeleton images
     cmd_normalize = 'AimsApplyTransform' + \
-        ' -i ' + input_image + \
-        ' -o ' + resampled_dir + \
-        ' -m ' + transfo_file + \
-        ' -r ' + ref_file + \
-        ' -t linear'
+                    ' -i ' + input_image + \
+                    ' -o ' + resampled_dir + \
+                    ' -m ' + transfo_file + \
+                    ' -r ' + ref_file + \
+                    ' -t linear'
     print(cmd_normalize)
     os.system(cmd_normalize)
 
@@ -398,10 +396,8 @@ class SkeletonResampler(FileResampler):
             side: either 'L' or 'R', hemisphere side
             out_voxel_size: float giving voxel size in mm
             parallel: does parallel computation if True
-            src_filename : name of skeleton files
-                          (format : "<SIDE><src_filename><SUBJECT>.nii.gz")
-            output_filename : name of generated files
-                          (format : "<SIDE><output_filename><SUBJECT>.nii.gz")
+            src_filename : name of skeleton files (format : "<SIDE><src_filename>_<SUBJECT>.nii.gz")
+            output_filename : name of generated files (format : "<SIDE><output_filename>_<SUBJECT>.nii.gz")
         """
         super(SkeletonResampler, self).__init__(
             src_dir=src_dir, resampled_dir=resampled_dir,
@@ -410,21 +406,18 @@ class SkeletonResampler(FileResampler):
 
         # Names of files in function of dictionary: keys = 'subject' and 'side'
         # Src directory contains either 'R' or 'L' a subdirectory
-        # self.src_file = join(
-        #    self.src_dir,
-        #    '%(side)sskeleton_generated_%(subject)s.nii.gz')
         self.src_file = join(self.src_dir,
-                             f'%(side)s' + src_filename + '%(subject)s.nii.gz')
+                             f"%(side)s{src_filename}_%(subject)s.nii.gz")
 
         # Names of files in function of dictionary: keys -> 'subject' and
         # 'side'
         self.src_filename = src_filename
         self.resampled_file = join(
             self.resampled_dir,
-            f'%(side)s' + output_filename + '%(subject)s.nii.gz')
+            f"%(side)s{output_filename}_%(subject)s.nii.gz")
 
         # subjects are detected as the nifti file names under src_dir
-        self.expr = '^.' + src_filename + '(.*).nii.gz$'
+        self.expr = f"^.{src_filename}_(.*).nii.gz$"
 
     @staticmethod
     def resample_one_subject(src_file: str,
@@ -458,10 +451,8 @@ class FoldLabelResampler(FileResampler):
             side: either 'L' or 'R', hemisphere side
             out_voxel_size: float giving voxel size in mm
             parallel: does parallel computation if True
-            src_filename : name of fold label files
-                          (format : "<SIDE><src_filename><SUBJECT>.nii.gz")
-            output_filename : name of generated files
-                          (format : "<SIDE><output_filename><SUBJECT>.nii.gz")
+            src_filename : name of fold label files (format : "<SIDE><src_filename>_<SUBJECT>.nii.gz")
+            output_filename : name of generated files (format : "<SIDE><output_filename>_<SUBJECT>.nii.gz")
         """
         super(FoldLabelResampler, self).__init__(
             src_dir=src_dir, resampled_dir=resampled_dir,
@@ -472,17 +463,17 @@ class FoldLabelResampler(FileResampler):
         # Src directory contains either 'R' or 'L' a subdirectory
         self.src_file = join(
             self.src_dir,
-            '%(side)s' + src_filename + '%(subject)s.nii.gz')
+            f"%(side)s{src_filename}_%(subject)s.nii.gz")
 
         # Names of files in function of dictionary: keys -> 'subject' and
         # 'side'
         self.src_filename = src_filename
         self.resampled_file = join(
             self.resampled_dir,
-            f'%(side)s' + output_filename + '%(subject)s.nii.gz')
+            f"%(side)s{output_filename}_%(subject)s.nii.gz")
 
         # subjects are detected as the nifti file names under src_dir
-        self.expr = '^.' + src_filename + '(.*).nii.gz$'
+        self.expr = f"^.{src_filename}_(.*).nii.gz$"
 
     @staticmethod
     def resample_one_subject(src_file: str,
@@ -573,8 +564,8 @@ def parse_args(argv):
         type=str,
         default=_RESAMPLED_SKELETON_DIR_DEFAULT,
         help='Target directory where to store the resampled files. '
-        'Default is : ' +
-        _RESAMPLED_SKELETON_DIR_DEFAULT)
+             'Default is : ' +
+             _RESAMPLED_SKELETON_DIR_DEFAULT)
     parser.add_argument(
         "-t", "--transform_dir", type=str, default=_TRANSFORM_DIR_DEFAULT,
         help='Transform directory containing transform files to ICBM2009c. '
@@ -594,30 +585,25 @@ def parse_args(argv):
         help='Voxel size of bounding box. '
              'Default is : None')
     parser.add_argument(
-        "-f", "--src_filename", type=str, default=_SKELETON_FILENAME,
+        "-f", "--src_filename", type=str, default=None,
         help='Filename of sources files. '
-             'Format is : "<SIDE><src_filename><SUBJECT>.nii.gz" '
+             'Format is : "<SIDE><src_filename>_<SUBJECT>.nii.gz" '
              'Default is : ' + _SKELETON_FILENAME)
     parser.add_argument(
-        "-e",
-        "--output_filename",
-        type=str,
-        default=_RESAMPLED_SKELETON_FILENAME,
+        "-e", "--output_filename", type=str, default=None,
         help='Filename of output files. '
-        'Format is : "<SIDE><output_filename><SUBJECT>.nii.gz" '
-        'Default is : ' +
-        _RESAMPLED_SKELETON_FILENAME)
+             'Format is : "<SIDE><output_filename>_<SUBJECT>.nii.gz" '
+             'Default is : ' + _RESAMPLED_SKELETON_FILENAME)
     parser.add_argument(
         '-v', '--verbose', action='count', default=0,
         help='Verbose mode: '
-        'If no option is provided then logging.INFO is selected. '
-        'If one option -v (or -vv) or more is provided '
-        'then logging.DEBUG is selected.')
+             'If no option is provided then logging.INFO is selected. '
+             'If one option -v (or -vv) or more is provided '
+             'then logging.DEBUG is selected.')
 
     params = {}
 
     args = parser.parse_args(argv)
-
     dico_suffix = {"R": "right", "L": "left", "F": "full"}
     setup_log(args,
               log_dir=f"{args.output_dir}",
@@ -649,7 +635,6 @@ def resample_files(
         number_subjects=_ALL_SUBJECTS,
         src_filename=_SKELETON_FILENAME,
         output_filename=_RESAMPLED_SKELETON_FILENAME):
-
     if input_type == "skeleton":
         src_filename = (_SKELETON_FILENAME
                         if src_filename is None
