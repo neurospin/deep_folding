@@ -55,15 +55,14 @@ def is_skeleton(arr):
 
 
 def generate_skeleton_thin_junction(
-        graph: aims.Graph) -> aims.Volume:
+        graph: aims.Graph, volume: aims.Volume) -> aims.Volume:
     """Converts an aims graph into skeleton volumes
-
     It should produce thin junctions as vertices (aims_ss, aims_bottom)
     are written after edges (junction, plidepassage).
     Thus, when voxels are present in both, simple and bottom surfaces override
     junctions
     """
-    vol_skel = create_empty_volume_from_graph(graph)
+    vol_skel = volume
     arr_skel = np.asarray(vol_skel)
 
     for edge in graph.edges():
@@ -111,15 +110,14 @@ def generate_skeleton_thin_junction(
 
 
 def generate_skeleton_wide_junction(
-        graph: aims.Graph) -> aims.Volume:
+        graph: aims.Graph, volume: aims.Volume) -> aims.Volume:
     """Converts an aims graph into skeleton volumes
-
     It should produce wide junctions as edges (junction, plidepassage)
     are written after vertices (aims_ss, aims_bottom).
     Thus, when voxels are present in both, junction voxels override
     simple surface and bottom voxels
     """
-    vol_skel = create_empty_volume_from_graph(graph)
+    vol_skel = volume
     arr_skel = np.asarray(vol_skel)
 
     cnt_duplicate = 0
@@ -166,10 +164,11 @@ def generate_skeleton_from_graph(
         graph: aims.Graph,
         junction: str = _JUNCTION_DEFAULT) -> aims.Volume:
     """Generates skeleton from graph"""
+    volume = create_empty_volume_from_graph(graph)
     if junction == 'wide':
-        vol_skel = generate_skeleton_wide_junction(graph)
+        vol_skel = generate_skeleton_wide_junction(graph, volume)
     else:
-        vol_skel = generate_skeleton_thin_junction(graph)
+        vol_skel = generate_skeleton_thin_junction(graph, volume)
     return vol_skel
 
 
