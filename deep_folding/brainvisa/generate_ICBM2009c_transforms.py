@@ -167,8 +167,12 @@ class GraphGenerateTransform:
     def generate_one_transform(self, subject: str):
         """Generates and writes ICBM2009c transform for one subject.
         """
-        graph_path = f"{self.src_dir}/{subject}*/" +\
-                     f"{self.path_to_graph}/{self.side}*.arg"
+        if self.side == "F":
+            graph_path = f"{self.src_dir}/{subject}*/" + \
+                         f"{self.path_to_graph}/?{subject}*.arg"
+        else:
+            graph_path = f"{self.src_dir}/{subject}*/" + \
+                         f"{self.path_to_graph}/{self.side}{subject}*.arg"
         log.debug(graph_path)
         list_graph_file = glob.glob(graph_path)
         log.debug(f"list_graph_file = {list_graph_file}")
@@ -204,8 +208,8 @@ class GraphGenerateTransform:
                 continue
 
     def get_transform_filename(self, subject, graph_file):
-        transform_file = (
-            f"{self.transform_dir}/"
+        transform_file = join(
+            f"{self.transform_dir}",
             f"{self.side}transform_to_ICBM2009c_{subject}")
         if self.bids:
             session = re.search("ses-([^_/]+)", graph_file)
