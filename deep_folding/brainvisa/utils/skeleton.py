@@ -38,6 +38,7 @@
 import numpy as np
 from soma import aims
 
+from deep_folding.brainvisa import DeepFoldingError
 from deep_folding.brainvisa.utils.graph import create_empty_volume_from_graph
 from deep_folding.config.logs import set_file_logger
 
@@ -180,4 +181,74 @@ def generate_skeleton_from_graph_file(graph_file: str,
     vol_skeleton = generate_skeleton_from_graph(graph, junction)
     if not is_skeleton(np.asarray(vol_skeleton)):
         raise ValueError(f"{skeleton_file} has unexpected skeleton values")
+    aims.write(vol_skeleton, skeleton_file)
+
+
+def generate_full_skeleton(graph_file_left: str,
+                           graph_file_right: str,
+                           skeleton_file: str,
+                           junction: str = _JUNCTION_DEFAULT):
+    """Generates full skeleton from right and left graph files"""
+    graph_left = aims.read(graph_file_left)
+    graph_right = aims.read(graph_file_right)
+
+    # Sanity check
+    # TODO: find the good keys to check
+    keys_to_check = ['voxel_size', 'transformations', 'referentials', 'referential']
+    for k in keys_to_check:
+        try:
+            if graph_left[k] != graph_right[k]:
+                raise DeepFoldingError(f"The attribute {k} is not the same in the right graph ({graph_right[k]}) "
+                                       f"and in the left graph ({graph_left[k]})")
+        except KeyError as e:
+            log.warning(f"The attribute {e} is not in the graphs ({graph_file_right} or {graph_file_left})")
+    # Get the dimensions for the new volume
+    boundingbox_max_left = np.asarray(graph_left["boundingbox_max"])
+    boundingbox_max_right = np.asarray(graph_right["boundingbox_max"])
+    boundingbox_max = np.maximum(boundingbox_max_left, boundingbox_max_right)
+    log.debug(f"Boundingbox max : {boundingbox_max}")
+
+    # Create empty volumes with the new dimensions
+    dimensions = (boundingbox_max[0] + 1,
+                  boundingbox_max[1] + 1,
+                  boundingbox_max[2] + 1,
+                  1)
+    empty_vol_left = create_empty_volume_from_graph(graph_left, dimensions=dimensions)
+    empty_vol_right = create_empty_volume_from_graph(graph_right, dimensions=dimensions)
+    vol_skeleton = create_empty_volume_from_graph(graph_right, dimensions=dimensions)
+    # Generate the skeletons according to the junction
+    if junction == 'wide':
+        vol_skeleton_left = generate_skeleton_wide_junction(graph_left, empty_vol_left)
+        vol_skeleton_right = generate_skeleton_wide_junction(graph_right, empty_vol_right)
+    else:
+        vol_skeleton_left = generate_skeleton_thin_junction(graph_left, empty_vol_left)
+        vol_skeleton_right = generate_skeleton_thin_junction(graph_right, empty_vol_right)
+
+    priority_order = {0: 15, 10: 10, 11: 14, 20: 9, 30: 12, 35: 11, 40: 8,
+                      50: 7, 60: 13, 70: 6, 80: 5, 90: 4, 100: 3, 110: 2, 120: 1}
+    arr_skeleton_left = np.asarray(vol_skeleton_left)
+    arr_skeleton_right = np.asarray(vol_skeleton_right)
+    arr_skeleton = np.asarray(vol_skeleton)
+
+    # Add the left and right skeletons
+    # For contentious voxels (voxels which have two different values in the two skeletons),
+    # the value is chosen according to the priority order
+    vectorize = np.vectorize(lambda x: priority_order[x])
+    mask = vectorize(arr_skeleton_right) >= vectorize(arr_skeleton_left)
+    arr_skeleton[mask] = arr_skeleton_left[mask]
+    arr_skeleton[~mask] = arr_skeleton_right[~mask]
+    arr_skeleton = arr_skeleton.astype(int)
+
+    # Sanity checks
+    # FIXME : select good threshold
+    threshold = 200
+    nb_contentious_voxels = np.count_nonzero(np.logical_and(arr_skeleton_left, arr_skeleton_right))
+    log.debug(f"Unique value of the skeleton : {np.unique(arr_skeleton)}")
+    log.debug(f"Number of conflict voxels between left and right skeletons : {nb_contentious_voxels}")
+    if nb_contentious_voxels > threshold:
+        log.warning(f"Left and right graph files have {nb_contentious_voxels} voxels with different values ! "
+                    f"Graph files : {graph_file_left} and {graph_file_left}")
+
+    if not is_skeleton(np.asarray(vol_skeleton)):
+        raise DeepFoldingError(f"{skeleton_file} has unexpected skeleton values")
     aims.write(vol_skeleton, skeleton_file)
