@@ -53,7 +53,7 @@ import re
 from os.path import abspath, basename, join, dirname
 from os.path import basename
 
-from deep_folding.brainvisa import exception_handler
+from deep_folding.brainvisa import exception_handler, DeepFoldingError
 from deep_folding.brainvisa.utils.folder import create_folder
 from deep_folding.brainvisa.utils.subjects import get_number_subjects,\
                                                   is_it_a_subject
