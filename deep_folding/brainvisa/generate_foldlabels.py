@@ -38,7 +38,7 @@
   Typical usage
   -------------
   You can use this program by first entering in the brainvisa environment
-  (here brainvisa 5.0.0 installed with singurity) and launching the script
+  (here brainvisa 5.0.0 installed with singularity) and launching the script
   from the terminal:
   >>> bv bash
   >>> python generate_foldlabels.py
@@ -50,11 +50,9 @@ import argparse
 import glob
 import re
 import sys
-from os.path import abspath
-from os.path import exists
-from os.path import basename
+from os.path import abspath, exists, basename, dirname, join
 
-from deep_folding.brainvisa import exception_handler
+from deep_folding.brainvisa import exception_handler, DeepFoldingError
 from deep_folding.brainvisa.utils.folder import create_folder
 from deep_folding.brainvisa.utils.subjects import get_number_subjects,\
                                                   is_it_a_subject
@@ -219,6 +217,25 @@ class GraphConvert2FoldLabel:
                 graph_file, foldlabel_file, self.junction)
             if not self.bids:
                 break
+
+    @staticmethod
+    def get_left_and_right_graph_files(graph_file, list_graph_file):
+        graph_name = basename(graph_file)
+        if graph_name[0] == "L":
+            graph_file_left = graph_file
+            graph_file_right = join(dirname(graph_file), f"R{graph_name[1:]}")
+            if graph_file_right not in list_graph_file:
+                raise DeepFoldingError(f"Right graph is missing ({graph_file_right})")
+            else:
+                graph_to_remove = graph_file_right
+        else:
+            graph_file_right = graph_file
+            graph_file_left = join(dirname(graph_file), f"L{graph_name[1:]}")
+            if graph_file_left not in list_graph_file:
+                raise DeepFoldingError(f"Left graph is missing ({graph_file_left})")
+            else:
+                graph_to_remove = graph_file_left
+        return graph_file_left, graph_file_right, graph_to_remove
 
     def compute(self, number_subjects):
         """Loops over subjects and converts graphs into skeletons.
