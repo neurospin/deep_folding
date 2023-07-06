@@ -45,10 +45,9 @@ import glob
 import re
 import sys
 from os.path import abspath, basename, join, exists, isdir
-
-from soma import aims
 import numpy as np
 from p_tqdm import p_map
+from soma import aims
 
 from deep_folding.brainvisa import exception_handler
 from deep_folding.brainvisa.utils.folder import create_folder
@@ -67,7 +66,7 @@ from deep_folding.brainvisa.utils.constants import \
     _PATH_TO_GRAPH_DEFAULT
 
 _OUTPUT_DIR_DEFAULT = join(_SKELETON_DIR_DEFAULT, "without_ventricle")
-_SKELETON_FILENAME_DEFAULT = "skeleton_generated"
+_SRC_FILENAME_DEFAULT = "skeleton_generated"
 _OUTPUT_FILENAME_DEFAULT = "skeleton_generated_without_ventricle"
 _LABELLING_SESSION_DEFAULT = "deepcnn_session_auto"
 
@@ -75,26 +74,24 @@ _LABELLING_SESSION_DEFAULT = "deepcnn_session_auto"
 log = set_file_logger(__file__)
 
 
-def remove_ventricle_from_one_skeleton(skeleton_file, labelled_graph_file):
-    skeleton = aims.read(skeleton_file)
-    arr_skel = np.asarray(skeleton)
+def remove_ventricle_from_graph(volume_file, labelled_graph_file):
+    volume = aims.read(volume_file)
+    arr = np.asarray(volume)
     labelled_graph = aims.read(labelled_graph_file)
     for vertex in labelled_graph.vertices():
         if "label" in vertex:
             label = vertex["label"]
             if label.startswith("ventricle"):
-                for bucket_name, value in {
-                        'aims_other': 100,
-                        'aims_ss': 60,
-                        'aims_bottom': 30}.items():
+                for bucket_name in ('aims_other', 'aims_ss',
+                                    'aims_bottom'):
                     bucket = vertex.get(bucket_name)
                     if bucket is not None:
                         voxels = np.array(bucket[0].keys())
                         if voxels.shape == (0,):
                             continue
                         for i, j, k in voxels:
-                            arr_skel[i, j, k] = 0
-    return skeleton
+                            arr[i, j, k] = 0
+    return volume
 
 
 def parse_args(argv):
@@ -108,14 +105,15 @@ def parse_args(argv):
     # Parse command line arguments
     parser = argparse.ArgumentParser(
         prog=basename(__file__),
-        description="Generate skeleton files without ventricle.")
+        description="Generate volumes without ventricle.")
     parser.add_argument(
-        "-s", "--skeleton_dir", type=str,
-        help="Directory where are the skeletons you want ventricle "
-             "to be removed from")
+        "-s", "--src_dir", type=str, default=_SKELETON_DIR_DEFAULT,
+        help="Directory where are the files you want ventricle "
+             "to be removed from."
+             f"Default is : {_SKELETON_DIR_DEFAULT}")
     parser.add_argument(
         "-o", "--output_dir", type=str, default=_OUTPUT_DIR_DEFAULT,
-        help="Output directory where to put skeleton files without ventricle. "
+        help="Output directory where to put the files without ventricle. "
              f"Default is : {_OUTPUT_DIR_DEFAULT}")
     parser.add_argument(
         "-m", "--morpho_dir", type=str, default=_SRC_DIR_DEFAULT,
@@ -124,9 +122,7 @@ def parse_args(argv):
              "as subdirectories. "
              f"Default is : {_SRC_DIR_DEFAULT}")
     parser.add_argument(
-        "-p",
-        "--path_to_graph",
-        type=str,
+        "-p", "--path_to_graph", type=str,
         default=_PATH_TO_GRAPH_DEFAULT,
         help="Relative path to graph. "
         "In BIDS format, the session_acquisition_run directory "
@@ -138,13 +134,11 @@ def parse_args(argv):
         help="Name of the labelling session in Morphologist tree. "
              f"Default is : {_LABELLING_SESSION_DEFAULT}")
     parser.add_argument(
-        "-f",
-        "--skeleton_filename",
-        type=str,
-        default=_SKELETON_FILENAME_DEFAULT,
-        help="Filename of skeleton files. "
-        "Format is : <SIDE><skeleton_filename>_<SUBJECT>.nii.gz "
-        f"Default is : {_SKELETON_FILENAME_DEFAULT}")
+        "-f", "--src_filename", type=str,
+        default=_SRC_FILENAME_DEFAULT,
+        help="Filename of source files. "
+        "Format is : <SIDE><source_filename>_<SUBJECT>.nii.gz "
+        f"Default is : {_SRC_FILENAME_DEFAULT}")
     parser.add_argument(
         "-e", "--output_filename", type=str, default=_OUTPUT_FILENAME_DEFAULT,
         help="Filename of output files. "
@@ -184,26 +178,26 @@ def parse_args(argv):
 
     params['output_dir'] = abspath(args.output_dir)
     params['morpho_dir'] = abspath(args.morpho_dir)
-    params['skeleton_dir'] = abspath(args.skeleton_dir)
+    params['src_dir'] = abspath(args.src_dir)
     # Checks if nb_subjects is either the string "all" or a positive integer
     params['nb_subjects'] = get_number_subjects(args.nb_subjects)
 
     return params
 
 
-class RemoveVentricleFromSkeleton:
-    """Class to remove ventricle from skeleton files through the automatic
+class RemoveVentricleFromVolume:
+    """Class to remove ventricle from volume files through the automatic
     labelling graph computed by Morphologist. The default automatic labelling
     session is : deepcnn_session_auto.
 
-    It contains all the information to get labelled graphs from skeleton
-    filenames and to write new sketletons without ventricle in the target
+    It contains all the information to get labelled graphs from volume
+    filenames and to write new volumes without ventricle in the target
     directory.
     """
 
-    def __init__(self, skeleton_dir, output_dir,
+    def __init__(self, src_dir, output_dir,
                  morpho_dir, path_to_graph, labelling_session,
-                 skeleton_filename, output_filename,
+                 src_filename, output_filename,
                  side, bids, parallel):
 
         self.side = side
@@ -212,50 +206,46 @@ class RemoveVentricleFromSkeleton:
         self.morpho_dir = morpho_dir
         self.path_to_graph = path_to_graph
         self.labelling_session = labelling_session
-        self.skeleton_dir = join(skeleton_dir, self.side)
+        self.src_dir = join(src_dir, self.side)
         self.output_dir = join(output_dir, self.side)
         create_folder(abspath(self.output_dir))
 
-        self.expr = f"{self.side}{skeleton_filename}_(.*).nii.gz$"
-        self.skeleton_file = join(
-            self.skeleton_dir,
-            f"%(side)s{skeleton_filename}_%(subject)s.nii.gz")
-        self.output_file = join(
-            self.output_dir,
-            f"%(side)s{output_filename}_%(subject)s.nii.gz")
+        self.expr = f"{self.side}{src_filename}_(.*).nii.gz$"
+        self.src_file = f"%(side)s{src_filename}_%(subject)s.nii.gz"
+        self.output_file = f"%(side)s{output_filename}_%(subject)s.nii.gz"
 
     def remove_ventricle_from_one_subject(self, subject: str):
-        """ Removes ventricle and writes new skeleton for one subject.
+        """ Removes ventricle and writes new volume file for one subject.
         """
 
         sbj = {"subject": subject, "side": self.side}
 
-        skeleton_file = join(self.skeleton_dir, self.skeleton_file % sbj)
+        src_file = join(self.src_dir, self.src_file % sbj)
 
         output_file = join(self.output_dir, self.output_file % sbj)
 
         labelled_graph_list = self.get_labelled_graph(subject)
 
-        log.debug(f"skeleton_file = {skeleton_file}")
+        log.debug(f"src_file = {src_file}")
         log.debug(f"labelled_graphs = {labelled_graph_list}")
         log.debug(f"output_file = {output_file}")
 
-        if exists(skeleton_file):
+        if exists(src_file):
             for graph_file in labelled_graph_list:
                 if exists(graph_file):
-                    skeleton = remove_ventricle_from_one_skeleton(
-                        skeleton_file, graph_file)
+                    volume = remove_ventricle_from_graph(
+                        src_file, graph_file)
                 else:
                     raise FileNotFoundError(f"Labelled graph not found : \
                                             {graph_file}")
-            aims.write(skeleton, output_file)
+            aims.write(volume, output_file)
         else:
-            raise FileNotFoundError(f"Skeleton file not found : \
-                                    {skeleton_file}")
+            raise FileNotFoundError(f"Source file not found : \
+                                    {src_file}")
 
     def get_labelled_graph(self, subject: str):
         """ Find the labelled graph in the morphologist database from the
-        skeleton filename.
+        source filename.
         """
         labelled_graph_list = []
         side_list = ["L", "R"] if self.side == "F" else [self.side]
@@ -286,27 +276,27 @@ class RemoveVentricleFromSkeleton:
         return labelled_graph_list
 
     def compute(self, number_subjects):
-        """Loops over subjects and remove ventricle from skeletons.
+        """Loops over subjects and remove ventricle from volumes.
         """
         # Gets list of subjects
-        log.debug(f"skeleton_dir = {self.skeleton_dir}")
+        log.debug(f"src_dir = {self.src_dir}")
         log.debug(f"reg exp = {self.expr}")
 
-        if isdir(self.skeleton_dir):
-            filenames = glob.glob(f"{self.skeleton_dir}/*.nii.gz")
-            log.debug(f"Skeleton files list = {filenames}")
+        if isdir(self.src_dir):
+            filenames = glob.glob(f"{self.src_dir}/*.nii.gz")
+            log.debug(f"Volume files list = {filenames}")
 
             list_subjects = [re.search(self.expr, basename(filename))[1]
                              for filename in filenames
                              if not re.search('.minf$', filename)]
             list_subjects = select_subjects_int(list_subjects, number_subjects)
+
+            log.info(f"Expected number of subjects = {len(list_subjects)}")
+            log.info(f"list_subjects[:5] = {list_subjects[:5]}")
+            log.debug(f"list_subjects = {list_subjects}")
         else:
             raise NotADirectoryError(
                 f"{self.src_dir} doesn't exist or is not a directory")
-
-        log.info(f"Expected number of subjects = {len(list_subjects)}")
-        log.info(f"list_subjects[:5] = {list_subjects[:5]}")
-        log.debug(f"list_subjects = {list_subjects}")
 
         # Performs computation on all subjects either serially or in parallel
         if self.parallel:
@@ -326,39 +316,38 @@ class RemoveVentricleFromSkeleton:
         compare_number_aims_files_with_expected(self.output_dir, list_subjects)
 
 
-def remove_ventricle(skeleton_dir=_SKELETON_DIR_DEFAULT,
+def remove_ventricle(src_dir=_SRC_DIR_DEFAULT,
                      output_dir=_OUTPUT_DIR_DEFAULT,
                      morpho_dir=_SRC_DIR_DEFAULT,
                      path_to_graph=_PATH_TO_GRAPH_DEFAULT,
                      labelling_session=_LABELLING_SESSION_DEFAULT,
-                     skeleton_filename=_SKELETON_FILENAME_DEFAULT,
+                     src_filename=_SRC_FILENAME_DEFAULT,
                      output_filename=_OUTPUT_FILENAME_DEFAULT,
                      side=_SIDE_DEFAULT,
                      bids=False,
                      parallel=False,
                      number_subjects=_ALL_SUBJECTS):
-    """Remove ventricle from a skeleton
+    """Remove ventricle from a volume
     through the automatic labelled graph by Morphologist"""
 
     # Initialization
-    removal = RemoveVentricleFromSkeleton(
-        skeleton_dir=skeleton_dir,
+    removal = RemoveVentricleFromVolume(
+        src_dir=src_dir,
         output_dir=output_dir,
         morpho_dir=morpho_dir,
         path_to_graph=path_to_graph,
         labelling_session=labelling_session,
-        skeleton_filename=skeleton_filename,
+        src_filename=src_filename,
         output_filename=output_filename,
         side=side,
         bids=bids,
         parallel=parallel)
-    # Actual generation of skeletons from graphs
     removal.compute(number_subjects=number_subjects)
 
 
 @exception_handler
 def main(argv):
-    """Reads argument line and remove ventricle from skeleton
+    """Reads argument line and remove ventricle from volumes
     Args:
         argv: a list containing command line arguments
     """
@@ -367,12 +356,12 @@ def main(argv):
 
     # Actual API
     remove_ventricle(
-        skeleton_dir=params["skeleton_dir"],
+        src_dir=params["src_dir"],
         output_dir=params["output_dir"],
         morpho_dir=params["morpho_dir"],
         path_to_graph=params["path_to_graph"],
         labelling_session=params["labelling_session"],
-        skeleton_filename=params["skeleton_filename"],
+        src_filename=params["src_filename"],
         output_filename=params["output_filename"],
         side=params["side"],
         bids=params["bids"],
