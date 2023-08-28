@@ -202,20 +202,20 @@ pipeline.py
 ===========
 
 You can use the pipeline.py program to do all the previous steps in one command line. The way it works is that it calls all the required functions to process the target dataset from graphs to crops.
-/!\ Currently, if a step is already done (already existing skeletons for example) and the data stored at the right place, the program doesn't recompute it and use the existing data.
+/!\\ Currently, if a step is already done (already existing skeletons for example) and the data stored at the right place, the program doesn't recompute it and use the existing data.
 
 All the parameters required for the called functions need to be written in a json file, which is the only argument (with verbose) of the pipeline function.
-/!\ Any change in the arguments of a called function needs to be passed on both the json file and the pipeline.py code itself.
+/!\\ Any change in the arguments of a called function needs to be passed on both the json file and the pipeline.py code itself.
 
 Remark: a command line log is still computed with this method. The only difference is that the name of the normally called python file has "pipeline_" at the beginning. The parameters json file file is also copied to the crop directory.
 
 
 Currently (last update on 09/02/2023) the arguments of the json file are the following:
 
-- save_behavior: parameter to set how the generated files should be saved. Choose 'clear_and_compute' to delete potential already existing ones, choose 'best' to compute only subjects that don't already exist,
-choose 'minimal' to call the functions only if the directory is missing or empty.
+- save_behavior: parameter to set how the generated files should be saved. Choose 'clear_and_compute' to delete potential already existing ones, choose 'best' to compute only subjects that don't already exist, choose 'minimal' to call the functions only if the directory is missing or empty.
 Remark: for the mask computation, it is always 'best' that is chosen.
 Remark: 'clear_and_compute' should be used only if you want to recompute the whole pipeline for all subjects. 'best' should be prefered in other cases.
+
 - side: 'R' for right hemisphere or 'L' for left hemisphere.
 - out_voxel_size: float, same as others.
 - region name: *pipeline specific* ; name of the target region in the brain_region_json.

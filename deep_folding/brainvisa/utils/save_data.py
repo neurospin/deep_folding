@@ -162,7 +162,8 @@ def get_one_numpy_array(filename, cropped_dir):
                 f"file={file_nii} does not look like a nifti file")
 
 
-def save_to_numpy(cropped_dir, tgt_dir=None, file_basename=None, parallel = False):
+def save_to_numpy(cropped_dir, subset_list=None, tgt_dir=None, file_basename=None,
+                  parallel=False):
     """
     Creates a numpy array for each subject.
 
@@ -171,6 +172,7 @@ def save_to_numpy(cropped_dir, tgt_dir=None, file_basename=None, parallel = Fals
 
     Args:
         cropped_dir: directory containing cropped images
+        subset_list: list of subjects to put in the numpy. If None, put all of them
         tgt_dir: directory where to save the numpy array file
         file_basename: final file name = file_basename.npy
     """
@@ -183,8 +185,15 @@ def save_to_numpy(cropped_dir, tgt_dir=None, file_basename=None, parallel = Fals
     log.debug(f"cropped_dir = {cropped_dir}")
     log.info("STEP 1. Now reading cropped dir...")
     listdir = os.listdir(cropped_dir)
+    print('subset', len(subset_list), subset_list[:5])
     listdir = [filename for filename in listdir \
         if is_file_nii(os.path.join(cropped_dir, filename))]
+    print("before filter", len(listdir), listdir[:5])
+    if subset_list != None:
+        subset_list = [sub_name+'_cropped_foldlabel.nii.gz' for sub_name in subset_list]
+        listdir = [filename for filename in listdir if filename in subset_list]
+        print("after filter", len(listdir), listdir[:5])
+    
     if parallel:
         log.info("Reading cropped dir is done in PARALLEL")
         partial_func = partial(get_one_numpy_array, cropped_dir=cropped_dir)
@@ -195,6 +204,7 @@ def save_to_numpy(cropped_dir, tgt_dir=None, file_basename=None, parallel = Fals
         log.info("Reading cropped dir is done SERIALLY")
         for filename in tqdm(sorted(listdir)):
             file_nii = os.path.join(cropped_dir, filename)
+            print(file_nii)
             if is_file_nii(file_nii):
                 aimsvol = aims.read(file_nii)
                 sample = np.asarray(aimsvol)
