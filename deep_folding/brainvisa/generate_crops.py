@@ -154,10 +154,10 @@ def crop_mask(file_src, file_cropped, mask, bbmin, bbmax, no_mask=_NO_MASK_DEFAU
     vol_cropped = aims.VolumeView(vol, bbmin, bbmax-bbmin)
     aims.write(vol_cropped, file_cropped)
     # Crops mask according to mask bounding box
-    file_mask = os.path.dirname(os.path.dirname(file_cropped))
-    mask_cropped = aims.VolumeView(mask, bbmin, bbmax-bbmin)
-    aims.write(mask_cropped,
-               f"{file_mask}/mask_cropped.nii.gz")
+    # file_mask = os.path.dirname(os.path.dirname(file_cropped))
+    # mask_cropped = aims.VolumeView(mask, bbmin, bbmax-bbmin)
+    # aims.write(mask_cropped,
+    #            f"{file_mask}/mask_cropped.nii.gz")
 
 
 class CropGenerator:
@@ -294,6 +294,13 @@ class CropGenerator:
                 # Creates target and cropped directory
                 create_folder(self.crop_dir)
                 create_folder(self.cropped_samples_dir)
+
+                # Crops mask according to mask bounding box, for debugging
+                mask_cropped = aims.VolumeView(self.mask,
+                                               self.bbmin,
+                                               self.bbmax - self.bbmin)
+                aims.write(mask_cropped,
+                        f"{self.crop_dir}/{self.side}mask_cropped.nii.gz")
 
                 # Writes number of subjects and directory names to json file
                 dict_to_add = {'nb_subjects': len(list_subjects),

@@ -185,14 +185,14 @@ def save_to_numpy(cropped_dir, subset_list=None, tgt_dir=None, file_basename=Non
     log.debug(f"cropped_dir = {cropped_dir}")
     log.info("STEP 1. Now reading cropped dir...")
     listdir = os.listdir(cropped_dir)
-    print('subset', len(subset_list), subset_list[:5])
+    #print('subset', len(subset_list), subset_list[:5])
     listdir = [filename for filename in listdir \
         if is_file_nii(os.path.join(cropped_dir, filename))]
-    print("before filter", len(listdir), listdir[:5])
+    #print("before filter", len(listdir), listdir[:5])
     if subset_list != None:
         subset_list = [sub_name+'_cropped_foldlabel.nii.gz' for sub_name in subset_list]
         listdir = [filename for filename in listdir if filename in subset_list]
-        print("after filter", len(listdir), listdir[:5])
+        #print("after filter", len(listdir), listdir[:5])
     
     if parallel:
         log.info("Reading cropped dir is done in PARALLEL")
@@ -204,7 +204,7 @@ def save_to_numpy(cropped_dir, subset_list=None, tgt_dir=None, file_basename=Non
         log.info("Reading cropped dir is done SERIALLY")
         for filename in tqdm(sorted(listdir)):
             file_nii = os.path.join(cropped_dir, filename)
-            print(file_nii)
+            #print(file_nii)
             if is_file_nii(file_nii):
                 aimsvol = aims.read(file_nii)
                 sample = np.asarray(aimsvol)

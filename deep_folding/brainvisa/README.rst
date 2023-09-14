@@ -238,3 +238,13 @@ Remark: 'clear_and_compute' should be used only if you want to recompute the who
 - cropping_type: parameter of generate_crops.
 - combine_type: parameter of generate_crops.
 - no_mask: parameter of generate_crops.
+
+
+pipeline_square.py
+==================
+
+In order not to simplify the use of pipeline.py when you want to run it multiple times, ``pipeline_square.py`` has been written.
+Instead of modifying by hand the json used by ``pipeline.py``, ``pipeline_square.py`` does it automatically by looping on all the values of all the specified parameters. The parameters to loop on are specified inside the python file.
+All the pipelines are launched serially.
+
+/!\\ In order for ``pipeline_square.py`` to work, you need for the target dataset(s) to have a json called 'pipeline_loop_2mm.json' (or any other way as specified in the ``pipeline_square.py``). All the parameters not specified in ``pipeline_square.py`` will be taken as in this json.

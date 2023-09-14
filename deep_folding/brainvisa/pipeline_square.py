@@ -4,7 +4,7 @@ import os
 import json
 
 
-regions = ['S.F.inter.', 'S.F.inf.-BROCA-S.Pe.C.inf.', 'S.T.i.', 'S.C.', 'F.C.M.post.-S.p.C.']
+regions = ['S.C.-sylv.']
 datasets = ['bsnip1', 'candi', 'cnp', 'schizconnect-vip-prague']
 sides = ['R', 'L']
 input_types = ['foldlabel', 'skeleton']
@@ -26,11 +26,11 @@ for region in regions:
 
                 # replace the template json by the modified one
                 with open(pipeline_json, 'w') as file2:
-                    json.dump(json_dict, file2)
+                    json.dump(json_dict, file2, indent=3)
                     file2.close()
                 
                 # run the pipeline on the target region with the requested parameters
-                os.system(f"python3 brainvisa/pipeline.py --params_path {pipeline_json}")
+                os.system(f"python3 deep_folding/brainvisa/pipeline.py --params_path {pipeline_json}")
                 print("\nEND")
                 print(region, dataset, side, input_type, 'ok')
                 print("\n")
