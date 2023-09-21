@@ -38,7 +38,7 @@
   Typical usage
   -------------
   You can use this program by first entering in the brainvisa environment
-  (here brainvisa 5.0.0 installed with singurity) and launching the script
+  (here brainvisa 5.0.0 installed with singularity) and launching the script
   from the terminal:
   >>> bv bash
   >>> python generate_foldlabels.py
@@ -50,11 +50,9 @@ import argparse
 import glob
 import re
 import sys
-from os.path import abspath
-from os.path import exists
-from os.path import basename
+from os.path import abspath, exists, basename, dirname, join
 
-from deep_folding.brainvisa import exception_handler
+from deep_folding.brainvisa import exception_handler, DeepFoldingError
 from deep_folding.brainvisa.utils.folder import create_folder
 from deep_folding.brainvisa.utils.subjects import get_number_subjects,\
                                                   is_it_a_subject
@@ -63,7 +61,7 @@ from deep_folding.brainvisa.utils.subjects import select_subjects_int,\
 from deep_folding.brainvisa.utils.logs import setup_log
 from deep_folding.brainvisa.utils.parallel import define_njobs
 from deep_folding.brainvisa.utils.foldlabel import \
-    generate_foldlabel_from_graph_file
+    generate_foldlabel_from_graph_file, generate_full_foldlabel
 from deep_folding.brainvisa.utils.quality_checks import \
     compare_number_aims_files_with_expected, \
     compare_number_aims_files_with_number_in_source, \
@@ -144,10 +142,11 @@ def parse_args(argv):
 
     args = parser.parse_args(argv)
 
+    suffix = {"R": "right", "L": "left", "F": "full"}
     setup_log(args,
               log_dir=f"{args.output_dir}",
               prog_name=basename(__file__),
-              suffix='right' if args.side == 'R' else 'left')
+              suffix=suffix[args.side])
 
     params = {}
 
@@ -156,6 +155,8 @@ def parse_args(argv):
     params['path_to_graph'] = args.path_to_graph
     params['side'] = args.side
     params['junction'] = args.junction
+    params['parallel'] = args.parallel
+    params['bids'] = args.bids
     params['parallel'] = args.parallel
     # Checks if nb_subjects is either the string "all" or a positive integer
     params['nb_subjects'] = get_number_subjects(args.nb_subjects)
@@ -205,20 +206,54 @@ class GraphConvert2FoldLabel:
         """Generates and writes skeleton for one subject.
         """
         # Gets graph file path
-        graph_path = f"{self.src_dir}/{subject}*/" +\
-                     f"{self.path_to_graph}/{self.side}*.arg"
+        if self.side == "F":
+            graph_path = f"{self.src_dir}/{subject}*/" + \
+                         f"{self.path_to_graph}/?{subject}*.arg"
+        else:
+            graph_path = f"{self.src_dir}/{subject}*/" +\
+                         f"{self.path_to_graph}/{self.side}*.arg"
         list_graph_file = glob.glob(graph_path)
         log.debug(f"list_graph_file = {list_graph_file}")
         if len(list_graph_file) == 0:
-            raise RuntimeError(f"No graph file! "
-                               f"{graph_path} doesn't exist")
-
+            raise FileNotFoundError(f"No graph file! "
+                                    f"{graph_path} doesn't exist")
         for graph_file in list_graph_file:
-            foldlabel_file = self.get_foldlabel_filename(subject, graph_file)
-            generate_foldlabel_from_graph_file(
-                graph_file, foldlabel_file, self.junction)
-            if not self.bids:
-                break
+            try:
+                foldlabel_file = self.get_foldlabel_filename(subject, graph_file)
+                if self.side == "F":
+                    graph_file_left, graph_file_right, graph_to_remove = \
+                        self.get_left_and_right_graph_files(graph_file, list_graph_file)
+                    if graph_to_remove:
+                        list_graph_file.remove(graph_to_remove)
+                        generate_full_foldlabel(graph_file_left, graph_file_right,
+                                                foldlabel_file, self.junction)
+                else:
+                    generate_foldlabel_from_graph_file(
+                        graph_file, foldlabel_file, self.junction)
+                if not self.bids:
+                    break
+            except DeepFoldingError as e:
+                log.error(f"Graph file {graph_file} : {e}")
+                continue
+
+    @staticmethod
+    def get_left_and_right_graph_files(graph_file, list_graph_file):
+        graph_name = basename(graph_file)
+        if graph_name[0] == "L":
+            graph_file_left = graph_file
+            graph_file_right = join(dirname(graph_file), f"R{graph_name[1:]}")
+            if graph_file_right not in list_graph_file:
+                raise DeepFoldingError(f"Right graph is missing ({graph_file_right})")
+            else:
+                graph_to_remove = graph_file_right
+        else:
+            graph_file_right = graph_file
+            graph_file_left = join(dirname(graph_file), f"L{graph_name[1:]}")
+            if graph_file_left not in list_graph_file:
+                raise DeepFoldingError(f"Left graph is missing ({graph_file_left})")
+            else:
+                graph_to_remove = graph_file_left
+        return graph_file_left, graph_file_right, graph_to_remove
 
     def compute(self, number_subjects):
         """Loops over subjects and converts graphs into skeletons.
