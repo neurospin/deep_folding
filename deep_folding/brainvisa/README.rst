@@ -202,10 +202,10 @@ pipeline.py
 ===========
 
 You can use the pipeline.py program to do all the previous steps in one command line. The way it works is that it calls all the required functions to process the target dataset from graphs to crops.
-/!\ Currently, if a step is already done (already existing skeletons for example) and the data stored at the right place, the program doesn't recompute it and use the existing data.
+/!\\ Currently, if a step is already done (already existing skeletons for example) and the data stored at the right place, the program doesn't recompute it and use the existing data.
 
 All the parameters required for the called functions need to be written in a json file, which is the only argument (with verbose) of the pipeline function.
-/!\ Any change in the arguments of a called function needs to be passed on both the json file and the pipeline.py code itself.
+/!\\ Any change in the arguments of a called function needs to be passed on both the json file and the pipeline.py code itself.
 
 Remark: a command line log is still computed with this method. The only difference is that the name of the normally called python file has "pipeline_" at the beginning. The parameters json file file is also copied to the crop directory.
 
@@ -238,3 +238,12 @@ Remark: 'clear_and_compute' should be used only if you want to recompute the who
 - cropping_type: parameter of generate_crops.
 - combine_type: parameter of generate_crops.
 - no_mask: parameter of generate_crops.
+
+multi_pipelines.py
+==================
+
+In order not to simplify the use of pipeline.py when you want to run it multiple times, ``multi_pipelines.py`` has been written.
+Instead of modifying by hand the json used by ``pipeline.py``, ``multi_pipelines.py`` does it automatically by looping on all the values of all the specified parameters. The parameters to loop on are specified inside the python file.
+All the pipelines are launched serially.
+
+/!\\ In order for ``multi_pipelines.py`` to work, you need for the target dataset(s) to have a json called 'pipeline_loop_2mm.json' (or any other way as specified in the ``multi_pipelines.py``). All the parameters not specified in ``multi_pipelines.py`` will be taken as in this json.
