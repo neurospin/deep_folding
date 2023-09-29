@@ -4,8 +4,8 @@ import os
 import json
 
 
-regions = ['S.F.inter.', 'S.F.inf.-BROCA-S.Pe.C.inf.', 'S.T.i.', 'S.C.', 'F.C.M.post.-S.p.C.']
-datasets = ['bsnip1', 'candi', 'cnp', 'schizconnect-vip-prague']
+regions = ['S.Pe.C.', 'S.Po.C.']
+datasets = ['hcp-top-separated']
 sides = ['R', 'L']
 input_types = ['foldlabel', 'skeleton']
 
@@ -30,7 +30,7 @@ for region in regions:
                     file2.close()
                 
                 # run the pipeline on the target region with the requested parameters
-                os.system(f"python3 brainvisa/pipeline.py --params_path {pipeline_json}")
+                os.system(f"python3 pipeline.py --params_path {pipeline_json}")
                 print("\nEND")
                 print(region, dataset, side, input_type, 'ok')
                 print("\n")
