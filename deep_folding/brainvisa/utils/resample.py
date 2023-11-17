@@ -126,10 +126,11 @@ def resample(input_image: Union[str, aims.Volume],
     if aims.version() >= (5, 2):
         reorder = False
         toc = time()
-        if values != sorted(np.unique(vol_dt[vol_dt != background])):
+        if list(values) != list(sorted(np.unique(
+                vol_dt[vol_dt != background]))):
             print('changing values')
             reorder = True
-            old_vol = vol
+            # old_vol = vol
             old_resmp = resampled
             resampled = aims.Volume(resampled)
             repl = {v: i+1 for i, v in enumerate(values)}
