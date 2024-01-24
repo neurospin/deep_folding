@@ -71,7 +71,7 @@ def resample(input_image: Union[str, aims.Volume],
         vol = aims.read(input_image)
     else:
         vol = input_image
-    vol_dt = vol.__array__()
+    vol_dt = vol.np
 
     # Reads transformation if present (either path to file or aims Volume)
     if transformation:
@@ -87,9 +87,9 @@ def resample(input_image: Union[str, aims.Volume],
     # Definition of voxel size and dim
     ##################################
 
+    hdr = aims.StandardReferentials.icbm2009cTemplateHeader()
     if output_vs:
         output_vs = np.array(output_vs)
-        hdr = aims.StandardReferentials.icbm2009cTemplateHeader()
         # New volume dimensions
         resampling_ratio = np.array(hdr['voxel_size'][:3]) / output_vs
         orig_dim = hdr['volume_dimension'][:3]
@@ -146,6 +146,9 @@ def resample(input_image: Union[str, aims.Volume],
         bck = aims.BucketMap_VOID()
         bck.setSizeXYZT(*vol.header()['voxel_size'][:3], 1.)
         cvol_bk = aims.RawConverter_rc_ptr_Volume_S16_BucketMap_VOID(True)
+        # make sure the background is 0 before transformation into bucket
+        # FIXME: what if 0 is actually a non-background label ?
+        vol[vol.np == background] = 0
         cvol_bk.convert(vol, bck)
         for v in bck.keys():
             print(v, ':', len(bck[v]), 'voxels')
