@@ -129,6 +129,7 @@ def resample(input_image: Union[str, aims.Volume],
     if aims.version() >= (5, 2):
         reorder = False
         toc = time()
+        repl = {}
         if values != unique_val_in_vol:
             #print('changing values')
             reorder = True
@@ -143,6 +144,7 @@ def resample(input_image: Union[str, aims.Volume],
                 aims, 'Replacer_{}'.format(aims.typeCode(old_resmp.np.dtype)))
             replacer.replace(resampled, resampled, repl)
             replacer.replace(vol, vol, repl)
+            values = [repl.get(x, x) for x in values]
         bck = aims.BucketMap_VOID()
         bck.setSizeXYZT(*vol.header()['voxel_size'][:3], 1.)
         cvol_bk = aims.RawConverter_rc_ptr_Volume_S16_BucketMap_VOID(True)
@@ -167,9 +169,8 @@ def resample(input_image: Union[str, aims.Volume],
             # (there are no python bindings for this C library yet)
             # (and VipSkeleton in version 5.1 does not have the -k option)
             if immortals is None:
-                immortals = [30, 50, 80]
-            immortals_i = [values.index(x) + 1
-                          for x in [i for i in immortals if i in values]]
+                immortals = [repl.get(x, x) for x in [30, 50, 80]]
+            immortals_i = [x for x in immortals if x in values]
             # skeleton for border lines (junctionos, bottom) will become
             # immortals
             borders = aims.Volume(resampled)
