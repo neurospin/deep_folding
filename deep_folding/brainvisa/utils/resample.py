@@ -130,7 +130,7 @@ def resample(input_image: Union[str, aims.Volume],
         reorder = False
         toc = time()
         if values != unique_val_in_vol:
-            print('changing values')
+            #print('changing values')
             reorder = True
             # old_vol = vol
             old_resmp = resampled
@@ -150,8 +150,8 @@ def resample(input_image: Union[str, aims.Volume],
         # FIXME: what if 0 is actually a non-background label ?
         vol[vol.np == background] = 0
         cvol_bk.convert(vol, bck)
-        for v in bck.keys():
-            print(v, ':', len(bck[v]), 'voxels')
+        #for v in bck.keys():
+        #    print(v, ':', len(bck[v]), 'voxels')
         t_bck = time() - toc
         toc = time()
         bck2 = aimsalgo.resampleBucket(bck, trm, inv_trm, output_vs)
