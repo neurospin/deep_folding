@@ -162,7 +162,8 @@ def resample_one_skeleton(input_image,
 def resample_one_foldlabel(input_image,
                            out_voxel_size,
                            transformation,
-                           skeleton_mask=None):
+                           do_skel=False,
+                           immortals=None):
     """Resamples one foldlabel file
 
     Args
@@ -184,12 +185,13 @@ def resample_one_foldlabel(input_image,
                          output_vs=out_voxel_size,
                          transformation=transformation)
     
-    if skeleton_mask is not None:
-        resampled_masked = mask_foldlabel(resampled,
-                                          skeleton_mask)
-        return resampled_masked
-    else:
-        return resampled
+    #if skeleton_mask is not None:
+    #    resampled_masked = mask_foldlabel(resampled,
+    #                                      skeleton_mask)
+    #    return resampled_masked
+    #else:
+    #    return resampled
+    return resampled
 
 
 def resample_one_distmap(input_image,
