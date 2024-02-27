@@ -26,7 +26,8 @@ def resample(input_image: Union[str, aims.Volume],
              values: list = None,
              verbose: bool = False,
              do_skel: bool = False,
-             immortals: list = None) -> aims.Volume:
+             immortals: list = None,
+             redo_classif: bool = True) -> aims.Volume:
     """
         Transforms and resamples a volume that has discret values
 
@@ -42,15 +43,21 @@ def resample(input_image: Union[str, aims.Volume],
             Background value (default: 0)
         values: []
             List of unique values ordered by ascendent priority
-            without background. If not given,
-            priority is set by ascendent values
+            without background. If not given, priority is set by ascending
+            values. For Morphologist or deep_folding skeletons (see
+            :func:`~deep_folding.brainvisa.utils.skeleton.generate_skeleton_thin_junction`) a good values list is:
+            [100, 60, 10, 20, 40, 50, 70, 80, 110, 120, 30, 35].
         do_skel:
             do skeletonization after resampling
         immortals:
             if skeletonization is used, this is the list of voxel values used
             as initial "immortal voxels" in the skeletonization: voxels that
             will not be eroded. Normally border and junctions values, in a
-            Morphologist skeleton: [30, 50, 80]. This is the default.
+            Morphologist or deep_folding skeleton: [30, 50, 80, 35, 110, 120].
+            This is the default.
+        redo_classif:
+            if True, after re-skeletonization, re-perform voxel topological
+            classification. No effect if do_skel is False.
 
         Return
         ------
@@ -124,7 +131,7 @@ def resample(input_image: Union[str, aims.Volume],
     if aims.version() >= (5, 2):
 
         if immortals is None:
-            immortals = [30, 50, 80]
+            immortals = [30, 50, 80, 35, 110, 120]
         immortals = [v for v in values if v in immortals]
         values = [v for v in values if v not in immortals] \
             + [v for v in immortals]
@@ -239,7 +246,7 @@ def resample(input_image: Union[str, aims.Volume],
             borders[borders_cc.np != 0] = 1
             borders[seeds] = range(2, ccn + 1)
             aimsalgo.AimsDistanceFrontPropagation(borders, 1, 0, 3, 3, 3,
-                                                    50, False)
+                                                  50, False)
             seeds2 = []
             for cc in range(ccn - 1):
                 mi = np.argmax(borders[bbk[cc]])
@@ -268,6 +275,7 @@ def resample(input_image: Union[str, aims.Volume],
                 # aims.write(sk_in, '/tmp/borders_sk.nii')  # debug
                 sk_in[sk_in.np != 0] = 1
                 sk_in[borders.np != 0] = -103  # immportals value
+                del borders
                 aims.write(sk_in, tmp[1])
                 cmd = ['VipSkeleton', '-i', tmp[1], '-so', tmp2[1], '-fv', 'n',
                        '-sk', 's', '-p', '0', '-c', 'n', '-k']
@@ -297,6 +305,31 @@ def resample(input_image: Union[str, aims.Volume],
             replacer = getattr(
                 aims, 'Replacer_{}'.format(aims.typeCode(resampled.np.dtype)))
             replacer.replace(resampled, resampled, irepl)
+
+        if redo_classif and do_skel:
+            th = aims.Volume(resampled)
+            th[th.np != 0] = 1
+            tc = aimsalgo.TopologicalClassifier_Volume_S16()
+            topo = tc.doit(th)
+            del th
+            # replace values changed between aims/vip topological values (see
+            # the output of the command "VipTopoClassifMeaning -a") and
+            # deep_folding value for external junction, 35, which are now
+            # 30 or 80 (bottom or junction).
+            resampled[resampled.np != 35] = 0
+            resampled2 = aims.Volume(resampled)
+            # dilate value 35 1 voxel in each direction
+            resampled[:-1, :, :, :] += resampled[1:, :, :, :]
+            resampled[1:, :, :, :] += resampled2[:-1, :, :, :]
+            resampled[:, :-1, :, :] += resampled2[:, 1:, :, :]
+            resampled[:, 1:, :, :] += resampled2[:, :-1, :, :]
+            resampled[:, :, :-1, :] += resampled2[:, :, 1:, :]
+            resampled[:, :, 1:, :] += resampled2[:, :, :-1, :]
+            del resampled2
+            # intersect
+            topo[np.isin(topo, (30, 80)) & (resampled.np != 0)] = 35
+            resampled = topo
+            del topo
 
         log.debug("Time: {}s".format(time() - tic))
         log.debug("\t{}s to create the bucket\n\t{}s to resample bucket\n"
