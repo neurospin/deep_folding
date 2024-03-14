@@ -100,10 +100,27 @@ _RESAMPLED_DISTMAP_FILENAME = "resampled_distmap_"
 # Defines logger
 log = set_file_logger(__file__)
 
+def mask_foldlabel(resampled,
+                   skeleton_mask):
+    """
+    if do_skel=True,
+    resampled foldlabel is masked using skeleton.
+    """
+    
+    arr_resampled = resampled.np
+    arr_skeleton = skeleton_mask.np
+    arr = arr_resampled.copy()
+    arr[arr_skeleton==0]=0
+    vol = aims.Volume(arr)
+    return vol
+
 
 def resample_one_skeleton(input_image,
                           out_voxel_size,
-                          transformation):
+                          transformation,
+                          do_skel,
+                          immortals,
+                          redo_classif=True):
     """Resamples one skeleton file
 
     Args
@@ -114,6 +131,11 @@ def resample_one_skeleton(input_image,
             Output voxel size (default: None, no resampling)
         transformation: string or aims.Volume
             either path to transformation file or transformation itself
+        do_skel: bool
+            whether to apply skeletonization
+        immortals: list
+            if do_skel, then the list of immortal voxel values
+            (NB: UNCLEAR)
 
     Returns:
         resampled: aims.Volume
@@ -125,20 +147,25 @@ def resample_one_skeleton(input_image,
     # for the bottom value (30) and the simple surface value (60)
     # with respect to the natural order
     # We don't give background, which is the interior 0
-    values = np.array([11, 60, 30, 35, 10, 20, 40,
-                      50, 70, 80, 90, 100, 110, 120])
-
+    #values = [11, 60, 30, 35, 10, 20, 40,
+    #          50, 70, 80, 90, 100, 110, 120]
+    values = [100, 60, 10, 20, 40, 50, 70, 80, 110, 120, 30, 35]
     # Normalization and resampling of skeleton images
     resampled = resample(input_image=input_image,
                          output_vs=out_voxel_size,
                          transformation=transformation,
-                         values=values)
+                         values=values,
+                         do_skel=do_skel,
+                         immortals=immortals)
     return resampled
 
 
 def resample_one_foldlabel(input_image,
                            out_voxel_size,
-                           transformation):
+                           transformation,
+                           do_skel=False,
+                           immortals=None,
+                           redo_classif=False):
     """Resamples one foldlabel file
 
     Args
@@ -159,6 +186,13 @@ def resample_one_foldlabel(input_image,
     resampled = resample(input_image=input_image,
                          output_vs=out_voxel_size,
                          transformation=transformation)
+    
+    #if skeleton_mask is not None:
+    #    resampled_masked = mask_foldlabel(resampled,
+    #                                      skeleton_mask)
+    #    return resampled_masked
+    #else:
+    #    return resampled
     return resampled
 
 
@@ -227,7 +261,8 @@ class FileResampler:
     """
 
     def __init__(self, src_dir, resampled_dir, transform_dir,
-                 side, out_voxel_size, parallel
+                 side, out_voxel_size, parallel,
+                 do_skel, immortals
                  ):
         """Inits with list of directories
 
@@ -259,11 +294,16 @@ class FileResampler:
         self.out_voxel_size = (out_voxel_size,
                                out_voxel_size,
                                out_voxel_size)
+        
+        self.do_skel = do_skel
+        self.immortals = immortals
 
     @staticmethod
     def resample_one_subject(src_file: str,
                              out_voxel_size: float,
                              transform_file: str,
+                             do_skel: bool,
+                             immortals: list,
                              resampled_file=None):
         """Resamples skeleton
 
@@ -299,7 +339,9 @@ class FileResampler:
                 src_file=src_file,
                 out_voxel_size=self.out_voxel_size,
                 transform_file=transform_file,
-                resampled_file=resampled_file)
+                resampled_file=resampled_file,
+                do_skel=self.do_skel,
+                immortals=self.immortals)
             # aims.write(resampled, resampled_file)
         else:
             raise FileNotFoundError(f"{src_file} not found")
@@ -387,7 +429,7 @@ class SkeletonResampler(FileResampler):
 
     def __init__(self, src_dir, resampled_dir, transform_dir,
                  side, out_voxel_size, parallel, src_filename,
-                 output_filename
+                 output_filename, do_skel, immortals
                  ):
         """Inits with list of directories
 
@@ -406,7 +448,12 @@ class SkeletonResampler(FileResampler):
         super(SkeletonResampler, self).__init__(
             src_dir=src_dir, resampled_dir=resampled_dir,
             transform_dir=transform_dir, side=side,
-            out_voxel_size=out_voxel_size, parallel=parallel)
+            out_voxel_size=out_voxel_size, parallel=parallel,
+            do_skel=do_skel, immortals=immortals)
+        
+        #skeletonization parameters
+        self.do_skel=do_skel
+        self.immortals=immortals
 
         # Names of files in function of dictionary: keys = 'subject' and 'side'
         # Src directory contains either 'R' or 'L' a subdirectory
@@ -430,6 +477,8 @@ class SkeletonResampler(FileResampler):
     def resample_one_subject(src_file: str,
                              out_voxel_size: float,
                              transform_file: str,
+                             do_skel: bool,
+                             immortals: list,
                              resampled_file=None):
         """Resamples skeleton
 
@@ -437,7 +486,9 @@ class SkeletonResampler(FileResampler):
         from parent class FileResampler"""
         resampled = resample_one_skeleton(input_image=src_file,
                                           out_voxel_size=out_voxel_size,
-                                          transformation=transform_file)
+                                          transformation=transform_file,
+                                          do_skel=do_skel,
+                                          immortals=immortals)
         aims.write(resampled, resampled_file)
 
 
@@ -447,7 +498,7 @@ class FoldLabelResampler(FileResampler):
 
     def __init__(self, src_dir, resampled_dir, transform_dir,
                  side, out_voxel_size, parallel, src_filename,
-                 output_filename
+                 output_filename, do_skel, immortals
                  ):
         """Inits with list of directories
 
@@ -466,7 +517,8 @@ class FoldLabelResampler(FileResampler):
         super(FoldLabelResampler, self).__init__(
             src_dir=src_dir, resampled_dir=resampled_dir,
             transform_dir=transform_dir, side=side,
-            out_voxel_size=out_voxel_size, parallel=parallel)
+            out_voxel_size=out_voxel_size, parallel=parallel,
+            do_skel=do_skel, immortals=immortals)
 
         # Names of files in function of dictionary: keys = 'subject' and 'side'
         # Src directory contains either 'R' or 'L' a subdirectory
@@ -488,10 +540,13 @@ class FoldLabelResampler(FileResampler):
     def resample_one_subject(src_file: str,
                              out_voxel_size: float,
                              transform_file: str,
+                             do_skel: bool,
+                             immortals=None,
                              resampled_file=None):
         resampled = resample_one_foldlabel(input_image=src_file,
                                            out_voxel_size=out_voxel_size,
-                                           transformation=transform_file)
+                                           transformation=transform_file,
+                                           do_skel=do_skel)
         aims.write(resampled, resampled_file)
 
 
@@ -501,7 +556,7 @@ class DistMapResampler(FileResampler):
 
     def __init__(self, src_dir, resampled_dir, transform_dir,
                  side, out_voxel_size, parallel, src_filename,
-                 output_filename
+                 output_filename, do_skel, immortals
                  ):
         """Inits with list of directories
         Args:
@@ -515,7 +570,8 @@ class DistMapResampler(FileResampler):
         super(DistMapResampler, self).__init__(
             src_dir=src_dir, resampled_dir=resampled_dir,
             transform_dir=transform_dir, side=side,
-            out_voxel_size=out_voxel_size, parallel=parallel)
+            out_voxel_size=out_voxel_size, parallel=parallel,
+            do_skel=do_skel, immortals=immortals)
 
         # Names of files in function of dictionary: keys = 'subject' and 'side'
         # Src directory contains either 'R' or 'L' a subdirectory
@@ -537,7 +593,9 @@ class DistMapResampler(FileResampler):
     def resample_one_subject(src_file: str,
                              out_voxel_size: float,
                              transform_file: str,
-                             resampled_file: str):
+                             resampled_file: str,
+                             do_skel=None,
+                             immortals=None):
         return resample_one_distmap(input_image=src_file,
                                     resampled_dir=resampled_file,
                                     out_voxel_size=out_voxel_size,
@@ -664,7 +722,9 @@ def resample_files(
             out_voxel_size=out_voxel_size,
             parallel=parallel,
             src_filename=src_filename,
-            output_filename=output_filename)
+            output_filename=output_filename,
+            do_skel=True,
+            immortals=[30, 50, 80, 35, 110, 120])
     elif input_type == "foldlabel":
         src_filename = (_FOLDLABEL_FILENAME
                         if src_filename is None
@@ -680,7 +740,9 @@ def resample_files(
             out_voxel_size=out_voxel_size,
             parallel=parallel,
             src_filename=src_filename,
-            output_filename=output_filename)
+            output_filename=output_filename,
+            do_skel=False,
+            immortals=[])
     elif input_type == "distmap":
         resampler = DistMapResampler(
             src_dir=src_dir,
@@ -690,7 +752,9 @@ def resample_files(
             out_voxel_size=out_voxel_size,
             parallel=parallel,
             src_filename=src_filename,
-            output_filename=output_filename)
+            output_filename=output_filename,
+            do_skel=False,
+            immortals=[])
     else:
         raise ValueError(
             "input_type: shall be either 'skeleton', 'foldlabel' or "

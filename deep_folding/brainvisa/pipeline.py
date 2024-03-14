@@ -365,40 +365,40 @@ def main(argv):
             log.info('Raw distmaps generated')
 
     # generate raw foldlabels if required
-    if params['input_type'] == 'foldlabel':
-        step = print_info(step, "generate raw foldlabels")
-        foldlabel_raw_path = os.path.join(
-            params['foldlabel_dir'], 'raw', params['side'])
+    #if params['input_type'] == 'foldlabel':
+    #    step = print_info(step, "generate raw foldlabels")
+    #    foldlabel_raw_path = os.path.join(
+    #        params['foldlabel_dir'], 'raw', params['side'])
 
-        if is_step_to_be_computed(
-            foldlabel_raw_path,
-            "Raw foldlabels",
-                save_behavior=save_behavior):
-            if save_behavior == 'clear_and_compute' and os.path.exists(
-                    foldlabel_raw_path):
+     #   if is_step_to_be_computed(
+     #       foldlabel_raw_path,
+     #       "Raw foldlabels",
+     #           save_behavior=save_behavior):
+     #       if save_behavior == 'clear_and_compute' and os.path.exists(
+     #               foldlabel_raw_path):
                 # remove the target folder
-                log.info(f"Delete {foldlabel_raw_path}")
-                shutil.rmtree(foldlabel_raw_path)
+     #           log.info(f"Delete {foldlabel_raw_path}")
+     #           shutil.rmtree(foldlabel_raw_path)
 
-            args_generate_foldlabels = {
-                'src_dir': params['graphs_dir'],
-                'foldlabel_dir': params['foldlabel_dir'] + '/raw',
-                'path_to_graph': params['path_to_graph'],
-                'side': params['side'],
-                'junction': params['junction'],
-                'bids': params['bids'],
-                'parallel': params['parallel'],
-                'number_subjects': params['nb_subjects'],
-                'qc_path': params['skel_qc_path']}
+      #      args_generate_foldlabels = {
+      #          'src_dir': params['graphs_dir'],
+      #          'foldlabel_dir': params['foldlabel_dir'] + '/raw',
+      #          'path_to_graph': params['path_to_graph'],
+      #          'side': params['side'],
+      #          'junction': params['junction'],
+      #          'bids': params['bids'],
+      #          'parallel': params['parallel'],
+      #          'number_subjects': params['nb_subjects'],
+      #          'qc_path': params['skel_qc_path']}
 
-            setup_log(Namespace(**{'verbose': log.level,
-                                   **args_generate_foldlabels}),
-                      log_dir=f"{args_generate_foldlabels['foldlabel_dir']}",
-                      prog_name='pipeline_generate_foldlabels.py',
-                      suffix=full_side[1:])
+       #     setup_log(Namespace(**{'verbose': log.level,
+        #                           **args_generate_foldlabels}),
+         #             log_dir=f"{args_generate_foldlabels['foldlabel_dir']}",
+          #            prog_name='pipeline_generate_foldlabels.py',
+           #           suffix=full_side[1:])
 
-            generate_foldlabels(**args_generate_foldlabels)
-            log.info('Raw foldlabels generated')
+            #generate_foldlabels(**args_generate_foldlabels)
+            #log.info('Raw foldlabels generated')
 
     # generate transform
     if params['out_voxel_size'] != 'raw':
