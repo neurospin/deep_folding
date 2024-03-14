@@ -2,6 +2,7 @@ import numpy as np
 import os
 from soma import aims, aimsalgo
 import pandas as pd
+from tqdm import tqdm
 
 """
 Computes distbottom nifti and npy files from cropped skeleton.
@@ -15,7 +16,7 @@ crops_dirs = directory+side+'crops/'
 skel_subjects = pd.read_csv(directory+side+'skeleton_subject.csv') # NB: skeleton_subject needs to be in consistent order with Rskeleton.npy
 
 distbottom_list = []
-for i, subject in enumerate(skel_subjects.Subject):
+for i, subject in enumerate(tqdm(skel_subjects.Subject)):
     vol = aims.read(crops_dirs+subject+'_cropped_skeleton.nii.gz')
     outside = 0
     other_outside = 11
@@ -33,8 +34,6 @@ for i, subject in enumerate(skel_subjects.Subject):
     aimsalgo.AimsDistanceFrontPropagation(vol, ss_val, outside, 3, 3, 3, 50, False)
     aims.write(vol, directory+side+f'distbottom/{subject}_cropped_distbottom.nii.gz')
     distbottom_list.append(vol.np)
-    if i % 1000 == 0:
-        print(i)
 
 # save al distbottoms in numpy array
 arr = np.stack(distbottom_list)
