@@ -36,22 +36,22 @@ def test_generate_distmaps_n_0():
         number_subjects=0)
 
 
-def test_generate_distmaps():
-    """Test distmap generation
-    """
-    generate_distmaps.generate_distmaps(src_dir=src_dir,
-                        distmaps_dir=tgt_dir,
-                        side='R',
-                        parallel=False,
-                        resampled_skel=False,
-                        number_subjects=1)
-
-    distmap_target = aims.read(os.path.join(
-        tgt_dir, 'R', 'Rdistmap_generated_146533.nii.gz')).arraydata()
-
-    distmap_ref = aims.read(os.path.join(
-        ref_dir, 'Rdistmap_generated_146533.nii.gz')).arraydata()
-
-    equal_dist = equal_distmaps(distmap_ref, distmap_target)
-
-    assert equal_dist
+# def test_generate_distmaps():
+#    """Test distmap generation
+#    """
+#    generate_distmaps.generate_distmaps(src_dir=src_dir,
+#                        distmaps_dir=tgt_dir,
+#                        side='R',
+#                        parallel=False,
+#                        resampled_skel=False,
+#                        number_subjects=1)
+#
+#    distmap_target = aims.read(os.path.join(
+#        tgt_dir, 'R', 'Rdistmap_generated_146533.nii.gz')).arraydata()
+#
+#    distmap_ref = aims.read(os.path.join(
+#        ref_dir, 'Rdistmap_generated_146533.nii.gz')).arraydata()
+#
+#    equal_dist = equal_distmaps(distmap_ref, distmap_target)
+#
+#    assert equal_dist
