@@ -20,20 +20,21 @@ def nearest_nonzero_idx(a,x,y,z):
     min_idx = ((d - x)**2 + (e - y)**2 + (f - z)**2).argmin()
     return(d[min_idx], e[min_idx], f[min_idx])
 
-dataset='UkBioBank'
+dataset="schizconnect-vip-prague"
+# dataset='bsnip1'
+# dataset='UkBioBank'
 #dataset='ACCpatterns'
 root = '/neurospin/dico/data/deep_folding/current/datasets/'
 #root = '/volatile/jl277509/data/' # but I copy only the crops locally..
-resolution, res = "1.5mm", 1.5
+resolution, res = "2mm", 2.0
 side='R'
 resume=False
 
 vx_tolerance=30
 
-old_dir = f'{root}{dataset}/foldlabels/{resolution}_tmp/'
-new_dir = f'{root}{dataset}/foldlabels/{resolution}/'
-old_foldlabel_dir = os.path.join(old_dir,side)
-new_foldlabel_dir = os.path.join(new_dir,side)
+foldlabel_dir = f'{root}{dataset}/foldlabels/{resolution}/'
+old_foldlabel_dir = f'{foldlabel_dir}{side}_tmp'
+new_foldlabel_dir = f'{foldlabel_dir}{side}'
 skels_dir = f'{root}{dataset}/skeletons/{resolution}/{side}/'
 subjects = os.listdir(skels_dir)
 skel_subjects = [sub[20:-7] for sub in subjects if sub[-1]!='f']
@@ -42,9 +43,10 @@ print(f'first skel subjects: {skel_subjects[:5]}')
 
 #check existence of foldlabels
 if not resume:
-    assert os.path.isdir(new_dir), "Compute resampled foldlabels using deep_folding before masking."
+    assert os.path.isdir(new_foldlabel_dir), "Compute resampled foldlabels using deep_folding before masking."
+    assert not os.path.isdir(old_foldlabel_dir), f"You have to remove previous {old_foldlabel_dir}."
     #move foldlabels to tmp folder 
-    os.rename(new_dir, old_dir)
+    os.rename(new_foldlabel_dir, old_foldlabel_dir)
     os.makedirs(new_foldlabel_dir)
 
 if resume:
@@ -57,7 +59,8 @@ if resume:
 for i, subject in enumerate(tqdm(skel_subjects)):
 
     skel = aims.read(os.path.join(skels_dir,f'{side}resampled_skeleton_{subject}.nii.gz'))
-    old_foldlabel = aims.read(os.path.join(old_foldlabel_dir,f'{side}resampled_foldlabel_{subject}.nii.gz'))
+    old_foldlabel = aims.read(os.path.join(old_foldlabel_dir,
+                                           f'{side}resampled_foldlabel_{subject}.nii.gz'))
     skel_np = skel.np
     old_foldlabel_np = old_foldlabel.np
 

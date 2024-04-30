@@ -9,11 +9,13 @@ Computes distbottom nifti and npy files from cropped skeleton.
 For now, this code works on crops, not on the whole brain.
 """
 
-directory = f'/volatile/jl277509/data/UkBioBank/crops/1.5mm/CINGULATE/mask/'
+directory = f'/neurospin/dico/data/deep_folding/current/datasets/schizconnect-vip-prague/crops/2mm/S.C.-S.Pe.C./mask/'
 side = 'R'
 
 crops_dirs = directory+side+'crops/'
 skel_subjects = pd.read_csv(directory+side+'skeleton_subject.csv') # NB: skeleton_subject needs to be in consistent order with Rskeleton.npy
+
+os.makedirs(f'{directory}{side}distbottom', exist_ok=True)
 
 distbottom_list = []
 for i, subject in enumerate(tqdm(skel_subjects.Subject)):
