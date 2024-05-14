@@ -54,6 +54,7 @@ from deep_folding.brainvisa.utils.sulcus import complete_sulci_name
 
 from deep_folding.brainvisa.compute_mask import compute_mask
 from deep_folding.brainvisa.generate_crops import generate_crops
+from deep_folding.brainvisa.generate_distbottom_crops import generate_distbottom_crops
 from deep_folding.brainvisa.generate_distmaps import generate_distmaps
 from deep_folding.brainvisa.generate_foldlabels import generate_foldlabels
 from deep_folding.brainvisa.generate_ICBM2009c_transforms import \
@@ -482,7 +483,9 @@ def main(argv):
             resample_files(**args_resample_files)
             log.info(f"{params['input_type']} resampled")
 
+    ##########################################################
     # generate crops
+    ##########################################################
     if params['input_type'] == 'distmap':
         raw_input = params['distmaps_dir']
         resampled_dir = os.path.join(params['distmaps_dir'], vox_size)
@@ -549,6 +552,43 @@ def main(argv):
                   'w') as file:
             json.dump(params, file, indent=2)
 
+    ##########################################################
+    # generate distbottoms
+    ##########################################################
+    path_to_distbottom_complete = path_to_crops + \
+        '/' + params['side'] + "distbottom"
+    
+    step = print_info(step, f"generate distbottom crops")
+    if is_step_to_be_computed(
+            path=path_to_distbottom_complete,
+            log_string="Distbottoms",
+            save_behavior=save_behavior):
+        if save_behavior == 'clear_and_compute' and os.path.exists(
+                path_to_crops_complete):
+            # remove the target folder
+            log.info(f"Delete {path_to_distbottom_complete}")
+            shutil.rmtree(path_to_distbottom_complete)
+
+        args_generate_distbottom = {
+            'src_dir': path_to_crops,
+            'crop_dir': path_to_crops,
+            'side': params['side'],
+            'parallel': params['parallel'],
+            'number_subjects': params['nb_subjects']}
+
+        setup_log(Namespace(**{'verbose': log.level, **args_generate_distbottom}),
+                  log_dir=f"{args_generate_distbottom['crop_dir']}",
+                  prog_name='generate_distbottom_crops.py',
+                  suffix=full_side[1:])
+
+        generate_distbottom_crops(**args_generate_distbottom)
+        log.info('Crops generated')
+
+        # save params json where the crops lie
+        with open(path_to_crops +
+                  f"/pipeline_params_{params['side']}{cropdir_name}s.json",
+                  'w') as file:
+            json.dump(params, file, indent=2)
 
 ######################################################################
 # Main program

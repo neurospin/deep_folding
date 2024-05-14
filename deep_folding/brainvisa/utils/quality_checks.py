@@ -222,6 +222,43 @@ def get_not_processed_cropped_files(src_dir, tgt_dir):
     return not_processed_files
 
 
+def get_not_processed_distbottom_files(src_dir, tgt_dir):
+    """Returns list of source files not yet processed.
+
+    this one is specific toc rop directory.
+    This is done by comparing subjects in src and tgt directories"""
+
+    if isinstance(src_dir, str):
+        src_files = glob.glob(f"{src_dir}/*.nii.gz")
+    log.info(f"number of source files = {len(src_files)}")
+    if len(src_files):
+        log.info(f"first source file = {src_files[0]}")
+    log.debug(f"list src files = {src_files}")
+
+    tgt_files = glob.glob(f"{tgt_dir}/*.nii.gz")
+    log.info(f"number of target files = {len(tgt_files)}")
+    if len(tgt_files):
+        log.info(f"first target file = {tgt_files[0]}")
+
+    src_subjects = [subject.split("_cropped")[0] for subject in src_files]
+    src_subjects = [subject.split("/")[-1] for subject in src_subjects]
+
+    tgt_subjects = [subject.split("_cropped_distbottom")[0] for subject in tgt_files]
+    tgt_subjects = [subject.split("/")[-1] for subject in tgt_subjects]
+
+    not_processed_subjects = list(set(src_subjects) - set(tgt_subjects))
+
+    root = os.path.dirname(src_files[0])
+    not_processed_files = [
+        f"{root}/{subject}_cropped_skeleton.nii.gz"
+        for subject in not_processed_subjects]
+    log.info(f"number of not processed subjects = {len(not_processed_files)}")
+    if len(not_processed_files):
+        log.info(f"first not_processed file = {not_processed_files[0]}")
+
+    return not_processed_files
+
+
 def get_not_processed_subjects(src_subjects, tgt_dir, prefix="generated_"):
     """Returns list of source files not yet processed.
 

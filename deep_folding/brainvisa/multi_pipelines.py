@@ -6,9 +6,9 @@ import json
 
 regions = ['S.C.-S.Pe.C.']
 # datasets = ['bsnip1', 'candi', 'cnp', 'schizconnect-vip-prague']
-datasets = ['UkBioBank']
-sides = ['R']
-input_types = ['skeleton', 'foldlabel']
+datasets = ['schizconnect-vip-prague']
+sides = ['L']
+input_types = ['skeleton']
 
 
 for region in regions:

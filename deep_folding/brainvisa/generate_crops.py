@@ -731,21 +731,12 @@ def parse_args(argv):
         args,
         log_dir=f"{args.output_dir}",
         prog_name=basename(__file__),
-        suffix=f"right_{args.input_type}" if args.side == 'R' else 'left')
+        suffix=f"right_{args.input_type}" if args.side == 'R' else f"right_{args.input_type}")
 
-    params['src_dir'] = args.src_dir
-    params['input_type'] = args.input_type
+    params = vars(args)
+
     params['crop_dir'] = args.output_dir
-    params['bbox_dir'] = args.bbox_dir
-    params['mask_dir'] = args.mask_dir
     params['list_sulci'] = args.sulcus  # a list of sulci
-    params['side'] = args.side
-    params['cropping_type'] = args.cropping_type
-    params['combine_type'] = args.combine_type
-    params['parallel'] = args.parallel
-    params['no_mask'] = args.no_mask
-    params['threshold'] = args.threshold
-    params['dilation'] = args.dilation
 
     # Checks if nb_subjects is either the string "all" or a positive integer
     params['nb_subjects'] = get_number_subjects(args.nb_subjects)
