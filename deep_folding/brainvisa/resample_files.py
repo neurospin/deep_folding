@@ -529,6 +529,7 @@ class FoldLabelResampler(FileResampler):
         # Names of files in function of dictionary: keys -> 'subject' and
         # 'side'
         self.src_filename = src_filename
+        self.resampled_dir = self.resampled_dir + "_before_masking"
         self.resampled_file = join(
             self.resampled_dir,
             f'%(side)s' + output_filename + '%(subject)s.nii.gz')

@@ -555,40 +555,41 @@ def main(argv):
     ##########################################################
     # generate distbottoms
     ##########################################################
-    path_to_distbottom_complete = path_to_crops + \
-        '/' + params['side'] + "distbottom"
-    
-    step = print_info(step, f"generate distbottom crops")
-    if is_step_to_be_computed(
-            path=path_to_distbottom_complete,
-            log_string="Distbottoms",
-            save_behavior=save_behavior):
-        if save_behavior == 'clear_and_compute' and os.path.exists(
-                path_to_crops_complete):
-            # remove the target folder
-            log.info(f"Delete {path_to_distbottom_complete}")
-            shutil.rmtree(path_to_distbottom_complete)
+    if params['input_type'] == 'skeleton':
+        path_to_distbottom_complete = path_to_crops + \
+            '/' + params['side'] + "distbottom"
+        
+        step = print_info(step, f"generate distbottom crops")
+        if is_step_to_be_computed(
+                path=path_to_distbottom_complete,
+                log_string="Distbottoms",
+                save_behavior=save_behavior):
+            if save_behavior == 'clear_and_compute' and os.path.exists(
+                    path_to_crops_complete):
+                # remove the target folder
+                log.info(f"Delete {path_to_distbottom_complete}")
+                shutil.rmtree(path_to_distbottom_complete)
 
-        args_generate_distbottom = {
-            'src_dir': path_to_crops,
-            'crop_dir': path_to_crops,
-            'side': params['side'],
-            'parallel': params['parallel'],
-            'number_subjects': params['nb_subjects']}
+            args_generate_distbottom = {
+                'src_dir': path_to_crops,
+                'crop_dir': path_to_crops,
+                'side': params['side'],
+                'parallel': params['parallel'],
+                'number_subjects': params['nb_subjects']}
 
-        setup_log(Namespace(**{'verbose': log.level, **args_generate_distbottom}),
-                  log_dir=f"{args_generate_distbottom['crop_dir']}",
-                  prog_name='generate_distbottom_crops.py',
-                  suffix=full_side[1:])
+            setup_log(Namespace(**{'verbose': log.level, **args_generate_distbottom}),
+                    log_dir=f"{args_generate_distbottom['crop_dir']}",
+                    prog_name='generate_distbottom_crops.py',
+                    suffix=full_side[1:])
 
-        generate_distbottom_crops(**args_generate_distbottom)
-        log.info('Crops generated')
+            generate_distbottom_crops(**args_generate_distbottom)
+            log.info('Crops generated')
 
-        # save params json where the crops lie
-        with open(path_to_crops +
-                  f"/pipeline_params_{params['side']}{cropdir_name}s.json",
-                  'w') as file:
-            json.dump(params, file, indent=2)
+            # save params json where the crops lie
+            with open(path_to_crops +
+                    f"/pipeline_params_{params['side']}{cropdir_name}s.json",
+                    'w') as file:
+                json.dump(params, file, indent=2)
 
 ######################################################################
 # Main program

@@ -149,7 +149,7 @@ def get_not_processed_subjects_dict(subjects, tgt_dir):
 
     This is done by comparing subjects in subject dict and tgt directories"""
 
-    log.info(f"first subject start of fucntion= {subjects[0]}")
+    log.info(f"first subject start of function= {subjects[0]}")
     src_subjects = [sub['subject'] for sub in subjects]
     if len(src_subjects):
         log.info(f"first subject = {src_subjects[0]}")
