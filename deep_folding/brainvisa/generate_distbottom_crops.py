@@ -49,13 +49,12 @@ from os.path import join
 from os.path import basename
 
 import numpy as np
-import scipy.ndimage
+import pandas as pd
 
 from deep_folding.brainvisa import exception_handler
 from deep_folding.brainvisa.utils.save_data import save_to_numpy
 from deep_folding.brainvisa.utils.save_data import \
     save_to_dataframe_format_from_list
-from deep_folding.brainvisa.utils.bbox import compute_max_box
 from deep_folding.brainvisa.utils.folder import create_folder
 from deep_folding.brainvisa.utils.logs import LogJson
 from deep_folding.brainvisa.utils.logs import setup_log
@@ -85,6 +84,29 @@ from deep_folding.brainvisa.utils.constants import \
 # Defines logger
 log = set_file_logger(__file__)
 
+
+def quality_checks(crop_dir, side):
+    s = np.load(f"{crop_dir}/{side}skeleton.npy")
+    d = np.load(f"{crop_dir}/{side}distbottom.npy")
+
+    # checks if same voxel position
+    assert (s.shape == d.shape), (
+        f"Skeleton and distbottom of different shapes: {s.shape} != {d.shape}")
+    assert (s[d==32501].sum() == 0), (
+        f"Skeleton and distbottom with different non-zero positions: "
+        f"{(s[d==32501]!=0).sum()} different non-zero positions")
+    assert ((d[s==0]!=32501).sum() == 0), (
+        f"Skeleton and distbottom with different non-zero positions: "
+        f"{(d[s==0]!=32501).sum()} different non-zero positions")
+    
+    # Checks if subjects are equal between distbottom and skeleton
+    dfs = pd.read_csv(f"{crop_dir}/{side}skeleton_subject.csv")
+    dfd = pd.read_csv(f"{crop_dir}/{side}distbottom_subject.csv")
+    assert (dfs.equals(dfd)), "List of subjects for distbottom and skeleton are not equal"
+
+    # Checks if numpy arrays and csvs are consistent
+    assert (s.shape[0] == len(dfs)), "Number of skeleton subjects differs between numpy array and csv"
+    assert (d.shape[0] == len(dfd)), "Number of distbottom subjects differs between numpy array and csv"
 
 
 class DistBottomCropGenerator:
@@ -278,6 +300,8 @@ class DistBottomCropGenerator:
                 file_basename=self.file_basename_pickle,
                 list_sample_id=list_sample_id,
                 list_sample_file=list_sample_file)
+            
+        quality_checks(self.crop_dir, self.side)
 
 
 

@@ -158,6 +158,30 @@ def crop_mask(file_src, file_cropped, mask, bbmin, bbmax, side,
     #            f"{file_mask}/{side}mask_cropped.nii.gz")
 
 
+def quality_checks(crop_dir, side):
+    s = np.load(f"{crop_dir}/{side}skeleton.npy")
+    f = np.load(f"{crop_dir}/{side}label.npy")
+
+    # checks if same voxel position
+    assert (s.shape == f.shape), (
+        f"Skeleton and foldlabel of different shapes: {s.shape} != {f.shape}")
+    assert (f[s==0].sum() == 0), (
+        f"Foldlabel and skeleton arrays with different non-zero positions: "
+        f"{(f[s==0]!=0).sum()} different non-zero positions")
+    assert (s[f==0].sum() == 0), (
+        f"Foldlabel and skeleton arrays with different non-zero positions: "
+        f"{(s[f==0]!=0).sum()} different non-zero positions")
+    
+    # Checks if subjects are equal between distbottom and skeleton
+    dff = pd.read_csv(f"{crop_dir}/{side}label_subject.csv")
+    dfs = pd.read_csv(f"{crop_dir}/{side}skeleton_subject.csv")
+    assert (dff == dfs), "List of subjects for foldlabel and skeleton are not equal"
+
+    # Checks if numpy arrays and csvs are consistent
+    assert (s.shape[0] == len(dfs)), "Number of skeleton subjects differs between numpy array and csv"
+    assert (f.shape[0] == len(dff)), "Number of foldlabel subjects differs between numpy array and csv"
+
+
 class CropGenerator:
     """Generates cropped skeleton files and corresponding npy file
     """
@@ -789,6 +813,7 @@ def generate_crops(
             no_mask=no_mask,
             threshold=threshold,
             dilation=dilation)
+        
     elif input_type == "distmap":
         crop = DistMapCropGenerator(
             src_dir=src_dir,
@@ -807,6 +832,9 @@ def generate_crops(
         raise ValueError(
             "input_type: shall be either 'skeleton', 'foldlabel' or 'distmap'")
     crop.compute(number_subjects=number_subjects)
+
+    if input_type == "foldlabel":
+        quality_checks(crop_dir, side)
 
 
 @exception_handler

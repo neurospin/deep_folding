@@ -154,6 +154,38 @@ def check_if_number_skeletons_equals_number_foldlabels(resampled_dir, skeleton_d
         f"Number of skeleton files = {len(skeleton_files)}\n"
         "One possible reason: you should resample skeleton file before resampling foldlabel files"
         )
+    
+
+def check_if_same_position_skeleton_distancebottom(s, d):
+    assert (s.shape == d.shape), (
+        f"Skeleton and distbottom of different shapes: {s.shape} != {d.shape}")
+    assert (s[d==32501].sum() == 0), (
+        f"Skeleton and distbottom with different non-zero positions: "
+        f"{(s[d==32501]!=0).sum()} different non-zero positions")
+    assert ((d[s==0]!=32501).sum() == 0), (
+        f"Skeleton and distbottom with different non-zero positions: "
+        f"{(d[s==0]!=32501).sum()} different non-zero positions")
+    
+
+def check_if_same_position_skeleton_foldlabel(s, f):
+    assert (s.shape == f.shape), (
+        f"Skeleton and foldlabel of different shapes: {s.shape} != {f.shape}")
+    assert (f[s==0].sum() == 0), (
+        f"Foldlabel and skeleton arrays with different non-zero positions: "
+        f"{(f[s==0]!=0).sum()} different non-zero positions")
+    assert (s[f==0].sum() == 0), (
+        f"Foldlabel and skeleton arrays with different non-zero positions: "
+        f"{(s[f==0]!=0).sum()} different non-zero positions")
+
+
+def check_if_equal(list_dataframes):
+    df0 = list_dataframes[0]
+    for df in list_dataframes[1:]:
+        assert (df == df0), "List of subjects are not equal"
+
+
+def check_if_same_dim(arr, df):
+    assert (arr.shape[0] == len(df)), "Number of subjects differs between numpy array and csv"
 
 
 def parse_args(argv: list) -> dict:

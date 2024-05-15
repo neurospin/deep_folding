@@ -63,6 +63,7 @@ from os.path import basename
 from p_tqdm import p_map
 
 import numpy as np
+import pandas as pd
 import warnings
 
 from deep_folding.brainvisa import exception_handler
