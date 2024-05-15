@@ -5,10 +5,10 @@ import json
 
 
 regions = ['S.C.-S.Pe.C.']
-# datasets = ['bsnip1', 'candi', 'cnp', 'schizconnect-vip-prague']
-datasets = ['schizconnect-vip-prague']
-sides = ['L']
-input_types = ['foldlabel']
+datasets = ['bsnip1', 'candi', 'cnp', 'schizconnect-vip-prague']
+# datasets = ['schizconnect-vip-prague']
+sides = ['L', 'R']
+input_types = ['skeleton', 'foldlabel']
 
 
 for region in regions:
