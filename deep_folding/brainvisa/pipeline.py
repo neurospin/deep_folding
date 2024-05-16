@@ -511,9 +511,9 @@ def main(argv):
             skeleton_dir = os.path.join(params['skeleton_dir'], vox_size)
             path_masked_path = os.path.join(masked_dir, params['side'])
 
-            check_if_number_skeletons_equals_number_foldlabels(
-                resampled_dir, skeleton_dir
-            )
+           # check_if_number_skeletons_equals_number_foldlabels(
+           #     resampled_dir, skeleton_dir
+           # )
 
             if is_step_to_be_computed(
                     path=path_masked_path,
