@@ -58,6 +58,7 @@ from os.path import join
 from os.path import basename
 
 import numpy as np
+import pandas as pd
 import scipy.ndimage
 
 from deep_folding.brainvisa import exception_handler
@@ -175,7 +176,7 @@ def quality_checks(crop_dir, side):
     # Checks if subjects are equal between distbottom and skeleton
     dff = pd.read_csv(f"{crop_dir}/{side}label_subject.csv")
     dfs = pd.read_csv(f"{crop_dir}/{side}skeleton_subject.csv")
-    assert (dff == dfs), "List of subjects for foldlabel and skeleton are not equal"
+    assert (dff.equals(dfs)), "List of subjects for foldlabel and skeleton are not equal"
 
     # Checks if numpy arrays and csvs are consistent
     assert (s.shape[0] == len(dfs)), "Number of skeleton subjects differs between numpy array and csv"

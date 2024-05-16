@@ -6,9 +6,8 @@ import subprocess
 
 
 regions = ['S.C.-S.Pe.C.']
-# datasets = ['bsnip1', 'candi', 'cnp', 'schizconnect-vip-prague']
-datasets = ['candi', 'schizconnect-vip-prague']
-sides = ['L']
+datasets = ['candi', 'cnp', 'bsnip1', 'schizconnect-vip-prague']
+sides = ['L', 'R']
 input_types = ['skeleton', 'foldlabel']
 
 
