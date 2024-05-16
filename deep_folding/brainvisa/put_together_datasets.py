@@ -46,7 +46,7 @@ from deep_folding.brainvisa.utils.folder import create_folder
 
 regions = ['S.C.-S.Pe.C.']
 datasets = ['bsnip1', 'candi', 'cnp', 'schizconnect-vip-prague']
-target = ['schiz']
+target = 'schiz'
 resolution = "2mm"
 
 datasets_folder = "/neurospin/dico/data/deep_folding/current/datasets"
@@ -95,7 +95,7 @@ def check_if_same_position(s, f, d):
 def check_if_equal(list_dataframes):
     df0 = list_dataframes[0]
     for df in list_dataframes[1:]:
-        assert (df == df0), "List of subjects are not equal"
+        assert (df.equals(df0)), "List of subjects are not equal"
 
 
 def check_if_same_dim(arr, df):
@@ -113,11 +113,12 @@ def save_to_csv(csv_file, df):
     reloaded = pd.read_csv(csv_file)
     assert df.equals(reloaded), "csv file on disk differs from computed csv dataframe"
 
+
 for region in regions:
 
     # Prepares output directories
     target_region_folder = f"{target_folder}/crops/{resolution}/{region}/mask"
-    shutil.rmtree(target_region_folder)
+    shutil.rmtree(target_region_folder, ignore_errors=True)
     create_folder(target_region_folder)
 
     # Initializes target numpy arrays
@@ -153,8 +154,8 @@ for region in regions:
         Rlabel_subject_csv = concat_csv(Rlabel_subject_csv, f"{src_folder}/Rlabel_subject.csv")
         Rdistbottom_subject_csv = concat_csv(Rdistbottom_subject_csv, f"{src_folder}/Rdistbottom_subject.csv")
         Lskeleton_subject_csv = concat_csv(Lskeleton_subject_csv, f"{src_folder}/Lskeleton_subject.csv")
-        Rlabel_subject_csv = concat_csv(Rlabel_subject_csv, f"{src_folder}/Rlabel_subject.csv")
-        Rdistbottom_subject_csv = concat_csv(Rdistbottom_subject_csv, f"{src_folder}/Rdistbottom_subject.csv")
+        Llabel_subject_csv = concat_csv(Llabel_subject_csv, f"{src_folder}/Llabel_subject.csv")
+        Ldistbottom_subject_csv = concat_csv(Ldistbottom_subject_csv, f"{src_folder}/Ldistbottom_subject.csv")
 
     # Checks numpy
     check_if_same_position(Rskeleton_npy, Rlabel_npy, Rdistbottom_npy)
@@ -187,6 +188,3 @@ for region in regions:
     save_to_csv(f"{target_region_folder}/Lskeleton_subject.csv", Lskeleton_subject_csv)
     save_to_csv(f"{target_region_folder}/Llabel_subject.csv", Llabel_subject_csv)
     save_to_csv(f"{target_region_folder}/Ldistbottom_subject.csv", Ldistbottom_subject_csv)
-
-
-print("toto")
