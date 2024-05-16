@@ -24,19 +24,27 @@ dataset='UkBioBank'
 #dataset='ACCpatterns'
 root = '/neurospin/dico/data/deep_folding/current/datasets/'
 #root = '/volatile/jl277509/data/' # but I copy only the crops locally..
-resolution, res = "1.5mm", 1.5
+resolution, res = "2mm", 2.0
 side='R'
 resume=False
+#subs_to_recompute = '/volatile/jl277509/data/UkBioBank/subjects_issue.csv' # set to None to compute on all subjects
+subs_to_recompute=None
 
 vx_tolerance=30
 
-old_dir = f'{root}{dataset}/foldlabels/{resolution}_tmp/'
-new_dir = f'{root}{dataset}/foldlabels/{resolution}/'
-old_foldlabel_dir = os.path.join(old_dir,side)
-new_foldlabel_dir = os.path.join(new_dir,side)
+old_dir = f'{root}{dataset}/foldlabels/{resolution}/{side}_tmp/'
+new_dir = f'{root}{dataset}/foldlabels/{resolution}/{side}/'
+#old_foldlabel_dir = os.path.join(old_dir,side)
+#new_foldlabel_dir = os.path.join(new_dir,side)
+old_foldlabel_dir=old_dir
+new_foldlabel_dir=new_dir
 skels_dir = f'{root}{dataset}/skeletons/{resolution}/{side}/'
-subjects = os.listdir(skels_dir)
-skel_subjects = [sub[20:-7] for sub in subjects if sub[-1]!='f']
+if subs_to_recompute==None:
+    subjects = os.listdir(skels_dir)
+    skel_subjects = [sub[20:-7] for sub in subjects if sub[-1]!='f']
+else:
+    subjects = pd.read_csv(subs_to_recompute)
+    skel_subjects = subjects['Subject'].tolist()
 print(f'number of subjects detected in {dataset}: {len(skel_subjects)}')
 print(f'first skel subjects: {skel_subjects[:5]}')
 

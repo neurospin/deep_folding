@@ -10,7 +10,7 @@ For now, this code works on crops, not on the whole brain.
 """
 
 #directory = f'/volatile/jl277509/data/UkBioBank/crops/1.5mm/CINGULATE/mask/'
-directory = "/neurospin/dico/data/deep_folding/current/datasets/UkBioBank/crops/1.5mm/S.T.s./mask/"
+directory = "/neurospin/dico/data/deep_folding/current/datasets/UkBioBank/crops/2mm/CINGULATE/mask/"
 side = 'R'
 distbottom_dir = os.path.join(directory, f'{side}distbottom')
 if not os.path.isdir(distbottom_dir):
