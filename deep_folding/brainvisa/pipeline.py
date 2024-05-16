@@ -41,6 +41,7 @@ import os
 import argparse
 import sys
 import shutil
+import glob
 
 from os.path import basename
 from argparse import Namespace
@@ -54,8 +55,10 @@ from deep_folding.brainvisa.utils.sulcus import complete_sulci_name
 
 from deep_folding.brainvisa.compute_mask import compute_mask
 from deep_folding.brainvisa.generate_crops import generate_crops
+from deep_folding.brainvisa.generate_distbottom_crops import generate_distbottom_crops
 from deep_folding.brainvisa.generate_distmaps import generate_distmaps
 from deep_folding.brainvisa.generate_foldlabels import generate_foldlabels
+from deep_folding.brainvisa.mask_resampled_foldlabels import mask_files
 from deep_folding.brainvisa.generate_ICBM2009c_transforms import \
     generate_ICBM2009c_transforms
 from deep_folding.brainvisa.generate_skeletons import generate_skeletons
@@ -140,6 +143,10 @@ def is_step_to_be_computed(path, log_string, save_behavior='best'):
             f"Choose between 'best' (recommanded)"
             "minimal and clear_and_compute. "
             "Refer to the README for more information.")
+
+
+def check_if_same_dim(arr, df):
+    assert (arr.shape[0] == len(df)), "Number of subjects differs between numpy array and csv"
 
 
 def parse_args(argv: list) -> dict:
@@ -249,8 +256,10 @@ def main(argv):
     params['transform_dir'] = os.path.join(params["output_dir"], "transforms")
     params['crops_dir'] = os.path.join(params["output_dir"], "crops")
 
-    step = 1
+    ##########################################################
     # generate masks
+    ##########################################################
+    step = 1
     step = print_info(step, "generate masks")
     for sulcus in sulci_list:
         log.info(f"Treating the mask generation of {sulcus} (if required).")
@@ -295,6 +304,11 @@ def main(argv):
             # execute the actual function
             compute_mask(**args_compute_mask)
             log.info('Mask generated')
+
+    ##########################################################
+    # generate raw volumes
+    #  (either skeletons, or foldlabels, or distmaps)
+    ##########################################################
 
     # generate raw skeletons
     if params['input_type'] in ['skeleton', 'distmap']:
@@ -365,42 +379,45 @@ def main(argv):
             log.info('Raw distmaps generated')
 
     # generate raw foldlabels if required
-    #if params['input_type'] == 'foldlabel':
-    #    step = print_info(step, "generate raw foldlabels")
-    #    foldlabel_raw_path = os.path.join(
-    #        params['foldlabel_dir'], 'raw', params['side'])
+    if params['input_type'] == 'foldlabel':
+       step = print_info(step, "generate raw foldlabels")
+       foldlabel_raw_path = os.path.join(
+           params['foldlabel_dir'], 'raw', params['side'])
 
-     #   if is_step_to_be_computed(
-     #       foldlabel_raw_path,
-     #       "Raw foldlabels",
-     #           save_behavior=save_behavior):
-     #       if save_behavior == 'clear_and_compute' and os.path.exists(
-     #               foldlabel_raw_path):
-                # remove the target folder
-     #           log.info(f"Delete {foldlabel_raw_path}")
-     #           shutil.rmtree(foldlabel_raw_path)
+       if is_step_to_be_computed(
+            foldlabel_raw_path,
+            "Raw foldlabels",
+                save_behavior=save_behavior):
+            if save_behavior == 'clear_and_compute' and os.path.exists(
+                    foldlabel_raw_path):
+                # remove the target folder
+                log.info(f"Delete {foldlabel_raw_path}")
+                shutil.rmtree(foldlabel_raw_path)
 
-      #      args_generate_foldlabels = {
-      #          'src_dir': params['graphs_dir'],
-      #          'foldlabel_dir': params['foldlabel_dir'] + '/raw',
-      #          'path_to_graph': params['path_to_graph'],
-      #          'side': params['side'],
-      #          'junction': params['junction'],
-      #          'bids': params['bids'],
-      #          'parallel': params['parallel'],
-      #          'number_subjects': params['nb_subjects'],
-      #          'qc_path': params['skel_qc_path']}
+            args_generate_foldlabels = {
+                'src_dir': params['graphs_dir'],
+                'foldlabel_dir': params['foldlabel_dir'] + '/raw',
+                'path_to_graph': params['path_to_graph'],
+                'side': params['side'],
+                'junction': params['junction'],
+                'bids': params['bids'],
+                'parallel': params['parallel'],
+                'number_subjects': params['nb_subjects'],
+                'qc_path': params['skel_qc_path']}
 
-       #     setup_log(Namespace(**{'verbose': log.level,
-        #                           **args_generate_foldlabels}),
-         #             log_dir=f"{args_generate_foldlabels['foldlabel_dir']}",
-          #            prog_name='pipeline_generate_foldlabels.py',
-           #           suffix=full_side[1:])
+            setup_log(Namespace(**{'verbose': log.level,
+                                    **args_generate_foldlabels}),
+                        log_dir=f"{args_generate_foldlabels['foldlabel_dir']}",
+                        prog_name='pipeline_generate_foldlabels.py',
+                        suffix=full_side[1:])
 
-            #generate_foldlabels(**args_generate_foldlabels)
-            #log.info('Raw foldlabels generated')
+            generate_foldlabels(**args_generate_foldlabels)
+            log.info('Raw foldlabels generated')
 
+
+    ##########################################################
     # generate transform
+    ##########################################################
     if params['out_voxel_size'] != 'raw':
         step = print_info(step, "generate transforms")
         path_to_transforms = os.path.join(
@@ -434,7 +451,10 @@ def main(argv):
             generate_ICBM2009c_transforms(**args_generate_transforms)
             log.info('Transforms generated')
 
+
+    ##########################################################
     # resample files
+    ##########################################################
     if params['out_voxel_size'] != 'raw':
         step = print_info(step, f"resample {params['input_type']} files")
         if params['input_type'] == 'distmap':
@@ -449,8 +469,11 @@ def main(argv):
             # raw data supposed to be skeletons by default
             raw_input = os.path.join(params['skeleton_dir'], 'raw')
             resampled_dir = os.path.join(params['skeleton_dir'], vox_size)
-
+    
+        # if foldlabel, we generate here foldlabels before masking with skeletons
         path_resampled_path = os.path.join(resampled_dir, params['side'])
+        if params['input_type'] == 'foldlabel':
+            path_resampled_path = path_resampled_path + "_before_masking"
 
         if is_step_to_be_computed(
                 path=path_resampled_path,
@@ -482,7 +505,45 @@ def main(argv):
             resample_files(**args_resample_files)
             log.info(f"{params['input_type']} resampled")
 
+        # Mask foldlabels with reskeletized skeletons
+        if params['input_type'] == "foldlabel":
+            masked_dir = os.path.join(params['foldlabel_dir'], vox_size)
+            skeleton_dir = os.path.join(params['skeleton_dir'], vox_size)
+            path_masked_path = os.path.join(masked_dir, params['side'])
+
+            check_if_number_skeletons_equals_number_foldlabels(
+                resampled_dir, skeleton_dir
+            )
+
+            if is_step_to_be_computed(
+                    path=path_masked_path,
+                    log_string=f"Masking {params['input_type']}s",
+                    save_behavior=save_behavior):
+                if save_behavior == 'clear_and_compute' and os.path.exists(
+                        path_masked_path):
+                    # remove the target folder
+                    log.info(f"Delete {path_masked_path}")
+                    shutil.rmtree(path_masked_path)
+
+                args_masked_files = {'src_dir': masked_dir,
+                                     'skeleton_dir': skeleton_dir,
+                                     'masked_dir': masked_dir,
+                                     'side': params['side'],
+                                     'number_subjects': params['nb_subjects'],
+                                     'parallel': params['parallel']}
+
+                setup_log(Namespace(**{'verbose': log.level,
+                                    **args_masked_files}),
+                        log_dir=f"{args_masked_files['masked_dir']}",
+                        prog_name='pipeline_mask_resampled_foldlabels.py',
+                        suffix=full_side[1:])
+
+                mask_files(**args_masked_files)
+                log.info(f"{params['input_type']} masked")
+
+    ##########################################################
     # generate crops
+    ##########################################################
     if params['input_type'] == 'distmap':
         raw_input = params['distmaps_dir']
         resampled_dir = os.path.join(params['distmaps_dir'], vox_size)
@@ -549,6 +610,45 @@ def main(argv):
                   'w') as file:
             json.dump(params, file, indent=2)
 
+
+    ##########################################################
+    # generate distbottom crops
+    ##########################################################
+    if params['input_type'] == 'skeleton':
+        path_to_distbottom_complete = path_to_crops + \
+            '/' + params['side'] + "distbottom"
+        
+        step = print_info(step, f"generate distbottom crops")
+        if is_step_to_be_computed(
+                path=path_to_distbottom_complete,
+                log_string="Distbottoms",
+                save_behavior=save_behavior):
+            if save_behavior == 'clear_and_compute' and os.path.exists(
+                    path_to_crops_complete):
+                # remove the target folder
+                log.info(f"Delete {path_to_distbottom_complete}")
+                shutil.rmtree(path_to_distbottom_complete)
+
+            args_generate_distbottom = {
+                'src_dir': path_to_crops,
+                'crop_dir': path_to_crops,
+                'side': params['side'],
+                'parallel': params['parallel'],
+                'number_subjects': params['nb_subjects']}
+
+            setup_log(Namespace(**{'verbose': log.level, **args_generate_distbottom}),
+                    log_dir=f"{args_generate_distbottom['crop_dir']}",
+                    prog_name='generate_distbottom_crops.py',
+                    suffix=full_side[1:])
+
+            generate_distbottom_crops(**args_generate_distbottom)
+            log.info('Crops generated')
+
+            # save params json where the crops lie
+            with open(path_to_crops +
+                    f"/pipeline_params_{params['side']}{cropdir_name}s.json",
+                    'w') as file:
+                json.dump(params, file, indent=2)
 
 ######################################################################
 # Main program

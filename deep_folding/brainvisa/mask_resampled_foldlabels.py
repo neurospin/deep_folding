@@ -1,16 +1,106 @@
-import numpy as np
+#!python
+# -*- coding: utf-8 -*-
+#
+#  This software and supporting documentation are distributed by
+#      Institut Federatif de Recherche 49
+#      CEA/NeuroSpin, Batiment 145,
+#      91191 Gif-sur-Yvette cedex
+#      France
+#
+# This software is governed by the CeCILL license version 2 under
+# French law and abiding by the rules of distribution of free software.
+# You can  use, modify and/or redistribute the software under the
+# terms of the CeCILL license version 2 as circulated by CEA, CNRS
+# and INRIA at the following URL "http://www.cecill.info".
+#
+# As a counterpart to the access to the source code and  rights to copy,
+# modify and redistribute granted by the license, users are provided only
+# with a limited warranty  and the software's author,  the holder of the
+# economic rights,  and the successive licensors  have only  limited
+# liability.
+#
+# In this respect, the user's attention is drawn to the risks associated
+# with loading,  using,  modifying and/or developing or reproducing the
+# software by the user in light of its specific status of free software,
+# that may mean  that it is complicated to manipulate,  and  that  also
+# therefore means  that it is reserved for developers  and  experienced
+# professionals having in-depth computer knowledge. Users are therefore
+# encouraged to load and test the software's suitability as regards their
+# requirements in conditions enabling the security of their systems and/or
+# data to be ensured and,  more generally, to use and operate it in the
+# same conditions as regards security.
+#
+# The fact that you are presently reading this means that you have had
+# knowledge of the CeCILL license version 2 and that you accept its terms.
+
+"""Masks foldlabels
+
+The aim of this script is to mask foldlabels using re-skeletized skeletons.
+
+  Typical usage
+  -------------
+  You can use this program by first entering in the brainvisa environment
+  (here brainvisa 5.0.0 installed with singurity) and launching the script
+  from the terminal:
+  >>> bv bash
+  >>> python mask_resampled_foldlabeld.py
+
+  Alternatively, you can launch the script in the interactive terminal ipython:
+  >>> %run mask_resampled_foldlabeld.py
+
+"""
+
+import argparse
+from asyncio.subprocess import DEVNULL
+from email.mime import base
+import glob
 import os
+import re
+import sys
+import tempfile
+from os.path import join
+from os.path import basename
+from p_tqdm import p_map
+
+import numpy as np
 import pandas as pd
-from soma import aims
 import warnings
-from tqdm import tqdm
+
+from deep_folding.brainvisa import exception_handler
+from deep_folding.brainvisa.utils.parallel import define_njobs
+
+from deep_folding.brainvisa.utils.subjects import get_number_subjects
+from deep_folding.brainvisa.utils.subjects import select_subjects_int
+from deep_folding.brainvisa.utils.folder import create_folder
+from deep_folding.brainvisa.utils.logs import setup_log
+from deep_folding.brainvisa.utils.quality_checks import \
+    compare_number_aims_files_with_expected, \
+    compare_number_aims_files_with_number_in_source, \
+    get_not_processed_files, \
+    save_list_to_csv
+from pqdm.processes import pqdm
+from deep_folding.config.logs import set_file_logger
+from soma import aims
+
+# Import constants
+from deep_folding.brainvisa.utils.constants import \
+    _ALL_SUBJECTS, _SKELETON_DIR_DEFAULT,\
+    _RESAMPLED_SKELETON_DIR_DEFAULT,\
+    _RESAMPLED_FOLDLABEL_DIR_DEFAULT, \
+    _SIDE_DEFAULT
+
+_SKELETON_FILENAME = "skeleton_generated_"
+_FOLDLABEL_FILENAME = "foldlabel_"
+_DISTMAP_FILENAME = "distmap_generated_"
+_RESAMPLED_SKELETON_FILENAME = "resampled_skeleton_"
+_RESAMPLED_FOLDLABEL_FILENAME = "resampled_foldlabel_"
+_MASKED_FOLDLABEL_FILENAME = "resampled_foldlabel_"
 
 
-"""
-This file masks the resampled_foldlabel files generated using resample_files.
-For now, foldlabel needs to be run twice: once for resampled_foldlabel generation,
-and once for cropping AFTER applying applying the following mask.
-"""
+# Defines logger
+log = set_file_logger(__file__)
+
+_VX_TOLERANCE=30
 
 def nearest_nonzero_idx(a,x,y,z):
     tmp = a[x,y,z]
@@ -20,68 +110,266 @@ def nearest_nonzero_idx(a,x,y,z):
     min_idx = ((d - x)**2 + (e - y)**2 + (f - z)**2).argmin()
     return(d[min_idx], e[min_idx], f[min_idx])
 
-dataset="schizconnect-vip-prague"
-# dataset='bsnip1'
-# dataset='UkBioBank'
-#dataset='ACCpatterns'
-root = '/neurospin/dico/data/deep_folding/current/datasets/'
-#root = '/volatile/jl277509/data/' # but I copy only the crops locally..
-resolution, res = "2mm", 2.0
-side='R'
-resume=False
+class FoldLabelMasker:
+    """Maskes foldlables using reskeletized skeletons as masks
 
-vx_tolerance=30
+    """
 
-foldlabel_dir = f'{root}{dataset}/foldlabels/{resolution}/'
-old_foldlabel_dir = f'{foldlabel_dir}{side}_tmp'
-new_foldlabel_dir = f'{foldlabel_dir}{side}'
-skels_dir = f'{root}{dataset}/skeletons/{resolution}/{side}/'
-subjects = os.listdir(skels_dir)
-skel_subjects = [sub[20:-7] for sub in subjects if sub[-1]!='f']
-print(f'number of subjects detected in {dataset}: {len(skel_subjects)}')
-print(f'first skel subjects: {skel_subjects[:5]}')
+    def __init__(self, src_dir, skeleton_dir, masked_dir,
+                 side, parallel
+                 ):
+        """Inits with list of directories
 
-#check existence of foldlabels
-if not resume:
-    assert os.path.isdir(new_foldlabel_dir), "Compute resampled foldlabels using deep_folding before masking."
-    assert not os.path.isdir(old_foldlabel_dir), f"You have to remove previous {old_foldlabel_dir}."
-    #move foldlabels to tmp folder 
-    os.rename(new_foldlabel_dir, old_foldlabel_dir)
-    os.makedirs(new_foldlabel_dir)
+        Args:
+            src_dir: folder containing resampled foldlabels
+            skeleton_dir: folder containing resampled and reskeletized skeletons
+            masked_dir: name of target (output) directory,
+            side: either 'L' or 'R', hemisphere side
+            parallel: does parallel computation if True
+        """
+        self.side = side
+        self.parallel = parallel
 
-if resume:
-    # list already computed subjects
-    subjects_already_masked = os.listdir(new_foldlabel_dir)
-    subjects_already_masked = [elem[21:-7] for elem in subjects_already_masked if elem[-1]!='f']
-    skel_subjects = [elem for elem in skel_subjects if elem not in subjects_already_masked]
-    print(f'{len(subjects_already_masked)} subjects already processed, resuming')
+        # Names of files in function of dictionary: keys = 'subject' and 'side'
+        # Src directory contains either 'R' or 'L' a subdirectory
+        self.src_dir = join(src_dir, self.side) + "_before_masking"
 
-for i, subject in enumerate(tqdm(skel_subjects)):
+        self.skeleton_dir = join(skeleton_dir, self.side)
 
-    skel = aims.read(os.path.join(skels_dir,f'{side}resampled_skeleton_{subject}.nii.gz'))
-    old_foldlabel = aims.read(os.path.join(old_foldlabel_dir,
-                                           f'{side}resampled_foldlabel_{subject}.nii.gz'))
-    skel_np = skel.np
-    old_foldlabel_np = old_foldlabel.np
+        # Names of files in function of dictionary: keys -> 'subject' and
+        # 'side'
+        self.masked_dir = join(masked_dir, self.side)
 
-    foldlabel = old_foldlabel_np.copy()
-    # first mask skeleton using foldlabel because sometimes 1vx is added during skeletonization...
-    foldlabel[skel_np==0]=0
-    f = foldlabel!=0
-    s = skel_np!=0
-    diff_fs = np.sum(f!=s)
-    assert (diff_fs<=vx_tolerance), f"subject {subject} has incompatible foldlabel and skeleton. {np.sum(s)} vx in skeleton, {np.sum(f)} vx in foldlabel"
-    if diff_fs!=0:
-        warnings.warn(f"subject {subject} has incompatible foldlabel and skeleton. {np.sum(s)} vx in skeleton, {np.sum(f)} vx in foldlabel")
-        idxs = np.where(f!=s)
-        print(idxs)
-        for i in range(diff_fs):
-            x,y,z = idxs[0][i], idxs[1][i], idxs[2][i]
-            d,e,f = nearest_nonzero_idx(foldlabel[:,:,:,0],x,y,z)
-            foldlabel[x,y,z,0]=foldlabel[d,e,f,0]
-            print(f'foldlabel has a 0 at index {x,y,z}, nearest nonzero at index {d,e,f}, value {foldlabel[d,e,f,0]}')
-    f = foldlabel!=0
-    assert np.sum(f!=s)==0, f'subject {subject} has incompatible foldlabel and skeleton AFTER CORRECTION. {np.sum(s)} vx in skeleton, {np.sum(f)} vx in foldlabel'
-    vol = aims.Volume(foldlabel)
-    vol.header()['voxel_size'] = [res, res, res]
-    aims.write(vol, os.path.join(new_foldlabel_dir,f'{side}resampled_foldlabel_{subject}.nii.gz'))
+        # subjects are detected as the nifti file names under src_dir
+        self.expr = '^.resampled_foldlabel_(.*).nii.gz$'
+        
+        self.src_filename = f"{self.side}resampled_foldlabel_"
+        self.output_filename = f"{self.side}resampled_foldlabel_"
+
+    def mask_one_file(self, subject: str):
+        skel = aims.read(
+            os.path.join(
+                self.skeleton_dir,
+                f'{self.side}resampled_skeleton_{subject}.nii.gz'))
+        old_foldlabel = aims.read(
+            os.path.join(
+                self.src_dir,
+                f'{self.side}resampled_foldlabel_{subject}.nii.gz'))
+        skel_np = skel.np
+        old_foldlabel_np = old_foldlabel.np
+
+        foldlabel = old_foldlabel_np.copy()
+        # first mask skeleton using foldlabel because sometimes 1vx is added during skeletonization...
+        foldlabel[skel_np==0]=0
+        f = foldlabel!=0
+        s = skel_np!=0
+        diff_fs = np.sum(f!=s)
+        assert (diff_fs<=_VX_TOLERANCE), f"subject {subject} has incompatible foldlabel and skeleton. {np.sum(s)} vx in skeleton, {np.sum(f)} vx in foldlabel"
+        if diff_fs!=0:
+            warnings.warn(f"subject {subject} has incompatible foldlabel and skeleton. {np.sum(s)} vx in skeleton, {np.sum(f)} vx in foldlabel")
+            idxs = np.where(f!=s)
+            print(idxs)
+            for i in range(diff_fs):
+                x,y,z = idxs[0][i], idxs[1][i], idxs[2][i]
+                d,e,f = nearest_nonzero_idx(foldlabel[:,:,:,0],x,y,z)
+                foldlabel[x,y,z,0]=foldlabel[d,e,f,0]
+                print(f'foldlabel has a 0 at index {x,y,z}, nearest nonzero at index {d,e,f}, value {foldlabel[d,e,f,0]}')
+        f = foldlabel!=0
+        assert np.sum(f!=s)==0, f'subject {subject} has incompatible foldlabel and skeleton AFTER CORRECTION. {np.sum(s)} vx in skeleton, {np.sum(f)} vx in foldlabel'
+        vol = aims.Volume(foldlabel)
+        vol.header()['voxel_size'] = old_foldlabel.header()['voxel_size']
+        aims.write(vol,
+                   os.path.join(self.masked_dir,f'{self.side}resampled_foldlabel_{subject}.nii.gz'))
+
+    def compute(self, number_subjects=_ALL_SUBJECTS):
+        """Loops over nii files
+
+        The programm loops over all subjects from the input (source) directory.
+
+        Args:
+            number_subjects: integer giving the number of subjects to analyze,
+                by default it is set to _ALL_SUBJECTS (-1).
+        """
+
+        if number_subjects:
+
+            log.debug(f"src_dir = {self.src_dir}")
+            log.debug(f"reg exp = {self.expr}")
+
+            if os.path.isdir(self.src_dir):
+                src_files = glob.glob(f"{self.src_dir}/*.nii.gz")
+                log.debug(f"list src files = {src_files}")
+                log.debug(os.path.basename(src_files[0]))
+
+                # Creates target directories
+                create_folder(self.masked_dir)
+
+                # Generates list of subjects not treated yet
+                not_processed_files = get_not_processed_files(
+                    self.src_dir, self.masked_dir, self.src_filename)
+
+                list_all_subjects = \
+                    [re.search(self.expr, os.path.basename(dI))[1]
+                     for dI in not_processed_files]
+            else:
+                raise NotADirectoryError(
+                    f"{self.src_dir} doesn't exist or is not a directory")
+
+            if len(list_all_subjects):
+                log.info(f"First subject to process: {list_all_subjects[0]}")
+                log.info(f"Number of requested subjects: {number_subjects}, {type(number_subjects)}")
+                # Gives the possibility to list only the first number_subjects
+                list_subjects = select_subjects_int(
+                    list_all_subjects, number_subjects)
+                log.info(f"Expected number of subjects = {len(list_subjects)}")
+                log.info(f"list_subjects[:5] = {list_subjects[:5]}")
+                log.debug(f"list_subjects = {list_subjects}")
+
+                # Performs resampling for each file in a parallelized way
+                if self.parallel:
+                    log.info(
+                        "PARALLEL MODE: subjects are in parallel")
+                    p_map(
+                        self.mask_one_file,
+                        list_subjects,
+                        num_cpus=define_njobs())
+                else:
+                    log.info(
+                        "SERIAL MODE: subjects are scanned serially")
+                    for sub in list_subjects:
+                        self.mask_one_file(sub)
+            else:
+                list_subjects = []
+                log.info(
+                    "There is no subject or there is no subject to process "
+                    "in the source directory")
+
+            # Checks if there is expected number of generated files
+            compare_number_aims_files_with_expected(self.masked_dir,
+                                                    list_subjects)
+
+            # Checks if number of generated files == number of src files
+            masked_files, src_files = \
+                compare_number_aims_files_with_number_in_source(
+                    self.masked_dir, self.src_dir)
+            not_processed_files = get_not_processed_files(self.src_dir,
+                                                          self.masked_dir,
+                                                          self.src_filename)
+            save_list_to_csv(
+                not_processed_files,
+                f"{self.masked_dir}/../not_processed_files.csv")
+
+
+def parse_args(argv):
+    """Function parsing command-line arguments
+
+    Args:
+        argv: a list containing command line arguments
+
+    Returns:
+        params: dictionary with keys: src_dir, tgt_dir, nb_subjects, list_sulci
+    """
+
+    # Parse command line arguments
+    parser = argparse.ArgumentParser(
+        prog=basename(__file__),
+        description='Masks resampled foldlabel files')
+    parser.add_argument(
+        "-s", "--src_dir", type=str, default=_RESAMPLED_FOLDLABEL_DIR_DEFAULT,
+        help='Source directory where input resampled foldlabel files lie. '
+             'Default is : ' + _RESAMPLED_FOLDLABEL_DIR_DEFAULT)
+    parser.add_argument(
+        "-k", "--skeleton_dir", type=str, default=_RESAMPLED_SKELETON_DIR_DEFAULT,
+        help='Source directory where input resampled skeleton files lie. '
+             'Default is : ' + _RESAMPLED_SKELETON_DIR_DEFAULT)
+    parser.add_argument(
+        "-o",
+        "--output_dir",
+        type=str,
+        default=_RESAMPLED_FOLDLABEL_DIR_DEFAULT,
+        help='Target directory where to store the masked files. '
+        'Default is : ' +
+        _RESAMPLED_FOLDLABEL_DIR_DEFAULT)
+    parser.add_argument(
+        "-i", "--side", type=str, default=_SIDE_DEFAULT,
+        help='Hemisphere side (either L or R). Default is : ' + _SIDE_DEFAULT)
+    parser.add_argument(
+        "-a", "--parallel", default=False, action='store_true',
+        help='if set (-a), launches computation in parallel')
+    parser.add_argument(
+        "-n", "--nb_subjects", type=str, default="all",
+        help='Number of subjects to take into account, or \'all\'. '
+             '0 subject is allowed, for debug purpose.')
+    parser.add_argument(
+        '-v', '--verbose', action='count', default=0,
+        help='Verbose mode: '
+        'If no option is provided then logging.INFO is selected. '
+        'If one option -v (or -vv) or more is provided '
+        'then logging.DEBUG is selected.')
+
+    params = {}
+
+    args = parser.parse_args(argv)
+
+    setup_log(args,
+              log_dir=f"{args.output_dir}",
+              prog_name=basename(__file__),
+              suffix='right' if args.side == 'R' else 'left')
+    
+    params = vars(args)
+
+    params['masked_dir'] = args.output_dir
+    params['nb_subjects'] = get_number_subjects(args.nb_subjects)
+
+    return params
+
+
+def mask_files(
+        src_dir=_RESAMPLED_FOLDLABEL_DIR_DEFAULT,
+        skeleton_dir=_RESAMPLED_SKELETON_DIR_DEFAULT,
+        masked_dir=_RESAMPLED_FOLDLABEL_DIR_DEFAULT,
+        side=_SIDE_DEFAULT,
+        parallel=False,
+        number_subjects=_ALL_SUBJECTS):
+
+    masker = FoldLabelMasker(
+        src_dir=src_dir,
+        skeleton_dir=skeleton_dir,
+        masked_dir=masked_dir,
+        side=side,
+        parallel=parallel
+    )
+
+    masker.compute(number_subjects=number_subjects)
+
+
+@exception_handler
+def main(argv):
+    """Reads argument line and resamples files
+
+    Args:
+        argv: a list containing command line arguments
+    """
+
+    # Parsing arguments
+    params = parse_args(argv)
+
+    # Actual API
+    mask_files(
+        src_dir=params['src_dir'],
+        skeleton_dir=params['skeleton_dir'],
+        masked_dir=params['masked_dir'],
+        side=params['side'],
+        number_subjects=params['nb_subjects'],
+        parallel=params['parallel']
+    )
+
+
+######################################################################
+# Main program
+######################################################################
+
+if __name__ == '__main__':
+    # This permits to call main also from another python program
+    # without having to make system calls
+    main(argv=sys.argv[1:])

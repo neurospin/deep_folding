@@ -58,6 +58,7 @@ from os.path import join
 from os.path import basename
 
 import numpy as np
+import pandas as pd
 import scipy.ndimage
 
 from deep_folding.brainvisa import exception_handler
@@ -156,6 +157,30 @@ def crop_mask(file_src, file_cropped, mask, bbmin, bbmax, side,
     # mask_cropped = aims.VolumeView(mask, bbmin, bbmax - bbmin)
     # aims.write(mask_cropped,
     #            f"{file_mask}/{side}mask_cropped.nii.gz")
+
+
+def quality_checks(crop_dir, side):
+    s = np.load(f"{crop_dir}/{side}skeleton.npy")
+    f = np.load(f"{crop_dir}/{side}label.npy")
+
+    # checks if same voxel position
+    assert (s.shape == f.shape), (
+        f"Skeleton and foldlabel of different shapes: {s.shape} != {f.shape}")
+    assert (f[s==0].sum() == 0), (
+        f"Foldlabel and skeleton arrays with different non-zero positions: "
+        f"{(f[s==0]!=0).sum()} different non-zero positions")
+    assert (s[f==0].sum() == 0), (
+        f"Foldlabel and skeleton arrays with different non-zero positions: "
+        f"{(s[f==0]!=0).sum()} different non-zero positions")
+    
+    # Checks if subjects are equal between distbottom and skeleton
+    dff = pd.read_csv(f"{crop_dir}/{side}label_subject.csv")
+    dfs = pd.read_csv(f"{crop_dir}/{side}skeleton_subject.csv")
+    assert (dff.equals(dfs)), "List of subjects for foldlabel and skeleton are not equal"
+
+    # Checks if numpy arrays and csvs are consistent
+    assert (s.shape[0] == len(dfs)), "Number of skeleton subjects differs between numpy array and csv"
+    assert (f.shape[0] == len(dff)), "Number of foldlabel subjects differs between numpy array and csv"
 
 
 class CropGenerator:
@@ -731,21 +756,12 @@ def parse_args(argv):
         args,
         log_dir=f"{args.output_dir}",
         prog_name=basename(__file__),
-        suffix=f"right_{args.input_type}" if args.side == 'R' else 'left')
+        suffix=f"right_{args.input_type}" if args.side == 'R' else f"right_{args.input_type}")
 
-    params['src_dir'] = args.src_dir
-    params['input_type'] = args.input_type
+    params = vars(args)
+
     params['crop_dir'] = args.output_dir
-    params['bbox_dir'] = args.bbox_dir
-    params['mask_dir'] = args.mask_dir
     params['list_sulci'] = args.sulcus  # a list of sulci
-    params['side'] = args.side
-    params['cropping_type'] = args.cropping_type
-    params['combine_type'] = args.combine_type
-    params['parallel'] = args.parallel
-    params['no_mask'] = args.no_mask
-    params['threshold'] = args.threshold
-    params['dilation'] = args.dilation
 
     # Checks if nb_subjects is either the string "all" or a positive integer
     params['nb_subjects'] = get_number_subjects(args.nb_subjects)
@@ -798,6 +814,7 @@ def generate_crops(
             no_mask=no_mask,
             threshold=threshold,
             dilation=dilation)
+        
     elif input_type == "distmap":
         crop = DistMapCropGenerator(
             src_dir=src_dir,
@@ -816,6 +833,9 @@ def generate_crops(
         raise ValueError(
             "input_type: shall be either 'skeleton', 'foldlabel' or 'distmap'")
     crop.compute(number_subjects=number_subjects)
+
+    if input_type == "foldlabel":
+        quality_checks(crop_dir, side)
 
 
 @exception_handler

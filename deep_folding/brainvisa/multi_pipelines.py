@@ -2,12 +2,13 @@
 
 import os
 import json
+import subprocess
 
 
 regions = ['S.C.-S.Pe.C.']
-datasets = ['bsnip1', 'candi', 'cnp', 'schizconnect-vip-prague']
-sides = ['R', 'L']
-input_types = ['foldlabel', 'skeleton']
+datasets = ['candi', 'cnp', 'bsnip1', 'schizconnect-vip-prague']
+sides = ['L', 'R']
+input_types = ['skeleton', 'foldlabel']
 
 
 for region in regions:
@@ -24,13 +25,21 @@ for region in regions:
             for input_type in input_types:
                 json_dict['input_type'] = input_type
 
+                if region == 'CINGULATE.':
+                    json_dict['combine_type'] = True
+                else:
+                    json_dict['combine_type'] = False
+
                 # replace the template json by the modified one
                 with open(pipeline_json, 'w') as file2:
                     json.dump(json_dict, file2, indent=3)
                     file2.close()
                 
                 # run the pipeline on the target region with the requested parameters
-                os.system(f"python3 pipeline.py --params_path {pipeline_json}")
+                if os.system(f"python3 pipeline.py --params_path {pipeline_json}") != 0:
+                    raise ValueError("Error in pipeline: see above for error explanations")
                 print("\nEND")
+                os.system("which python3")
+                print(pipeline_json)
                 print(region, dataset, side, input_type, 'ok')
                 print("\n")
