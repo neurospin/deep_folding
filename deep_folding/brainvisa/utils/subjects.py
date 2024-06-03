@@ -173,7 +173,7 @@ def select_good_qc(orig_list: list, qc_path: str):
             sep = ','
         log.info(f'Reading qc tsv file')
         qc_file = pd.read_csv(qc_path, sep=sep)
-
+        qc_file["participant_id"] = qc_file["participant_id"].astype(str)
         qc_file = qc_file[qc_file.qc != 0]
 
         sublist = [name for name in orig_list

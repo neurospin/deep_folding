@@ -44,7 +44,7 @@ import shutil
 from deep_folding.brainvisa.utils.folder import create_folder
 
 
-regions = ['S.C.-S.Pe.C.']
+regions = ['S.Or.']
 datasets = ['bsnip1', 'candi', 'cnp', 'schizconnect-vip-prague']
 target = 'schiz'
 resolution = "2mm"

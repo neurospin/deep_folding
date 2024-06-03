@@ -107,9 +107,11 @@ def save_to_dataframe_format_from_list(
 def compare_one_array(cropped_dir, list_basename, row):
     index = row[0]
     sub = row[1]
-    index_sub = [idx for idx, x in enumerate(list_basename) if str(sub) in x]
-    if len(index_sub):
+    index_sub = [idx for idx, x in enumerate(list_basename) if x.startswith(f"{str(sub)}_cropped")]
+    if len(index_sub)==1:
         index_sub = index_sub[0]
+    elif len(index_sub)>1:
+        raise ValueError(f"Subject {sub}: several crops are matched to definition")
     else:
         raise ValueError(f"Subject {sub} not in cropped files")
     subject_file = f"{cropped_dir}/{list_basename[index_sub]}"
@@ -123,7 +125,7 @@ def compare_array_aims_files(subjects, arr, cropped_dir, parallel=True):
     log.info(f"subjects.head() = {subjects.head()}")
     if parallel:
         log.info("Quality check is done in PARALLEL")
-        list_nifti = glob.glob(f"{cropped_dir}/*.nii.gz")
+        list_nifti = sorted(glob.glob(f"{cropped_dir}/*_cropped_*.nii.gz"))
         list_basename = [os.path.basename(f) for f in list_nifti]
         log.info(f"list_basename[:3] = {list_basename[:3]}")
         partial_func = partial(compare_one_array, cropped_dir, list_basename)
@@ -140,7 +142,7 @@ def compare_array_aims_files(subjects, arr, cropped_dir, parallel=True):
         log.info("Quality check is done SERIALLY")
         for index, row in tqdm(subjects.iterrows()):
             sub = row['Subject']
-            subject_file = glob.glob(f"{cropped_dir}/{sub}*.nii.gz")[0]
+            subject_file = glob.glob(f"{cropped_dir}/{sub}_cropped_*.nii.gz")[0]
             vol = aims.read(subject_file)
             arr_ref = np.asarray(vol)
             arr_from_array = arr[index, ...]

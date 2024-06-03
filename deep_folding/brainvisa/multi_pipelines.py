@@ -5,8 +5,9 @@ import json
 import subprocess
 
 
-regions = ['S.C.-S.Pe.C.']
-datasets = ['candi', 'cnp', 'bsnip1', 'schizconnect-vip-prague']
+regions = ['S.C.-S.Pe.C.', 'S.Or.']
+# datasets = ['candi', 'cnp', 'bsnip1', 'schizconnect-vip-prague']
+datasets = ['PreCatatoes']
 sides = ['L', 'R']
 input_types = ['skeleton', 'foldlabel']
 
@@ -36,7 +37,7 @@ for region in regions:
                     file2.close()
                 
                 # run the pipeline on the target region with the requested parameters
-                if os.system(f"python3 pipeline.py --params_path {pipeline_json}") != 0:
+                if subprocess.call(["python3", "pipeline.py", "--params_path", f"{pipeline_json}"]) != 0:
                     raise ValueError("Error in pipeline: see above for error explanations")
                 print("\nEND")
                 os.system("which python3")
