@@ -440,7 +440,8 @@ def main(argv):
                 'side': params['side'],
                 'bids': params['bids'],
                 'parallel': params['parallel'],
-                'number_subjects': params['nb_subjects']}
+                'number_subjects': params['nb_subjects'],
+                'qc_path': params['skel_qc_path']}
 
             setup_log(Namespace(**{'verbose': log.level,
                                    **args_generate_transforms}),

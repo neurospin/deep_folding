@@ -57,7 +57,8 @@ from deep_folding.brainvisa import exception_handler
 from deep_folding.brainvisa.utils.folder import create_folder
 from deep_folding.brainvisa.utils.subjects import get_number_subjects,\
                                                   is_it_a_subject
-from deep_folding.brainvisa.utils.subjects import select_subjects_int
+from deep_folding.brainvisa.utils.subjects import \
+    select_subjects_int, select_good_qc
 from deep_folding.brainvisa.utils.logs import setup_log
 from deep_folding.brainvisa.utils.parallel import define_njobs
 from deep_folding.brainvisa.utils.quality_checks import \
@@ -71,7 +72,8 @@ from soma import aims
 from deep_folding.brainvisa.utils.constants import \
     _ALL_SUBJECTS, _SRC_DIR_DEFAULT,\
     _TRANSFORM_DIR_DEFAULT, _SIDE_DEFAULT, \
-    _PATH_TO_GRAPH_DEFAULT
+    _PATH_TO_GRAPH_DEFAULT, \
+    _QC_PATH_DEFAULT
 
 # Defines logger
 log = set_file_logger(__file__)
@@ -108,6 +110,11 @@ def parse_args(argv):
         default=_PATH_TO_GRAPH_DEFAULT,
         help='Relative path to graph. '
              'Default is ' + _PATH_TO_GRAPH_DEFAULT)
+    parser.add_argument(
+        "-q", "--quality_checks", type=str,
+        default=_QC_PATH_DEFAULT,
+        help='Path to quality check .csv. '
+             'Default is ' + _QC_PATH_DEFAULT)
     parser.add_argument(
         "-b", "--bids", default=False, action="store_true",
         help="If the database uses the BIDS format"
@@ -153,13 +160,14 @@ class GraphGenerateTransform:
 
     def __init__(self, src_dir, transform_dir,
                  side, parallel,
-                 path_to_graph, bids):
+                 path_to_graph, bids, qc_path):
         self.src_dir = src_dir
         self.transform_dir = transform_dir
         self.side = side
         self.parallel = parallel
         self.path_to_graph = path_to_graph
         self.bids = bids
+        self.qc_path = qc_path
         self.transform_dir = f"{self.transform_dir}/{self.side}"
         create_folder(abspath(self.transform_dir))
 
@@ -210,6 +218,8 @@ class GraphGenerateTransform:
 
         list_subjects = [basename(filename) for filename in filenames
                          if is_it_a_subject(filename)]
+        log.info(f"Number of subjects before qc = {len(list_subjects)}")
+        list_subjects = select_good_qc(list_subjects, self.qc_path)
         list_subjects = \
             get_not_processed_subjects_transform(list_subjects,
                                                  self.transform_dir,
@@ -253,7 +263,8 @@ def generate_ICBM2009c_transforms(
         side=_SIDE_DEFAULT,
         bids=False,
         parallel=False,
-        number_subjects=_ALL_SUBJECTS):
+        number_subjects=_ALL_SUBJECTS,
+        qc_path=_QC_PATH_DEFAULT):
     """Generates skeletons from graphs"""
 
     # Initialization
@@ -263,7 +274,8 @@ def generate_ICBM2009c_transforms(
         path_to_graph=path_to_graph,
         side=side,
         bids=bids,
-        parallel=parallel
+        parallel=parallel,
+        qc_path=qc_path
     )
     # Actual generation of skeletons from graphs
     transform.compute(number_subjects=number_subjects)
@@ -287,7 +299,8 @@ def main(argv):
         side=params['side'],
         bids=params['bids'],
         parallel=params['parallel'],
-        number_subjects=params['nb_subjects'])
+        number_subjects=params['nb_subjects'],
+        qc_path=params['quality_checks'])
 
 
 if __name__ == '__main__':
