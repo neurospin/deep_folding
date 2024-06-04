@@ -146,7 +146,7 @@ def resample_one_skeleton(input_image,
     # The more important is the inversion in the priority
     # for the bottom value (30) and the simple surface value (60)
     # with respect to the natural order
-    # We don't give background, which is the interior 0
+    # We don't give background, which is the interior 0foldlabels/2mm/L_before_masking/Lresampled_foldlabel_10.nii.gz
     #values = [11, 60, 30, 35, 10, 20, 40,
     #          50, 70, 80, 90, 100, 110, 120]
     values = [100, 60, 10, 20, 40, 50, 70, 80, 110, 120, 30, 35]

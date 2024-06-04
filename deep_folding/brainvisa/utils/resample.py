@@ -328,7 +328,7 @@ def resample(input_image: Union[str, aims.Volume],
             del resampled2
             # intersect
             topo[np.isin(topo, (30, 80)) & (resampled.np != 0)] = 35
-            resampled = topo
+            resampled[:] = topo
             del topo
 
         log.debug("Time: {}s".format(time() - tic))
