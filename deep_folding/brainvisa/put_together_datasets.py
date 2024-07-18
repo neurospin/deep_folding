@@ -44,9 +44,11 @@ import shutil
 from deep_folding.brainvisa.utils.folder import create_folder
 
 
-regions = ['S.Or.']
-datasets = ['bsnip1', 'candi', 'cnp', 'schizconnect-vip-prague']
-target = 'schiz'
+regions = ['S.C.-S.Pe.C.', 'S.Or.']
+# datasets = ['bsnip1', 'candi', 'cnp', 'schizconnect-vip-prague']
+# target = 'schiz'
+datasets = ['bsnip1', 'candi', 'cnp', 'schizconnect-vip-prague', 'PreCatatoes']
+target = 'schiz_extended'
 resolution = "2mm"
 
 datasets_folder = "/neurospin/dico/data/deep_folding/current/datasets"
@@ -109,6 +111,7 @@ def save_to_numpy(npy_file, arr):
 
 
 def save_to_csv(csv_file, df):
+    df = df.astype(str)
     df.to_csv(csv_file, index=False)
     reloaded = pd.read_csv(csv_file)
     assert df.equals(reloaded), "csv file on disk differs from computed csv dataframe"

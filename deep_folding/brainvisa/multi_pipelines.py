@@ -4,10 +4,28 @@ import os
 import json
 import subprocess
 
-
-regions = ['S.C.-S.Pe.C.', 'S.Or.']
+"""
+regions = ["S.C.-sylv.", "S.C.-S.Pe.C.", "S.C.-S.Po.C.",\
+            "S.Pe.C.", "S.Po.C.", "CINGULATE.", "S.F.int.-F.C.M.ant.",\
+            "S.F.inf.-BROCA-S.Pe.C.inf.", "S.T.s.", "Sc.Cal.-S.Li.",\
+            "F.C.M.post.-S.p.C.", "S.T.i.-S.O.T.lat.",\
+            "OCCIPITAL", "F.I.P.", "S.F.inter.-S.F.sup.",\
+            "S.F.median-S.F.pol.tr.-S.F.sup.", "S.Or.",\
+            "S.Or.-S.Olf.", "F.P.O.-S.Cu.-Sc.Cal.",\
+            "S.s.P.-S.Pa.int.", "S.T.s.br.",\
+            "Lobule_parietal_sup.", "S.F.marginal-S.F.inf.ant.",\
+            "F.Coll.-S.Rh.", "S.T.i.-S.T.s.-S.T.pol.",\
+            "F.C.L.p.-subsc.-F.C.L.a.-INSULA.", "S.F.int.-S.R.",\
+            "fronto-parietal_medial_face."\
+            ]
+            """
+# regions = ["F.I.P.", "S.T.s.-S.GSM.", "F.C.L.p.-S.GSM."]
+# regions = ["F.I.P."]
+#regions = ["OCCIPITAL"]
+regions = ["F.C.L.p.-subsc.-F.C.L.a.-INSULA."]
+datasets = ['UkBioBank']
 # datasets = ['candi', 'cnp', 'bsnip1', 'schizconnect-vip-prague']
-datasets = ['PreCatatoes']
+# datasets = ['PreCatatoes']
 sides = ['L', 'R']
 input_types = ['skeleton', 'foldlabel']
 
@@ -30,6 +48,11 @@ for region in regions:
                     json_dict['combine_type'] = True
                 else:
                     json_dict['combine_type'] = False
+                    
+                if (region == 'OCCIPITAL') or (region == "F.C.L.p.-subsc.-F.C.L.a.-INSULA."):
+                    json_dict['threshold'] = 1
+                else:
+                    json_dict['threshold'] = 0
 
                 # replace the template json by the modified one
                 with open(pipeline_json, 'w') as file2:

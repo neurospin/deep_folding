@@ -219,13 +219,9 @@ def save_to_numpy(
     else:
         log.info("Reading cropped dir is done SERIALLY")
         for filename in tqdm(sorted(listdir)):
-            file_nii = os.path.join(cropped_dir, filename)
-            if is_file_nii(file_nii):
-                aimsvol = aims.read(file_nii)
-                sample = np.asarray(aimsvol)
-                subject = re.search('(.*)_cropped_(.*)', file_nii).group(1)
-                list_sample_id.append(os.path.basename(subject))
-                list_sample_file.append(sample)
+            id, sample = get_one_numpy_array(filename, cropped_dir)
+            list_sample_id.append(id)
+            list_sample_file.append(sample)
 
     log.info("STEP 2. Now writing subject name file...")
     # Writes subject ID csv file
