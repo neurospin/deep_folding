@@ -411,7 +411,7 @@ def main(argv):
                         prog_name='pipeline_generate_foldlabels.py',
                         suffix=full_side[1:])
 
-            # generate_foldlabels(**args_generate_foldlabels)
+            generate_foldlabels(**args_generate_foldlabels)
             log.info('Raw foldlabels generated')
 
 
