@@ -27,8 +27,7 @@
 # data to be ensured and,  more generally, to use and operate it in the
 
 """
-This program converts volumes contained in a folder into buckets.
-It writes bucket files in the output folder
+Suppress files listed in csv
 """
 import argparse
 import sys
