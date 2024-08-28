@@ -20,14 +20,15 @@ regions = ["S.C.-sylv.", "S.C.-S.Pe.C.", "S.C.-S.Po.C.",\
             ]
 """
 # regions = ["F.I.P.", "S.T.s.-S.GSM.", "F.C.L.p.-S.GSM."]
-regions = ["F.I.P."]
+# regions = ["F.I.P."]
+regions = ["F.C.L.p.-subsc.-F.C.L.a.-INSULA."]
 #regions = ["OCCIPITAL"]
 # regions = ["S.T.s.-S.GSM.", "F.C.L.p.-S.GSM."]
-datasets = ['hcp']
+datasets = ['hcp', 'UkBioBank']
 # datasets = ['synesthetes']
 # datasets = ['candi', 'cnp', 'bsnip1', 'schizconnect-vip-prague']
 # datasets = ['PreCatatoes']
-sides = ['L', 'R']
+sides = ['L']
 input_types = ['skeleton', 'foldlabel']
 
 
