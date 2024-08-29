@@ -51,8 +51,9 @@ def is_volume_binary(arr):
     return np.isin(arr, arr_values).all()
 
 
-def generate_extremities_from_graph(graph: aims.Graph,
-                                    skeleton_with_hull: aims.Volume) -> aims.Volume:
+def generate_extremities_from_graph(
+        graph: aims.Graph,
+        skeleton_with_hull: aims.Volume) -> aims.Volume:
     """Generete extremities (dilated lateral edges).
     Returns volume"""
     trm = aims.GraphManip.getICBM2009cTemplateTransform(graph)
@@ -80,7 +81,7 @@ def generate_extremities_from_graph_file(graph_file: str,
                                          skeleton_with_hull_file: str,
                                          extremity_file: str):
     """Generates extremities from graph file and skeleton with hull.
-    
+
     The extremities are only the inflated lateral edges of branches"""
 
     graph = aims.read(graph_file)

@@ -38,7 +38,7 @@ _INPUT_TYPE_DEFAULT = "skeleton"
 _SKELETON_DIR_DEFAULT = "test/datasets/hcp/skeletons/raw"
 
 # Default directory where we put extremities
-_EXTREMITY_DIR_DEFAULT = "test/datasets/hcp/trimmed_skeletons/raw"
+_EXTREMITIES_DIR_DEFAULT = "test/datasets/hcp/extremities/raw"
 
 # Default directory where we put foldlabels
 _FOLDLABEL_DIR_DEFAULT = "test/datasets/hcp/foldlabels/raw"

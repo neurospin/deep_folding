@@ -73,9 +73,9 @@ from deep_folding.config.logs import set_file_logger
 
 # Import constants
 from deep_folding.brainvisa.utils.constants import \
-    _ALL_SUBJECTS, _SRC_DIR_DEFAULT,\
-    _EXTREMITY_DIR_DEFAULT, _SIDE_DEFAULT, \
-    _JUNCTION_DEFAULT, _PATH_TO_GRAPH_DEFAULT, \
+    _ALL_SUBJECTS, _SRC_DIR_DEFAULT, \
+    _EXTREMITIES_DIR_DEFAULT, _SIDE_DEFAULT, \
+    _PATH_TO_GRAPH_DEFAULT, \
     _PATH_TO_SKELETON_WITH_HULL_DEFAULT, \
     _QC_PATH_DEFAULT
 
@@ -102,9 +102,9 @@ def parse_args(argv):
         help='Source directory where the graph data lies. '
              'Default is : ' + _SRC_DIR_DEFAULT)
     parser.add_argument(
-        "-o", "--output_dir", type=str, default=_EXTREMITY_DIR_DEFAULT,
+        "-o", "--output_dir", type=str, default=_EXTREMITIES_DIR_DEFAULT,
         help='Output directory where to put skeleton files.'
-        'Default is : ' + _EXTREMITY_DIR_DEFAULT)
+        'Default is : ' + _EXTREMITIES_DIR_DEFAULT)
     parser.add_argument(
         "-i", "--side", type=str, default=_SIDE_DEFAULT,
         help='Hemisphere side. Default is : ' + _SIDE_DEFAULT)
@@ -123,10 +123,6 @@ def parse_args(argv):
         default=_QC_PATH_DEFAULT,
         help='Path to quality check .csv. '
              'Default is ' + _QC_PATH_DEFAULT)
-    parser.add_argument(
-        "-j", "--junction", type=str, default=_JUNCTION_DEFAULT,
-        help='junction rendering (either \'wide\' or \'thin\') '
-             f"Default is {_JUNCTION_DEFAULT}")
     parser.add_argument(
         "-b", "--bids", default=False, action="store_true",
         help="if the database uses the BIDS format"
@@ -156,7 +152,7 @@ def parse_args(argv):
     params = vars(args)
 
     params['src_dir'] = abspath(args.src_dir)
-    params['extremity_dir'] = abspath(args.output_dir)
+    params['extremities_dir'] = abspath(args.output_dir)
     # Checks if nb_subjects is either the string "all" or a positive integer
     params['number_subjects'] = get_number_subjects(args.nb_subjects)
 
@@ -178,26 +174,25 @@ class GraphConvert2Extremity:
     and writes extremities as volume into target directory
     """
 
-    def __init__(self, src_dir, extremity_dir,
-                 side, junction, parallel,
+    def __init__(self, src_dir, extremities_dir,
+                 side, parallel,
                  path_to_skeleton_with_hull,
                  path_to_graph, bids, qc_path):
         self.src_dir = src_dir
-        self.extremity_dir = extremity_dir
+        self.extremities_dir = extremities_dir
         self.side = side
         self.qc_path = qc_path
-        self.junction = junction
         self.parallel = parallel
         self.path_to_graph = path_to_graph
         self.path_to_skeleton_with_hull = path_to_skeleton_with_hull
         self.bids = bids
-        self.extremity_dir = f"{self.extremity_dir}/{self.side}"
-        create_folder(abspath(self.extremity_dir))
+        self.extremities_dir = f"{self.extremities_dir}/{self.side}"
+        create_folder(abspath(self.extremities_dir))
 
     def get_extremity_filename(self, subject, graph_file):
         """Creates name of extremity file for one subject"""
-        extremity_file = f"{self.extremity_dir}/" + \
-                        f"{self.side}extremities_{subject}"
+        extremity_file = f"{self.extremities_dir}/" + \
+            f"{self.side}extremities_{subject}"
         if self.bids:
             session = re.search("ses-([^_/]+)", graph_file)
             acquisition = re.search("acq-([^_/]+)", graph_file)
@@ -212,12 +207,12 @@ class GraphConvert2Extremity:
         return extremity_file
 
     def generate_one_extremity(self, subject: str):
-        """Generates and writes skeleton for one subject.
+        """Generates and writes extremity volume for one subject.
         """
         graph_path = f"{self.src_dir}/{subject}/" +\
                      f"{self.path_to_graph}/{self.side}*.arg"
         skeleton_with_hull_path = f"{self.src_dir}/{subject}/" +\
-                     f"{self.path_to_skeleton_with_hull}/{self.side}skeleton*.nii.gz"
+            f"{self.path_to_skeleton_with_hull}/{self.side}skeleton*.nii.gz"
 
         # Gets graph file path
         list_graph_file = glob.glob(graph_path)
@@ -225,21 +220,26 @@ class GraphConvert2Extremity:
 
         # Gets skeleton with hull file path
         list_skeleton_with_hull_file = glob.glob(skeleton_with_hull_path)
-        log.debug(f"list_skeleton_with_hull_file = {list_skeleton_with_hull_file}")
+        log.debug(
+            f"list_skeleton_with_hull_file = {list_skeleton_with_hull_file}")
 
         if len(list_graph_file) == 0:
             raise RuntimeError(f"No graph file! "
                                f"{graph_path} does not exist")
         if len(list_skeleton_with_hull_file) == 0:
-            raise RuntimeError(f"No skeleton_with_hull file! "
-                               f"{skeleton_with_hull_path} does not exist "
-                               f"or does not contain {self.side}skeleton files")
+            raise RuntimeError(
+                f"No skeleton_with_hull file! "
+                f"{skeleton_with_hull_path} does not exist "
+                f"or does not contain {self.side}skeleton files")
         if len(list_graph_file) != len(list_skeleton_with_hull_file):
-            raise RuntimeError("Different number of graph files and skeleton with hull files! "
-                               f"Graph files = {list_graph_file}. "
-                               f"Skeleton with hull files = {list_skeleton_with_hull_file}")
+            raise RuntimeError(
+                "Different number of graph files "
+                "and skeleton with hull files! "
+                f"Graph files = {list_graph_file}. "
+                f"Skeleton with hull files = {list_skeleton_with_hull_file}")
 
-        for graph_file, skeleton_with_hull_file in zip(list_graph_file, list_skeleton_with_hull_file):
+        for graph_file, skeleton_with_hull_file in \
+                zip(list_graph_file, list_skeleton_with_hull_file):
             extremity_file = self.get_extremity_filename(subject, graph_file)
             log.debug(f"skeleton_with_hull_file = {skeleton_with_hull_file}")
 
@@ -259,7 +259,7 @@ class GraphConvert2Extremity:
         log.info(f"Number of subjects before qc = {len(list_subjects)}")
         list_subjects = select_good_qc(list_subjects, self.qc_path)
         list_subjects = \
-            get_not_processed_subjects(list_subjects, self.extremity_dir)
+            get_not_processed_subjects(list_subjects, self.extremities_dir)
 
         list_subjects = select_subjects_int(list_subjects, number_subjects)
 
@@ -286,20 +286,19 @@ class GraphConvert2Extremity:
             list_graphs = \
                 [g for g in glob.glob(f"{self.src_dir}/*/{self.path_to_graph}")
                  if not re.search('.minf$', g)]
-            compare_number_aims_files_with_expected(self.extremity_dir,
+            compare_number_aims_files_with_expected(self.extremities_dir,
                                                     list_graphs)
         else:
-            compare_number_aims_files_with_expected(self.extremity_dir,
+            compare_number_aims_files_with_expected(self.extremities_dir,
                                                     list_subjects)
 
 
 def generate_extremities(
         src_dir=_SRC_DIR_DEFAULT,
-        extremity_dir=_EXTREMITY_DIR_DEFAULT,
+        extremities_dir=_EXTREMITIES_DIR_DEFAULT,
         path_to_skeleton_with_hull=_PATH_TO_SKELETON_WITH_HULL_DEFAULT,
         path_to_graph=_PATH_TO_GRAPH_DEFAULT,
         side=_SIDE_DEFAULT,
-        junction=_JUNCTION_DEFAULT,
         bids=False,
         parallel=False,
         number_subjects=_ALL_SUBJECTS,

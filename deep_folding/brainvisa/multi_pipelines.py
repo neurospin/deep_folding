@@ -1,4 +1,5 @@
-"""Uses the pipeline on multiple regions and datasets, for both sides and input type."""
+"""Uses the pipeline on multiple regions and datasets,
+for both sides and input type."""
 
 import os
 import json
@@ -18,56 +19,66 @@ regions = ["S.C.-sylv.", "S.C.-S.Pe.C.", "S.C.-S.Po.C.",\
             "F.C.L.p.-subsc.-F.C.L.a.-INSULA.", "S.F.int.-S.R.",\
             "fronto-parietal_medial_face."\
             ]
+regions = ["F.I.P.", "S.T.s.-S.GSM.", "F.C.L.p.-S.GSM."]
+regions = ["F.I.P."]
+regions = ["OCCIPITAL"]
+regions = ["S.T.s.-S.GSM.", "F.C.L.p.-S.GSM."]
+datasets = ["hcp", "UkBioBank"]
+datasets = ["synesthetes"]
+datasets = ["candi", "cnp", "bsnip1", "schizconnect-vip-prague"]
+datasets = ["PreCatatoes"]
 """
-# regions = ["F.I.P.", "S.T.s.-S.GSM.", "F.C.L.p.-S.GSM."]
-# regions = ["F.I.P."]
+
+path_dataset_root = "/neurospin/dico/data/deep_folding/current/datasets"
+datasets = ["hcp"]
 regions = ["F.C.L.p.-subsc.-F.C.L.a.-INSULA."]
-#regions = ["OCCIPITAL"]
-# regions = ["S.T.s.-S.GSM.", "F.C.L.p.-S.GSM."]
-datasets = ['hcp', 'UkBioBank']
-# datasets = ['synesthetes']
-# datasets = ['candi', 'cnp', 'bsnip1', 'schizconnect-vip-prague']
-# datasets = ['PreCatatoes']
-sides = ['L']
-input_types = ['skeleton', 'foldlabel']
+sides = ["L"]
+input_types = ["skeleton", "foldlabel", "extremities"]
 
 
 for region in regions:
     for dataset in datasets:
         # loads a already existing template
-        pipeline_json = f"/neurospin/dico/data/deep_folding/current/datasets/{dataset}/pipeline_loop_2mm.json"
+        pipeline_json = f"{path_dataset_root}/{dataset}/pipeline_loop_2mm.json"
         with open(pipeline_json, 'r') as file:
             json_dict = json.load(file)
             file.close()
-        # change the parameters that need to be changed (region, side, input_type)
-        json_dict['region_name'] = region
+        # change the parameters that need to be changed
+        # (region, side, input_type)
+        json_dict["region_name"] = region
         for side in sides:
-            json_dict['side'] = side
+            json_dict["side"] = side
             for input_type in input_types:
-                json_dict['input_type'] = input_type
+                json_dict["input_type"] = input_type
 
-                if region == 'CINGULATE.':
-                    json_dict['combine_type'] = True
+                if region == "CINGULATE.":
+                    json_dict["combine_type"] = True
                 else:
-                    json_dict['combine_type'] = False
-                    
-                if (region == 'OCCIPITAL') or (region == "F.C.L.p.-subsc.-F.C.L.a.-INSULA."):
-                    json_dict['threshold'] = 1
-                elif (region == 'F.C.L.p.-subsc.-F.C.L.a.-INSULA.') and (side == 'L'):
-                    json_dict['threshold'] = 1
+                    json_dict["combine_type"] = False
+
+                if ((region == "OCCIPITAL") or
+                        (region == "F.C.L.p.-subsc.-F.C.L.a.-INSULA.")):
+                    json_dict["threshold"] = 1
+                elif ((region == "F.C.L.p.-subsc.-F.C.L.a.-INSULA.") and
+                      (side == "L")):
+                    json_dict["threshold"] = 1
                 else:
-                    json_dict['threshold'] = 0
+                    json_dict["threshold"] = 0
 
                 # replace the template json by the modified one
-                with open(pipeline_json, 'w') as file2:
+                with open(pipeline_json, "w") as file2:
                     json.dump(json_dict, file2, indent=3)
                     file2.close()
-                
-                # run the pipeline on the target region with the requested parameters
-                if subprocess.call(["python3", "pipeline.py", "--params_path", f"{pipeline_json}"]) != 0:
-                    raise ValueError("Error in pipeline: see above for error explanations")
+
+                # run the pipeline on the target region
+                # with requested parameters read from new json
+                if subprocess.call(
+                        ["python3", "pipeline.py",
+                         "--params_path", f"{pipeline_json}"]) != 0:
+                    raise ValueError("Error in pipeline: "
+                                     "see above for error explanations")
                 print("\nEND")
                 os.system("which python3")
                 print(pipeline_json)
-                print(region, dataset, side, input_type, 'ok')
+                print(region, dataset, side, input_type, "ok")
                 print("\n")
