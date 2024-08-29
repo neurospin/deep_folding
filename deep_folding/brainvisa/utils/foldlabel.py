@@ -178,6 +178,16 @@ def generate_foldlabel_wide_junction(
 
     return vol_label
 
+def check_if_valid_foldlabel(vol_label: aims.Volume):
+    a = vol_label.np
+    if ((np.mod(a, 999)==0) & (a!=0)).sum() != 0:
+        raise ValueError(
+            "The foldlabel is NOT valid. "
+            "There are too many simple surfaces in graph. "
+            "There are more than 999 simple surfaces!!!"
+        )
+    
+
 
 def generate_foldlabel_from_graph(
         graph: aims.Graph,
@@ -187,6 +197,7 @@ def generate_foldlabel_from_graph(
         vol_label = generate_foldlabel_wide_junction(graph)
     else:
         vol_label = generate_foldlabel_thin_junction(graph)
+    check_if_valid_foldlabel(vol_label)
     return vol_label
 
 

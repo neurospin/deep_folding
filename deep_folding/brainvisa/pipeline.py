@@ -553,11 +553,12 @@ def main(argv):
                                    'src_filename': src_filename,
                                    'output_filename': output_filename}
 
-            setup_log(Namespace(**{'verbose': log.level,
-                                   **args_resample_files}),
-                      log_dir=f"{args_resample_files['resampled_dir']}",
-                      prog_name='pipeline_resample_files.py',
-                      suffix=full_side[1:])
+            setup_log(
+                Namespace(**{'verbose': log.level,
+                             **args_resample_files}),
+                log_dir=f"{args_resample_files['resampled_dir']}",
+                prog_name='pipeline_resample_files.py',
+                suffix=full_side[1:])
 
             resample_files(**args_resample_files)
             log.info(f"{params['input_type']} resampled")

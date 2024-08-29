@@ -54,28 +54,28 @@ from os.path import abspath
 from os.path import exists
 from os.path import basename
 
+from p_tqdm import p_map
+
 from deep_folding.brainvisa import exception_handler
 from deep_folding.brainvisa.utils.folder import create_folder
-from deep_folding.brainvisa.utils.subjects import get_number_subjects,\
-                                                  is_it_a_subject
-from deep_folding.brainvisa.utils.subjects import select_subjects_int,\
-                                                  select_good_qc
+from deep_folding.brainvisa.utils.subjects import \
+    get_number_subjects, \
+    is_it_a_subject
+from deep_folding.brainvisa.utils.subjects import select_subjects_int, \
+    select_good_qc
 from deep_folding.brainvisa.utils.logs import setup_log
 from deep_folding.brainvisa.utils.parallel import define_njobs
 from deep_folding.brainvisa.utils.foldlabel import \
     generate_foldlabel_from_graph_file
 from deep_folding.brainvisa.utils.quality_checks import \
     compare_number_aims_files_with_expected, \
-    compare_number_aims_files_with_number_in_source, \
     get_not_processed_subjects, \
     save_list_to_csv
-from pqdm.processes import pqdm
-from p_tqdm import p_map
 from deep_folding.config.logs import set_file_logger
 
 # Import constants
 from deep_folding.brainvisa.utils.constants import \
-    _ALL_SUBJECTS, _SRC_DIR_DEFAULT,\
+    _ALL_SUBJECTS, _SRC_DIR_DEFAULT, \
     _FOLDLABEL_DIR_DEFAULT, _SIDE_DEFAULT, \
     _JUNCTION_DEFAULT, _PATH_TO_GRAPH_DEFAULT, \
     _QC_PATH_DEFAULT
@@ -186,6 +186,7 @@ class GraphConvert2FoldLabel:
         create_folder(abspath(self.foldlabel_dir))
 
     def get_foldlabel_filename(self, subject, graph_file):
+        """Build foldlabel file name"""
         foldlabel_file = f"{self.foldlabel_dir}/" + \
             f"{self.side}foldlabel_{subject}"
         if self.bids:
@@ -202,7 +203,7 @@ class GraphConvert2FoldLabel:
         return foldlabel_file
 
     def generate_one_foldlabel(self, subject: str):
-        """Generates and writes skeleton for one subject.
+        """Generates and writes foldlabel for one subject.
         """
         # Gets graph file path
         graph_path = f"{self.src_dir}/{subject}/" +\
@@ -223,6 +224,7 @@ class GraphConvert2FoldLabel:
     def compute(self, number_subjects):
         """Loops over subjects and converts graphs into skeletons.
         """
+        # Gets list of subject names
         if not exists(self.src_dir):
             raise ValueError(f"{self.src_dir} does not exist!")
         filenames = glob.glob(f"{self.src_dir}/*")
@@ -234,7 +236,8 @@ class GraphConvert2FoldLabel:
             list_subjects, self.foldlabel_dir, "foldlabel_")
         list_subjects = select_subjects_int(list_subjects, number_subjects)
 
-        # Performs computation on all subjects either serially or in parallel
+        # Performs computation on all selected subjects
+        # either serially or in parallel
         if self.parallel:
             log.info(
                 "PARALLEL MODE: subjects are computed in parallel.")
@@ -249,7 +252,7 @@ class GraphConvert2FoldLabel:
             for sub in list_subjects:
                 self.generate_one_foldlabel(sub)
 
-        # Checks if there is expected number of generated files
+        # Checks if there is the expected number of generated files
         compare_number_aims_files_with_expected(self.foldlabel_dir,
                                                 list_subjects)
         list_subjects = [basename(filename) for filename in filenames

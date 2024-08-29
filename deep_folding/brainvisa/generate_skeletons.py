@@ -53,6 +53,8 @@ import sys
 from os.path import abspath
 from os.path import basename
 
+from p_tqdm import p_map
+
 from deep_folding.brainvisa import exception_handler
 from deep_folding.brainvisa.utils.folder import create_folder
 from deep_folding.brainvisa.utils.subjects import \
@@ -66,13 +68,11 @@ from deep_folding.brainvisa.utils.skeleton import \
 from deep_folding.brainvisa.utils.quality_checks import \
     compare_number_aims_files_with_expected, \
     get_not_processed_subjects
-from pqdm.processes import pqdm
-from p_tqdm import p_map
 from deep_folding.config.logs import set_file_logger
 
 # Import constants
 from deep_folding.brainvisa.utils.constants import \
-    _ALL_SUBJECTS, _SRC_DIR_DEFAULT,\
+    _ALL_SUBJECTS, _SRC_DIR_DEFAULT, \
     _SKELETON_DIR_DEFAULT, _SIDE_DEFAULT, \
     _JUNCTION_DEFAULT, _PATH_TO_GRAPH_DEFAULT, \
     _QC_PATH_DEFAULT
