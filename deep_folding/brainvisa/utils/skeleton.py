@@ -122,9 +122,6 @@ def generate_skeleton_wide_junction(
     vol_skel = create_empty_volume_from_graph(graph)
     arr_skel = np.asarray(vol_skel)
 
-    cnt_duplicate = 0
-    cnt_total = 0
-
     for vertex in graph.vertices():
         for bucket_name, value in {'aims_other': 100,
                                    'aims_ss': 60, 'aims_bottom': 30}.items():
@@ -182,3 +179,15 @@ def generate_skeleton_from_graph_file(graph_file: str,
     if not is_skeleton(np.asarray(vol_skeleton)):
         raise ValueError(f"{skeleton_file} has unexpected skeleton values")
     aims.write(vol_skeleton, skeleton_file)
+
+
+def generate_trimmed_skeleton_from_graph_file(graph_file: str,
+                                      skeleton_file: str,
+                                      junction: str = _JUNCTION_DEFAULT):
+    """Generates skeleton from graph file"""
+    graph = aims.read(graph_file)
+    vol_skeleton = generate_skeleton_from_graph(graph, junction)
+    if not is_skeleton(np.asarray(vol_skeleton)):
+        raise ValueError(f"{skeleton_file} has unexpected skeleton values")
+    aims.write(vol_skeleton, skeleton_file)
+    

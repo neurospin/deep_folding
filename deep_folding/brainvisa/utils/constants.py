@@ -20,7 +20,12 @@ _SRC_DIR_DEFAULT = \
 _PATH_TO_GRAPH_DEFAULT = \
     "t1mri/BL/default_analysis/folds/3.1"
 
-# Default directory to which we write the bounding box results
+# Gives the relative path to the labelled graph .arg
+# in a "morphologist-like" dataset
+_PATH_TO_SKELETON_WITH_HULL_DEFAULT = \
+    "t1mri/BL/default_analysis/segmentation"
+
+# Default directory to which we write the bounding box
 _BBOX_DIR_DEFAULT = "test/bbox/1mm"
 
 # Default directory to which we write the masks
@@ -31,6 +36,9 @@ _INPUT_TYPE_DEFAULT = "skeleton"
 
 # Default directory where we put skeletons
 _SKELETON_DIR_DEFAULT = "test/datasets/hcp/skeletons/raw"
+
+# Default directory where we put extremities
+_EXTREMITY_DIR_DEFAULT = "test/datasets/hcp/trimmed_skeletons/raw"
 
 # Default directory where we put foldlabels
 _FOLDLABEL_DIR_DEFAULT = "test/datasets/hcp/foldlabels/raw"
