@@ -51,8 +51,6 @@ The aim of this script is to resample skeletons, foldlabels and distmaps.
 """
 
 import argparse
-from asyncio.subprocess import DEVNULL
-from email.mime import base
 import glob
 import os
 import re

@@ -55,7 +55,7 @@ from os.path import basename
 
 from deep_folding.brainvisa import exception_handler
 from deep_folding.brainvisa.utils.folder import create_folder
-from deep_folding.brainvisa.utils.subjects import get_number_subjects,\
+from deep_folding.brainvisa.utils.subjects import get_number_subjects, \
                                                   is_it_a_subject
 from deep_folding.brainvisa.utils.subjects import \
     select_subjects_int, select_good_qc
@@ -70,7 +70,7 @@ from soma import aims
 
 # Import constants
 from deep_folding.brainvisa.utils.constants import \
-    _ALL_SUBJECTS, _SRC_DIR_DEFAULT,\
+    _ALL_SUBJECTS, _SRC_DIR_DEFAULT, \
     _TRANSFORM_DIR_DEFAULT, _SIDE_DEFAULT, \
     _PATH_TO_GRAPH_DEFAULT, \
     _QC_PATH_DEFAULT

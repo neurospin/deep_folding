@@ -52,31 +52,27 @@ import argparse
 import glob
 import re
 import sys
-import os
 from os.path import abspath
 from os.path import basename
-from os.path import normpath
-from os import pardir
+
+from p_tqdm import p_map
 
 from deep_folding.brainvisa import exception_handler
 from deep_folding.brainvisa.utils.folder import create_folder
 from deep_folding.brainvisa.utils.subjects import get_number_subjects
 from deep_folding.brainvisa.utils.subjects import select_subjects_int
 from deep_folding.brainvisa.utils.logs import setup_log
-from deep_folding.brainvisa.utils.parallel import define_njobs
 from deep_folding.brainvisa.utils.distmap import \
-    generate_distmap_from_skeleton_file,\
-    generate_distmap_from_resampled_skeleton
+    generate_distmap_from_resampled_skeleton, \
+    generate_distmap_from_skeleton_file
 from deep_folding.brainvisa.utils.quality_checks import \
     compare_number_aims_files_with_expected, \
     get_not_processed_subjects_distmap
-from pqdm.processes import pqdm
-from p_tqdm import p_map
 from deep_folding.config.logs import set_file_logger
 
 # Import constants
 from deep_folding.brainvisa.utils.constants import \
-    _ALL_SUBJECTS, _SKELETON_DIR_DEFAULT,\
+    _ALL_SUBJECTS, _SKELETON_DIR_DEFAULT, \
     _DISTMAPS_DIR_DEFAULT, _SIDE_DEFAULT
 
 # Defines logger

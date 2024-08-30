@@ -39,7 +39,6 @@ import os
 import numpy as np
 import tempfile
 from soma import aims
-from soma import aimsalgo
 
 from deep_folding.brainvisa.utils.padding import padd
 from deep_folding.config.logs import set_file_logger
