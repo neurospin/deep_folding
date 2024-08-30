@@ -371,17 +371,17 @@ class FileResampler:
         else:
             raise FileNotFoundError(f"{src_file} not found")
 
-    def compute(self, number_subjects=_ALL_SUBJECTS):
+    def compute(self, nb_subjects=_ALL_SUBJECTS):
         """Loops over nii files
 
         The programm loops over all subjects from the input (source) directory.
 
         Args:
-            number_subjects: integer giving the number of subjects to analyze,
+            nb_subjects: integer giving the number of subjects to analyze,
                 by default it is set to _ALL_SUBJECTS (-1).
         """
 
-        if number_subjects:
+        if nb_subjects:
 
             log.debug(f"src_dir = {self.src_dir}")
             log.debug(f"reg exp = {self.expr}")
@@ -406,9 +406,9 @@ class FileResampler:
                     f"{self.src_dir} doesn't exist or is not a directory")
 
             if len(list_all_subjects):
-                # Gives the possibility to list only the first number_subjects
+                # Gives the possibility to list only the first nb_subjects
                 list_subjects = select_subjects_int(
-                    list_all_subjects, number_subjects)
+                    list_all_subjects, nb_subjects)
                 log.info(f"Expected number of subjects = {len(list_subjects)}")
                 log.info(f"list_subjects[:5] = {list_subjects[:5]}")
                 log.debug(f"list_subjects = {list_subjects}")
@@ -734,7 +734,7 @@ def resample_files(
         side=_SIDE_DEFAULT,
         out_voxel_size=_VOXEL_SIZE_DEFAULT,
         parallel=False,
-        number_subjects=_ALL_SUBJECTS,
+        nb_subjects=_ALL_SUBJECTS,
         src_filename=_SKELETON_FILENAME,
         output_filename=_RESAMPLED_SKELETON_FILENAME):
 
@@ -809,7 +809,7 @@ def resample_files(
             "input_type: shall be either 'skeleton', 'foldlabel',"
             "extremities or distmap")
 
-    resampler.compute(number_subjects=number_subjects)
+    resampler.compute(nb_subjects=nb_subjects)
 
 
 @exception_handler

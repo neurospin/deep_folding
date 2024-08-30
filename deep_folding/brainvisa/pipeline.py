@@ -77,6 +77,7 @@ def get_sulci_list(
         json_path='/neurospin/dico/data/deep_folding/current/'
                   'sulci_regions_overlap.json'):
     """Gets list of sulci corresponding to a region"""
+
     with open(json_path, 'r') as file:
         brain_regions = json.load(file)
 

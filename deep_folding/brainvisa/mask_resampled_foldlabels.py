@@ -51,20 +51,18 @@ The aim of this script is to mask foldlabels using re-skeletized skeletons.
 """
 
 import argparse
-from asyncio.subprocess import DEVNULL
-from email.mime import base
 import glob
 import os
 import re
 import sys
-import tempfile
 from os.path import join
 from os.path import basename
 from p_tqdm import p_map
 
 import numpy as np
-import pandas as pd
 import warnings
+
+from soma import aims
 
 from deep_folding.brainvisa import exception_handler
 from deep_folding.brainvisa.utils.parallel import define_njobs
@@ -78,14 +76,12 @@ from deep_folding.brainvisa.utils.quality_checks import \
     compare_number_aims_files_with_number_in_source, \
     get_not_processed_files, \
     save_list_to_csv
-from pqdm.processes import pqdm
 from deep_folding.config.logs import set_file_logger
-from soma import aims
 
 # Import constants
 from deep_folding.brainvisa.utils.constants import \
-    _ALL_SUBJECTS, _SKELETON_DIR_DEFAULT,\
-    _RESAMPLED_SKELETON_DIR_DEFAULT,\
+    _ALL_SUBJECTS, \
+    _RESAMPLED_SKELETON_DIR_DEFAULT, \
     _RESAMPLED_FOLDLABEL_DIR_DEFAULT, \
     _SIDE_DEFAULT
 
@@ -100,15 +96,17 @@ _MASKED_FOLDLABEL_FILENAME = "resampled_foldlabel_"
 # Defines logger
 log = set_file_logger(__file__)
 
-_VX_TOLERANCE=30
+_VX_TOLERANCE = 30
 
-def nearest_nonzero_idx(a,x,y,z):
-    tmp = a[x,y,z]
-    a[x,y,z] = 0
-    d,e,f = np.nonzero(a)
-    a[x,y,z] = tmp
+
+def nearest_nonzero_idx(a, x, y, z):
+    tmp = a[x, y, z]
+    a[x, y, z] = 0
+    d, e, f = np.nonzero(a)
+    a[x, y, z] = tmp
     min_idx = ((d - x)**2 + (e - y)**2 + (f - z)**2).argmin()
-    return(d[min_idx], e[min_idx], f[min_idx])
+    return (d[min_idx], e[min_idx], f[min_idx])
+
 
 class FoldLabelMasker:
     """Maskes foldlables using reskeletized skeletons as masks
@@ -122,7 +120,7 @@ class FoldLabelMasker:
 
         Args:
             src_dir: folder containing resampled foldlabels
-            skeleton_dir: folder containing resampled and reskeletized skeletons
+            skeleton_dir: folder containing resampled + reskeletized skeletons
             masked_dir: name of target (output) directory,
             side: either 'L' or 'R', hemisphere side
             parallel: does parallel computation if True
@@ -142,7 +140,7 @@ class FoldLabelMasker:
 
         # subjects are detected as the nifti file names under src_dir
         self.expr = '^.resampled_foldlabel_(.*).nii.gz$'
-        
+
         self.src_filename = f"{self.side}resampled_foldlabel_"
         self.output_filename = f"{self.side}resampled_foldlabel_"
 
@@ -159,39 +157,51 @@ class FoldLabelMasker:
         old_foldlabel_np = old_foldlabel.np
 
         foldlabel = old_foldlabel_np.copy()
-        # first mask skeleton using foldlabel because sometimes 1vx is added during skeletonization...
-        foldlabel[skel_np==0]=0
-        f = foldlabel!=0
-        s = skel_np!=0
-        diff_fs = np.sum(f!=s)
-        assert (diff_fs<=_VX_TOLERANCE), f"subject {subject} has incompatible foldlabel and skeleton. {np.sum(s)} vx in skeleton, {np.sum(f)} vx in foldlabel"
-        if diff_fs!=0:
-            warnings.warn(f"subject {subject} has incompatible foldlabel and skeleton. {np.sum(s)} vx in skeleton, {np.sum(f)} vx in foldlabel")
-            idxs = np.where(f!=s)
+        # first mask skeleton using foldlabel because sometimes
+        # 1vx is added during skeletonization...
+        foldlabel[skel_np == 0] = 0
+        f = foldlabel != 0
+        s = skel_np != 0
+        diff_fs = np.sum(f != s)
+        assert (diff_fs <= _VX_TOLERANCE), \
+            f"subject {subject} has incompatible foldlabel and skeleton. "
+        f"{np.sum(s)} vx in skeleton, {np.sum(f)} vx in foldlabel"
+        if diff_fs != 0:
+            warnings.warn(
+                f"subject {subject} has incompatible foldlabel and skeleton. "
+                f"{np.sum(s)} vx in skeleton, {np.sum(f)} vx in foldlabel")
+            idxs = np.where(f != s)
             print(idxs)
             for i in range(diff_fs):
-                x,y,z = idxs[0][i], idxs[1][i], idxs[2][i]
-                d,e,f = nearest_nonzero_idx(foldlabel[:,:,:,0],x,y,z)
-                foldlabel[x,y,z,0]=foldlabel[d,e,f,0]
-                print(f'foldlabel has a 0 at index {x,y,z}, nearest nonzero at index {d,e,f}, value {foldlabel[d,e,f,0]}')
-        f = foldlabel!=0
-        assert np.sum(f!=s)==0, f'subject {subject} has incompatible foldlabel and skeleton AFTER CORRECTION. {np.sum(s)} vx in skeleton, {np.sum(f)} vx in foldlabel'
+                x, y, z = idxs[0][i], idxs[1][i], idxs[2][i]
+                d, e, f = nearest_nonzero_idx(foldlabel[:, :, :, 0], x, y, z)
+                foldlabel[x, y, z, 0] = foldlabel[d, e, f, 0]
+                print(f"foldlabel has a 0 at index {x,y,z}, "
+                      f"nearest nonzero at index {d,e,f}, "
+                      f"value {foldlabel[d,e,f,0]}")
+        f = foldlabel != 0
+        assert np.sum(f != s) == 0, \
+            f"subject {subject} has incompatible foldlabel and skeleton " \
+            "AFTER CORRECTION. " \
+            f"{np.sum(s)} vx in skeleton, {np.sum(f)} vx in foldlabel"
         vol = aims.Volume(foldlabel)
         vol.header()['voxel_size'] = old_foldlabel.header()['voxel_size']
-        aims.write(vol,
-                   os.path.join(self.masked_dir,f'{self.side}resampled_foldlabel_{subject}.nii.gz'))
+        aims.write(
+            vol,
+            os.path.join(self.masked_dir,
+                         f'{self.side}resampled_foldlabel_{subject}.nii.gz'))
 
-    def compute(self, number_subjects=_ALL_SUBJECTS):
+    def compute(self, nb_subjects=_ALL_SUBJECTS):
         """Loops over nii files
 
         The programm loops over all subjects from the input (source) directory.
 
         Args:
-            number_subjects: integer giving the number of subjects to analyze,
+            nb_subjects: integer giving the number of subjects to analyze,
                 by default it is set to _ALL_SUBJECTS (-1).
         """
 
-        if number_subjects:
+        if nb_subjects:
 
             log.debug(f"src_dir = {self.src_dir}")
             log.debug(f"reg exp = {self.expr}")
@@ -217,10 +227,12 @@ class FoldLabelMasker:
 
             if len(list_all_subjects):
                 log.info(f"First subject to process: {list_all_subjects[0]}")
-                log.info(f"Number of requested subjects: {number_subjects}, {type(number_subjects)}")
-                # Gives the possibility to list only the first number_subjects
+                log.info(
+                    "Number of requested subjects: "
+                    f"{nb_subjects}, {type(nb_subjects)}")
+                # Gives the possibility to list only the first nb_subjects
                 list_subjects = select_subjects_int(
-                    list_all_subjects, number_subjects)
+                    list_all_subjects, nb_subjects)
                 log.info(f"Expected number of subjects = {len(list_subjects)}")
                 log.info(f"list_subjects[:5] = {list_subjects[:5]}")
                 log.debug(f"list_subjects = {list_subjects}")
@@ -279,7 +291,8 @@ def parse_args(argv):
         help='Source directory where input resampled foldlabel files lie. '
              'Default is : ' + _RESAMPLED_FOLDLABEL_DIR_DEFAULT)
     parser.add_argument(
-        "-k", "--skeleton_dir", type=str, default=_RESAMPLED_SKELETON_DIR_DEFAULT,
+        "-k", "--skeleton_dir", type=str,
+        default=_RESAMPLED_SKELETON_DIR_DEFAULT,
         help='Source directory where input resampled skeleton files lie. '
              'Default is : ' + _RESAMPLED_SKELETON_DIR_DEFAULT)
     parser.add_argument(
@@ -315,7 +328,7 @@ def parse_args(argv):
               log_dir=f"{args.output_dir}",
               prog_name=basename(__file__),
               suffix='right' if args.side == 'R' else 'left')
-    
+
     params = vars(args)
 
     params['masked_dir'] = args.output_dir
@@ -330,7 +343,7 @@ def mask_files(
         masked_dir=_RESAMPLED_FOLDLABEL_DIR_DEFAULT,
         side=_SIDE_DEFAULT,
         parallel=False,
-        number_subjects=_ALL_SUBJECTS):
+        nb_subjects=_ALL_SUBJECTS):
 
     masker = FoldLabelMasker(
         src_dir=src_dir,
@@ -340,7 +353,7 @@ def mask_files(
         parallel=parallel
     )
 
-    masker.compute(number_subjects=number_subjects)
+    masker.compute(nb_subjects=nb_subjects)
 
 
 @exception_handler
@@ -360,7 +373,7 @@ def main(argv):
         skeleton_dir=params['skeleton_dir'],
         masked_dir=params['masked_dir'],
         side=params['side'],
-        number_subjects=params['nb_subjects'],
+        nb_subjects=params['nb_subjects'],
         parallel=params['parallel']
     )
 

@@ -87,12 +87,12 @@ from soma import aims
 
 # Import constants
 from deep_folding.brainvisa.utils.constants import \
-    _ALL_SUBJECTS, _RESAMPLED_SKELETON_DIR_DEFAULT,\
-    _BBOX_DIR_DEFAULT, _MASK_DIR_DEFAULT,\
-    _CROP_DIR_DEFAULT,\
-    _SIDE_DEFAULT, _CROPPING_TYPE_DEFAULT,\
-    _COMBINE_TYPE_DEFAULT, _INPUT_TYPE_DEFAULT,\
-    _SULCUS_DEFAULT, _NO_MASK_DEFAULT,\
+    _ALL_SUBJECTS, _RESAMPLED_SKELETON_DIR_DEFAULT, \
+    _BBOX_DIR_DEFAULT, _MASK_DIR_DEFAULT, \
+    _CROP_DIR_DEFAULT, \
+    _SIDE_DEFAULT, _CROPPING_TYPE_DEFAULT, \
+    _COMBINE_TYPE_DEFAULT, _INPUT_TYPE_DEFAULT, \
+    _SULCUS_DEFAULT, _NO_MASK_DEFAULT, \
     _DILATION_DEFAULT, _THRESHOLD_DEFAULT
 
 # Defines logger
@@ -166,21 +166,24 @@ def quality_checks(crop_dir, side):
     # checks if same voxel position
     assert (s.shape == f.shape), (
         f"Skeleton and foldlabel of different shapes: {s.shape} != {f.shape}")
-    assert (f[s==0].sum() == 0), (
+    assert (f[s == 0].sum() == 0), (
         f"Foldlabel and skeleton arrays with different non-zero positions: "
-        f"{(f[s==0]!=0).sum()} different non-zero positions")
-    assert (s[f==0].sum() == 0), (
+        f"{(f[s == 0] != 0).sum()} different non-zero positions")
+    assert (s[f == 0].sum() == 0), (
         f"Foldlabel and skeleton arrays with different non-zero positions: "
-        f"{(s[f==0]!=0).sum()} different non-zero positions")
-    
+        f"{(s[f == 0] != 0).sum()} different non-zero positions")
+
     # Checks if subjects are equal between distbottom and skeleton
     dff = pd.read_csv(f"{crop_dir}/{side}label_subject.csv")
     dfs = pd.read_csv(f"{crop_dir}/{side}skeleton_subject.csv")
-    assert (dff.equals(dfs)), "List of subjects for foldlabel and skeleton are not equal"
+    assert (dff.equals(dfs)), \
+        "List of subjects for foldlabel and skeleton are not equal"
 
     # Checks if numpy arrays and csvs are consistent
-    assert (s.shape[0] == len(dfs)), "Number of skeleton subjects differs between numpy array and csv"
-    assert (f.shape[0] == len(dff)), "Number of foldlabel subjects differs between numpy array and csv"
+    assert (s.shape[0] == len(dfs)), \
+        "Number of skeleton subjects differs between numpy array and csv"
+    assert (f.shape[0] == len(dff)), \
+        "Number of foldlabel subjects differs between numpy array and csv"
 
 
 class CropGenerator:
@@ -274,15 +277,15 @@ class CropGenerator:
         else:
             raise FileNotFoundError(f"{file_src} not found")
 
-    def crop_files(self, number_subjects=_ALL_SUBJECTS):
+    def crop_files(self, nb_subjects=_ALL_SUBJECTS):
         """Crop nii files
         The programm loops over all subjects from the input (source) directory.
         Args:
-            number_subjects: integer giving the number of subjects to analyze,
+            nb_subjects: integer giving the number of subjects to analyze,
                 by default it is set to _ALL_SUBJECTS (-1).
         """
 
-        if number_subjects:
+        if nb_subjects:
 
             if os.path.isdir(self.src_dir):
                 files = glob.glob(f"{self.src_dir}/*.nii.gz")
@@ -310,9 +313,9 @@ class CropGenerator:
 
             if len(list_all_subjects):
                 # Gives the possibility to list
-                # only the first number_subjects
+                # only the first nb_subjects
                 list_subjects = select_subjects_int(list_all_subjects,
-                                                    number_subjects)
+                                                    nb_subjects)
 
                 log.info(f"Expected number of subjects = {len(list_subjects)}")
                 log.info(f"list_subjects[:5] = {list_subjects[:5]}")
@@ -321,14 +324,13 @@ class CropGenerator:
                 # Creates target and cropped directory
                 create_folder(self.crop_dir)
                 create_folder(self.cropped_samples_dir)
-                
+
                 # Crops mask according to mask bounding box, for debugging
                 mask_cropped = aims.VolumeView(self.mask,
                                                self.bbmin,
                                                self.bbmax - self.bbmin)
                 aims.write(mask_cropped,
-                        f"{self.crop_dir}/{self.side}mask_cropped.nii.gz")
-                
+                           f"{self.crop_dir}/{self.side}mask_cropped.nii.gz")
 
                 # Writes number of subjects and directory names to json file
                 dict_to_add = {
@@ -381,13 +383,13 @@ class CropGenerator:
             save_list_to_csv(not_processed_files,
                              f"{self.crop_dir}/not_processed_files.csv")
 
-    def compute_bounding_box_or_mask(self, number_subjects):
+    def compute_bounding_box_or_mask(self, nb_subjects):
         """Computes bounding box or mask
         Args:
-            number_subjects: integer giving the number of subjects to analyze,
+            nb_subjects: integer giving the number of subjects to analyze,
                 by default it is set to _ALL_SUBJECTS (-1)."""
 
-        if number_subjects:
+        if nb_subjects:
             if self.cropping_type == 'bbox':
                 self.bbmin, self.bbmax = \
                     compute_max_box(sulci_list=self.list_sulci,
@@ -431,24 +433,24 @@ class CropGenerator:
                     "cropping_type must be either "
                     "\'bbox\' or \'mask\' or \'mask_intersect\'")
 
-    def compute(self, number_subjects=_ALL_SUBJECTS):
+    def compute(self, nb_subjects=_ALL_SUBJECTS):
         """Main API to create numpy files
         The programm loops over all subjects from the input (source) directory.
         Args:
-            number_subjects: integer giving the number of subjects to analyze,
+            nb_subjects: integer giving the number of subjects to analyze,
                 by default it is set to _ALL_SUBJECTS (-1).
         """
 
         self.json.write_general_info()
 
         # Computes bounding box or mask
-        self.compute_bounding_box_or_mask(number_subjects=number_subjects)
+        self.compute_bounding_box_or_mask(nb_subjects=nb_subjects)
 
         # Generate cropped files
-        self.crop_files(number_subjects=number_subjects)
+        self.crop_files(nb_subjects=nb_subjects)
 
         # Creation of .npy file containing all subjects
-        if number_subjects:
+        if nb_subjects:
             list_sample_id, list_sample_file = \
                 save_to_numpy(cropped_dir=self.cropped_samples_dir,
                               tgt_dir=self.crop_dir,
@@ -756,7 +758,8 @@ def parse_args(argv):
         args,
         log_dir=f"{args.output_dir}",
         prog_name=basename(__file__),
-        suffix=f"right_{args.input_type}" if args.side == 'R' else f"right_{args.input_type}")
+        suffix=f"right_{args.input_type}" if args.side == 'R' else f"left_{args.input_type}"
+    )
 
     params = vars(args)
 
@@ -765,6 +768,12 @@ def parse_args(argv):
 
     # Checks if nb_subjects is either the string "all" or a positive integer
     params['nb_subjects'] = get_number_subjects(args.nb_subjects)
+
+    # Removes renamed params
+    # So that we can use params dictionary directly as function arguments
+    params.pop('output_dir')
+    params.pop('sulcus')
+    params.pop('verbose')
 
     return params
 
@@ -777,62 +786,31 @@ def generate_crops(
         mask_dir=_MASK_DIR_DEFAULT,
         side=_SIDE_DEFAULT,
         list_sulci=_SULCUS_DEFAULT,
-        number_subjects=_ALL_SUBJECTS,
+        nb_subjects=_ALL_SUBJECTS,
         cropping_type=_CROPPING_TYPE_DEFAULT,
         combine_type=_COMBINE_TYPE_DEFAULT,
         parallel=False,
         no_mask=True,
         threshold=_THRESHOLD_DEFAULT,
         dilation=_DILATION_DEFAULT
-        ):
+):
+
+    # Gets function arguments and values
+    params = locals()
+    params.pop('nb_subjects')
+    params.pop('input_type')
 
     if input_type == "skeleton":
-        crop = SkeletonCropGenerator(
-            src_dir=src_dir,
-            crop_dir=crop_dir,
-            bbox_dir=bbox_dir,
-            mask_dir=mask_dir,
-            side=side,
-            list_sulci=list_sulci,
-            cropping_type=cropping_type,
-            combine_type=combine_type,
-            parallel=parallel,
-            no_mask=no_mask,
-            threshold=threshold,
-            dilation=dilation)
+        crop = SkeletonCropGenerator(**params)
     elif input_type == "foldlabel":
-        crop = FoldLabelCropGenerator(
-            src_dir=src_dir,
-            crop_dir=crop_dir,
-            bbox_dir=bbox_dir,
-            mask_dir=mask_dir,
-            side=side,
-            list_sulci=list_sulci,
-            cropping_type=cropping_type,
-            combine_type=combine_type,
-            parallel=parallel,
-            no_mask=no_mask,
-            threshold=threshold,
-            dilation=dilation)
-        
+        crop = FoldLabelCropGenerator(**params)
     elif input_type == "distmap":
-        crop = DistMapCropGenerator(
-            src_dir=src_dir,
-            crop_dir=crop_dir,
-            bbox_dir=bbox_dir,
-            mask_dir=mask_dir,
-            side=side,
-            list_sulci=list_sulci,
-            cropping_type=cropping_type,
-            combine_type=combine_type,
-            parallel=parallel,
-            no_mask=no_mask,
-            threshold=threshold,
-            dilation=dilation)
+        crop = DistMapCropGenerator(**params)
     else:
         raise ValueError(
             "input_type: shall be either 'skeleton', 'foldlabel' or 'distmap'")
-    crop.compute(number_subjects=number_subjects)
+
+    crop.compute(nb_subjects=nb_subjects)
 
     if input_type == "foldlabel":
         quality_checks(crop_dir, side)
@@ -849,21 +827,7 @@ def main(argv):
     params = parse_args(argv)
 
     # Actual API
-    generate_crops(
-        src_dir=params['src_dir'],
-        input_type=params['input_type'],
-        crop_dir=params['crop_dir'],
-        bbox_dir=params['bbox_dir'],
-        mask_dir=params['mask_dir'],
-        side=params['side'],
-        list_sulci=params['list_sulci'],
-        cropping_type=params['cropping_type'],
-        combine_type=params['combine_type'],
-        parallel=params['parallel'],
-        number_subjects=params['nb_subjects'],
-        no_mask=params['no_mask'],
-        threshold=params['threshold'],
-        dilation=params['dilation'])
+    generate_crops(**params)
 
 
 ######################################################################
