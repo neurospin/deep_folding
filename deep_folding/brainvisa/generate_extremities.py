@@ -154,13 +154,11 @@ def parse_args(argv):
     params['src_dir'] = abspath(args.src_dir)
     params['extremities_dir'] = abspath(args.output_dir)
     # Checks if nb_subjects is either the string "all" or a positive integer
-    params['number_subjects'] = get_number_subjects(args.nb_subjects)
+    params['nb_subjects'] = get_number_subjects(args.nb_subjects)
 
     # Removes renamed parameters
-    # So that we can use params dictionary directly as function arugments
-    params.pop('src_dir')
+    # So that we can use params dictionary directly as function arguments
     params.pop('output_dir')
-    params.pop('nb_subjects')
     params.pop('verbose')
 
     return params
@@ -249,7 +247,7 @@ class GraphConvert2Extremity:
             if not self.bids:
                 break
 
-    def compute(self, number_subjects):
+    def compute(self, nb_subjects):
         """Loops over subjects and converts graphs into skeletons.
         """
         # Gets list of subjects
@@ -261,7 +259,7 @@ class GraphConvert2Extremity:
         list_subjects = \
             get_not_processed_subjects(list_subjects, self.extremities_dir)
 
-        list_subjects = select_subjects_int(list_subjects, number_subjects)
+        list_subjects = select_subjects_int(list_subjects, nb_subjects)
 
         log.info(f"Expected number of subjects = {len(list_subjects)}")
         log.info(f"list_subjects[:5] = {list_subjects[:5]}")
@@ -301,20 +299,20 @@ def generate_extremities(
         side=_SIDE_DEFAULT,
         bids=False,
         parallel=False,
-        number_subjects=_ALL_SUBJECTS,
+        nb_subjects=_ALL_SUBJECTS,
         qc_path=_QC_PATH_DEFAULT):
     """Generates extremities (inflated lmateral edges) from graphs"""
 
     # Gets function arguments and values
     parameters = locals()
-    number_subjects = parameters.pop('number_subjects')
+    nb_subjects = parameters.pop('nb_subjects')
 
     # Initialization with same arguments and values as function
     conversion = GraphConvert2Extremity(
         **parameters
     )
     # Actual generation of skeletons from graphs
-    conversion.compute(number_subjects=number_subjects)
+    conversion.compute(nb_subjects=nb_subjects)
 
 
 @exception_handler

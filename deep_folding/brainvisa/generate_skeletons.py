@@ -153,6 +153,12 @@ def parse_args(argv):
     # Checks if nb_subjects is either the string "all" or a positive integer
     params['nb_subjects'] = get_number_subjects(args.nb_subjects)
 
+    # Removes renamed parameters
+    # So that we can use params dictionary directly as function arugments
+    params.pop('output_dir')
+    params.pop('nb_subjects')
+    params.pop('verbose')
+
     return params
 
 
@@ -267,16 +273,13 @@ def generate_skeletons(
         qc_path=_QC_PATH_DEFAULT):
     """Generates skeletons from graphs"""
 
-    # Initialization
+    # Gets function arguments and values
+    parameters = locals()
+    number_subjects = parameters.pop('number_subjects')
+
+    # Initialization with same arguments and values as function
     conversion = GraphConvert2Skeleton(
-        src_dir=src_dir,
-        skeleton_dir=skeleton_dir,
-        path_to_graph=path_to_graph,
-        side=side,
-        bids=bids,
-        junction=junction,
-        parallel=parallel,
-        qc_path=qc_path
+        **parameters
     )
     # Actual generation of skeletons from graphs
     conversion.compute(number_subjects=number_subjects)

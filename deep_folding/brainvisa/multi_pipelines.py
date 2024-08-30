@@ -29,11 +29,11 @@ datasets = ["candi", "cnp", "bsnip1", "schizconnect-vip-prague"]
 datasets = ["PreCatatoes"]
 """
 
-path_dataset_root = "/neurospin/dico/data/deep_folding/current/datasets"
+path_dataset_root = "/neurospin/dico/data/deep_folding/test/datasets"
 datasets = ["hcp"]
-regions = ["F.C.L.p.-subsc.-F.C.L.a.-INSULA."]
+regions = ["S.C.-sylv."]
 sides = ["L"]
-input_types = ["skeleton", "foldlabel", "extremities"]
+input_types = ["skeleton", "foldlabel"]
 
 
 for region in regions:

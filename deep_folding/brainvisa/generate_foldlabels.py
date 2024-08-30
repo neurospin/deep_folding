@@ -159,6 +159,12 @@ def parse_args(argv):
     params['parallel'] = args.parallel
     # Checks if nb_subjects is either the string "all" or a positive integer
     params['nb_subjects'] = get_number_subjects(args.nb_subjects)
+    
+    # Removes renamed parameters
+    # So that we can use params dictionary directly as function arguments
+    params.pop('output_dir')
+    params.pop('nb_subjects')
+    params.pop('verbose')
 
     return params
 

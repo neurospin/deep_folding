@@ -530,7 +530,7 @@ class FoldLabelResampler(FileResampler):
         self.resampled_dir = self.resampled_dir + "_before_masking"
         self.resampled_file = join(
             self.resampled_dir,
-            f'%(side)s' + output_filename + '%(subject)s.nii.gz')
+            '%(side)s' + output_filename + '%(subject)s.nii.gz')
 
         # subjects are detected as the nifti file names under src_dir
         self.expr = '^.' + src_filename + '(.*).nii.gz$'

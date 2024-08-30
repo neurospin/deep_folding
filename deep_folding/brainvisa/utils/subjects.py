@@ -82,6 +82,7 @@ def select_subjects_int(orig_list: list, nb_subjects: int) -> list:
     Returns:
         sublist: list of strings, being the select number of subjects
     """
+    orig_list.sort()
     sublist = (
         orig_list
         if nb_subjects == _ALL_SUBJECTS
