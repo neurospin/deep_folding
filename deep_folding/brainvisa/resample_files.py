@@ -87,8 +87,10 @@ from deep_folding.brainvisa.utils.constants import \
 
 _SKELETON_FILENAME = "skeleton_generated_"
 _FOLDLABEL_FILENAME = "foldlabel_"
+_EXTREMITIES_FILENAME = "extremities_"
 _RESAMPLED_SKELETON_FILENAME = "resampled_skeleton_"
 _RESAMPLED_FOLDLABEL_FILENAME = "resampled_foldlabel_"
+_RESAMPLED_EXTREMITIES_FILENAME = "resampled_extremities_"
 
 
 # Defines logger
@@ -100,6 +102,10 @@ def mask_foldlabel(resampled,
     """
     if do_skel=True,
     resampled foldlabel is masked using skeleton.
+
+    Usually not used in this file
+     as there is no guarantee that skeletized skeleton
+     has been generated before
     """
 
     arr_resampled = resampled.np
@@ -157,10 +163,7 @@ def resample_one_skeleton(input_image,
 
 def resample_one_foldlabel(input_image,
                            out_voxel_size,
-                           transformation,
-                           do_skel=False,
-                           immortals=None,
-                           redo_classif=False):
+                           transformation):
     """Resamples one foldlabel file
 
     Args
@@ -188,6 +191,33 @@ def resample_one_foldlabel(input_image,
     #    return resampled_masked
     # else:
     #    return resampled
+    return resampled
+
+
+def resample_one_extremities(input_image,
+                             out_voxel_size,
+                             transformation):
+    """Resamples one extremities file
+
+    Args
+    ----
+        input_image: either string or aims.Volume
+            either path to extremities or extremities aims Volume
+        out_voxel_size: tuple
+            Output voxel size (default: None, no resampling)
+        transformation: string or aims.Volume
+            either path to transformation file or transformation itself
+
+    Returns:
+        resampled: aims.Volume
+            Transformed or resampled volume
+    """
+
+    # Normalization and resampling of foldlabel images
+    resampled = resample(input_image=input_image,
+                         output_vs=out_voxel_size,
+                         transformation=transformation)
+
     return resampled
 
 
@@ -541,8 +571,7 @@ class FoldLabelResampler(FileResampler):
                              resampled_file=None):
         resampled = resample_one_foldlabel(input_image=src_file,
                                            out_voxel_size=out_voxel_size,
-                                           transformation=transform_file,
-                                           do_skel=do_skel)
+                                           transformation=transform_file)
         aims.write(resampled, resampled_file)
 
 
@@ -729,6 +758,24 @@ def resample_files(
             immortals=[30, 50, 80, 35, 110, 120])
     elif input_type == "foldlabel":
         src_filename = (_FOLDLABEL_FILENAME
+                        if src_filename is None
+                        else src_filename)
+        output_filename = (_RESAMPLED_FOLDLABEL_FILENAME
+                           if output_filename is None
+                           else output_filename)
+        resampler = FoldLabelResampler(
+            src_dir=src_dir,
+            resampled_dir=resampled_dir,
+            transform_dir=transform_dir,
+            side=side,
+            out_voxel_size=out_voxel_size,
+            parallel=parallel,
+            src_filename=src_filename,
+            output_filename=output_filename,
+            do_skel=False,
+            immortals=[])
+    elif input_type == "extremities":
+        src_filename = (_EXTREMITIES_FILENAME
                         if src_filename is None
                         else src_filename)
         output_filename = (_RESAMPLED_FOLDLABEL_FILENAME

@@ -2,8 +2,6 @@
     Resample a volume that contains discret values
 """
 import os
-import sys
-from contextlib import contextmanager
 import logging
 from time import time
 from typing import Union
@@ -45,7 +43,8 @@ def resample(input_image: Union[str, aims.Volume],
             List of unique values ordered by ascendent priority
             without background. If not given, priority is set by ascending
             values. For Morphologist or deep_folding skeletons (see
-            :func:`~deep_folding.brainvisa.utils.skeleton.generate_skeleton_thin_junction`) a good values list is:
+            :func:`~deep_folding.brainvisa.utils.skeleton.generate_skeleton_thin_junction`)
+            a good values list is:
             [100, 60, 10, 20, 40, 50, 70, 80, 110, 120, 30, 35].
         do_skel:
             do skeletonization after resampling
@@ -199,7 +198,6 @@ def resample(input_image: Union[str, aims.Volume],
         toc = time()
         cbk_vol = aims.RawConverter_BucketMap_VOID_rc_ptr_Volume_S16(True)
         cbk_vol.printToVolume(bck2, resampled)
-        t_tovol = time() - toc
 
         if do_skel:
             # skeletonization using Vip command
@@ -363,13 +361,16 @@ def resample(input_image: Union[str, aims.Volume],
             # Use a for loop instead:
             for p in bck2[0].keys():
                 c = p.list()
-                if c[0] < new_dim[0] and c[1] < new_dim[1] and c[2] < new_dim[2]:
+                if (c[0] < new_dim[0] and
+                    c[1] < new_dim[1] and
+                        c[2] < new_dim[2]):
                     resampled[c[0], c[1], c[2]] = values[i]
 
             log.debug("Time for value {} ({} voxels): {}s".format(
                 v, np.where(vol_dt == v)[0].shape[0], time() - tic))
             log.debug("\t{}s to create the bucket\n\t{}s to resample bucket\n"
-                      "\t{}s to assign values".format(t_bck, t_rs, time() - toc))
+                      "\t{}s to assign values".format(
+                          t_bck, t_rs, time() - toc))
             tic = time()
 
     return resampled
