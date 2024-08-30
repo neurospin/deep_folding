@@ -156,7 +156,7 @@ def parse_args(argv):
     # Checks if nb_subjects is either the string "all" or a positive integer
     params['nb_subjects'] = get_number_subjects(args.nb_subjects)
 
-    # Removes renamed parameters
+    # Removes renamed params
     # So that we can use params dictionary directly as function arguments
     params.pop('output_dir')
     params.pop('verbose')
@@ -304,13 +304,11 @@ def generate_extremities(
     """Generates extremities (inflated lmateral edges) from graphs"""
 
     # Gets function arguments and values
-    parameters = locals()
-    nb_subjects = parameters.pop('nb_subjects')
+    params = locals()
+    nb_subjects = params.pop('nb_subjects')
 
     # Initialization with same arguments and values as function
-    conversion = GraphConvert2Extremity(
-        **parameters
-    )
+    conversion = GraphConvert2Extremity(**params)
     # Actual generation of skeletons from graphs
     conversion.compute(nb_subjects=nb_subjects)
 

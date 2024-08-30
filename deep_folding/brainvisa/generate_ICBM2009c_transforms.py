@@ -111,7 +111,7 @@ def parse_args(argv):
         help='Relative path to graph. '
              'Default is ' + _PATH_TO_GRAPH_DEFAULT)
     parser.add_argument(
-        "-q", "--quality_checks", type=str,
+        "-q", "--qc_path", type=str,
         default=_QC_PATH_DEFAULT,
         help='Path to quality check .csv. '
              'Default is ' + _QC_PATH_DEFAULT)
@@ -147,6 +147,11 @@ def parse_args(argv):
     params['transform_dir'] = abspath(args.output_dir)
     # Checks if nb_subjects is either the string "all" or a positive integer
     params['nb_subjects'] = get_number_subjects(args.nb_subjects)
+
+    # Removes renamed params
+    # So that we can use params dictionary directly as function arguments
+    params.pop('output_dir')
+    params.pop('verbose')
 
     return params
 
@@ -208,7 +213,7 @@ class GraphGenerateTransform:
         transform_file += ".trm"
         return transform_file
 
-    def compute(self, number_subjects):
+    def compute(self, nb_subjects):
         """Loops over subjects to generate transforms to ICBM2009c from graphs.
         """
         # Gets list fo subjects
@@ -224,7 +229,7 @@ class GraphGenerateTransform:
             get_not_processed_subjects_transform(list_subjects,
                                                  self.transform_dir,
                                                  prefix="ICBM2009c_")
-        list_subjects = select_subjects_int(list_subjects, number_subjects)
+        list_subjects = select_subjects_int(list_subjects, nb_subjects)
 
         log.info(f"Expected number of subjects = {len(list_subjects)}")
         log.info(f"list_subjects[:5] = {list_subjects[:5]}")
@@ -263,7 +268,7 @@ def generate_ICBM2009c_transforms(
         side=_SIDE_DEFAULT,
         bids=False,
         parallel=False,
-        number_subjects=_ALL_SUBJECTS,
+        nb_subjects=_ALL_SUBJECTS,
         qc_path=_QC_PATH_DEFAULT):
     """Generates skeletons from graphs"""
 
@@ -278,7 +283,7 @@ def generate_ICBM2009c_transforms(
         qc_path=qc_path
     )
     # Actual generation of skeletons from graphs
-    transform.compute(number_subjects=number_subjects)
+    transform.compute(nb_subjects=nb_subjects)
 
 
 @exception_handler
@@ -299,7 +304,7 @@ def main(argv):
         side=params['side'],
         bids=params['bids'],
         parallel=params['parallel'],
-        number_subjects=params['nb_subjects'],
+        nb_subjects=params['nb_subjects'],
         qc_path=params['quality_checks'])
 
 

@@ -297,7 +297,7 @@ def main(argv):
                 'sulcus': sulcus,
                 'new_sulcus': params['new_sulcus'],
                 'side': params['side'],
-                'number_subjects': params['nb_subjects_mask'],
+                'nb_subjects': params['nb_subjects_mask'],
                 'out_voxel_size': params['out_voxel_size']}
 
             # write the logs as if the command line compute_mask.py was
@@ -347,7 +347,7 @@ def main(argv):
                 'junction': params['junction'],
                 'bids': params['bids'],
                 'parallel': params['parallel'],
-                'number_subjects': params['nb_subjects'],
+                'nb_subjects': params['nb_subjects'],
                 'qc_path': params['skel_qc_path']}
 
             setup_log(
@@ -383,7 +383,7 @@ def main(argv):
                 'side': params['side'],
                 'parallel': params['parallel'],
                 'resampled_skel': params['resampled_skel'],
-                'number_subjects': params['nb_subjects']}
+                'nb_subjects': params['nb_subjects']}
 
             setup_log(
                 Namespace(**{'verbose': log.level,
@@ -421,7 +421,7 @@ def main(argv):
                 'side': params['side'],
                 'bids': params['bids'],
                 'parallel': params['parallel'],
-                'number_subjects': params['nb_subjects'],
+                'nb_subjects': params['nb_subjects'],
                 'qc_path': params['skel_qc_path']}
 
             setup_log(
@@ -458,7 +458,7 @@ def main(argv):
                 'junction': params['junction'],
                 'bids': params['bids'],
                 'parallel': params['parallel'],
-                'number_subjects': params['nb_subjects'],
+                'nb_subjects': params['nb_subjects'],
                 'qc_path': params['skel_qc_path']}
 
             setup_log(Namespace(**{'verbose': log.level,
@@ -496,7 +496,7 @@ def main(argv):
                 'side': params['side'],
                 'bids': params['bids'],
                 'parallel': params['parallel'],
-                'number_subjects': params['nb_subjects'],
+                'nb_subjects': params['nb_subjects'],
                 'qc_path': params['skel_qc_path']}
 
             setup_log(
@@ -547,7 +547,7 @@ def main(argv):
                                    'resampled_dir': resampled_dir,
                                    'transform_dir': params['transform_dir'],
                                    'side': params['side'],
-                                   'number_subjects': params['nb_subjects'],
+                                   'nb_subjects': params['nb_subjects'],
                                    'out_voxel_size': params['out_voxel_size'],
                                    'parallel': params['parallel'],
                                    'src_filename': src_filename,
@@ -587,7 +587,7 @@ def main(argv):
                                      'skeleton_dir': skeleton_dir,
                                      'masked_dir': masked_dir,
                                      'side': params['side'],
-                                     'number_subjects': params['nb_subjects'],
+                                     'nb_subjects': params['nb_subjects'],
                                      'parallel': params['parallel']}
 
                 setup_log(Namespace(**{'verbose': log.level,
@@ -648,7 +648,7 @@ def main(argv):
             'cropping_type': params['cropping_type'],
             'combine_type': params['combine_type'],
             'parallel': params['parallel'],
-            'number_subjects': params['nb_subjects'],
+            'nb_subjects': params['nb_subjects'],
             'no_mask': params['no_mask'],
             'threshold': params['threshold'],
             'dilation': params['dilation']}
@@ -691,7 +691,7 @@ def main(argv):
                 'crop_dir': path_to_crops,
                 'side': params['side'],
                 'parallel': params['parallel'],
-                'number_subjects': params['nb_subjects']}
+                'nb_subjects': params['nb_subjects']}
 
             setup_log(
                 Namespace(**{'verbose': log.level,

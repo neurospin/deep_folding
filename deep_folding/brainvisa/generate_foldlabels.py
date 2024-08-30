@@ -115,7 +115,7 @@ def parse_args(argv):
         help='Relative path to graph. '
              'Default is ' + _PATH_TO_GRAPH_DEFAULT)
     parser.add_argument(
-        "-q", "--quality_checks", type=str,
+        "-q", "--qc_path", type=str,
         default=_QC_PATH_DEFAULT,
         help='Path to quality check .csv. '
              'Default is ' + _QC_PATH_DEFAULT)
@@ -159,11 +159,10 @@ def parse_args(argv):
     params['parallel'] = args.parallel
     # Checks if nb_subjects is either the string "all" or a positive integer
     params['nb_subjects'] = get_number_subjects(args.nb_subjects)
-    
-    # Removes renamed parameters
+
+    # Removes renamed params
     # So that we can use params dictionary directly as function arguments
     params.pop('output_dir')
-    params.pop('nb_subjects')
     params.pop('verbose')
 
     return params
@@ -227,7 +226,7 @@ class GraphConvert2FoldLabel:
             if not self.bids:
                 break
 
-    def compute(self, number_subjects):
+    def compute(self, nb_subjects):
         """Loops over subjects and converts graphs into skeletons.
         """
         # Gets list of subject names
@@ -240,7 +239,7 @@ class GraphConvert2FoldLabel:
         list_subjects = select_good_qc(list_subjects, self.qc_path)
         list_subjects = get_not_processed_subjects(
             list_subjects, self.foldlabel_dir, "foldlabel_")
-        list_subjects = select_subjects_int(list_subjects, number_subjects)
+        list_subjects = select_subjects_int(list_subjects, nb_subjects)
 
         # Performs computation on all selected subjects
         # either serially or in parallel
@@ -277,23 +276,19 @@ def generate_foldlabels(
         junction=_JUNCTION_DEFAULT,
         bids=False,
         parallel=False,
-        number_subjects=_ALL_SUBJECTS,
+        nb_subjects=_ALL_SUBJECTS,
         qc_path=_QC_PATH_DEFAULT):
     """Generates foldlabels from graphs"""
 
+    # Gets function arguments and values
+    params = locals()
+    nb_subjects = params.pop('nb_subjects')
+
     # Initialization
-    conversion = GraphConvert2FoldLabel(
-        src_dir=src_dir,
-        foldlabel_dir=foldlabel_dir,
-        path_to_graph=path_to_graph,
-        side=side,
-        bids=bids,
-        junction=junction,
-        parallel=parallel,
-        qc_path=qc_path
-    )
-    # Actual generation of skeletons from graphs
-    conversion.compute(number_subjects=number_subjects)
+    conversion = GraphConvert2FoldLabel(**params)
+
+    # Actual generation of foldlabels from graphs
+    conversion.compute(nb_subjects=nb_subjects)
 
 
 @exception_handler
@@ -315,7 +310,7 @@ def main(argv):
         junction=params['junction'],
         bids=params['bids'],
         parallel=params['parallel'],
-        number_subjects=params['nb_subjects'],
+        nb_subjects=params['nb_subjects'],
         qc_path=params['quality_checks'])
 
 

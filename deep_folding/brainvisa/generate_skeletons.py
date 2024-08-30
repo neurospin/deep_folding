@@ -112,7 +112,7 @@ def parse_args(argv):
         help='Relative path to graph. '
              'Default is ' + _PATH_TO_GRAPH_DEFAULT)
     parser.add_argument(
-        "-q", "--quality_checks", type=str,
+        "-q", "--qc_path", type=str,
         default=_QC_PATH_DEFAULT,
         help='Path to quality check .csv. '
              'Default is ' + _QC_PATH_DEFAULT)
@@ -153,10 +153,9 @@ def parse_args(argv):
     # Checks if nb_subjects is either the string "all" or a positive integer
     params['nb_subjects'] = get_number_subjects(args.nb_subjects)
 
-    # Removes renamed parameters
+    # Removes renamed params
     # So that we can use params dictionary directly as function arugments
     params.pop('output_dir')
-    params.pop('nb_subjects')
     params.pop('verbose')
 
     return params
@@ -217,7 +216,7 @@ class GraphConvert2Skeleton:
             if not self.bids:
                 break
 
-    def compute(self, number_subjects):
+    def compute(self, nb_subjects):
         """Loops over subjects and converts graphs into skeletons.
         """
         # Gets list of subjects
@@ -229,7 +228,7 @@ class GraphConvert2Skeleton:
         list_subjects = \
             get_not_processed_subjects(list_subjects, self.skeleton_dir)
 
-        list_subjects = select_subjects_int(list_subjects, number_subjects)
+        list_subjects = select_subjects_int(list_subjects, nb_subjects)
 
         log.info(f"Expected number of subjects = {len(list_subjects)}")
         log.info(f"list_subjects[:5] = {list_subjects[:5]}")
@@ -269,20 +268,20 @@ def generate_skeletons(
         junction=_JUNCTION_DEFAULT,
         bids=False,
         parallel=False,
-        number_subjects=_ALL_SUBJECTS,
+        nb_subjects=_ALL_SUBJECTS,
         qc_path=_QC_PATH_DEFAULT):
     """Generates skeletons from graphs"""
 
     # Gets function arguments and values
-    parameters = locals()
-    number_subjects = parameters.pop('number_subjects')
+    params = locals()
+    nb_subjects = params.pop('nb_subjects')
 
     # Initialization with same arguments and values as function
     conversion = GraphConvert2Skeleton(
-        **parameters
+        **params
     )
     # Actual generation of skeletons from graphs
-    conversion.compute(number_subjects=number_subjects)
+    conversion.compute(nb_subjects=nb_subjects)
 
 
 @exception_handler
@@ -296,16 +295,7 @@ def main(argv):
     params = parse_args(argv)
 
     # Actual API
-    generate_skeletons(
-        src_dir=params['src_dir'],
-        skeleton_dir=params['skeleton_dir'],
-        path_to_graph=params['path_to_graph'],
-        side=params['side'],
-        junction=params['junction'],
-        bids=params['bids'],
-        parallel=params['parallel'],
-        number_subjects=params['nb_subjects'],
-        qc_path=params['quality_checks'])
+    generate_skeletons(**params)
 
 
 if __name__ == '__main__':

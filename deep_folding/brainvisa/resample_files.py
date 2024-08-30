@@ -60,8 +60,6 @@ from os.path import join
 from os.path import basename
 from p_tqdm import p_map
 
-import numpy as np
-
 from deep_folding.brainvisa import exception_handler
 from deep_folding.brainvisa.utils.parallel import define_njobs
 from deep_folding.brainvisa.utils.resample import resample
@@ -76,27 +74,26 @@ from deep_folding.brainvisa.utils.quality_checks import \
     compare_number_aims_files_with_number_in_source, \
     get_not_processed_files, \
     save_list_to_csv
-from pqdm.processes import pqdm
 from deep_folding.config.logs import set_file_logger
 from soma import aims
 
 # Import constants
 from deep_folding.brainvisa.utils.constants import \
-    _ALL_SUBJECTS, _INPUT_TYPE_DEFAULT, _SKELETON_DIR_DEFAULT,\
-    _TRANSFORM_DIR_DEFAULT, _RESAMPLED_SKELETON_DIR_DEFAULT,\
-    _RESAMPLED_FOLDLABEL_DIR_DEFAULT, \
-    _SIDE_DEFAULT, _VOXEL_SIZE_DEFAULT
+    _ALL_SUBJECTS, _INPUT_TYPE_DEFAULT, \
+    _TRANSFORM_DIR_DEFAULT, \
+    _SIDE_DEFAULT, _VOXEL_SIZE_DEFAULT, \
+    _SKELETON_DIR_DEFAULT, \
+    _RESAMPLED_SKELETON_DIR_DEFAULT
 
 _SKELETON_FILENAME = "skeleton_generated_"
 _FOLDLABEL_FILENAME = "foldlabel_"
-_DISTMAP_FILENAME = "distmap_generated_"
 _RESAMPLED_SKELETON_FILENAME = "resampled_skeleton_"
 _RESAMPLED_FOLDLABEL_FILENAME = "resampled_foldlabel_"
-_RESAMPLED_DISTMAP_FILENAME = "resampled_distmap_"
 
 
 # Defines logger
 log = set_file_logger(__file__)
+
 
 def mask_foldlabel(resampled,
                    skeleton_mask):
@@ -104,11 +101,11 @@ def mask_foldlabel(resampled,
     if do_skel=True,
     resampled foldlabel is masked using skeleton.
     """
-    
+
     arr_resampled = resampled.np
     arr_skeleton = skeleton_mask.np
     arr = arr_resampled.copy()
-    arr[arr_skeleton==0]=0
+    arr[arr_skeleton == 0] = 0
     vol = aims.Volume(arr)
     return vol
 
@@ -144,8 +141,8 @@ def resample_one_skeleton(input_image,
     # The more important is the inversion in the priority
     # for the bottom value (30) and the simple surface value (60)
     # with respect to the natural order
-    # We don't give background, which is the interior 0foldlabels/2mm/L_before_masking/Lresampled_foldlabel_10.nii.gz
-    #values = [11, 60, 30, 35, 10, 20, 40,
+    # We don't give background, which is the interior 0
+    # values = [11, 60, 30, 35, 10, 20, 40,
     #          50, 70, 80, 90, 100, 110, 120]
     values = [100, 60, 10, 20, 40, 50, 70, 80, 110, 120, 30, 35]
     # Normalization and resampling of skeleton images
@@ -184,12 +181,12 @@ def resample_one_foldlabel(input_image,
     resampled = resample(input_image=input_image,
                          output_vs=out_voxel_size,
                          transformation=transformation)
-    
-    #if skeleton_mask is not None:
+
+    # if skeleton_mask is not None:
     #    resampled_masked = mask_foldlabel(resampled,
     #                                      skeleton_mask)
     #    return resampled_masked
-    #else:
+    # else:
     #    return resampled
     return resampled
 
@@ -292,7 +289,7 @@ class FileResampler:
         self.out_voxel_size = (out_voxel_size,
                                out_voxel_size,
                                out_voxel_size)
-        
+
         self.do_skel = do_skel
         self.immortals = immortals
 
@@ -333,7 +330,7 @@ class FileResampler:
 
         # Performs the resampling
         if os.path.exists(src_file):
-            resampled = self.resample_one_subject(
+            self.resample_one_subject(
                 src_file=src_file,
                 out_voxel_size=self.out_voxel_size,
                 transform_file=transform_file,
@@ -448,10 +445,10 @@ class SkeletonResampler(FileResampler):
             transform_dir=transform_dir, side=side,
             out_voxel_size=out_voxel_size, parallel=parallel,
             do_skel=do_skel, immortals=immortals)
-        
-        #skeletonization parameters
-        self.do_skel=do_skel
-        self.immortals=immortals
+
+        # skeletonization parameters
+        self.do_skel = do_skel
+        self.immortals = immortals
 
         # Names of files in function of dictionary: keys = 'subject' and 'side'
         # Src directory contains either 'R' or 'L' a subdirectory
@@ -459,14 +456,14 @@ class SkeletonResampler(FileResampler):
         #    self.src_dir,
         #    '%(side)sskeleton_generated_%(subject)s.nii.gz')
         self.src_file = join(self.src_dir,
-                             f'%(side)s' + src_filename + '%(subject)s.nii.gz')
+                             '%(side)s' + src_filename + '%(subject)s.nii.gz')
 
         # Names of files in function of dictionary: keys -> 'subject' and
         # 'side'
         self.src_filename = src_filename
         self.resampled_file = join(
             self.resampled_dir,
-            f'%(side)s' + output_filename + '%(subject)s.nii.gz')
+            '%(side)s' + output_filename + '%(subject)s.nii.gz')
 
         # subjects are detected as the nifti file names under src_dir
         self.expr = '^.' + src_filename + '(.*).nii.gz$'
@@ -576,14 +573,14 @@ class DistMapResampler(FileResampler):
         # Src directory contains either 'R' or 'L' a subdirectory
         self.src_file = join(
             self.src_dir,
-            f'%(side)s' + src_filename + '%(subject)s.nii.gz')
+            '%(side)s' + src_filename + '%(subject)s.nii.gz')
 
         # Names of files in function of dictionary: keys -> 'subject' and
         # 'side'
         self.src_filename = src_filename
         self.resampled_file = join(
             self.resampled_dir,
-            f'%(side)s' + output_filename + '%(subject)s.nii.gz')
+            '%(side)s' + output_filename + '%(subject)s.nii.gz')
 
         # subjects are detected as the nifti file names under src_dir
         self.expr = '^.' + src_filename + '(.*).nii.gz$'
@@ -595,10 +592,11 @@ class DistMapResampler(FileResampler):
                              resampled_file: str,
                              do_skel=None,
                              immortals=None):
-        return resample_one_distmap(input_image=src_file,
-                                    resampled_dir=resampled_file,
-                                    out_voxel_size=out_voxel_size,
-                                    transformation=transform_file)
+        resampled = resample_one_distmap(input_image=src_file,
+                                         resampled_dir=resampled_file,
+                                         out_voxel_size=out_voxel_size,
+                                         transformation=transform_file)
+        aims.write(resampled, resampled_file)
 
 
 def parse_args(argv):
@@ -691,6 +689,11 @@ def parse_args(argv):
     params['nb_subjects'] = get_number_subjects(args.nb_subjects)
     params['src_filename'] = args.src_filename
     params['output_filename'] = args.output_filename
+
+    # Removes renamed params
+    # So that we can use params dictionary directly as function arguments
+    params.pop('output_dir')
+
     return params
 
 
@@ -756,8 +759,8 @@ def resample_files(
             immortals=[])
     else:
         raise ValueError(
-            "input_type: shall be either 'skeleton', 'foldlabel' or "
-            "distmap")
+            "input_type: shall be either 'skeleton', 'foldlabel',"
+            "extremities or distmap")
 
     resampler.compute(number_subjects=number_subjects)
 
@@ -774,18 +777,7 @@ def main(argv):
     params = parse_args(argv)
 
     # Actual API
-    resample_files(
-        src_dir=params['src_dir'],
-        input_type=params['input_type'],
-        resampled_dir=params['resampled_dir'],
-        transform_dir=params['transform_dir'],
-        side=params['side'],
-        number_subjects=params['nb_subjects'],
-        out_voxel_size=params['out_voxel_size'],
-        parallel=params['parallel'],
-        src_filename=params['src_filename'],
-        output_filename=params['output_filename']
-    )
+    resample_files(**params)
 
 
 ######################################################################

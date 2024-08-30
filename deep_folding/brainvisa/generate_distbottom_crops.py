@@ -45,11 +45,12 @@ import glob
 import os
 import re
 import sys
-from os.path import join
-from os.path import basename
-
 import numpy as np
 import pandas as pd
+
+from os.path import join
+from os.path import basename
+from p_tqdm import p_map
 
 from deep_folding.brainvisa import exception_handler
 from deep_folding.brainvisa.utils.save_data import save_to_numpy
@@ -68,18 +69,13 @@ from deep_folding.brainvisa.utils.quality_checks import \
     compare_number_aims_files_with_number_in_source, \
     save_list_to_csv
 from deep_folding.config.logs import set_file_logger
-from p_tqdm import p_map
-from soma import aims
+
 
 # Import constants
 from deep_folding.brainvisa.utils.constants import \
-    _ALL_SUBJECTS, _RESAMPLED_SKELETON_DIR_DEFAULT,\
-    _BBOX_DIR_DEFAULT, _MASK_DIR_DEFAULT,\
-    _CROP_DIR_DEFAULT,\
-    _SIDE_DEFAULT, _CROPPING_TYPE_DEFAULT,\
-    _COMBINE_TYPE_DEFAULT, _INPUT_TYPE_DEFAULT,\
-    _SULCUS_DEFAULT, _NO_MASK_DEFAULT,\
-    _DILATION_DEFAULT, _THRESHOLD_DEFAULT
+    _ALL_SUBJECTS, \
+    _CROP_DIR_DEFAULT, \
+    _SIDE_DEFAULT
 
 # Defines logger
 log = set_file_logger(__file__)
@@ -92,21 +88,24 @@ def quality_checks(crop_dir, side):
     # checks if same voxel position
     assert (s.shape == d.shape), (
         f"Skeleton and distbottom of different shapes: {s.shape} != {d.shape}")
-    assert (s[d==32501].sum() == 0), (
+    assert (s[d == 32501].sum() == 0), (
         f"Skeleton and distbottom with different non-zero positions: "
-        f"{(s[d==32501]!=0).sum()} different non-zero positions")
-    assert ((d[s==0]!=32501).sum() == 0), (
+        f"{(s[d == 32501]!=0).sum()} different non-zero positions")
+    assert ((d[s == 0] != 32501).sum() == 0), (
         f"Skeleton and distbottom with different non-zero positions: "
-        f"{(d[s==0]!=32501).sum()} different non-zero positions")
-    
+        f"{(d[s == 0] != 32501).sum()} different non-zero positions")
+
     # Checks if subjects are equal between distbottom and skeleton
     dfs = pd.read_csv(f"{crop_dir}/{side}skeleton_subject.csv")
     dfd = pd.read_csv(f"{crop_dir}/{side}distbottom_subject.csv")
-    assert (dfs.equals(dfd)), "List of subjects for distbottom and skeleton are not equal"
+    assert (dfs.equals(dfd)), \
+        "List of subjects for distbottom and skeleton are not equal"
 
     # Checks if numpy arrays and csvs are consistent
-    assert (s.shape[0] == len(dfs)), "Number of skeleton subjects differs between numpy array and csv"
-    assert (d.shape[0] == len(dfd)), "Number of distbottom subjects differs between numpy array and csv"
+    assert (s.shape[0] == len(dfs)), \
+        "Number of skeleton subjects differs between numpy array and csv"
+    assert (d.shape[0] == len(dfd)), \
+        "Number of distbottom subjects differs between numpy array and csv"
 
 
 class DistBottomCropGenerator:
@@ -136,7 +135,8 @@ class DistBottomCropGenerator:
         self.src_dir = join(src_dir, f"{self.side}crops")
 
         # Directory where to store cropped distbottom files
-        self.cropped_samples_dir = join(self.crop_dir, self.side + 'distbottom')
+        self.cropped_samples_dir = join(
+            self.crop_dir, self.side + 'distbottom')
 
         # Names of files in function of dict: keys -> 'subject' and 'side'
         # Generated skeleton crops
@@ -158,7 +158,6 @@ class DistBottomCropGenerator:
         # Creates npys file name
         self.file_basename_npy = self.side + 'distbottom'
         self.file_basename_pickle = self.side + 'distbottom'
-
 
     def generate_one_distbottom(self, subject_id):
         """Crops one file
@@ -186,15 +185,15 @@ class DistBottomCropGenerator:
         else:
             raise FileNotFoundError(f"{file_src} not found")
 
-    def generate_distbottom_files(self, number_subjects=_ALL_SUBJECTS):
+    def generate_distbottom_files(self, nb_subjects=_ALL_SUBJECTS):
         """Generate distbottom files
         The programm loops over all subjects from the input (source) directory.
         Args:
-            number_subjects: integer giving the number of subjects to analyze,
+            nb_subjects: integer giving the number of subjects to analyze,
                 by default it is set to _ALL_SUBJECTS (-1).
         """
 
-        if number_subjects:
+        if nb_subjects:
 
             if os.path.isdir(self.src_dir):
                 files = glob.glob(f"{self.src_dir}/*.nii.gz")
@@ -222,9 +221,9 @@ class DistBottomCropGenerator:
 
             if len(list_all_subjects):
                 # Gives the possibility to list
-                # only the first number_subjects
+                # only the first nb_subjects
                 list_subjects = select_subjects_int(list_all_subjects,
-                                                    number_subjects)
+                                                    nb_subjects)
 
                 log.info(f"Expected number of subjects = {len(list_subjects)}")
                 log.info(f"list_subjects[:5] = {list_subjects[:5]}")
@@ -274,21 +273,21 @@ class DistBottomCropGenerator:
             save_list_to_csv(not_processed_files,
                              f"{self.crop_dir}/not_processed_files.csv")
 
-    def compute(self, number_subjects=_ALL_SUBJECTS):
+    def compute(self, nb_subjects=_ALL_SUBJECTS):
         """Main API to create numpy files
         The programm loops over all subjects from the input (source) directory.
         Args:
-            number_subjects: integer giving the number of subjects to analyze,
+            nb_subjects: integer giving the number of subjects to analyze,
                 by default it is set to _ALL_SUBJECTS (-1).
         """
 
         self.json.write_general_info()
 
         # Generate cropped files
-        self.generate_distbottom_files(number_subjects=number_subjects)
+        self.generate_distbottom_files(nb_subjects=nb_subjects)
 
         # Creation of .npy file containing all subjects
-        if number_subjects:
+        if nb_subjects:
             list_sample_id, list_sample_file = \
                 save_to_numpy(cropped_dir=self.cropped_samples_dir,
                               tgt_dir=self.crop_dir,
@@ -300,9 +299,8 @@ class DistBottomCropGenerator:
                 file_basename=self.file_basename_pickle,
                 list_sample_id=list_sample_id,
                 list_sample_file=list_sample_file)
-            
-        quality_checks(self.crop_dir, self.side)
 
+        quality_checks(self.crop_dir, self.side)
 
 
 def parse_args(argv):
@@ -318,7 +316,7 @@ def parse_args(argv):
         prog=basename(__file__),
         description='Generates cropped and npy files of distances to bottom')
     parser.add_argument(
-        "-s", "--src_dir", type=str, default= _CROP_DIR_DEFAULT,
+        "-s", "--src_dir", type=str, default=_CROP_DIR_DEFAULT,
         help='Source directory where cropped skeleton input files lie. '
              'Default is : ' + _CROP_DIR_DEFAULT)
     parser.add_argument(
@@ -352,13 +350,18 @@ def parse_args(argv):
         args,
         log_dir=f"{args.output_dir}",
         prog_name=basename(__file__),
-        suffix=f"right" if args.side == 'R' else 'left')
+        suffix="right" if args.side == 'R' else 'left')
 
     params = vars(args)
 
     params['crop_dir'] = args.output_dir
     # Checks if nb_subjects is either the string "all" or a positive integer
     params['nb_subjects'] = get_number_subjects(args.nb_subjects)
+
+    # Removes renamed params
+    # So that we can use params dictionary directly as function arguments
+    params.pop('output_dir')
+    params.pop('verbose')
 
     return params
 
@@ -367,18 +370,19 @@ def generate_distbottom_crops(
         src_dir=_CROP_DIR_DEFAULT,
         crop_dir=_CROP_DIR_DEFAULT,
         side=_SIDE_DEFAULT,
-        number_subjects=_ALL_SUBJECTS,
+        nb_subjects=_ALL_SUBJECTS,
         parallel=False
         ):
 
-    crop = DistBottomCropGenerator(
-            src_dir=src_dir,
-            crop_dir=crop_dir,
-            side=side,
-            parallel=parallel
-            )
+    # Gets function arguments and values
+    params = locals()
+    nb_subjects = params.pop('nb_subjects')
 
-    crop.compute(number_subjects=number_subjects)
+    # Initialization with same arguments and values as function
+    crop = DistBottomCropGenerator(**params)
+
+    # Actual generation of distbottom crops from graphs
+    crop.compute(nb_subjects=nb_subjects)
 
 
 @exception_handler
@@ -392,13 +396,7 @@ def main(argv):
     params = parse_args(argv)
 
     # Actual API
-    generate_distbottom_crops(
-        src_dir=params['src_dir'],
-        crop_dir=params['crop_dir'],
-        side=params['side'],
-        parallel=params['parallel'],
-        number_subjects=params['nb_subjects']
-    )
+    generate_distbottom_crops(**params)
 
 
 ######################################################################
