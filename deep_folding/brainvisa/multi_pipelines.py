@@ -34,6 +34,7 @@ datasets = ["hcp"]
 regions = ["S.C.-sylv."]
 sides = ["L"]
 input_types = ["skeleton", "foldlabel"]
+verbose = "-v"
 
 
 for region in regions:
@@ -74,7 +75,8 @@ for region in regions:
                 # with requested parameters read from new json
                 if subprocess.call(
                         ["python3", "pipeline.py",
-                         "--params_path", f"{pipeline_json}"]) != 0:
+                         "--params_path", f"{pipeline_json}",
+                         f"{verbose}"]) != 0:
                     raise ValueError("Error in pipeline: "
                                      "see above for error explanations")
                 print("\nEND")

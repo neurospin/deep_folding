@@ -210,9 +210,12 @@ class DistBottomCropGenerator:
                     self.cropped_samples_dir)
 
                 if len(files):
-                    list_all_subjects = [
+                    list_not_processed_subjects = [
                         re.search(self.expr, basename(dI))[1]
                         for dI in not_processed_files]
+                    list_all_subjects = [
+                        re.search(self.expr, basename(dI))[1]
+                        for dI in files]
                 else:
                     raise ValueError(f"no nifti files in {self.src_dir}")
             else:
@@ -222,8 +225,10 @@ class DistBottomCropGenerator:
             if len(list_all_subjects):
                 # Gives the possibility to list
                 # only the first nb_subjects
-                list_subjects = select_subjects_int(list_all_subjects,
-                                                    nb_subjects)
+                list_subjects = select_subjects_int(
+                                    list_all_subjects,
+                                    list_not_processed_subjects,
+                                    nb_subjects)
 
                 log.info(f"Expected number of subjects = {len(list_subjects)}")
                 log.info(f"list_subjects[:5] = {list_subjects[:5]}")

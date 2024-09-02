@@ -243,7 +243,8 @@ def get_not_processed_distbottom_files(src_dir, tgt_dir):
     src_subjects = [subject.split("_cropped")[0] for subject in src_files]
     src_subjects = [subject.split("/")[-1] for subject in src_subjects]
 
-    tgt_subjects = [subject.split("_cropped_distbottom")[0] for subject in tgt_files]
+    tgt_subjects = [subject.split("_cropped_distbottom")[0]
+                    for subject in tgt_files]
     tgt_subjects = [subject.split("/")[-1] for subject in tgt_subjects]
 
     not_processed_subjects = list(set(src_subjects) - set(tgt_subjects))
@@ -281,6 +282,7 @@ def get_not_processed_subjects(src_subjects, tgt_dir, prefix="generated_"):
         log.info(f"first tgt subject = {tgt_subjects[0]}")
 
     not_processed_subjects = list(set(src_subjects) - set(tgt_subjects))
+    not_processed_subjects.sort()
 
     return not_processed_subjects
 

@@ -225,11 +225,13 @@ class GraphGenerateTransform:
                          if is_it_a_subject(filename)]
         log.info(f"Number of subjects before qc = {len(list_subjects)}")
         list_subjects = select_good_qc(list_subjects, self.qc_path)
-        list_subjects = \
+        not_processed_subjects = \
             get_not_processed_subjects_transform(list_subjects,
                                                  self.transform_dir,
                                                  prefix="ICBM2009c_")
-        list_subjects = select_subjects_int(list_subjects, nb_subjects)
+        list_subjects = select_subjects_int(list_subjects,
+                                            not_processed_subjects,
+                                            nb_subjects)
 
         log.info(f"Expected number of subjects = {len(list_subjects)}")
         log.info(f"list_subjects[:5] = {list_subjects[:5]}")

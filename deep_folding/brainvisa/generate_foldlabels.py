@@ -237,9 +237,12 @@ class GraphConvert2FoldLabel:
                          if is_it_a_subject(filename)]
         log.info(f"Number of subjects before qc = {len(list_subjects)}")
         list_subjects = select_good_qc(list_subjects, self.qc_path)
-        list_subjects = get_not_processed_subjects(
+        not_processed_subjects = get_not_processed_subjects(
             list_subjects, self.foldlabel_dir, "foldlabel_")
-        list_subjects = select_subjects_int(list_subjects, nb_subjects)
+
+        list_subjects = select_subjects_int(list_subjects,
+                                            not_processed_subjects,
+                                            nb_subjects)
 
         # Performs computation on all selected subjects
         # either serially or in parallel

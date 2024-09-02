@@ -218,9 +218,12 @@ class FoldLabelMasker:
                 not_processed_files = get_not_processed_files(
                     self.src_dir, self.masked_dir, self.src_filename)
 
-                list_all_subjects = \
-                    [re.search(self.expr, os.path.basename(dI))[1]
-                     for dI in not_processed_files]
+                list_not_processed_subjects = [
+                    re.search(self.expr, basename(dI))[1]
+                    for dI in not_processed_files]
+                list_all_subjects = [
+                    re.search(self.expr, basename(dI))[1]
+                    for dI in src_files]
             else:
                 raise NotADirectoryError(
                     f"{self.src_dir} doesn't exist or is not a directory")
@@ -232,7 +235,9 @@ class FoldLabelMasker:
                     f"{nb_subjects}, {type(nb_subjects)}")
                 # Gives the possibility to list only the first nb_subjects
                 list_subjects = select_subjects_int(
-                    list_all_subjects, nb_subjects)
+                                    list_all_subjects,
+                                    list_not_processed_subjects,
+                                    nb_subjects)
                 log.info(f"Expected number of subjects = {len(list_subjects)}")
                 log.info(f"list_subjects[:5] = {list_subjects[:5]}")
                 log.debug(f"list_subjects = {list_subjects}")

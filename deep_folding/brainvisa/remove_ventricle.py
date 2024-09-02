@@ -259,7 +259,8 @@ class RemoveVentricleFromVolume:
                     keys = "_".join(split[1:])
                 else:
                     keys = ""
-                    log.warning(f"The subject {subject} has no session, acquisition or run.")
+                    log.warning(f"The subject {subject} has no session, "
+                                "acquisition or run.")
                 filename = f"{side}{subject_id}_{self.labelling_session}.arg"
                 labelled_graph_file = join(
                     self.morpho_dir, subject_id, self.path_to_graph.replace(
