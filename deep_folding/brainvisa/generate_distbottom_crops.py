@@ -35,7 +35,7 @@
 
 """Creating npy file from T1 MRI datas
 The aim of this script is to create dataset of distances to bottoms
-alogn skeletons saved in a .npy file.
+along skeletons saved in a .npy file.
 
 Crops of skeletons must be generated before
 """

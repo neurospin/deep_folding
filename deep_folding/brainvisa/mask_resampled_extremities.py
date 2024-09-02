@@ -62,6 +62,8 @@ from p_tqdm import p_map
 import numpy as np
 import warnings
 
+from skimage.morphology import ball, binary_dilation
+
 from soma import aims
 
 from deep_folding.brainvisa import exception_handler
@@ -90,6 +92,7 @@ from deep_folding.brainvisa.utils.constants import \
 log = set_file_logger(__file__)
 
 _VX_TOLERANCE = 2
+_DILATION_MAGNITUDE = 2
 
 
 def nearest_nonzero_idx(a, x, y, z):
@@ -149,10 +152,29 @@ class ExtremitiesMasker:
         skel_np = skel.np
         old_extremities_np = old_extremities.np
 
-        extremities = old_extremities_np.copy()
+        old_extremities_np2 = old_extremities_np.copy()
         # first mask skeleton using extremities because sometimes
         # 1vx is added during skeletonization...
-        extremities[skel_np == 0] = 0
+        old_extremities_np2[skel_np == 0] = 0
+
+        # extremities are computed without the top (value 35 in skeleton)
+        # we here add the top, by looking for the value 35 in skeleton
+        # at distance 1 of the extremities
+        log.info("Extremities voxels without tops: "
+                 f"{np.sum(old_extremities_np2)}")
+        extremities_dilated = binary_dilation(
+                                old_extremities_np2[:, :, :, 0],
+                                ball(_DILATION_MAGNITUDE))
+        extremities_dilated = np.expand_dims(extremities_dilated, axis=-1)
+        tops_of_extremities = np.logical_and(extremities_dilated,
+                                             (skel_np == 35))
+        extremities = np.logical_or(old_extremities_np2,
+                                    tops_of_extremities)
+        extremities = extremities.astype(np.int16)
+        print("Voxels of extremities after adding tops : "
+              f"{np.sum(extremities)}")
+
+        # Makes som checks
         f = extremities != 0
         s = skel_np.copy()
         skel_np[extremities == 0] = 0
@@ -180,6 +202,8 @@ class ExtremitiesMasker:
             f"subject {subject} has incompatible extremities and skeleton " \
             "AFTER CORRECTION. " \
             f"{np.sum(s)} vx in skeleton, {np.sum(f)} vx in extremities"
+
+        # Writes volume to file
         vol = aims.Volume(extremities)
         vol.header()['voxel_size'] = old_extremities.header()['voxel_size']
         aims.write(
@@ -339,7 +363,7 @@ def parse_args(argv):
     return params
 
 
-def mask_files(
+def mask_extremities_files(
         src_dir=_RESAMPLED_EXTREMITIES_DIR_DEFAULT,
         skeleton_dir=_RESAMPLED_SKELETON_DIR_DEFAULT,
         masked_dir=_RESAMPLED_EXTREMITIES_DIR_DEFAULT,
@@ -370,7 +394,7 @@ def main(argv):
     params = parse_args(argv)
 
     # Actual API
-    mask_files(
+    mask_extremities_files(
         src_dir=params['src_dir'],
         skeleton_dir=params['skeleton_dir'],
         masked_dir=params['masked_dir'],

@@ -58,7 +58,10 @@ from deep_folding.brainvisa.generate_distbottom_crops import \
     generate_distbottom_crops
 from deep_folding.brainvisa.generate_distmaps import generate_distmaps
 from deep_folding.brainvisa.generate_foldlabels import generate_foldlabels
-from deep_folding.brainvisa.mask_resampled_foldlabels import mask_files
+from deep_folding.brainvisa.mask_resampled_foldlabels import \
+    mask_foldlabel_files
+from deep_folding.brainvisa.mask_resampled_extremities import \
+    mask_extremities_files
 from deep_folding.brainvisa.generate_ICBM2009c_transforms import \
     generate_ICBM2009c_transforms
 from deep_folding.brainvisa.generate_skeletons import generate_skeletons
@@ -603,7 +606,39 @@ def main(argv):
                           prog_name='pipeline_mask_resampled_foldlabels.py',
                           suffix=full_side[1:])
 
-                mask_files(**args_masked_files)
+                mask_foldlabel_files(**args_masked_files)
+                log.info(f"{params['input_type']} masked")
+
+        # Mask extremities with reskeletized skeletons
+        if params['input_type'] == "extremities":
+            masked_dir = os.path.join(params['extremities_dir'], vox_size)
+            skeleton_dir = os.path.join(params['skeleton_dir'], vox_size)
+            path_masked_path = os.path.join(masked_dir, params['side'])
+
+            if is_step_to_be_computed(
+                    path=path_masked_path,
+                    log_string=f"Masking {params['input_type']}s",
+                    save_behavior=save_behavior):
+                if save_behavior == 'clear_and_compute' and os.path.exists(
+                        path_masked_path):
+                    # remove the target folder
+                    log.info(f"Delete {path_masked_path}")
+                    shutil.rmtree(path_masked_path)
+
+                args_masked_files = {'src_dir': masked_dir,
+                                     'skeleton_dir': skeleton_dir,
+                                     'masked_dir': masked_dir,
+                                     'side': params['side'],
+                                     'nb_subjects': params['nb_subjects'],
+                                     'parallel': params['parallel']}
+
+                setup_log(Namespace(**{'verbose': log.level,
+                                    **args_masked_files}),
+                          log_dir=f"{args_masked_files['masked_dir']}",
+                          prog_name='pipeline_mask_resampled_extremities.py',
+                          suffix=full_side[1:])
+
+                mask_extremities_files(**args_masked_files)
                 log.info(f"{params['input_type']} masked")
 
     ##########################################################
@@ -615,6 +650,9 @@ def main(argv):
     elif params['input_type'] == 'foldlabel':
         raw_input = params['foldlabel_dir']
         resampled_dir = os.path.join(params['foldlabel_dir'], vox_size)
+    elif params['input_type'] == 'extremities':
+        raw_input = params['extremities_dir']
+        resampled_dir = os.path.join(params['extremities_dir'], vox_size)
     else:
         # raw data supposed to be skeletons by default
         raw_input = params['skeleton_dir']

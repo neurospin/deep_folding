@@ -74,7 +74,7 @@ for region in regions:
                 # run the pipeline on the target region
                 # with requested parameters read from new json
                 if subprocess.call(
-                        ["python3", "deep_folding/brainvisa/pipeline.py",
+                        ["python3", "pipeline.py",
                          "--params_path", f"{pipeline_json}",
                          f"{verbose}"]) != 0:
                     raise ValueError("Error in pipeline: "

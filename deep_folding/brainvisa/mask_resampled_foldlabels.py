@@ -335,7 +335,7 @@ def parse_args(argv):
     return params
 
 
-def mask_files(
+def mask_foldlabel_files(
         src_dir=_RESAMPLED_FOLDLABEL_DIR_DEFAULT,
         skeleton_dir=_RESAMPLED_SKELETON_DIR_DEFAULT,
         masked_dir=_RESAMPLED_FOLDLABEL_DIR_DEFAULT,
@@ -366,7 +366,7 @@ def main(argv):
     params = parse_args(argv)
 
     # Actual API
-    mask_files(
+    mask_foldlabel_files(
         src_dir=params['src_dir'],
         skeleton_dir=params['skeleton_dir'],
         masked_dir=params['masked_dir'],
