@@ -417,7 +417,7 @@ def main(argv):
                 'src_dir': params['graphs_dir'],
                 'extremities_dir': params['extremities_dir'] + '/raw',
                 'path_to_skeleton_with_hull':
-                params['path_to_skeleton_with_hull'],
+                    params['path_to_skeleton_with_hull'],
                 'path_to_graph': params['path_to_graph'],
                 'side': params['side'],
                 'bids': params['bids'],
@@ -428,7 +428,7 @@ def main(argv):
             setup_log(
                 Namespace(**{'verbose': log.level,
                           **args_generate_extremities}),
-                log_dir=f"{args_generate_extremities['foldlabel_dir']}",
+                log_dir=f"{args_generate_extremities['extremities_dir']}",
                 prog_name='pipeline_generate_extremities.py',
                 suffix=full_side[1:])
 
@@ -523,6 +523,10 @@ def main(argv):
             raw_input = os.path.join(params['foldlabel_dir'], 'raw')
             resampled_dir = os.path.join(params['foldlabel_dir'], vox_size)
 
+        elif params['input_type'] == 'extremities':
+            raw_input = os.path.join(params['extremities_dir'], 'raw')
+            resampled_dir = os.path.join(params['extremities_dir'], vox_size)
+            
         else:
             # raw data supposed to be skeletons by default
             raw_input = os.path.join(params['skeleton_dir'], 'raw')
@@ -531,6 +535,8 @@ def main(argv):
         # if foldlabel, we generate foldlabels before masking with skeletons
         path_resampled_path = os.path.join(resampled_dir, params['side'])
         if params['input_type'] == 'foldlabel':
+            path_resampled_path = path_resampled_path + "_before_masking"
+        elif params['input_type'] == 'extremities':
             path_resampled_path = path_resampled_path + "_before_masking"
 
         if is_step_to_be_computed(

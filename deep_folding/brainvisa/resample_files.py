@@ -411,9 +411,9 @@ class FileResampler:
             if len(list_all_subjects):
                 # Gives the possibility to list only the first nb_subjects
                 list_subjects = select_subjects_int(
-                                    list_all_subjects,
-                                    list_not_processed_subjects,
-                                    nb_subjects)
+                    list_all_subjects,
+                    list_not_processed_subjects,
+                    nb_subjects)
                 log.info(f"Expected number of subjects = {len(list_subjects)}")
                 log.info(f"list_subjects[:5] = {list_subjects[:5]}")
                 log.debug(f"list_subjects = {list_subjects}")
@@ -580,6 +580,64 @@ class FoldLabelResampler(FileResampler):
         aims.write(resampled, resampled_file)
 
 
+class ExtremitiesResampler(FileResampler):
+    """Resamples all extremities files from source directories
+    """
+
+    def __init__(self, src_dir, resampled_dir, transform_dir,
+                 side, out_voxel_size, parallel, src_filename,
+                 output_filename, do_skel, immortals
+                 ):
+        """Inits with list of directories
+
+        Args:
+            src_dir: folder containing generated skeletons or labels
+            resampled_dir: name of target (output) directory,
+            transform_dir: directory containing transform files to ICBM2009c
+            side: either 'L' or 'R', hemisphere side
+            out_voxel_size: float giving voxel size in mm
+            parallel: does parallel computation if True
+            src_filename : name of fold label files
+                          (format : "<SIDE><src_filename><SUBJECT>.nii.gz")
+            output_filename : name of generated files
+                          (format : "<SIDE><output_filename><SUBJECT>.nii.gz")
+        """
+        super(ExtremitiesResampler, self).__init__(
+            src_dir=src_dir, resampled_dir=resampled_dir,
+            transform_dir=transform_dir, side=side,
+            out_voxel_size=out_voxel_size, parallel=parallel,
+            do_skel=do_skel, immortals=immortals)
+
+        # Names of files in function of dictionary: keys = 'subject' and 'side'
+        # Src directory contains either 'R' or 'L' a subdirectory
+        self.src_file = join(
+            self.src_dir,
+            '%(side)s' + src_filename + '%(subject)s.nii.gz')
+
+        # Names of files in function of dictionary: keys -> 'subject' and
+        # 'side'
+        self.src_filename = src_filename
+        self.resampled_dir = self.resampled_dir + "_before_masking"
+        self.resampled_file = join(
+            self.resampled_dir,
+            '%(side)s' + output_filename + '%(subject)s.nii.gz')
+
+        # subjects are detected as the nifti file names under src_dir
+        self.expr = '^.' + src_filename + '(.*).nii.gz$'
+
+    @staticmethod
+    def resample_one_subject(src_file: str,
+                             out_voxel_size: float,
+                             transform_file: str,
+                             do_skel: bool,
+                             immortals=None,
+                             resampled_file=None):
+        resampled = resample_one_extremities(input_image=src_file,
+                                             out_voxel_size=out_voxel_size,
+                                             transformation=transform_file)
+        aims.write(resampled, resampled_file)
+
+
 class DistMapResampler(FileResampler):
     """Resamples all files from source directories
     """
@@ -649,13 +707,14 @@ def parse_args(argv):
         description='Generates resampled files (skeletons, foldlabels,...)')
     parser.add_argument(
         "-s", "--src_dir", type=str, default=_SKELETON_DIR_DEFAULT,
-        help='Source directory where inputs files (skeletons, labels or '
-             'distmaps) lie. '
+        help='Source directory where inputs files (skeletons, labels, '
+             'extremities, distmaps) lie. '
              'Default is : ' + _SKELETON_DIR_DEFAULT)
     parser.add_argument(
         "-y", "--input_type", type=str, default=_INPUT_TYPE_DEFAULT,
-        help='Input type: \'skeleton\', \'foldlabel\', \'distmap\' '
-             'Default is : ' + _INPUT_TYPE_DEFAULT)
+        help="Input type: \'skeleton\', \'foldlabel\', "
+             "\'extremities\', \'distmap\'. "
+             "Default is : " + _INPUT_TYPE_DEFAULT)
     parser.add_argument(
         "-o",
         "--output_dir",
@@ -727,6 +786,7 @@ def parse_args(argv):
     # Removes renamed params
     # So that we can use params dictionary directly as function arguments
     params.pop('output_dir')
+    params.pop('verbose')
 
     return params
 
@@ -786,7 +846,7 @@ def resample_files(
         output_filename = (_RESAMPLED_FOLDLABEL_FILENAME
                            if output_filename is None
                            else output_filename)
-        resampler = FoldLabelResampler(
+        resampler = ExtremitiesResampler(
             src_dir=src_dir,
             resampled_dir=resampled_dir,
             transform_dir=transform_dir,

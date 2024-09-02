@@ -33,7 +33,7 @@ path_dataset_root = "/neurospin/dico/data/deep_folding/test/datasets"
 datasets = ["hcp"]
 regions = ["S.C.-sylv."]
 sides = ["L"]
-input_types = ["skeleton", "foldlabel"]
+input_types = ["skeleton", "foldlabel", "extremities"]
 verbose = "-v"
 
 
@@ -74,7 +74,7 @@ for region in regions:
                 # run the pipeline on the target region
                 # with requested parameters read from new json
                 if subprocess.call(
-                        ["python3", "pipeline.py",
+                        ["python3", "deep_folding/brainvisa/pipeline.py",
                          "--params_path", f"{pipeline_json}",
                          f"{verbose}"]) != 0:
                     raise ValueError("Error in pipeline: "

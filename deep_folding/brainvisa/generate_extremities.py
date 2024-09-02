@@ -257,7 +257,9 @@ class GraphConvert2Extremity:
         log.info(f"Number of subjects before qc = {len(list_subjects)}")
         list_subjects = select_good_qc(list_subjects, self.qc_path)
         not_processed_subjects = \
-            get_not_processed_subjects(list_subjects, self.extremities_dir)
+            get_not_processed_subjects(list_subjects,
+                                       self.extremities_dir,
+                                       "extremities_")
 
         list_subjects = select_subjects_int(list_subjects,
                                             not_processed_subjects,
