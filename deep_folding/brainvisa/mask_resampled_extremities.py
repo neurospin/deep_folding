@@ -33,9 +33,9 @@
 # The fact that you are presently reading this means that you have had
 # knowledge of the CeCILL license version 2 and that you accept its terms.
 
-"""Masks foldlabels
+"""Masks extremities
 
-The aim of this script is to mask foldlabels using re-skeletized skeletons.
+The aim of this script is to mask extremities using re-skeletized skeletons.
 
   Typical usage
   -------------
@@ -43,10 +43,10 @@ The aim of this script is to mask foldlabels using re-skeletized skeletons.
   (here brainvisa 5.0.0 installed with singurity) and launching the script
   from the terminal:
   >>> bv bash
-  >>> python mask_resampled_foldlabels.py
+  >>> python mask_resampled_extremities.py
 
   Alternatively, you can launch the script in the interactive terminal ipython:
-  >>> %run mask_resampled_foldlabels.py
+  >>> %run mask_resampled_extremities.py
 
 """
 
@@ -82,14 +82,14 @@ from deep_folding.config.logs import set_file_logger
 from deep_folding.brainvisa.utils.constants import \
     _ALL_SUBJECTS, \
     _RESAMPLED_SKELETON_DIR_DEFAULT, \
-    _RESAMPLED_FOLDLABEL_DIR_DEFAULT, \
+    _RESAMPLED_EXTREMITIES_DIR_DEFAULT, \
     _SIDE_DEFAULT
 
 
 # Defines logger
 log = set_file_logger(__file__)
 
-_VX_TOLERANCE = 30
+_VX_TOLERANCE = 2
 
 
 def nearest_nonzero_idx(a, x, y, z):
@@ -101,8 +101,8 @@ def nearest_nonzero_idx(a, x, y, z):
     return (d[min_idx], e[min_idx], f[min_idx])
 
 
-class FoldLabelMasker:
-    """Maskes foldlables using reskeletized skeletons as masks
+class ExtremitiesMasker:
+    """Maskes extremities using reskeletized skeletons as masks
 
     """
 
@@ -112,7 +112,7 @@ class FoldLabelMasker:
         """Inits with list of directories
 
         Args:
-            src_dir: folder containing resampled foldlabels
+            src_dir: folder containing resampled extremities
             skeleton_dir: folder containing resampled + reskeletized skeletons
             masked_dir: name of target (output) directory,
             side: either 'L' or 'R', hemisphere side
@@ -132,57 +132,60 @@ class FoldLabelMasker:
         self.masked_dir = join(masked_dir, self.side)
 
         # subjects are detected as the nifti file names under src_dir
-        self.expr = '^.resampled_foldlabel_(.*).nii.gz$'
+        self.expr = '^.resampled_extremities_(.*).nii.gz$'
 
-        self.src_filename = f"{self.side}resampled_foldlabel_"
-        self.output_filename = f"{self.side}resampled_foldlabel_"
+        self.src_filename = f"{self.side}resampled_extremities_"
+        self.output_filename = f"{self.side}resampled_extremities_"
 
     def mask_one_file(self, subject: str):
         skel = aims.read(
             os.path.join(
                 self.skeleton_dir,
                 f'{self.side}resampled_skeleton_{subject}.nii.gz'))
-        old_foldlabel = aims.read(
+        old_extremities = aims.read(
             os.path.join(
                 self.src_dir,
-                f'{self.side}resampled_foldlabel_{subject}.nii.gz'))
+                f'{self.side}resampled_extremities_{subject}.nii.gz'))
         skel_np = skel.np
-        old_foldlabel_np = old_foldlabel.np
+        old_extremities_np = old_extremities.np
 
-        foldlabel = old_foldlabel_np.copy()
-        # first mask skeleton using foldlabel because sometimes
+        extremities = old_extremities_np.copy()
+        # first mask skeleton using extremities because sometimes
         # 1vx is added during skeletonization...
-        foldlabel[skel_np == 0] = 0
-        f = foldlabel != 0
+        extremities[skel_np == 0] = 0
+        f = extremities != 0
+        s = skel_np.copy()
+        skel_np[extremities == 0] = 0
         s = skel_np != 0
         diff_fs = np.sum(f != s)
-        assert (diff_fs <= _VX_TOLERANCE), \
-            f"subject {subject} has incompatible foldlabel and skeleton. "
-        f"{np.sum(s)} vx in skeleton, {np.sum(f)} vx in foldlabel"
+        assert (diff_fs <= _VX_TOLERANCE), (
+            f"subject {subject} has incompatible extremities and skeleton."
+            f"{np.sum(s)} vx in skeleton, {np.sum(f)} vx in extremities"
+        )
         if diff_fs != 0:
             warnings.warn(
-                f"subject {subject} has incompatible foldlabel and skeleton. "
-                f"{np.sum(s)} vx in skeleton, {np.sum(f)} vx in foldlabel")
+                f"subject {subject} has incompatible extremities/skeleton. "
+                f"{np.sum(s)} vx in skeleton, {np.sum(f)} vx in extremities")
             idxs = np.where(f != s)
             print(idxs)
             for i in range(diff_fs):
                 x, y, z = idxs[0][i], idxs[1][i], idxs[2][i]
-                d, e, f = nearest_nonzero_idx(foldlabel[:, :, :, 0], x, y, z)
-                foldlabel[x, y, z, 0] = foldlabel[d, e, f, 0]
-                print(f"foldlabel has a 0 at index {x,y,z}, "
+                d, e, f = nearest_nonzero_idx(extremities[:, :, :, 0], x, y, z)
+                extremities[x, y, z, 0] = extremities[d, e, f, 0]
+                print(f"extremities has a 0 at index {x,y,z}, "
                       f"nearest nonzero at index {d,e,f}, "
-                      f"value {foldlabel[d,e,f,0]}")
-        f = foldlabel != 0
+                      f"value {extremities[d,e,f,0]}")
+        f = extremities != 0
         assert np.sum(f != s) == 0, \
-            f"subject {subject} has incompatible foldlabel and skeleton " \
+            f"subject {subject} has incompatible extremities and skeleton " \
             "AFTER CORRECTION. " \
-            f"{np.sum(s)} vx in skeleton, {np.sum(f)} vx in foldlabel"
-        vol = aims.Volume(foldlabel)
-        vol.header()['voxel_size'] = old_foldlabel.header()['voxel_size']
+            f"{np.sum(s)} vx in skeleton, {np.sum(f)} vx in extremities"
+        vol = aims.Volume(extremities)
+        vol.header()['voxel_size'] = old_extremities.header()['voxel_size']
         aims.write(
             vol,
             os.path.join(self.masked_dir,
-                         f'{self.side}resampled_foldlabel_{subject}.nii.gz'))
+                         f'{self.side}resampled_extremities_{subject}.nii.gz'))
 
     def compute(self, nb_subjects=_ALL_SUBJECTS):
         """Loops over nii files
@@ -283,11 +286,12 @@ def parse_args(argv):
     # Parse command line arguments
     parser = argparse.ArgumentParser(
         prog=basename(__file__),
-        description='Masks resampled foldlabel files')
+        description='Masks resampled extremities files')
     parser.add_argument(
-        "-s", "--src_dir", type=str, default=_RESAMPLED_FOLDLABEL_DIR_DEFAULT,
-        help='Source directory where input resampled foldlabel files lie. '
-             'Default is : ' + _RESAMPLED_FOLDLABEL_DIR_DEFAULT)
+        "-s", "--src_dir", type=str,
+        default=_RESAMPLED_EXTREMITIES_DIR_DEFAULT,
+        help='Source directory where input resampled extremities files lie. '
+             'Default is : ' + _RESAMPLED_EXTREMITIES_DIR_DEFAULT)
     parser.add_argument(
         "-k", "--skeleton_dir", type=str,
         default=_RESAMPLED_SKELETON_DIR_DEFAULT,
@@ -297,10 +301,10 @@ def parse_args(argv):
         "-o",
         "--output_dir",
         type=str,
-        default=_RESAMPLED_FOLDLABEL_DIR_DEFAULT,
+        default=_RESAMPLED_EXTREMITIES_DIR_DEFAULT,
         help='Target directory where to store the masked files. '
         'Default is : ' +
-        _RESAMPLED_FOLDLABEL_DIR_DEFAULT)
+        _RESAMPLED_EXTREMITIES_DIR_DEFAULT)
     parser.add_argument(
         "-i", "--side", type=str, default=_SIDE_DEFAULT,
         help='Hemisphere side (either L or R). Default is : ' + _SIDE_DEFAULT)
@@ -336,14 +340,14 @@ def parse_args(argv):
 
 
 def mask_files(
-        src_dir=_RESAMPLED_FOLDLABEL_DIR_DEFAULT,
+        src_dir=_RESAMPLED_EXTREMITIES_DIR_DEFAULT,
         skeleton_dir=_RESAMPLED_SKELETON_DIR_DEFAULT,
-        masked_dir=_RESAMPLED_FOLDLABEL_DIR_DEFAULT,
+        masked_dir=_RESAMPLED_EXTREMITIES_DIR_DEFAULT,
         side=_SIDE_DEFAULT,
         parallel=False,
         nb_subjects=_ALL_SUBJECTS):
 
-    masker = FoldLabelMasker(
+    masker = ExtremitiesMasker(
         src_dir=src_dir,
         skeleton_dir=skeleton_dir,
         masked_dir=masked_dir,

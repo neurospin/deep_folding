@@ -526,7 +526,7 @@ def main(argv):
         elif params['input_type'] == 'extremities':
             raw_input = os.path.join(params['extremities_dir'], 'raw')
             resampled_dir = os.path.join(params['extremities_dir'], vox_size)
-            
+
         else:
             # raw data supposed to be skeletons by default
             raw_input = os.path.join(params['skeleton_dir'], 'raw')

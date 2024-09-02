@@ -66,8 +66,8 @@ from soma import aims
 
 # Imports constants
 from deep_folding.brainvisa.utils.constants import \
-    _ALL_SUBJECTS, _SUPERVISED_SRC_DIR_DEFAULT,\
-    _MASK_DIR_DEFAULT, _SIDE_DEFAULT, _SULCUS_DEFAULT,\
+    _ALL_SUBJECTS, _SUPERVISED_SRC_DIR_DEFAULT, \
+    _MASK_DIR_DEFAULT, _SIDE_DEFAULT, _SULCUS_DEFAULT, \
     _VOXEL_SIZE_DEFAULT, _PATH_TO_GRAPH_SUPERVISED_DEFAULT
 
 # Defines logger
