@@ -18,15 +18,17 @@ regions = ["S.C.-sylv.", "S.C.-S.Pe.C.", "S.C.-S.Po.C.",\
             "F.C.L.p.-subsc.-F.C.L.a.-INSULA.", "S.F.int.-S.R.",\
             "fronto-parietal_medial_face."\
             ]
-            """
+"""
 # regions = ["F.I.P.", "S.T.s.-S.GSM.", "F.C.L.p.-S.GSM."]
 # regions = ["F.I.P."]
-#regions = ["OCCIPITAL"]
 regions = ["F.C.L.p.-subsc.-F.C.L.a.-INSULA."]
-datasets = ['UkBioBank']
+#regions = ["OCCIPITAL"]
+# regions = ["S.T.s.-S.GSM.", "F.C.L.p.-S.GSM."]
+datasets = ['hcp', 'UkBioBank']
+# datasets = ['synesthetes']
 # datasets = ['candi', 'cnp', 'bsnip1', 'schizconnect-vip-prague']
 # datasets = ['PreCatatoes']
-sides = ['L', 'R']
+sides = ['L']
 input_types = ['skeleton', 'foldlabel']
 
 
@@ -50,6 +52,8 @@ for region in regions:
                     json_dict['combine_type'] = False
                     
                 if (region == 'OCCIPITAL') or (region == "F.C.L.p.-subsc.-F.C.L.a.-INSULA."):
+                    json_dict['threshold'] = 1
+                elif (region == 'F.C.L.p.-subsc.-F.C.L.a.-INSULA.') and (side == 'L'):
                     json_dict['threshold'] = 1
                 else:
                     json_dict['threshold'] = 0
