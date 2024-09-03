@@ -205,8 +205,8 @@ def quality_checks_extremities(crop_dir, side):
         "Number of skeleton subjects differs between numpy array and csv"
     assert (f.shape[0] == len(dff)), \
         "Number of extremities subjects differs between numpy array and csv"
-        
-        
+
+    
 class CropGenerator:
     """Generates cropped skeleton files and corresponding npy file
     """
