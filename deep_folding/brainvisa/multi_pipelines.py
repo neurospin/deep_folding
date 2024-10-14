@@ -48,7 +48,7 @@ regions = ["S.C.-sylv.", "S.C.-S.Pe.C.", "S.C.-S.Po.C.",
            ]
 """
 regions = ["F.I.P."]
-sides = ["R"]
+sides = ["L"]
 input_types = ["skeleton", "foldlabel", "extremities"]
 verbose = "-v"
 

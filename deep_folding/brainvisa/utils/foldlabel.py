@@ -206,5 +206,8 @@ def generate_foldlabel_from_graph_file(graph_file: str,
                                        junction: str = _JUNCTION_DEFAULT):
     """Generates skeleton from graph file"""
     graph = aims.read(graph_file)
-    vol_label = generate_foldlabel_from_graph(graph, junction)
+    try:
+        vol_label = generate_foldlabel_from_graph(graph, junction)
+    except Exception as e:
+        raise Exception(f"Error generating foldlabel from {graph_file}") from e
     aims.write(vol_label, foldlabel_file)
