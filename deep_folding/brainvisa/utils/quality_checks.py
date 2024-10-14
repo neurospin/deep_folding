@@ -274,7 +274,7 @@ def get_not_processed_subjects(src_subjects, tgt_dir, prefix="generated_"):
         log.info(f"first target file = {tgt_files[0]}")
 
     tgt_subjects = [subject.split(prefix)[-1] for subject in tgt_files]
-    tgt_subjects = [subject.split("_")[0] for subject in tgt_subjects]
+    # tgt_subjects = [subject.split("_")[0] for subject in tgt_subjects]
 
     tgt_subjects = [subject.split(".")[0] for subject in tgt_subjects]
 
@@ -331,7 +331,7 @@ def get_not_processed_subjects_transform(
         log.info(f"first target file = {tgt_files[0]}")
 
     tgt_subjects = [subject.split(prefix)[-1] for subject in tgt_files]
-    tgt_subjects = [subject.split("_")[0] for subject in tgt_subjects]
+    # tgt_subjects = [subject.split("_")[0] for subject in tgt_subjects]
 
     tgt_subjects = [subject.split(".")[0] for subject in tgt_subjects]
 

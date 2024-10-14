@@ -152,27 +152,27 @@ class ExtremitiesMasker:
         skel_np = skel.np
         old_extremities_np = old_extremities.np
 
-        old_extremities_np2 = old_extremities_np.copy()
+        extremities = old_extremities_np.copy()
         # first mask skeleton using extremities because sometimes
         # 1vx is added during skeletonization...
-        old_extremities_np2[skel_np == 0] = 0
+        extremities[skel_np == 0] = 0
 
-        # extremities are computed without the top (value 35 in skeleton)
-        # we here add the top, by looking for the value 35 in skeleton
-        # at distance 1 of the extremities
-        log.info("Extremities voxels without tops: "
-                 f"{np.sum(old_extremities_np2)}")
-        extremities_dilated = binary_dilation(
-                                old_extremities_np2[:, :, :, 0],
-                                ball(_DILATION_MAGNITUDE))
-        extremities_dilated = np.expand_dims(extremities_dilated, axis=-1)
-        tops_of_extremities = np.logical_and(extremities_dilated,
-                                             (skel_np == 35))
-        extremities = np.logical_or(old_extremities_np2,
-                                    tops_of_extremities)
-        extremities = extremities.astype(np.int16)
-        print("Voxels of extremities after adding tops : "
-              f"{np.sum(extremities)}")
+        # # extremities are computed without the top (value 35 in skeleton)
+        # # we here add the top, by looking for the value 35 in skeleton
+        # # at distance 1 of the extremities
+        # log.info("Extremities voxels without tops: "
+        #          f"{np.sum(old_extremities_np2)}")
+        # extremities_dilated = binary_dilation(
+        #                         old_extremities_np2[:, :, :, 0],
+        #                         ball(_DILATION_MAGNITUDE))
+        # extremities_dilated = np.expand_dims(extremities_dilated, axis=-1)
+        # tops_of_extremities = np.logical_and(extremities_dilated,
+        #                                      (skel_np == 35))
+        # extremities = np.logical_or(old_extremities_np2,
+        #                             tops_of_extremities)
+        # extremities = extremities.astype(np.int16)
+        # print("Voxels of extremities after adding tops : "
+        #       f"{np.sum(extremities)}")
 
         # Makes som checks
         f = extremities != 0

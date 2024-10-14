@@ -29,10 +29,26 @@ datasets = ["candi", "cnp", "bsnip1", "schizconnect-vip-prague"]
 datasets = ["PreCatatoes"]
 """
 
-path_dataset_root = "/neurospin/dico/data/deep_folding/test/datasets"
-datasets = ["hcp"]
-regions = ["S.C.-sylv."]
-sides = ["L"]
+path_dataset_root = "/neurospin/dico/data/deep_folding/current/datasets"
+datasets = ["UkBioBank40"]
+"""
+regions = ["S.C.-sylv.", "S.C.-S.Pe.C.", "S.C.-S.Po.C.",
+           "S.Pe.C.", "S.Po.C.", "CINGULATE.", "S.F.int.-F.C.M.ant.",
+           "S.F.inf.-BROCA-S.Pe.C.inf.", "S.T.s.", "Sc.Cal.-S.Li.",
+           "F.C.M.post.-S.p.C.", "S.T.i.-S.O.T.lat.",
+           "OCCIPITAL", "F.I.P.", "S.F.inter.-S.F.sup.",
+           "S.F.median-S.F.pol.tr.-S.F.sup.", "S.Or.",
+           "S.Or.-S.Olf.", "F.P.O.-S.Cu.-Sc.Cal.",
+           "S.s.P.-S.Pa.int.", "S.T.s.br.",
+           "Lobule_parietal_sup.", "S.F.marginal-S.F.inf.ant.",
+           "F.Coll.-S.Rh.", "S.T.i.-S.T.s.-S.T.pol.",
+           "F.C.L.p.-subsc.-F.C.L.a.-INSULA.", "S.F.int.-S.R.",
+           "fronto-parietal_medial_face.",
+           "S.T.s.-S.GSM.", "F.C.L.p.-S.GSM."
+           ]
+"""
+regions = ["F.I.P."]
+sides = ["R"]
 input_types = ["skeleton", "foldlabel", "extremities"]
 verbose = "-v"
 

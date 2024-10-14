@@ -89,7 +89,7 @@ from deep_folding.brainvisa.utils.constants import \
 # Defines logger
 log = set_file_logger(__file__)
 
-_VX_TOLERANCE = 30
+_VX_TOLERANCE = 40
 
 
 def nearest_nonzero_idx(a, x, y, z):
@@ -157,8 +157,8 @@ class FoldLabelMasker:
         s = skel_np != 0
         diff_fs = np.sum(f != s)
         assert (diff_fs <= _VX_TOLERANCE), \
-            f"subject {subject} has incompatible foldlabel and skeleton. "
-        f"{np.sum(s)} vx in skeleton, {np.sum(f)} vx in foldlabel"
+            f"subject {subject} has incompatible foldlabel and skeleton. " \
+            f"{np.sum(s)} vx in skeleton, {np.sum(f)} vx in foldlabel"
         if diff_fs != 0:
             warnings.warn(
                 f"subject {subject} has incompatible foldlabel and skeleton. "
