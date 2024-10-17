@@ -42,7 +42,7 @@ AUTHOR_EMAIL = ""
 PLATFORMS = "OS Independent"
 PROVIDES = ["deep_folding"]
 REQUIRES = ['six', 'numpy', 'pytest', 'GitPython', 'typing', 'joblib',
-            'tqdm>=4.36', 'pqdm', 'p_tqdm',
+            'tqdm>=4.36', 'pqdm', 'p_tqdm', sparse,
             'dico_toolbox @ \
                 git+https://git@github.com/neurospin/dico_toolbox#egg=dico_toolbox',
             'colorado @ \

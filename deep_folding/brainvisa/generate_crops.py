@@ -192,7 +192,7 @@ def quality_checks_extremities(crop_dir, side):
 
     # checks if same voxel position
     assert (s.shape == f.shape), (
-        f"Skeleton and foldlabel of different shapes: {s.shape} != {f.shape}")
+        f"Skeleton and extremities of different shapes: {s.shape} != {f.shape}")
 
     # Checks if subjects are equal between foldlabel and skeleton
     dff = pd.read_csv(f"{crop_dir}/{side}extremities_subject.csv")

@@ -54,6 +54,7 @@ import re
 import sys
 from os.path import abspath
 from os.path import basename
+from os.path import exists
 from p_tqdm import p_map
 
 from deep_folding.brainvisa import exception_handler
@@ -240,10 +241,10 @@ class GraphConvert2Extremity:
                 zip(list_graph_file, list_skeleton_with_hull_file):
             extremity_file = self.get_extremity_filename(subject, graph_file)
             log.debug(f"skeleton_with_hull_file = {skeleton_with_hull_file}")
-
-            generate_extremities_from_graph_file(graph_file,
-                                                 skeleton_with_hull_file,
-                                                 extremity_file)
+            if not exists(extremity_file):
+                generate_extremities_from_graph_file(graph_file,
+                                                    skeleton_with_hull_file,
+                                                    extremity_file)
             if not self.bids:
                 break
 

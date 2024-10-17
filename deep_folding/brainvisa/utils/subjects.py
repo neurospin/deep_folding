@@ -37,6 +37,7 @@ import os
 import re
 
 import pandas as pd
+from pandas.api.types import is_integer_dtype
 
 from deep_folding.brainvisa.utils.constants import _ALL_SUBJECTS
 
@@ -179,6 +180,8 @@ def select_good_qc(orig_list: list, qc_path: str):
         log.info('Reading qc tsv file')
         qc_file = pd.read_csv(qc_path, sep=sep)
         qc_file["participant_id"] = qc_file["participant_id"].astype(str)
+        if not is_integer_dtype(qc_file.qc):
+            raise ValueError(f"qc column of qc_file {qc_path} is not of integer type!")
         qc_file = qc_file[qc_file.qc != 0]
 
         sublist = [name for name in orig_list

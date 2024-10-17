@@ -221,8 +221,9 @@ class GraphConvert2FoldLabel:
 
         for graph_file in list_graph_file:
             foldlabel_file = self.get_foldlabel_filename(subject, graph_file)
-            generate_foldlabel_from_graph_file(
-                graph_file, foldlabel_file, self.junction)
+            if not exists(foldlabel_file):
+                generate_foldlabel_from_graph_file(
+                    graph_file, foldlabel_file, self.junction)
             if not self.bids:
                 break
 

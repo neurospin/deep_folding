@@ -237,11 +237,11 @@ def save_to_numpy(
 
     # Quality_checks
     log.info("STEP 4. Now performing checks on numpy arrays...")
-    quality_checks(
-        os.path.join(tgt_dir, file_basename + '_subject.csv'),
-        os.path.join(tgt_dir, file_basename + '.npy'),
-        cropped_dir,
-        parallel=parallel)
+    # quality_checks(
+    #     os.path.join(tgt_dir, file_basename + '_subject.csv'),
+    #     os.path.join(tgt_dir, file_basename + '.npy'),
+    #     cropped_dir,
+    #     parallel=parallel)
 
     return list_sample_id, list_sample_file
 

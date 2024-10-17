@@ -52,6 +52,7 @@ import sys
 import re
 from os.path import abspath
 from os.path import basename
+from os.path import exists
 
 from deep_folding.brainvisa import exception_handler
 from deep_folding.brainvisa.utils.folder import create_folder
@@ -189,10 +190,11 @@ class GraphGenerateTransform:
                                f"{graph_path} doesn't exist")
         for graph_file in list_graph_file:
             transform_file = self.get_transform_filename(subject, graph_file)
-            graph = aims.read(graph_file)
-            g_to_icbm_template = aims.GraphManip.getICBM2009cTemplateTransform(
-                graph)
-            aims.write(g_to_icbm_template, transform_file)
+            if not exists(transform_file):
+                graph = aims.read(graph_file)
+                g_to_icbm_template = aims.GraphManip.getICBM2009cTemplateTransform(
+                    graph)
+                aims.write(g_to_icbm_template, transform_file)
             if not self.bids:
                 break
 
@@ -217,10 +219,7 @@ class GraphGenerateTransform:
         """Loops over subjects to generate transforms to ICBM2009c from graphs.
         """
         # Gets list fo subjects
-        log.debug(f"src_dir = {self.src_dir}")
-        filenames = glob.glob(f"{self.src_dir}/*[!.minf]")
-        log.info(f"filenames[:5] = {filenames[:5]}")
-
+        filenames = glob.glob(f"{self.src_dir}/*")
         list_subjects = [basename(filename) for filename in filenames
                          if is_it_a_subject(filename)]
         log.info(f"Number of subjects before qc = {len(list_subjects)}")

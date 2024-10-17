@@ -52,6 +52,7 @@ import re
 import sys
 from os.path import abspath
 from os.path import basename
+from os.path import exists
 
 from p_tqdm import p_map
 
@@ -210,9 +211,11 @@ class GraphConvert2Skeleton:
                                f"{graph_path} does not exist")
         for graph_file in list_graph_file:
             skeleton_file = self.get_skeleton_filename(subject, graph_file)
-            generate_skeleton_from_graph_file(graph_file,
-                                              skeleton_file,
-                                              self.junction)
+            if not exists(skeleton_file):
+                generate_skeleton_from_graph_file(
+                    graph_file,
+                    skeleton_file,
+                    self.junction)
             if not self.bids:
                 break
 

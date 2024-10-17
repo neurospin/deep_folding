@@ -156,6 +156,8 @@ class FoldLabelMasker:
         f = foldlabel != 0
         s = skel_np != 0
         diff_fs = np.sum(f != s)
+        
+        # try:
         assert (diff_fs <= _VX_TOLERANCE), \
             f"subject {subject} has incompatible foldlabel and skeleton. " \
             f"{np.sum(s)} vx in skeleton, {np.sum(f)} vx in foldlabel"
@@ -170,8 +172,8 @@ class FoldLabelMasker:
                 d, e, f = nearest_nonzero_idx(foldlabel[:, :, :, 0], x, y, z)
                 foldlabel[x, y, z, 0] = foldlabel[d, e, f, 0]
                 print(f"foldlabel has a 0 at index {x,y,z}, "
-                      f"nearest nonzero at index {d,e,f}, "
-                      f"value {foldlabel[d,e,f,0]}")
+                    f"nearest nonzero at index {d,e,f}, "
+                    f"value {foldlabel[d,e,f,0]}")
         f = foldlabel != 0
         assert np.sum(f != s) == 0, \
             f"subject {subject} has incompatible foldlabel and skeleton " \
@@ -182,7 +184,9 @@ class FoldLabelMasker:
         aims.write(
             vol,
             os.path.join(self.masked_dir,
-                         f'{self.side}resampled_foldlabel_{subject}.nii.gz'))
+                        f'{self.side}resampled_foldlabel_{subject}.nii.gz'))
+        # except AssertionError as e:
+        #     log.error(str(e))
 
     def compute(self, nb_subjects=_ALL_SUBJECTS):
         """Loops over nii files

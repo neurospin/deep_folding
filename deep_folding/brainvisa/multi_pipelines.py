@@ -30,8 +30,9 @@ datasets = ["PreCatatoes"]
 """
 
 path_dataset_root = "/neurospin/dico/data/deep_folding/current/datasets"
-datasets = ["UkBioBank40"]
+
 """
+datasets = ["pclean"]
 regions = ["S.C.-sylv.", "S.C.-S.Pe.C.", "S.C.-S.Po.C.",
            "S.Pe.C.", "S.Po.C.", "CINGULATE.", "S.F.int.-F.C.M.ant.",
            "S.F.inf.-BROCA-S.Pe.C.inf.", "S.T.s.", "Sc.Cal.-S.Li.",
@@ -46,11 +47,19 @@ regions = ["S.C.-sylv.", "S.C.-S.Pe.C.", "S.C.-S.Po.C.",
            "fronto-parietal_medial_face.",
            "S.T.s.-S.GSM.", "F.C.L.p.-S.GSM."
            ]
-"""
-regions = ["F.I.P."]
-sides = ["L"]
+sides = ["R", "L"]
 input_types = ["skeleton", "foldlabel", "extremities"]
 verbose = "-v"
+
+"""
+
+datasets = ["UkBioBank40"]
+regions = ["F.I.P."]
+sides = ["L"]
+input_types = ["extremities"]
+verbose = "-v"
+
+
 
 
 for region in regions:
