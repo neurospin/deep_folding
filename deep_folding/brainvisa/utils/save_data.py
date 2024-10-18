@@ -21,6 +21,10 @@ from deep_folding.config.logs import set_file_logger
 # Defines logger
 log = set_file_logger(__file__)
 
+# Defines global list to speed up parallelization
+# of quality checks
+list_basename = []
+
 
 def is_file_nii(filename):
     """Tests if file is nii file
@@ -104,13 +108,13 @@ def save_to_dataframe_format_from_list(
     dataframe.to_pickle(file_pickle)
 
 
-def compare_one_array(cropped_dir, list_basename, row):
-    index = row[0]
-    sub = row[1]
+def compare_one_array(row, cropped_dir):
+    global list_basename
+    sub = row
     index_sub = [idx for idx, x in enumerate(list_basename) if x.startswith(f"{str(sub)}_cropped")]
-    if len(index_sub)==1:
+    if len(index_sub) == 1:
         index_sub = index_sub[0]
-    elif len(index_sub)>1:
+    elif len(index_sub) > 1:
         raise ValueError(f"Subject {sub}: several crops are matched to definition")
     else:
         raise ValueError(f"Subject {sub} not in cropped files")
@@ -120,18 +124,32 @@ def compare_one_array(cropped_dir, list_basename, row):
     return arr_ref
 
 
-def compare_array_aims_files(subjects, arr, cropped_dir, parallel=True):
+def compare_array_aims_files(subjects, arr, cropped_dir, parallel=False):
     """Compares numpy arrays to subject nifti files"""
+    
+    global list_basename
+    
     log.info(f"subjects.head() = {subjects.head()}")
+    log.info(f"CPU count = {os.cpu_count()}")
+    
     if parallel:
         log.info("Quality check is done in PARALLEL")
+        
+        # Builds list_basename
         list_nifti = sorted(glob.glob(f"{cropped_dir}/*_cropped_*.nii.gz"))
         list_basename = [os.path.basename(f) for f in list_nifti]
         log.info(f"list_basename[:3] = {list_basename[:3]}")
-        partial_func = partial(compare_one_array, cropped_dir, list_basename)
-        enum = [x for x in enumerate(subjects['Subject'])]
-        log.info(f"enum subjects[:3] = {enum[:3]}")
-        list_arr = p_map(partial_func, enum)
+        
+        # Defines partial function
+        partial_func = partial(compare_one_array, cropped_dir=cropped_dir)
+        log.info(f"cropped_dir = {cropped_dir}")
+        list_subjects = subjects['Subject'].to_list()
+        log.info(f"enum subjects[:3] = {list_subjects[:3]}")
+        
+        # Reads all volumes as numpy arrays
+        list_arr = p_map(partial_func, list_subjects)
+        
+        # Compares with reference numpy array
         for index, arr_ref in enumerate(list_arr):
             if not np.array_equal(arr_ref, arr[index, ...]):
                 raise ValueError(
@@ -140,9 +158,20 @@ def compare_array_aims_files(subjects, arr, cropped_dir, parallel=True):
                     "arrays do not match")
     else:
         log.info("Quality check is done SERIALLY")
+        list_nifti = sorted(glob.glob(f"{cropped_dir}/*_cropped_*.nii.gz"))
+        list_basename = [os.path.basename(f) for f in list_nifti]
         for index, row in tqdm(subjects.iterrows()):
             sub = row['Subject']
-            subject_file = glob.glob(f"{cropped_dir}/{sub}_cropped_*.nii.gz")[0]
+            index_sub = [idx for idx, x in enumerate(list_basename) if x.startswith(f"{str(sub)}_cropped")]
+            
+            if len(index_sub) == 1:
+                index_sub = index_sub[0]
+            elif len(index_sub) > 1:
+                raise ValueError(f"Subject {sub}: several crops are matched to definition")
+            else:
+                raise ValueError(f"Subject {sub} not in cropped files")
+            
+            subject_file = f"{cropped_dir}/{list_basename[index_sub]}"
             vol = aims.read(subject_file)
             arr_ref = np.asarray(vol)
             arr_from_array = arr[index, ...]
@@ -160,7 +189,7 @@ def quality_checks(
 
     This is to check that the subjects list in csv file
     match the order set in numpy arrays"""
-    arr = np.load(npy_array_file_path, mmap_mode='r')
+    arr = np.load(npy_array_file_path)
     subjects = pd.read_csv(csv_file_path, dtype=str)
     compare_array_aims_files(subjects, arr, cropped_dir, parallel)
 
@@ -237,11 +266,11 @@ def save_to_numpy(
 
     # Quality_checks
     log.info("STEP 4. Now performing checks on numpy arrays...")
-    # quality_checks(
-    #     os.path.join(tgt_dir, file_basename + '_subject.csv'),
-    #     os.path.join(tgt_dir, file_basename + '.npy'),
-    #     cropped_dir,
-    #     parallel=parallel)
+    quality_checks(
+        os.path.join(tgt_dir, file_basename + '_subject.csv'),
+        os.path.join(tgt_dir, file_basename + '.npy'),
+        cropped_dir,
+        parallel=parallel)
 
     return list_sample_id, list_sample_file
 
@@ -252,6 +281,7 @@ if __name__ == '__main__':
     #     tgt_dir='/neurospin/dico/data/deep_folding/current/crops/SC/mask/sulcus_based/2mm/',
     #     file_basename='Rlabels')
     save_to_numpy(
-        cropped_dir='/neurospin/dico/data/deep_folding/current/datasets/hcp/crops/1mm/SC/no_mask/Rcrops/',
-        tgt_dir='/neurospin/dico/data/deep_folding/current/datasets/hcp/crops/1mm/SC/no_mask/Rcrops',
-        file_basename='Rlabels')
+        cropped_dir='/neurospin/dico/data/deep_folding/current/datasets/UkBioBank40/crops/2mm/F.I.P./mask/Rcrops/',
+        tgt_dir='/neurospin/dico/data/deep_folding/current/datasets/UkBioBank40/crops/2mm/F.I.P./mask',
+        file_basename='Rskeleton',
+        parallel=True)

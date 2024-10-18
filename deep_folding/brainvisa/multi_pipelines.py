@@ -55,8 +55,8 @@ verbose = "-v"
 
 datasets = ["UkBioBank40"]
 regions = ["F.I.P."]
-sides = ["L"]
-input_types = ["extremities"]
+sides = ["R"]
+input_types = ["skeleton", "foldlabel", "extremities"]
 verbose = "-v"
 
 

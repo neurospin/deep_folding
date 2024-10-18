@@ -66,7 +66,7 @@ for sulcus in tqdm(sulcus_list):
         #     distbottoms = np.flip(distbottoms, axis=1)
         #     extremities = np.flip(extremities, axis=1)
 
-        save_dir = f'{root_save_dir}/{side}skeleton_sparse'
+        save_dir = f'{root_save_dir}/{side}'
         if not os.path.isdir(os.path.join(save_dir, 'coords')):
             os.makedirs(os.path.join(save_dir, 'coords'))
         if not os.path.isdir(os.path.join(save_dir, 'skeleton')):
