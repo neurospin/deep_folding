@@ -231,8 +231,6 @@ class GraphConvert2FoldLabel:
         """Loops over subjects and converts graphs into skeletons.
         """
         # Gets list of subject names
-        if not exists(self.src_dir):
-            raise ValueError(f"{self.src_dir} does not exist!")
         filenames = glob.glob(f"{self.src_dir}/*")
         list_subjects = [basename(filename) for filename in filenames
                          if is_it_a_subject(filename)]

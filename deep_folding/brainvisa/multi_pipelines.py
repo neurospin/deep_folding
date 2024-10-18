@@ -54,7 +54,20 @@ verbose = "-v"
 """
 
 datasets = ["UkBioBank40"]
-regions = ["F.I.P."]
+regions = ["F.I.P.", "S.C.-sylv.", "S.C.-S.Pe.C.", "S.C.-S.Po.C.",
+           "S.Pe.C.", "S.Po.C.", "CINGULATE.", "S.F.int.-F.C.M.ant.",
+           "S.F.inf.-BROCA-S.Pe.C.inf.", "S.T.s.", "Sc.Cal.-S.Li.",
+           "F.C.M.post.-S.p.C.", "S.T.i.-S.O.T.lat.",
+           "OCCIPITAL", "S.F.inter.-S.F.sup.",
+           "S.F.median-S.F.pol.tr.-S.F.sup.", "S.Or.",
+           "S.Or.-S.Olf.", "F.P.O.-S.Cu.-Sc.Cal.",
+           "S.s.P.-S.Pa.int.", "S.T.s.br.",
+           "Lobule_parietal_sup.", "S.F.marginal-S.F.inf.ant.",
+           "F.Coll.-S.Rh.", "S.T.i.-S.T.s.-S.T.pol.",
+           "F.C.L.p.-subsc.-F.C.L.a.-INSULA.", "S.F.int.-S.R.",
+           "fronto-parietal_medial_face.",
+           "S.T.s.-S.GSM.", "F.C.L.p.-S.GSM."
+           ]
 sides = ["R"]
 input_types = ["skeleton", "foldlabel", "extremities"]
 verbose = "-v"
