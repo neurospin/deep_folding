@@ -35,7 +35,7 @@
 
 """ Remove ventricle from a volume through the automatic labelled graph
 by Morphologist.
-Be careful :
+/!\ Be careful :
 With the BIDS argument, the session-acquisition-run Morphologist folder
 should be replaced by a '*' in the <path_to_graph> argument.
 """
@@ -74,23 +74,28 @@ _LABELLING_SESSION_DEFAULT = "deepcnn_session_auto"
 log = set_file_logger(__file__)
 
 
-def remove_ventricle_from_graph(volume_file, labelled_graph_file):
-    volume = aims.read(volume_file)
+def remove_ventricle_from_graph(volume, labelled_graph, background = 0):
     arr = np.asarray(volume)
-    labelled_graph = aims.read(labelled_graph_file)
     for vertex in labelled_graph.vertices():
-        if "label" in vertex:
-            label = vertex["label"]
-            if label.startswith("ventricle"):
-                for bucket_name in ('aims_other', 'aims_ss',
-                                    'aims_bottom'):
-                    bucket = vertex.get(bucket_name)
-                    if bucket is not None:
-                        voxels = np.array(bucket[0].keys())
+        label = vertex.get("label", "unknown")
+        if label.startswith("ventricle"):
+            for edge in range(len(vertex.edges())):
+                for bucket_name in ("aims_plidepassage", 'aims_junction'):
+                    if bucket_name in vertex.edges()[edge]:
+                        voxels = np.array(
+                            vertex.edges()[edge][bucket_name][0].keys())
                         if voxels.shape == (0,):
                             continue
                         for i, j, k in voxels:
-                            arr[i, j, k] = 0
+                            arr[i, j, k] = background
+            for bucket_name in ('aims_bottom', 'aims_other', 'aims_ss'):
+                bucket = vertex.get(bucket_name)
+                if bucket is not None:
+                    voxels = np.array(bucket[0].keys())
+                    if voxels.shape == (0,):
+                        continue
+                    for i, j, k in voxels:
+                        arr[i, j, k] = background
     return volume
 
 
@@ -231,10 +236,12 @@ class RemoveVentricleFromVolume:
         log.debug(f"output_file = {output_file}")
 
         if exists(src_file):
+            volume = aims.read(src_file)
             for graph_file in labelled_graph_list:
                 if exists(graph_file):
+                    labelled_graph = aims.read(graph_file)
                     volume = remove_ventricle_from_graph(
-                        src_file, graph_file)
+                        volume, labelled_graph)
                 else:
                     raise FileNotFoundError(f"Labelled graph not found : \
                                             {graph_file}")
@@ -259,8 +266,7 @@ class RemoveVentricleFromVolume:
                     keys = "_".join(split[1:])
                 else:
                     keys = ""
-                    log.warning(f"The subject {subject} has no session, "
-                                "acquisition or run.")
+                    log.warning(f"The subject {subject} has no session, acquisition or run.")
                 filename = f"{side}{subject_id}_{self.labelling_session}.arg"
                 labelled_graph_file = join(
                     self.morpho_dir, subject_id, self.path_to_graph.replace(
