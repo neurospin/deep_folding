@@ -56,7 +56,8 @@ from deep_folding.brainvisa.utils.subjects import select_subjects_int
 from deep_folding.brainvisa.utils.logs import setup_log
 from deep_folding.brainvisa.utils.parallel import define_njobs
 from deep_folding.brainvisa.utils.quality_checks import \
-    compare_number_aims_files_with_expected
+    compare_number_aims_files_with_expected, \
+    get_not_processed_files_general
 from deep_folding.config.logs import set_file_logger
 
 # Import constants
@@ -66,15 +67,15 @@ from deep_folding.brainvisa.utils.constants import \
     _PATH_TO_GRAPH_DEFAULT
 
 _OUTPUT_DIR_DEFAULT = join(_SKELETON_DIR_DEFAULT, "without_ventricle")
-_SRC_FILENAME_DEFAULT = "skeleton_generated"
-_OUTPUT_FILENAME_DEFAULT = "skeleton_generated_without_ventricle"
+_SRC_FILENAME_DEFAULT = "skeleton_generated_"
+_OUTPUT_FILENAME_DEFAULT = "skeleton_generated_without_ventricle_"
 _LABELLING_SESSION_DEFAULT = "deepcnn_session_auto"
 
 # Defines logger
 log = set_file_logger(__file__)
 
 
-def remove_ventricle_from_graph(volume, labelled_graph, background = 0):
+def remove_ventricle_from_graph(volume, labelled_graph, background=0):
     arr = np.asarray(volume)
     for vertex in labelled_graph.vertices():
         label = vertex.get("label", "unknown")
@@ -215,9 +216,11 @@ class RemoveVentricleFromVolume:
         self.output_dir = join(output_dir, self.side)
         create_folder(abspath(self.output_dir))
 
-        self.expr = f"{self.side}{src_filename}_(.*).nii.gz$"
-        self.src_file = f"%(side)s{src_filename}_%(subject)s.nii.gz"
-        self.output_file = f"%(side)s{output_filename}_%(subject)s.nii.gz"
+        self.expr = f"{self.side}{src_filename}(.*).nii.gz$"
+        self.src_filename = src_filename
+        self.output_filename = output_filename
+        self.src_file = f"%(side)s{src_filename}%(subject)s.nii.gz"
+        self.output_file = f"%(side)s{output_filename}%(subject)s.nii.gz"
 
     def remove_ventricle_from_one_subject(self, subject: str):
         """ Removes ventricle and writes new volume file for one subject.
@@ -235,20 +238,23 @@ class RemoveVentricleFromVolume:
         log.debug(f"labelled_graphs = {labelled_graph_list}")
         log.debug(f"output_file = {output_file}")
 
-        if exists(src_file):
-            volume = aims.read(src_file)
-            for graph_file in labelled_graph_list:
-                if exists(graph_file):
-                    labelled_graph = aims.read(graph_file)
-                    volume = remove_ventricle_from_graph(
-                        volume, labelled_graph)
-                else:
-                    raise FileNotFoundError(f"Labelled graph not found : \
-                                            {graph_file}")
-            aims.write(volume, output_file)
-        else:
-            raise FileNotFoundError(f"Source file not found : \
-                                    {src_file}")
+        try:
+            if exists(src_file):
+                volume = aims.read(src_file)
+                for graph_file in labelled_graph_list:
+                    if exists(graph_file):
+                        labelled_graph = aims.read(graph_file)
+                        volume = remove_ventricle_from_graph(
+                            volume, labelled_graph)
+                    else:
+                        raise FileNotFoundError(f"Labelled graph not found : \
+                                                {graph_file}")
+                aims.write(volume, output_file)
+            else:
+                raise FileNotFoundError(f"Source file not found : \
+                                        {src_file}")
+        except Exception as e:
+            log.error(f"{subject}: {repr(e)}")
 
     def get_labelled_graph(self, subject: str):
         """ Find the labelled graph in the morphologist database from the
@@ -266,7 +272,8 @@ class RemoveVentricleFromVolume:
                     keys = "_".join(split[1:])
                 else:
                     keys = ""
-                    log.warning(f"The subject {subject} has no session, acquisition or run.")
+                    log.warning(f"The subject {subject} has no session, "
+                                "acquisition or run.")
                 filename = f"{side}{subject_id}_{self.labelling_session}.arg"
                 labelled_graph_file = join(
                     self.morpho_dir, subject_id, self.path_to_graph.replace(
@@ -290,13 +297,25 @@ class RemoveVentricleFromVolume:
         log.debug(f"reg exp = {self.expr}")
 
         if isdir(self.src_dir):
-            filenames = glob.glob(f"{self.src_dir}/*.nii.gz")
-            log.debug(f"Volume files list = {filenames}")
+            src_files = glob.glob(f"{self.src_dir}/*.nii.gz")
+            log.debug(f"Volume files list = {src_files}")
 
-            list_subjects = [re.search(self.expr, basename(filename))[1]
-                             for filename in filenames
-                             if not re.search('.minf$', filename)]
-            list_subjects = select_subjects_int(list_subjects, number_subjects)
+            # Generates list of subjects not treated yet
+            not_processed_files = get_not_processed_files_general(
+                self.src_dir, self.output_dir,
+                self.src_filename, self.output_filename)
+
+            list_not_processed_subjects = [
+                re.search(self.expr, basename(dI))[1]
+                for dI in not_processed_files]
+            list_all_subjects = [
+                re.search(self.expr, basename(dI))[1]
+                for dI in src_files]
+
+            list_subjects = select_subjects_int(
+                list_all_subjects,
+                list_not_processed_subjects,
+                number_subjects)
 
             log.info(f"Expected number of subjects = {len(list_subjects)}")
             log.info(f"list_subjects[:5] = {list_subjects[:5]}")
