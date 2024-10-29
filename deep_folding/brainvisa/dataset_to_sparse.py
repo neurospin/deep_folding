@@ -6,7 +6,7 @@ from tqdm import tqdm
 import yaml
 import copy
 
-sides = ['L']
+sides = ['L', 'R']
 
 """
 sulcus_list = ['F.Coll.-S.Rh.', 'S.F.median-S.F.pol.tr.-S.F.sup.', 'S.F.inf.-BROCA-S.Pe.C.inf.', \
@@ -20,7 +20,7 @@ sulcus_list = ['F.Coll.-S.Rh.', 'S.F.median-S.F.pol.tr.-S.F.sup.', 'S.F.inf.-BRO
 # NB: S.T.s.-S.GSM. , extremities were not generated ? TODO: after TGCC reopens
 
 #sulcus_list = ['S.C.-sylv.', 'CINGULATE.', 'S.T.s.']
-sulcus_list = ['F.I.P.']
+sulcus_list = ['S.Or.']
 #sulcus_list = ['S.F.inf.-BROCA-S.Pe.C.inf.']
 
 #rotated = '_rotated'

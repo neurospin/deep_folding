@@ -1,9 +1,12 @@
-"""Uses the pipeline on multiple regions and datasets,
+"""
+Uses the pipeline on multiple regions and datasets,
 for both sides and input type."""
 
 import os
 import json
 import subprocess
+
+path_dataset_root = "/neurospin/dico/data/deep_folding/current/datasets"
 
 """
 regions = ["S.C.-sylv.", "S.C.-S.Pe.C.", "S.C.-S.Po.C.",\
@@ -27,11 +30,7 @@ datasets = ["hcp", "UkBioBank"]
 datasets = ["synesthetes"]
 datasets = ["candi", "cnp", "bsnip1", "schizconnect-vip-prague"]
 datasets = ["PreCatatoes"]
-"""
 
-path_dataset_root = "/neurospin/dico/data/deep_folding/current/datasets"
-
-"""
 datasets = ["pclean"]
 regions = ["S.C.-sylv.", "S.C.-S.Pe.C.", "S.C.-S.Po.C.",
            "S.Pe.C.", "S.Po.C.", "CINGULATE.", "S.F.int.-F.C.M.ant.",
@@ -51,9 +50,6 @@ sides = ["R", "L"]
 input_types = ["skeleton", "foldlabel", "extremities"]
 verbose = "-v"
 
-"""
-
-datasets = ["UkBioBank40"]
 regions = ["F.I.P.", "S.C.-sylv.", "S.C.-S.Pe.C.", "S.C.-S.Po.C.",
            "S.Pe.C.", "S.Po.C.", "CINGULATE.", "S.F.int.-F.C.M.ant.",
            "S.F.inf.-BROCA-S.Pe.C.inf.", "S.T.s.", "Sc.Cal.-S.Li.",
@@ -68,8 +64,29 @@ regions = ["F.I.P.", "S.C.-sylv.", "S.C.-S.Pe.C.", "S.C.-S.Po.C.",
            "fronto-parietal_medial_face.",
            "S.T.s.-S.GSM.", "F.C.L.p.-S.GSM."
            ]
-sides = ["R"]
-input_types = ["skeleton", "foldlabel", "extremities"]
+
+datasets = ["imagen"]
+
+regions = ["S.C.-sylv.", "S.C.-S.Pe.C.", "S.C.-S.Po.C.",
+           "S.Pe.C.", "S.Po.C.", "CINGULATE.", "S.F.int.-F.C.M.ant.",
+           "S.F.inf.-BROCA-S.Pe.C.inf.", "S.T.s.", "Sc.Cal.-S.Li.",
+           "F.C.M.post.-S.p.C.", "S.T.i.-S.O.T.lat.",
+           "OCCIPITAL", "S.F.inter.-S.F.sup.",
+           "S.F.median-S.F.pol.tr.-S.F.sup.",
+           "S.Or.-S.Olf.", "F.P.O.-S.Cu.-Sc.Cal."]
+
+regions = ["F.I.P.", "S.Or."]
+"""
+
+datasets = ["abide2"]
+
+regions = ["S.F.int.-F.C.M.ant."
+           ]
+
+
+
+sides = ["L"]
+input_types = ["skeleton"]
 verbose = "-v"
 
 

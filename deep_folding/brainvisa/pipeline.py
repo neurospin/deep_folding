@@ -101,7 +101,7 @@ def get_sulci_list(
     except ValueError:
         print(
             f"The given region {region_name} "
-            f"is not in the dictonary at {json_path}")
+            f"is not in the dictionary at {json_path}")
 
     return sulci_list
 

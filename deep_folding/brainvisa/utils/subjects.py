@@ -178,8 +178,7 @@ def select_good_qc(orig_list: list, qc_path: str):
         else:
             sep = ','
         log.info('Reading qc tsv file')
-        qc_file = pd.read_csv(qc_path, sep=sep)
-        qc_file["participant_id"] = qc_file["participant_id"].astype(str)
+        qc_file = pd.read_csv(qc_path, sep=sep, dtype={"participant_id": object})
         if not is_integer_dtype(qc_file.qc):
             raise ValueError(f"qc column of qc_file {qc_path} is not of integer type!")
         qc_file = qc_file[qc_file.qc != 0]

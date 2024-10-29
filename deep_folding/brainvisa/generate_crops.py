@@ -63,8 +63,6 @@ import scipy.ndimage
 
 from deep_folding.brainvisa import exception_handler
 from deep_folding.brainvisa.utils.save_data import save_to_numpy
-from deep_folding.brainvisa.utils.save_data import \
-    save_to_dataframe_format_from_list
 from deep_folding.brainvisa.utils.bbox import compute_max_box
 from deep_folding.brainvisa.utils.folder import create_folder
 from deep_folding.brainvisa.utils.logs import LogJson
@@ -192,7 +190,8 @@ def quality_checks_extremities(crop_dir, side):
 
     # checks if same voxel position
     assert (s.shape == f.shape), (
-        f"Skeleton and extremities of different shapes: {s.shape} != {f.shape}")
+        "Skeleton and extremities of different shapes: "
+        f"{s.shape} != {f.shape}")
 
     # Checks if subjects are equal between foldlabel and skeleton
     dff = pd.read_csv(f"{crop_dir}/{side}extremities_subject.csv")
@@ -206,7 +205,7 @@ def quality_checks_extremities(crop_dir, side):
     assert (f.shape[0] == len(dff)), \
         "Number of extremities subjects differs between numpy array and csv"
 
-    
+
 class CropGenerator:
     """Generates cropped skeleton files and corresponding npy file
     """
@@ -482,12 +481,6 @@ class CropGenerator:
                               tgt_dir=self.crop_dir,
                               file_basename=self.file_basename_npy,
                               parallel=self.parallel)
-            save_to_dataframe_format_from_list(
-                cropped_dir=self.cropped_samples_dir,
-                tgt_dir=self.crop_dir,
-                file_basename=self.file_basename_pickle,
-                list_sample_id=list_sample_id,
-                list_sample_file=list_sample_file)
 
 
 class SkeletonCropGenerator(CropGenerator):
