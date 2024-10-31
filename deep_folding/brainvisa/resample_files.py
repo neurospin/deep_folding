@@ -761,9 +761,7 @@ def parse_args(argv):
         'If no option is provided then logging.INFO is selected. '
         'If one option -v (or -vv) or more is provided '
         'then logging.DEBUG is selected.')
-
-    params = {}
-
+    
     args = parser.parse_args(argv)
 
     setup_log(args,
@@ -771,18 +769,11 @@ def parse_args(argv):
               prog_name=basename(__file__),
               suffix='right' if args.side == 'R' else 'left')
 
-    params['src_dir'] = args.src_dir
-    params['input_type'] = args.input_type
+    params = vars(args)
     params['resampled_dir'] = args.output_dir
-    params['transform_dir'] = args.transform_dir
-    params['side'] = args.side
-    params['out_voxel_size'] = args.out_voxel_size
-    params['parallel'] = args.parallel
     # Checks if nb_subjects is either the string "all" or a positive integer
     params['nb_subjects'] = get_number_subjects(args.nb_subjects)
-    params['src_filename'] = args.src_filename
-    params['output_filename'] = args.output_filename
-
+    
     # Removes renamed params
     # So that we can use params dictionary directly as function arguments
     params.pop('output_dir')
