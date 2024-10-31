@@ -471,9 +471,9 @@ class SkeletonResampler(FileResampler):
             out_voxel_size: float giving voxel size in mm
             parallel: does parallel computation if True
             src_filename : name of skeleton files
-                          (format : "<SIDE><src_filename><SUBJECT>.nii.gz")
+                          (format : "<SIDE><src_filename>_<SUBJECT>.nii.gz")
             output_filename : name of generated files
-                          (format : "<SIDE><output_filename><SUBJECT>.nii.gz")
+                          (format : "<SIDE><output_filename>_<SUBJECT>.nii.gz")
         """
         super(SkeletonResampler, self).__init__(
             src_dir=src_dir, resampled_dir=resampled_dir,
@@ -540,9 +540,9 @@ class FoldLabelResampler(FileResampler):
             out_voxel_size: float giving voxel size in mm
             parallel: does parallel computation if True
             src_filename : name of fold label files
-                          (format : "<SIDE><src_filename><SUBJECT>.nii.gz")
+                          (format : "<SIDE><src_filename>_<SUBJECT>.nii.gz")
             output_filename : name of generated files
-                          (format : "<SIDE><output_filename><SUBJECT>.nii.gz")
+                          (format : "<SIDE><output_filename>_<SUBJECT>.nii.gz")
         """
         super(FoldLabelResampler, self).__init__(
             src_dir=src_dir, resampled_dir=resampled_dir,
@@ -598,9 +598,9 @@ class ExtremitiesResampler(FileResampler):
             out_voxel_size: float giving voxel size in mm
             parallel: does parallel computation if True
             src_filename : name of fold label files
-                          (format : "<SIDE><src_filename><SUBJECT>.nii.gz")
+                          (format : "<SIDE><src_filename>_<SUBJECT>.nii.gz")
             output_filename : name of generated files
-                          (format : "<SIDE><output_filename><SUBJECT>.nii.gz")
+                          (format : "<SIDE><output_filename>_<SUBJECT>.nii.gz")
         """
         super(ExtremitiesResampler, self).__init__(
             src_dir=src_dir, resampled_dir=resampled_dir,
@@ -744,7 +744,7 @@ def parse_args(argv):
     parser.add_argument(
         "-f", "--src_filename", type=str, default=_SKELETON_FILENAME,
         help='Filename of sources files. '
-             'Format is : "<SIDE><src_filename><SUBJECT>.nii.gz" '
+             'Format is : "<SIDE><src_filename>_<SUBJECT>.nii.gz" '
              'Default is : ' + _SKELETON_FILENAME)
     parser.add_argument(
         "-e",
@@ -752,7 +752,7 @@ def parse_args(argv):
         type=str,
         default=_RESAMPLED_SKELETON_FILENAME,
         help='Filename of output files. '
-        'Format is : "<SIDE><output_filename><SUBJECT>.nii.gz" '
+        'Format is : "<SIDE><output_filename>_<SUBJECT>.nii.gz" '
         'Default is : ' +
         _RESAMPLED_SKELETON_FILENAME)
     parser.add_argument(
