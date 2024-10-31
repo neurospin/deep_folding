@@ -85,12 +85,12 @@ from deep_folding.brainvisa.utils.constants import \
     _SKELETON_DIR_DEFAULT, \
     _RESAMPLED_SKELETON_DIR_DEFAULT
 
-_SKELETON_FILENAME = "skeleton_generated_"
-_FOLDLABEL_FILENAME = "foldlabel_"
-_EXTREMITIES_FILENAME = "extremities_"
-_RESAMPLED_SKELETON_FILENAME = "resampled_skeleton_"
-_RESAMPLED_FOLDLABEL_FILENAME = "resampled_foldlabel_"
-_RESAMPLED_EXTREMITIES_FILENAME = "resampled_extremities_"
+_SKELETON_FILENAME = "skeleton_generated"
+_FOLDLABEL_FILENAME = "foldlabel"
+_EXTREMITIES_FILENAME = "extremities"
+_RESAMPLED_SKELETON_FILENAME = "resampled_skeleton"
+_RESAMPLED_FOLDLABEL_FILENAME = "resampled_foldlabel"
+_RESAMPLED_EXTREMITIES_FILENAME = "resampled_extremities"
 
 
 # Defines logger
@@ -491,17 +491,17 @@ class SkeletonResampler(FileResampler):
         #    self.src_dir,
         #    '%(side)sskeleton_generated_%(subject)s.nii.gz')
         self.src_file = join(self.src_dir,
-                             '%(side)s' + src_filename + '%(subject)s.nii.gz')
+                             f'%(side)s{src_filename}_%(subject)s.nii.gz')
 
         # Names of files in function of dictionary: keys -> 'subject' and
         # 'side'
         self.src_filename = src_filename
         self.resampled_file = join(
             self.resampled_dir,
-            '%(side)s' + output_filename + '%(subject)s.nii.gz')
+            f'%(side)s{output_filename}_%(subject)s.nii.gz')
 
         # subjects are detected as the nifti file names under src_dir
-        self.expr = '^.' + src_filename + '(.*).nii.gz$'
+        self.expr = f'^.{src_filename}_(.*).nii.gz$'
 
     @staticmethod
     def resample_one_subject(src_file: str,
@@ -554,7 +554,7 @@ class FoldLabelResampler(FileResampler):
         # Src directory contains either 'R' or 'L' a subdirectory
         self.src_file = join(
             self.src_dir,
-            '%(side)s' + src_filename + '%(subject)s.nii.gz')
+            f'%(side)s{src_filename}_%(subject)s.nii.gz')
 
         # Names of files in function of dictionary: keys -> 'subject' and
         # 'side'
@@ -562,10 +562,10 @@ class FoldLabelResampler(FileResampler):
         self.resampled_dir = self.resampled_dir + "_before_masking"
         self.resampled_file = join(
             self.resampled_dir,
-            '%(side)s' + output_filename + '%(subject)s.nii.gz')
+            f'%(side)s{output_filename}_%(subject)s.nii.gz')
 
         # subjects are detected as the nifti file names under src_dir
-        self.expr = '^.' + src_filename + '(.*).nii.gz$'
+        self.expr = f'^.{src_filename}_(.*).nii.gz$'
 
     @staticmethod
     def resample_one_subject(src_file: str,
@@ -612,7 +612,7 @@ class ExtremitiesResampler(FileResampler):
         # Src directory contains either 'R' or 'L' a subdirectory
         self.src_file = join(
             self.src_dir,
-            '%(side)s' + src_filename + '%(subject)s.nii.gz')
+            f'%(side)s{src_filename}_%(subject)s.nii.gz')
 
         # Names of files in function of dictionary: keys -> 'subject' and
         # 'side'
@@ -620,10 +620,10 @@ class ExtremitiesResampler(FileResampler):
         self.resampled_dir = self.resampled_dir + "_before_masking"
         self.resampled_file = join(
             self.resampled_dir,
-            '%(side)s' + output_filename + '%(subject)s.nii.gz')
+            f'%(side)s{output_filename}_%(subject)s.nii.gz')
 
         # subjects are detected as the nifti file names under src_dir
-        self.expr = '^.' + src_filename + '(.*).nii.gz$'
+        self.expr = f'^.{src_filename}_(.*).nii.gz$'
 
     @staticmethod
     def resample_one_subject(src_file: str,
@@ -665,17 +665,17 @@ class DistMapResampler(FileResampler):
         # Src directory contains either 'R' or 'L' a subdirectory
         self.src_file = join(
             self.src_dir,
-            '%(side)s' + src_filename + '%(subject)s.nii.gz')
+            f'%(side)s{src_filename}_%(subject)s.nii.gz')
 
         # Names of files in function of dictionary: keys -> 'subject' and
         # 'side'
         self.src_filename = src_filename
         self.resampled_file = join(
             self.resampled_dir,
-            '%(side)s' + output_filename + '%(subject)s.nii.gz')
+            f'%(side)s{output_filename}_%(subject)s.nii.gz')
 
         # subjects are detected as the nifti file names under src_dir
-        self.expr = '^.' + src_filename + '(.*).nii.gz$'
+        self.expr = f'^.{src_filename}_(.*).nii.gz$'
 
     @staticmethod
     def resample_one_subject(src_file: str,
@@ -773,7 +773,7 @@ def parse_args(argv):
     params['resampled_dir'] = args.output_dir
     # Checks if nb_subjects is either the string "all" or a positive integer
     params['nb_subjects'] = get_number_subjects(args.nb_subjects)
-    
+
     # Removes renamed params
     # So that we can use params dictionary directly as function arguments
     params.pop('output_dir')
