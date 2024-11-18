@@ -78,7 +78,7 @@ regions = ["S.C.-sylv.", "S.C.-S.Pe.C.", "S.C.-S.Po.C.",
 regions = ["F.I.P.", "S.Or."]
 """
 
-datasets = ["abide2"]
+datasets = ["cnp"]
 
 regions = ["S.F.int.-F.C.M.ant."
            ]
@@ -95,7 +95,7 @@ verbose = "-v"
 for region in regions:
     for dataset in datasets:
         # loads a already existing template
-        pipeline_json = f"{path_dataset_root}/{dataset}/pipeline_loop_2mm.json"
+        pipeline_json = f"{path_dataset_root}/{dataset}/pipeline_for_mask_creation_1_5mm.json"
         with open(pipeline_json, 'r') as file:
             json_dict = json.load(file)
             file.close()

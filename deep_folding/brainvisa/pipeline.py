@@ -301,7 +301,7 @@ def main(argv):
                 'sulcus': sulcus,
                 'new_sulcus': params['new_sulcus'],
                 'side': params['side'],
-                'nb_subjects': params['nb_subjects_mask'],
+                'number_subjects': params['nb_subjects_mask'],
                 'out_voxel_size': params['out_voxel_size']}
 
             # write the logs as if the command line compute_mask.py was

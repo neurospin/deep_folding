@@ -55,7 +55,8 @@ from deep_folding.brainvisa.utils.logs import setup_log
 from deep_folding.brainvisa.utils.referentials import \
     generate_ref_volume_ICBM2009c
 from deep_folding.brainvisa.utils.subjects import get_number_subjects
-from deep_folding.brainvisa.utils.subjects import select_subjects_int
+from deep_folding.brainvisa.utils.subjects import \
+    select_subjects_int_if_list_of_dict
 from deep_folding.brainvisa.utils.subjects import \
     get_all_subjects_as_dictionary
 from deep_folding.brainvisa.utils.quality_checks import \
@@ -263,7 +264,9 @@ class MaskAroundSulcus:
 
             if len(not_treated_subjects):
                 # Gives the possibility to list only the first number_subjects
-                subjects = select_subjects_int(subjects, number_subjects)
+                subjects = select_subjects_int_if_list_of_dict(subjects,
+                                               not_treated_subjects,
+                                               number_subjects)
 
                 # Creates volume that will take the mask
                 self.mask = initialize_mask(self.out_voxel_size)

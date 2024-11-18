@@ -37,7 +37,6 @@ import os
 import re
 
 import pandas as pd
-from pandas.api.types import is_integer_dtype
 
 from deep_folding.brainvisa.utils.constants import _ALL_SUBJECTS
 
@@ -92,6 +91,32 @@ def select_subjects_int(orig_list: list,
         else orig_list[:nb_subjects])
     sublist = [s for s in sublist if s in not_processed_list]
     sublist.sort()
+
+    return sublist
+
+
+def select_subjects_int_if_list_of_dict(orig_list: list,
+                        not_processed_list: list,
+                        nb_subjects: int) -> list:
+    """Returns a sublist of nb_subjects elements
+
+    if nb_subjects == -1, it returns the original list
+
+    Args:
+        orig_list: list of strings, the origin list of subjects
+        not_processed_list: list of subjects not yet processed
+        nb_subjects: int giving nb of subjects (-1 if all subjects)
+
+    Returns:
+        sublist: list of strings, being the select number of subjects
+    """
+    orig_list = sorted(orig_list, key=lambda d: d['subject'])
+    sublist = (
+        orig_list
+        if nb_subjects == _ALL_SUBJECTS
+        else orig_list[:nb_subjects])
+    sublist = [s for s in sublist if s in not_processed_list]
+    sublist = sorted(sublist, key=lambda d: d['subject'])
 
     return sublist
 
@@ -178,9 +203,8 @@ def select_good_qc(orig_list: list, qc_path: str):
         else:
             sep = ','
         log.info('Reading qc tsv file')
-        qc_file = pd.read_csv(qc_path, sep=sep, dtype={"participant_id": object})
-        if not is_integer_dtype(qc_file.qc):
-            raise ValueError(f"qc column of qc_file {qc_path} is not of integer type!")
+        qc_file = pd.read_csv(qc_path, sep=sep)
+        qc_file["participant_id"] = qc_file["participant_id"].astype(str)
         qc_file = qc_file[qc_file.qc != 0]
 
         sublist = [name for name in orig_list
