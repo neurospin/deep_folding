@@ -37,7 +37,10 @@ Development
     cd deep_folding
     virtualenv --python=python3 --system-site-packages venv
     . venv/bin/activate
-    pip3 install -e .
+    # To avoid the scikit-learn naming error use 
+    SKLEARN_ALLOW_DEPRECATED_SKLEARN_PACKAGE_INSTALL=True pip3 install -e .
+    # instead of
+    # pip3 install -e .
 
     # Tests
     python3 -m pytest  # run tests
