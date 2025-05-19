@@ -1,6 +1,6 @@
 attributes = {
     'volume_dimension' : [ 137, 287, 231, 1 ],
-    'referential' : '7edb8b38-69cd-11ef-8783-a4bb6db7a741',
+    'referential' : 'b3c405f0-34c0-11f0-83b9-a4bb6db7a741',
     'voxel_size' : [ 0.699999988079071, 0.700012028217316, 0.700012028217316, 1 ],
     'sizeX' : 137,
     'sizeY' : 287,

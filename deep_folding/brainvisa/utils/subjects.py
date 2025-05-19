@@ -65,7 +65,7 @@ def get_number_subjects(nb_subjects: str) -> int:
                 raise ValueError
     except ValueError:
         raise ValueError(
-            "number_subjects must be either the string \"all\" or an integer")
+            "number_subjects must be either the string \"all\" or a positive integer")
     return nb_subjects_int
 
 

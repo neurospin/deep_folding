@@ -18,7 +18,7 @@ def test_generate_foldlabels_n_0():
     """Tests the function when number of subjects is 0"""
     generate_foldlabels.generate_foldlabels(
         foldlabel_dir=foldlabel_dir,
-        number_subjects=0)
+        nb_subjects=0)
 
 
 def equal_buckets(bck1, bck2):

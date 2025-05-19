@@ -13,4 +13,4 @@ def test_generate_ICBM2009c_transforms_n_0():
 
     generate_ICBM2009c_transforms.generate_ICBM2009c_transforms(
         transform_dir=transform_dir,
-        number_subjects=0)
+        nb_subjects=0)

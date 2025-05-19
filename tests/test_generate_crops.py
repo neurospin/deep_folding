@@ -10,4 +10,4 @@ def test_generate_crops_help():
 
 def test_generate_crops_n_0():
     """Tests the function when number of subjects is 0"""
-    generate_crops.generate_crops(crop_dir=crop_dir, number_subjects=0)
+    generate_crops.generate_crops(crop_dir=crop_dir, nb_subjects=0)

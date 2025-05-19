@@ -60,7 +60,7 @@ from p_tqdm import p_map
 from deep_folding.brainvisa import exception_handler
 from deep_folding.brainvisa.utils.folder import create_folder
 from deep_folding.brainvisa.utils.subjects import get_number_subjects
-from deep_folding.brainvisa.utils.subjects import select_subjects_int
+from deep_folding.brainvisa.utils.subjects import select_subjects_int, select_subjects
 from deep_folding.brainvisa.utils.logs import setup_log
 from deep_folding.brainvisa.utils.distmap import \
     generate_distmap_from_resampled_skeleton, \
@@ -187,7 +187,7 @@ class SkelConvert2DistMap:
             re.search(
                 f"({self.side}skeleton_generated_)(.*)(\\.nii\\.gz)",
                 filename).group(2) for filename in filenames]
-        list_subjects = select_subjects_int(list_subjects, number_subjects)
+        list_subjects = select_subjects(list_subjects, number_subjects)
         log.info(f"list_subjects[:5] before = {list_subjects[:5]}")
         list_subjects = \
             get_not_processed_subjects_distmap(list_subjects, self.distmap_dir)

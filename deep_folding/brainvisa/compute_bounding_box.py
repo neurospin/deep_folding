@@ -56,7 +56,7 @@ from deep_folding.brainvisa.utils.logs import setup_log
 from deep_folding.brainvisa.utils.referentials import \
     ICBM2009c_to_aims_talairach
 from deep_folding.brainvisa.utils.subjects import get_number_subjects
-from deep_folding.brainvisa.utils.subjects import select_subjects_int
+from deep_folding.brainvisa.utils.subjects import select_subjects
 from deep_folding.brainvisa.utils.subjects import \
     get_all_subjects_as_dictionary
 from deep_folding.brainvisa.utils.sulcus import complete_sulci_name
@@ -299,7 +299,7 @@ class BoundingBoxMax:
             self.json.write_general_info()
 
             # Gives the possibility to list only the first number_subjects
-            subjects = select_subjects_int(subjects, number_subjects)
+            subjects = select_subjects(subjects, number_subjects)
 
             # Creates target bbox dir if it doesn't exist
             create_folder(self.bbox_dir)

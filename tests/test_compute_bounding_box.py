@@ -56,7 +56,7 @@ def test_bounding_box_n_1():
                                               path_to_graph=path_to_graph,
                                               sulcus=sulcus,
                                               side=side,
-                                              number_subjects=_ALL_SUBJECTS,
+                                              number_subjects=1,
                                               out_voxel_size=out_voxel_size)
 
     # Selected keys to test

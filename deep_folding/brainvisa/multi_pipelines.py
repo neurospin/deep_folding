@@ -8,7 +8,7 @@ import subprocess
 
 path_dataset_root = "/neurospin/dico/data/deep_folding/current/datasets"
 
-"""
+
 regions = ["S.C.-sylv.", "S.C.-S.Pe.C.", "S.C.-S.Po.C.",\
             "S.Pe.C.", "S.Po.C.", "CINGULATE.", "S.F.int.-F.C.M.ant.",\
             "S.F.inf.-BROCA-S.Pe.C.inf.", "S.T.s.", "Sc.Cal.-S.Li.",\
@@ -20,8 +20,10 @@ regions = ["S.C.-sylv.", "S.C.-S.Pe.C.", "S.C.-S.Po.C.",\
             "Lobule_parietal_sup.", "S.F.marginal-S.F.inf.ant.",\
             "F.Coll.-S.Rh.", "S.T.i.-S.T.s.-S.T.pol.",\
             "F.C.L.p.-subsc.-F.C.L.a.-INSULA.", "S.F.int.-S.R.",\
-            "fronto-parietal_medial_face."\
+            "fronto-parietal_medial_face.",\
+            "LARGE_CINGULATE."\
             ]
+"""
 regions = ["F.I.P.", "S.T.s.-S.GSM.", "F.C.L.p.-S.GSM."]
 regions = ["F.I.P."]
 regions = ["OCCIPITAL"]
@@ -78,24 +80,18 @@ regions = ["S.C.-sylv.", "S.C.-S.Pe.C.", "S.C.-S.Po.C.",
 regions = ["F.I.P.", "S.Or."]
 """
 
-datasets = ["cnp"]
-
-regions = ["S.F.int.-F.C.M.ant."
-           ]
+datasets = ["dHCP_374_subjects"]
 
 
-
-sides = ["L"]
-input_types = ["skeleton"]
+sides = ["L", "R"]
+input_types = ["skeleton", "foldlabel", "extremities"]
 verbose = "-v"
-
-
 
 
 for region in regions:
     for dataset in datasets:
         # loads a already existing template
-        pipeline_json = f"{path_dataset_root}/{dataset}/pipeline_for_mask_creation_1_5mm.json"
+        pipeline_json = f"{path_dataset_root}/{dataset}/pipeline_loop_2mm.json"
         with open(pipeline_json, 'r') as file:
             json_dict = json.load(file)
             file.close()
