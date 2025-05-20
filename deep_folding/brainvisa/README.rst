@@ -1,7 +1,7 @@
 deep_folding.brainvisa
 ######################
 
-This folder contains scripts that work with BrainVISA/Anatomist.
+This folder contains scripts that work with PyAIMS (a BrainVISA library).
 
 .. image:: ../../docs/general_scheme.png
   :width: 600
