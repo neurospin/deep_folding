@@ -80,7 +80,7 @@ regions = ["S.C.-sylv.", "S.C.-S.Pe.C.", "S.C.-S.Po.C.",
 regions = ["F.I.P.", "S.Or."]
 """
 
-datasets = ["dHCP_374_subjects"]
+datasets = ["cadasil"]
 
 
 sides = ["L", "R"]
