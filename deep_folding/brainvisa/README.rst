@@ -35,7 +35,7 @@ In OUTPUT_DIR, create a json file named pipeline_loop_2mm.json, which contains (
       "input_type": "extremities",
       "labeled_subjects_dir": "",
       "path_to_graph_supervised": "",
-      "supervised_output_dir": "PROGRAM_DIR/deep_folding/data/mask",
+      "supervised_output_dir": "PROGRAM_DIR/deep_folding/data",
       "nb_subjects_mask": -1,
       "graphs_dir": "MORPHOLOGIST_DIR",
       "path_to_graph": "ses-1/anat/t1mri/default_acquisition/default_analysis/folds/3.1",
