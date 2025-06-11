@@ -8,9 +8,7 @@ MRIs are processed through BrainVISA/Morphologist tools.
 Prerequisites
 -------------
 
-Brainvisa parts (deep_folding.brainvisa) must run with brainvisa installer (usually using brainvisa singularity container).
-
-Deep learning part (preprocessing and utils) must run with python3 and works with pytorch.
+Brainvisa parts (deep_folding.brainvisa) must run with brainvisa installed (see steps below)
 
 Package documentation can be found at `https://neurospin.github.io/deep_folding/index.html <https://neurospin.github.io/deep_folding/index.html>`_.
 
@@ -24,6 +22,37 @@ Several processings are required, as drawn here:
   :width: 1000
  
 We give a step-by-step description of the pipeline in `<deep_folding/brainvisa/README.rst>`_.
+
+The pixi way (recommended)
+--------------------------
+
+First install aims, anatomist and morphologist library:
+
+.. code-block:: shell
+
+  # First install pixi (no need to be root) if it is not installed
+  curl -fsSL https://pixi.sh/install.sh | bash
+  source ~/.bashrc
+  
+  # Create the pixi environment
+  
+  mkdir env_pixi
+  cd env_pixi
+  pixi init -c conda-forge -c https://brainvisa.info/neuro-forge
+  pixi add anatomist soma-env=0.0 morphologist pip ipykernel 
+
+Then, activate the pixi shell and install deep_folding:
+
+.. code-block:: shell
+
+  pixi shell
+  # Install deep_folding
+  git clone https://github.com/neurospin/deep_folding.git
+  cd deep_folding
+  SKLEARN_ALLOW_DEPRECATED_SKLEARN_PACKAGE_INSTALL=True pip3 install -e .
+  
+  # Launch the tests to check the installation
+  python3 -m pytest
 
 Development
 -----------
