@@ -14,15 +14,19 @@ def load_regions(filename):
     return regions
 
 
-def load_sulci_model():
+def load_sulci_model(model_version='2019'):
     hpath = aims.carto.Paths.findResourceFile(
         'nomenclature/hierarchy/sulcal_root_colors.hie')
+    if model_version == '2008':
+        reg_type = 'global_registered_spam'
+    else:
+        reg_type = 'talairach_spam'
     lpath = aims.carto.Paths.findResourceFile(
-        'models/models_2008/descriptive_models/segments'
-        '/global_registered_spam_left/meshes/Lspam_model_meshes_1.arg')
+        f'models/models_{model_version}/descriptive_models/segments'
+        f'/{reg_type}_left/meshes/Lspam_model_meshes_1.arg')
     rpath = aims.carto.Paths.findResourceFile(
-        'models/models_2008/descriptive_models/segments'
-        '/global_registered_spam_right/meshes/Rspam_model_meshes_1.arg')
+        f'models/models_{model_version}/descriptive_models/segments'
+        f'/{reg_type}_right/meshes/Rspam_model_meshes_1.arg')
     a = ana.Anatomist()
     hie = a.loadObject(hpath)
     l_model = a.loadObject(lpath)
