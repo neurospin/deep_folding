@@ -7,6 +7,7 @@ import pandas as pd
 import json
 import numpy as np
 import os.path as osp
+import argparse
 
 
 # constants
@@ -23,6 +24,15 @@ DEFAULT_VIEW_SIZES = [
     (800, 600),  # left
 ]
 """ default snapshot sizes for each orientation """
+DEFAULT_QUATERNIONS = [
+    (SQ2_2, 0., 0., SQ2_2),  # front
+    (0., SQ2_2, SQ2_2, 0.),  # back
+    (0., 0., 1., 0.),  # top
+    (1., 0., 0., 0.),  # bottom
+    (0.5, -0.5, -0.5, 0.5),  # right
+    (0.5, 0.5, 0.5, 0.5),  # left
+]
+""" default orientations list """
 
 
 def read_regions_data(source, column=0):
@@ -318,7 +328,8 @@ def default_view_sizes():
     """ returns default view sizes, by just multiplying values from the
     DEFAULT_VIEW_SIZES variable by VIEW_SIZE_FACOR.
     """
-    sizes = [[s * VIEW_SIZE_FACOR for s in sz] for sz in DEFAULT_VIEW_SIZES]
+    sizes = [[int(s * VIEW_SIZE_FACOR) for s in sz]
+             for sz in DEFAULT_VIEW_SIZES]
     return sizes
 
 
@@ -326,12 +337,8 @@ def glassbrain(regions_csv, filenames, sizes=None, column=0, regions_path=None,
                model_version='2019', hemi='both',
                palette='glassbrain', bounds=None,
                zero_centered=False,
-               quaternions=[(SQ2_2, 0., 0., SQ2_2),  # front
-                            (0., SQ2_2, SQ2_2, 0.),  # back
-                            (0., 0., 1., 0.),  # top
-                            (1., 0., 0., 0.),  # bottom
-                            (0.5, -0.5, -0.5, 0.5),  # right
-                            (0.5, 0.5, 0.5, 0.5)]):  # left
+               quaternions=DEFAULT_QUATERNIONS, palette_snapshot=None,
+               palette_size=None):
     """ Make a full glassbrain view from a regions values dataset, and take
     several snapshots from it at different orientations
 
@@ -370,6 +377,10 @@ def glassbrain(regions_csv, filenames, sizes=None, column=0, regions_path=None,
         numbers (x, y, z, w) specifying the rotation axis and sinus of half
         rotation angle. Rotation rotates the camera orientation from the
         default orientation along Z axis (0, 0, 1).
+    palette_snapshot: str
+        output filename for the palette colormap and scale
+    palette_size: list of 2 ints
+        size of the palette image snapshot
     """
     res = build_glassbrain_view(regions_csv, column, regions_path,
                                 model_version=model_version, hemi=hemi,
@@ -378,6 +389,7 @@ def glassbrain(regions_csv, filenames, sizes=None, column=0, regions_path=None,
     window = res[0]
     if sizes is None or len(sizes) == 0:
         sizes = default_view_sizes()
+    palette_snapshot_done = False
 
     for i, quaternion in enumerate(quaternions):
         if filenames is not None and isinstance(filenames, (list, tuple)) \
@@ -402,3 +414,115 @@ def glassbrain(regions_csv, filenames, sizes=None, column=0, regions_path=None,
             size = sizes[-1]
         print('filename:', filename, ', size:', size)
         take_glassbrain_snapshot(window, quaternion, size, filename)
+
+        if not palette_snapshot_done:
+            palette_snapshot_done = True
+            if palette_snapshot is not None:
+                import paletteViewer
+
+                models = res[2]
+                paletteViewer.savePaletteImage(models[0], palette_snapshot,
+                                               palette_size)
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(
+        'build glassbrain-like snapshots for a set of data values (scalars) '
+        'associated with regions')
+    parser.add_argument('-i', '--input',
+                        help='regions data values. May be a JSON dict '
+                        '{region: value}, or a CSV table.')
+    parser.add_argument('-o', '--output', nargs='+',
+                        help='output snapshot image(s). Several -o options '
+                        'allowed. If a single one is used, a number will be '
+                        'appended for each image.')
+    parser.add_argument('-s', '--size', nargs='*',
+                        help='snapshot images sizes (as a json/python list: '
+                        '[800, 600], several -s options allowed)')
+    parser.add_argument('-c', '--column', type=int, default=0,
+                        help='table column to take values from in the data '
+                        'table, if the .CSV file contains several columns.')
+    parser.add_argument('-r', '--regions',
+                        help='regions definition (JSON file). Default to '
+                        'Champollion v1 regions.')
+    parser.add_argument('-v', '--version', default='2019',
+                        help='sulci model version to be used. "2008" (SPAM), '
+                        '"2019" (CNN)... The sulci list and nomenclature may '
+                        'change with versions. Defauilt: 2019')
+    parser.add_argument('--side', default='both', nargs='*',
+                        help='hemisphere to display: "left", "right", or '
+                        '"both". Default: both')
+    parser.add_argument('-p', '--palette', default='glassbrain',
+                        help='Anatomist palette name to be used. Defaults to '
+                        'a slightly custom one.')
+    parser.add_argument('--min', type=float,
+                        help='min value to be mapped to the palette')
+    parser.add_argument('--max', type=float,
+                        help='max value to be mapped to the palette')
+    parser.add_argument('-z', '--zero_centered', action='store_true',
+                        help='use it for positive/negative values, and use a '
+                        'zero-centered palette.')
+    parser.add_argument('-q', '--quaternions', nargs='*',
+                        help='views orientations. Several -q options may be '
+                        'used, each to specivy a snapshot viuew orientation. '
+                        'Each is a quaternion definition: 4 numbers '
+                        '[x, y, z, w] (in JSON format) specifying the '
+                        'rotation axis and sinus of half rotation angle. '
+                        'Rotation rotates the camera orientation from the '
+                        'default orientation along Z axis (0, 0, 1). Defaults '
+                        'to 6 directions from the 6 faces of a cube.')
+    parser.add_argument('-op', '--output_palette',
+                        help='save palette colormap and scale image')
+    parser.add_argument('-ps', '--palette_size',
+                        help='output palette image size, JSON list of 2 ints')
+    options = parser.parse_args()
+    regions_csv = options.input
+    filenames = options.output
+    if options.size is None:
+        sizes = None
+    else:
+        sizes = [json.loads(x) for x in options.size]
+    column = options.column
+    regions_path = options.regions
+    model_version = options.version
+    hemi = options.side
+    palette = options.palette
+    bounds = None
+    if options.min is not None or options.max is not None:
+        bounds = [options.min, options.max]
+    zero_centered = options.zero_centered
+    quaternions = DEFAULT_QUATERNIONS
+    if options.quaternions:
+        quaternions = [json.loads(x) for x in options.quaternions]
+    palette_snapshot = options.output_palette
+    palette_size = None
+    if options.palette_size is not None:
+        palette_size = json.loads(options.palette_size)
+
+    print('regions_csv:', regions_csv)
+    print('filenames:', filenames)
+    print('sizes:', sizes)
+    print('column:', column)
+    print('regions_path:', regions_path)
+    print('model_version:', model_version)
+    print('hemi:', hemi)
+    print('palette:', palette)
+    print('bounds:', bounds)
+    print('zero_centered:', zero_centered)
+    print('quaternions:', quaternions)
+    print('palette_snapshot:', palette_snapshot)
+
+    if regions_csv is None:
+        raise ValueError('Input regions data is required.')
+    if filenames is None:
+        raise ValueError('an output filename is required.')
+
+    import anatomist.headless as ana
+
+    a = ana.Anatomist()
+
+    glassbrain(regions_csv, filenames, sizes=sizes, column=column,
+               regions_path=regions_path, model_version=model_version,
+               hemi=hemi, palette=palette, bounds=bounds,
+               zero_centered=zero_centered, quaternions=quaternions,
+               palette_snapshot=palette_snapshot, palette_size=palette_size)
