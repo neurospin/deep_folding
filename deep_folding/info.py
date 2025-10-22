@@ -42,7 +42,7 @@ AUTHOR_EMAIL = ""
 PLATFORMS = "OS Independent"
 PROVIDES = ["deep_folding"]
 REQUIRES = ['six',
-            'numpy>=1.17.3,<1.25.0',
+            'numpy>=1.17.3,<1.27.0',
             'pytest',
             'GitPython',
             'typing',
