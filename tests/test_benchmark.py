@@ -4,11 +4,12 @@ import pandas as pd
 import os
 from deep_folding.brainvisa.benchmark_generation_distmap import Benchmark
 
-if os.path.isdir('/neurospin/'):
-    mask_dir='/neurospin/dico/data/deep_folding/current/mask/1mm/'
-else:
-    mask_dir = '/nfs/neurospin/dico/data/deep_folding/current/mask/1mm/'
+# if os.path.isdir('/neurospin/'):
+#     mask_dir='/neurospin/dico/data/deep_folding/current/mask/1mm/'
+# else:
+#     mask_dir = '/nfs/neurospin/dico/data/deep_folding/current/mask/1mm/'
 
+mask_dir = os.path.join(os.getcwd(), 'data/mask/1mm')
 
 def equal_skeletons(skel_ref, skel_target):
     """Returns True if skel1 and skel2 are identical

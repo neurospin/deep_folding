@@ -1,0 +1,15 @@
+attributes = {
+    'volume_dimension' : [ 193, 229, 193, 1 ],
+    'sizeX' : 193,
+    'sizeY' : 229,
+    'sizeZ' : 193,
+    'sizeT' : 1,
+    'referential' : '84b1989b-eb68-8665-0049-8feaf3c22679',
+    'referentials' : [ 'Talairach-MNI template-SPM' ],
+    'transformations' : [ [ -1, 0, 0, 96, 0, -1, 0, 96, 0, 0, -1, 114, 0, 0, 0, 1 ] ],
+    'voxel_size' : [ 1, 1, 1, 1 ],
+    'storage_to_memory' : [ -1, 0, 0, 192, 0, -1, 0, 228, 0, 0, -1, 192, 0, 0, 0, 1 ],
+    'format' : 'NIFTI-1',
+    'data_type' : 'S16',
+    'object_type' : 'Volume'
+  }
