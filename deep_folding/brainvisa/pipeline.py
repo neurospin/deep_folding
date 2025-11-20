@@ -77,7 +77,7 @@ log = set_file_logger(__file__)
 def get_sulci_list(
         region_name,
         side,
-        json_path='/neurospin/dico/data/deep_folding/current/'
+        json_path=f'{os.getcwd()}' #'/neurospin/dico/data/deep_folding/current/'
                   'sulci_regions_overlap.json'):
     """Gets list of sulci corresponding to a region"""
 
@@ -310,6 +310,7 @@ def main(argv):
                 args_compute_mask['new_sulcus']
                 if args_compute_mask['new_sulcus']
                 else args_compute_mask['sulcus'])
+
             setup_log(
                 Namespace(**{'verbose': log.level,
                           **args_compute_mask}),
@@ -681,6 +682,10 @@ def main(argv):
             # remove the target folder
             log.info(f"Delete {path_to_crops_complete}")
             shutil.rmtree(path_to_crops_complete)
+
+        
+        #TO_REMOVE
+        print(f"pipeline.py/main/params[masks_dir] 2 iter: {params['masks_dir']}")
 
         args_generate_crops = {
             'src_dir': src_dir,

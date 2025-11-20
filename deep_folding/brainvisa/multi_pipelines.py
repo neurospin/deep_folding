@@ -15,7 +15,7 @@ from deep_folding.config.logs import set_file_logger
 # Defines logger
 log = set_file_logger(__file__)
 
-_PATH_DATASET_ROOT_DEFAULT = "/neurospin/dico/data/deep_folding/current/datasets"
+_PATH_DATASET_ROOT_DEFAULT = os.getcwd() #"/neurospin/dico/data/deep_folding/current/datasets"
 
 _DATASETS_DEFAULT = ["UkBioBank40"]
 _SIDES_DEFAULT = ["L", "R"]
