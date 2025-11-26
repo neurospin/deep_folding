@@ -4,6 +4,8 @@ for both sides and input type."""
 
 import argparse
 import os
+from os.path import dirname
+from os.path import join
 import json
 import subprocess
 import sys
@@ -15,7 +17,7 @@ from deep_folding.config.logs import set_file_logger
 # Defines logger
 log = set_file_logger(__file__)
 
-_PATH_DATASET_ROOT_DEFAULT = os.getcwd() #"/neurospin/dico/data/deep_folding/current/datasets"
+_PATH_DATASET_ROOT_DEFAULT = join(dirname(dirname(os.getcwd())), '/runs/') #"/neurospin/dico/data/deep_folding/current/datasets"
 
 _DATASETS_DEFAULT = ["UkBioBank40"]
 _SIDES_DEFAULT = ["L", "R"]
@@ -87,6 +89,10 @@ def parse_args(argv):
     args = parser.parse_args(argv)
 
     params = vars(args)
+
+    #TO_REMOVE
+    print(f"multi_pipelines.py/parse_args/params/path_dataset_root: {params['path_dataset_root']}")
+    print(f"multi_pipelines.py/parse_args/params/datasets: {params['datasets']}")
 
     verbose = '-' + ('v' * args.verbose) if args.verbose > 0 else ''
     
