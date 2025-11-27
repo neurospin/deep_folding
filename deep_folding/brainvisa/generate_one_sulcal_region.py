@@ -78,7 +78,7 @@ def get_sulci_list(
         region_name,
         side,
         json_path=f'{os.getcwd()}' #'/neurospin/dico/data/deep_folding/current/'
-                  'sulci_regions_overlap.json'):
+                  'sulci_regions_champollion_V1.json'):
     """Gets list of sulci corresponding to a region"""
 
     with open(json_path, 'r') as file:
