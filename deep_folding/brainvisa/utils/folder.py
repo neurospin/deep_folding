@@ -40,3 +40,27 @@ def create_folder(folder: str) -> None:
     """Creates folder if it doesn't exist"""
     if not os.path.exists(folder):
         os.makedirs(folder)
+
+def get_nth_parent_dir(folder: str, n: int) -> str:
+    """
+    Returns the absolute path to the nth parent of a directory
+    
+    :param folder: absolute path to a directory
+    :type folder: str
+    :param n: number of iteration to do
+    :type n: int
+    :return: absolute path to the nth parent
+    :rtype: str
+    """
+
+    # Substracting 3 instead of 1 because of the first and last element being ''
+    if n >= len(folder.split('/')) - 3:
+        return '/' + folder.split('/')[1] + '/'
+    else :
+        parent_folder: str = folder
+        for i in range(n) :
+            parent_folder = os.path.dirname(parent_folder)
+    
+    #TO_REMOVE
+    print(f"folder.py/get_nth_paretn_dir/parent_dir: {parent_folder}")
+    return parent_folder

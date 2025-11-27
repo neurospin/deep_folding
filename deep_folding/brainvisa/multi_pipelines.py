@@ -4,11 +4,12 @@ for both sides and input type."""
 
 import argparse
 import os
-from os.path import dirname
 from os.path import join
 import json
 import subprocess
 import sys
+
+from deep_folding.brainvisa.utils.folder import get_nth_parent_dir
 
 from deep_folding.brainvisa import exception_handler
 from deep_folding.brainvisa.utils.logs import setup_log
@@ -18,8 +19,7 @@ from deep_folding.config.logs import set_file_logger
 log = set_file_logger(__file__)
 
 # The relative path leads to right outside of deep_folding directory and /runs/ which is the prefered file architecture for accessing the data
-_PATH_DATASET_ROOT_DEFAULT = join(dirname(dirname(os.getcwd())), '/runs/') #"/neurospin/dico/data/deep_folding/current/datasets"
-
+_PATH_DATASET_ROOT_DEFAULT = os.path.join(get_nth_parent_dir(os.getcwd(), 3), 'runs/') #"/neurospin/dico/data/deep_folding/current/datasets"
 _DATASETS_DEFAULT = ["UkBioBank40"]
 _SIDES_DEFAULT = ["L", "R"]
 _INPUT_TYPES_DEFAULT = ["skeleton", "foldlabel", "extremities"]
@@ -91,10 +91,6 @@ def parse_args(argv):
 
     params = vars(args)
 
-    #TO_REMOVE
-    print(f"multi_pipelines.py/parse_args/params/path_dataset_root: {params['path_dataset_root']}")
-    print(f"multi_pipelines.py/parse_args/params/datasets: {params['datasets']}")
-
     verbose = '-' + ('v' * args.verbose) if args.verbose > 0 else ''
     
 
@@ -125,7 +121,24 @@ def generate_sulcal_regions(regions, datasets, sides, input_types, path_dataset_
             pipeline_json = f"{path_dataset_root}/{dataset}/pipeline_loop_2mm.json"
             with open(pipeline_json, 'r') as file:
                 json_dict = json.load(file)
+
+                # Modifying templated values in the JSON file
+                for k, v in json_dict.items():
+                    if v == "$local":
+                        if k == "brain_regions_json":
+                            json_dict["brain_regions_json"] = join(get_nth_parent_dir(os.getcwd(), 3), 
+                                                                   'champollion_pipeline/sulci_regions_champollion_V1.json')
+                        if k == "labeled_subjects_dir":
+                            json_dict["labeled_subjects_dir"] = join(path_dataset_root, dataset, "derivatives/morphologist-5.2")
+                        if k == "supervised_output_dir":
+                            json_dict["supervised_output_dir"] = join(get_nth_parent_dir(os.getcwd(), 3), 'deep_folding/data')
+                        if k == "graphs_dir":
+                            json_dict["graphs_dir"] = join(path_dataset_root, dataset, "derivatives/morphologist-5.2")
+                        if k == "output_dir":
+                            json_dict["output_dir"] = join(path_dataset_root, dataset, "derivatives/deep-folding")
+                
                 file.close()
+
             # change the parameters that need to be changed
             # (region, side, input_type)
             json_dict["region_name"] = region
@@ -150,6 +163,8 @@ def generate_sulcal_regions(regions, datasets, sides, input_types, path_dataset_
 
                     # replace the template json by the modified one
                     with open(pipeline_json, "w") as file2:
+                        print("multipipeline.py/generate_sulcal_regions/json_dict:")
+                        pp.pprint(json_dict)
                         json.dump(json_dict, file2, indent=3)
                         file2.close()
 
