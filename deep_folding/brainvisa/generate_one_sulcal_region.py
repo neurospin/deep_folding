@@ -181,6 +181,10 @@ def parse_args(argv: list) -> dict:
         'If no option is provided then logging.INFO is selected. '
         'If one option -v (or -vv) or more is provided '
         'then logging.DEBUG is selected.')
+    parser.add_argument(
+        "--njobs", help="Number of CPU cores allowed to use. Default is your maximum number of cores - 2 or up to 22 if you have enough cores.",
+        type=int
+    )
 
     args = parser.parse_args(argv)
 
@@ -190,6 +194,8 @@ def parse_args(argv: list) -> dict:
 
     with open(params_path, 'r') as file:
         params = json.load(file)
+
+    params["njobs"] = args.njobs
 
     return params
 
@@ -701,7 +707,8 @@ def main(argv):
             'nb_subjects': params['nb_subjects'],
             'no_mask': params['no_mask'],
             'threshold': params['threshold'],
-            'dilation': params['dilation']}
+            'dilation': params['dilation'],
+            'njobs': params['njobs']}
 
         setup_log(Namespace(**{'verbose': log.level, **args_generate_crops}),
                   log_dir=f"{args_generate_crops['crop_dir']}",

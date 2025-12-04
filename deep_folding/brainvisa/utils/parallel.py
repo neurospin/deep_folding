@@ -40,8 +40,11 @@ for parallel computing
 from joblib import cpu_count
 
 
-def define_njobs():
+def define_njobs(nb_jobs: int | None):
     """Returns number of cpus used by main loop
     """
     nb_cpus = cpu_count()
-    return max(nb_cpus - 2, 1)
+    if nb_jobs:
+        return nb_jobs
+    else:
+        return min(nb_cpus - 2, 22)
