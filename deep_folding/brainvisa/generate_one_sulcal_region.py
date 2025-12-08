@@ -359,7 +359,8 @@ def main(argv):
                 'bids': params['bids'],
                 'parallel': params['parallel'],
                 'nb_subjects': params['nb_subjects'],
-                'qc_path': params['skel_qc_path']}
+                'qc_path': params['skel_qc_path'],
+                'njobs': params['njobs']}
 
             setup_log(
                 Namespace(**{'verbose': log.level,

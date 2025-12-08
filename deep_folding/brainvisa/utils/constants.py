@@ -95,3 +95,6 @@ _BRAIN_REGION_JSON = \
 
 # path to the qc csv
 _QC_PATH_DEFAULT = ''
+
+# number of minimal jobs
+_NB_JOBS_DEFAULT = 1

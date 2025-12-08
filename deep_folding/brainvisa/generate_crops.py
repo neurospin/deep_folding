@@ -91,7 +91,8 @@ from deep_folding.brainvisa.utils.constants import \
     _SIDE_DEFAULT, _CROPPING_TYPE_DEFAULT, \
     _COMBINE_TYPE_DEFAULT, _INPUT_TYPE_DEFAULT, \
     _SULCUS_DEFAULT, _NO_MASK_DEFAULT, \
-    _DILATION_DEFAULT, _THRESHOLD_DEFAULT
+    _DILATION_DEFAULT, _THRESHOLD_DEFAULT, \
+    _NB_JOBS_DEFAULT
 
 # Defines logger
 log = set_file_logger(__file__)
@@ -222,7 +223,8 @@ class CropGenerator:
                  cropping_type=_CROPPING_TYPE_DEFAULT,
                  combine_type=_COMBINE_TYPE_DEFAULT,
                  parallel=False,
-                 no_mask=_NO_MASK_DEFAULT):
+                 no_mask=_NO_MASK_DEFAULT,
+                 njobs=_NB_JOBS_DEFAULT):
         """Inits with list of directories and list of sulci
         Args:
             src_dir: folder containing generated skeletons, labels or distmaps
@@ -252,6 +254,7 @@ class CropGenerator:
         self.combine_type = combine_type
         self.parallel = parallel
         self.no_mask = no_mask
+        self.njobs = njobs
         print(self.no_mask)
 
         # Names of files in function of dictionary:
@@ -499,7 +502,8 @@ class SkeletonCropGenerator(CropGenerator):
                  parallel=False,
                  no_mask=_NO_MASK_DEFAULT,
                  threshold=_THRESHOLD_DEFAULT,
-                 dilation=_DILATION_DEFAULT):
+                 dilation=_DILATION_DEFAULT,
+                 njobs=_NB_JOBS_DEFAULT):
         """Inits with list of directories and list of sulci
         Args:
             src_dir: folder containing generated skeletons or labels
@@ -567,7 +571,8 @@ class FoldLabelCropGenerator(CropGenerator):
                  parallel=False,
                  no_mask=_NO_MASK_DEFAULT,
                  threshold=_THRESHOLD_DEFAULT,
-                 dilation=_DILATION_DEFAULT):
+                 dilation=_DILATION_DEFAULT,
+                 njobs=_NB_JOBS_DEFAULT):
         """Inits with list of directories and list of sulci
         Args:
             src_dir: folder containing generated labels
@@ -590,7 +595,7 @@ class FoldLabelCropGenerator(CropGenerator):
             list_sulci=list_sulci, side=side,
             cropping_type=cropping_type, combine_type=combine_type,
             parallel=parallel, no_mask=no_mask,
-            threshold=threshold, dilation=dilation
+            threshold=threshold, dilation=dilation,
         )
 
         # Directory where to store cropped skeleton files
@@ -636,7 +641,8 @@ class ExtremitiesCropGenerator(CropGenerator):
                  parallel=False,
                  no_mask=_NO_MASK_DEFAULT,
                  threshold=_THRESHOLD_DEFAULT,
-                 dilation=_DILATION_DEFAULT):
+                 dilation=_DILATION_DEFAULT,
+                 njobs=_NB_JOBS_DEFAULT):
         """Inits with list of directories and list of sulci
         Args:
             src_dir: folder containing generated extremities
@@ -882,7 +888,9 @@ def generate_crops(
         parallel=False,
         no_mask=True,
         threshold=_THRESHOLD_DEFAULT,
-        dilation=_DILATION_DEFAULT
+        dilation=_DILATION_DEFAULT,
+        njobs=_NB_JOBS_DEFAULT
+
 ):
 
     # Gets function arguments and values

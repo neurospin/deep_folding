@@ -200,14 +200,14 @@ def generate_sulcal_regions(regions, sides, input_types,
                 if verbose == '':
                     if subprocess.call(
                             ["python3", "generate_one_sulcal_region.py",
-                            "--params_path", f"{pipeline_json}", f"--njobs {njobs}"]) != 0:
+                            "--params_path", f"{pipeline_json}", "--njobs", str(njobs)]) != 0:
                         raise ValueError("Error in pipeline: "
                                         "see above for error explanations")
                 else:
                     if subprocess.call(
                             ["python3", "generate_one_sulcal_region.py",
                             "--params_path", f"{pipeline_json}",
-                            f"{verbose}", f"--njobs {njobs}"]) != 0:
+                            f"{verbose}", "--njobs", str(njobs)]) != 0:
                         raise ValueError("Error in pipeline: "
                                         "see above for error explanations")
                 print("\nEND")

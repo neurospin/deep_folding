@@ -76,7 +76,8 @@ from deep_folding.brainvisa.utils.constants import \
     _ALL_SUBJECTS, _SRC_DIR_DEFAULT, \
     _SKELETON_DIR_DEFAULT, _SIDE_DEFAULT, \
     _JUNCTION_DEFAULT, _PATH_TO_GRAPH_DEFAULT, \
-    _QC_PATH_DEFAULT
+    _QC_PATH_DEFAULT, \
+    _NB_JOBS_DEFAULT
 
 # Defines logger
 log = set_file_logger(__file__)
@@ -171,7 +172,7 @@ class GraphConvert2Skeleton:
 
     def __init__(self, src_dir, skeleton_dir,
                  side, junction, parallel,
-                 path_to_graph, bids, qc_path):
+                 path_to_graph, bids, qc_path, njobs):
         self.src_dir = src_dir
         self.skeleton_dir = skeleton_dir
         self.side = side
@@ -181,6 +182,7 @@ class GraphConvert2Skeleton:
         self.path_to_graph = path_to_graph
         self.bids = bids
         self.skeleton_dir = f"{self.skeleton_dir}/{self.side}"
+        self.njobs = njobs
         create_folder(abspath(self.skeleton_dir))
 
     def get_skeleton_filename(self, subject, graph_file):
@@ -245,7 +247,7 @@ class GraphConvert2Skeleton:
                 "PARALLEL MODE: subjects are computed in parallel.")
             p_map(self.generate_one_skeleton,
                   list_subjects,
-                  num_cpus=define_njobs())
+                  num_cpus=define_njobs(self.njobs))
         else:
             log.info(
                 "SERIAL MODE: subjects are scanned serially, "
@@ -274,7 +276,8 @@ def generate_skeletons(
         bids=False,
         parallel=False,
         nb_subjects=_ALL_SUBJECTS,
-        qc_path=_QC_PATH_DEFAULT):
+        qc_path=_QC_PATH_DEFAULT,
+        njobs=_NB_JOBS_DEFAULT):
     """Generates skeletons from graphs"""
 
     # Gets function arguments and values
