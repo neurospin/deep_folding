@@ -60,7 +60,5 @@ def get_nth_parent_dir(folder: str, n: int) -> str:
         parent_folder: str = folder
         for i in range(n) :
             parent_folder = os.path.dirname(parent_folder)
-    
-    #TO_REMOVE
-    print(f"folder.py/get_nth_paretn_dir/parent_dir: {parent_folder}")
+
     return parent_folder

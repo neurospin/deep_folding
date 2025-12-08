@@ -690,10 +690,6 @@ def main(argv):
             log.info(f"Delete {path_to_crops_complete}")
             shutil.rmtree(path_to_crops_complete)
 
-        
-        #TO_REMOVE
-        print(f"pipeline.py/main/params[masks_dir] 2 iter: {params['masks_dir']}")
-
         args_generate_crops = {
             'src_dir': src_dir,
             'input_type': params['input_type'],

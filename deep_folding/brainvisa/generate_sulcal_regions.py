@@ -145,6 +145,11 @@ def generate_sulcal_regions(regions, sides, input_types,
         with open(pipeline_json, 'r') as file:
             json_dict = json.load(file)
 
+            if "$local" not in json_dict.keys():
+                for f, v in {path_to_graph: "path_to_graph", path_sk_with_hull: "path_to_skeleton_with_hull", sk_qc_path: "skel_qc_path"}.items():
+                    if f:
+                        json_dict[v] = f
+
             # Modifying templated values in the JSON file
             for k, v in json_dict.items():
                 if v == "$local":
@@ -159,11 +164,11 @@ def generate_sulcal_regions(regions, sides, input_types,
                         json_dict[k] = join(path_dataset, f"derivatives/deep_folding-{_DEEPFOLDING_VERSION}" 
                                                        if output_dir != "" or output_dir is not None 
                                                        else output_dir)
-                    if k == "path_to_graph" and (path_to_graph != "" or path_to_graph is not None):
+                    if k == "path_to_graph" and path_to_graph:
                         json_dict[k] = path_to_graph
-                    if k == "path_to_skeleton_with_hull" and (path_sk_with_hull != "" or path_sk_with_hull is not None):
+                    if k == "path_to_skeleton_with_hull" and path_sk_with_hull:
                         json_dict[k] = path_sk_with_hull
-                    if k == "skel_qc_path" and (sk_qc_path != "" or sk_qc_path is not None):
+                    if k == "skel_qc_path" and sk_qc_path:
                         json_dict[k] = sk_qc_path
             
             file.close()
