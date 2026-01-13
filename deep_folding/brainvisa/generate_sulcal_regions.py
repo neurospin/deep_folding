@@ -154,12 +154,14 @@ def generate_sulcal_regions(regions, sides, input_types,
             for k, v in json_dict.items():
                 if v == "$local":
                     if k == "brain_regions_json":
-                        json_dict[k] = join(get_nth_parent_dir(os.getcwd(), 3), 
-                                                                'champollion_pipeline/sulci_regions_champollion_V1.json')
+                        json_dict[k] = join(
+                            get_nth_parent_dir(os.getcwd(), 4),
+                            'sulci_regions_champollion_V1.json'
+                        )
                     if k == "supervised_output_dir":
                         json_dict[k] = join(get_nth_parent_dir(os.getcwd(), 3), 'deep_folding/data')
                     if k == "graphs_dir":
-                        json_dict[k] = join(path_dataset, "derivatives/morphologist-5.2")
+                        json_dict[k] = join(path_dataset, "derivatives/morphologist-6.0")
                     if k == "output_dir":
                         json_dict[k] = join(path_dataset, f"derivatives/deep_folding-{_DEEPFOLDING_VERSION}" 
                                                        if output_dir != "" or output_dir is not None 

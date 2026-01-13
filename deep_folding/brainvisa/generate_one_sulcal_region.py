@@ -51,6 +51,7 @@ from deep_folding.config.logs import set_file_logger, set_root_logger_level
 from deep_folding.brainvisa.utils.logs import setup_log
 
 from deep_folding.brainvisa.utils.sulcus import complete_sulci_name
+from deep_folding.brainvisa.utils.folder import get_nth_parent_dir
 
 from deep_folding.brainvisa.compute_mask import compute_mask
 from deep_folding.brainvisa.generate_crops import generate_crops
@@ -77,8 +78,10 @@ log = set_file_logger(__file__)
 def get_sulci_list(
         region_name,
         side,
-        json_path=f'{os.getcwd()}' #'/neurospin/dico/data/deep_folding/current/'
-                  'sulci_regions_champollion_V1.json'):
+        json_path=os.path.join(
+            get_nth_parent_dir(os.path.abspath(__file__), 5),
+            'sulci_regions_champollion_V1.json'
+        )):
     """Gets list of sulci corresponding to a region"""
 
     with open(json_path, 'r') as file:
