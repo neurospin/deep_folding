@@ -38,10 +38,12 @@
 import json
 import numpy as np
 from soma import aims
+from deep_folding import config
 
-json_path = "/neurospin/dico/data/deep_folding/current/sulci_regions_gridsearch.json"
-mask_dir = f"/neurospin/dico/data/deep_folding/current/mask/2mm"
-output_path = "/neurospin/dico/data/deep_folding/current/mask/2mm/regions"
+root = config.config().get_champollion_data_root_dir()
+json_path = f"{root}/sulci_regions_gridsearch.json"
+mask_dir = f"{root}/mask/2mm"
+output_path = f"{root}/mask/2mm/regions"
 sides = ['R', 'L']
 regions = [
     "F.I.P.", "S.C.-sylv.", "S.C.-S.Pe.C.", "S.C.-S.Po.C.",
