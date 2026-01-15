@@ -1,14 +1,20 @@
 #!/usr/bin/env python
 
+"""
+Display Champollion regions in 2 distinct views to disantangle overlapping
+regions.
+"""
+
 import anatomist.direct.api as ana
 from soma import aims
 import os.path as osp
 from soma.qt_gui.qt_backend import Qt
 from deep_folding import config
+import argparse
 
 
 icbm_mesh_dir_fallback = '/neurospin/dico/data/bv_databases/templates/morphologist_templates/icbm152/mni_icbm152_nlin_asym_09c/t1mri/default_acquisition/default_analysis/segmentation/mesh'
-regions_graph_pat = '%(side)sregions_model_1.arg'
+regions_graph_pat = '%(side)sregions_model_%(level)s.arg'
 regions1 = [
     'S.F.median-S.F.pol.tr.-S.F.sup.',
     'S.F.marginal-S.F.inf.ant.',
@@ -31,7 +37,10 @@ regions1 = [
 ]
 
 
-def other_regions(nom, regions1):
+def other_regions(nom: aims.Hierarchy, regions1: list) -> list:
+    """ Get the "rest" of the regions from the nomenclature `nom`, which are
+    not in the list `regions1`.
+    """
     regions1 = set(regions1)
     other = []
     for node in nom.children()[0].children()[0].children():
@@ -41,7 +50,21 @@ def other_regions(nom, regions1):
     return other
 
 
-def display_champo_regions():
+def display_champo_regions(level=1) -> tuple:
+    """
+    Display Champollion regions in Anatomist.
+
+    Reads a nomenclature (champollion_v1.hie) from shared data, and the regions
+    graphs which should be available in the Champollion model, together with a
+    mesh of the ICBM152 template (found either in the shared data of the DISCO
+    toolbox, or in a fallback hard-coded path, see `icbm_mesh_dir_fallback`).
+
+    2 views are needed to avoid regions overlaps in displays, and each
+    hemisphere is displayed in 2 orientations, thus making 8 views.
+
+    Returns a tuple of objects and windows that should not be deleted before
+    the views are closed.
+    """
     a = ana.Anatomist()
     root = config.config().get_champollion_data_root_dir()
     regions_graph_dir = f"{root}/mask/2mm/regions/meshes"
@@ -49,10 +72,12 @@ def display_champo_regions():
         'nomenclature/hierarchy/champollion_v1.hie'))
     regions2 = other_regions(nom, regions1)
     anom = a.toAObject(nom)
-    l_reg_graph = a.loadObject(osp.join(regions_graph_dir,
-                                        regions_graph_pat % {'side': 'L'}))
-    r_reg_graph = a.loadObject(osp.join(regions_graph_dir,
-                                        regions_graph_pat % {'side': 'R'}))
+    print(osp.join(
+        regions_graph_dir, regions_graph_pat % {'side': 'L', 'level': level}))
+    l_reg_graph = a.loadObject(osp.join(
+        regions_graph_dir, regions_graph_pat % {'side': 'L', 'level': level}))
+    r_reg_graph = a.loadObject(osp.join(
+        regions_graph_dir, regions_graph_pat % {'side': 'R', 'level': level}))
     l_reg_graph.applyBuiltinReferential()
     r_reg_graph.applyBuiltinReferential()
     reg_graphs = (l_reg_graph, r_reg_graph)
@@ -103,9 +128,20 @@ def display_champo_regions():
                 group += 1
                 del w
 
-    app.exec()
-    del wins, block, reg_graphs, l_reg_graph, r_reg_graph
+    return wins, reg_graphs, meshes
 
 
 if __name__ == '__main__':
-    display_champo_regions()
+    parser = argparse.ArgumentParser(
+        'Display Champollion regions in several 3D views')
+    parser.add_argument(
+        'level', type=int, default=1, nargs='?',
+        help='threshold level in the stat map for the regions. 0: low (bigger '
+        'regioins), 1: intermediate, 2: high. Default=1')
+    options = parser.parse_args()
+    level = options.level
+
+    objs = display_champo_regions(level)
+
+    Qt.QApplication.instance().exec()
+    del objs
